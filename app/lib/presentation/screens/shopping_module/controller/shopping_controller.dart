@@ -72,7 +72,7 @@ class ShoppingController implements IBController {
       (failure) {
         _setError(
           failure,
-          fallback: 'Nao foi possivel carregar suas listas de compras.',
+          fallback: 'Não foi possível carregar suas listas de compras.',
         );
         return true;
       },
@@ -108,7 +108,7 @@ class ShoppingController implements IBController {
         (failure) {
           _setError(
             failure,
-            fallback: 'Nao foi possivel carregar todos os itens de compras.',
+            fallback: 'Não foi possível carregar todos os itens de compras.',
           );
           nextItemsByList[list.id] = const [];
         },
@@ -140,7 +140,7 @@ class ShoppingController implements IBController {
 
     return result.fold(
       (failure) {
-        _setError(failure, fallback: 'Nao foi possivel atualizar o item.');
+        _setError(failure, fallback: 'Não foi possível atualizar o item.');
         _refreshItemsForList(listId);
         return false;
       },
@@ -183,7 +183,7 @@ class ShoppingController implements IBController {
 
     return result.fold(
       (failure) {
-        _setError(failure, fallback: 'Nao foi possivel excluir o item.');
+        _setError(failure, fallback: 'Não foi possível excluir o item.');
         return false;
       },
       (_) {
@@ -218,7 +218,7 @@ class ShoppingController implements IBController {
 
     return result.fold(
       (failure) {
-        _setError(failure, fallback: 'Nao foi possivel concluir a lista.');
+        _setError(failure, fallback: 'Não foi possível concluir a lista.');
         return false;
       },
       (updatedList) {
@@ -247,7 +247,7 @@ class ShoppingController implements IBController {
     final result = await _deleteShoppingListUsecase.call(listId);
     return result.fold(
       (failure) {
-        _setError(failure, fallback: 'Nao foi possivel excluir a lista.');
+        _setError(failure, fallback: 'Não foi possível excluir a lista.');
         return false;
       },
       (_) {
@@ -282,7 +282,7 @@ class ShoppingController implements IBController {
 
     return result.fold(
       (failure) {
-        _setError(failure, fallback: 'Nao foi possivel criar a lista.');
+        _setError(failure, fallback: 'Não foi possível criar a lista.');
         return false;
       },
       (createdList) {
@@ -332,7 +332,7 @@ class ShoppingController implements IBController {
 
     return result.fold(
       (failure) {
-        _setError(failure, fallback: 'Nao foi possivel criar o item.');
+        _setError(failure, fallback: 'Não foi possível criar o item.');
         return false;
       },
       (createdItem) {

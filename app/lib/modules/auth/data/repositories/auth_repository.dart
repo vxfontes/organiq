@@ -29,7 +29,7 @@ class AuthRepository implements IAuthRepository {
       if (_isSuccess(statusCode)) {
         final session = AuthSessionOutput.fromJson(_asMap(response.data));
         if (session.token.isEmpty) {
-          return Left(GetFailure(message: 'Token invalido'));
+          return Left(GetFailure(message: 'Token inválido'));
         }
         await _tokenStore.saveToken(session.token);
         return Right(session);
@@ -63,7 +63,7 @@ class AuthRepository implements IAuthRepository {
       if (_isSuccess(statusCode)) {
         final session = AuthSessionOutput.fromJson(_asMap(response.data));
         if (session.token.isEmpty) {
-          return Left(SaveFailure(message: 'Token invalido'));
+          return Left(SaveFailure(message: 'Token inválido'));
         }
         await _tokenStore.saveToken(session.token);
         return Right(session);

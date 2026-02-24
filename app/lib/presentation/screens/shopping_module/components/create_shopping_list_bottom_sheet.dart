@@ -64,7 +64,7 @@ class _CreateShoppingListBottomSheetState
 
             final message =
                 widget.errorListenable.value ??
-                'Nao foi possivel criar a lista.';
+                'Não foi possível criar a lista.';
 
             ScaffoldMessenger.of(
               sheetContext,

@@ -98,7 +98,7 @@ class CreateTodoSheetState extends State<CreateTodoSheet> {
             }
             final message =
                 widget.errorListenable.value ??
-                'Nao foi possivel criar a tarefa.';
+                'Não foi possível criar a tarefa.';
             ScaffoldMessenger.of(
               sheetContext,
             ).showSnackBar(SnackBar(content: Text(message)));

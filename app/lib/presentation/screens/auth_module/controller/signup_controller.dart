@@ -47,7 +47,7 @@ class SignupController implements IBController {
     loading.value = false;
 
     return result.fold((failure) {
-      error.value = _failureMessage(failure, fallback: 'Nao foi possivel criar a conta agora.');
+      error.value = _failureMessage(failure, fallback: 'Não foi possível criar a conta agora.');
       return false;
     }, (_) => true);
   }

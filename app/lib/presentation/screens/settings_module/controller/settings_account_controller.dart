@@ -34,7 +34,7 @@ class SettingsAccountController implements IBController {
       (failure) {
         error.value = _failureMessage(
           failure,
-          fallback: 'Nao foi possivel carregar sua conta.',
+          fallback: 'Não foi possível carregar sua conta.',
         );
       },
       (output) {

@@ -32,7 +32,7 @@ class LoginController implements IBController {
     loading.value = false;
 
     return result.fold((failure) {
-      error.value = _failureMessage(failure, fallback: 'Nao foi possivel entrar agora.');
+      error.value = _failureMessage(failure, fallback: 'Não foi possível entrar agora.');
       return false;
     }, (_) => true);
   }

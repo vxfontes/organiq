@@ -122,7 +122,7 @@ class _CreateReminderBottomSheetState extends State<CreateReminderBottomSheet> {
             }
             final message =
                 widget.errorListenable.value ??
-                'Nao foi possivel criar o lembrete.';
+                'Não foi possível criar o lembrete.';
             ScaffoldMessenger.of(
               sheetContext,
             ).showSnackBar(SnackBar(content: Text(message)));

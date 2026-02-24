@@ -5,7 +5,7 @@ class Validators {
     final email = value.trim();
     if (email.isEmpty) return 'Informe seu email.';
     final regex = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
-    if (!regex.hasMatch(email)) return 'Email invalido.';
+    if (!regex.hasMatch(email)) return 'Email inválido.';
     return null;
   }
 
@@ -28,7 +28,7 @@ class Validators {
     required String timezone,
   }) {
     if (locale.isEmpty || timezone.isEmpty) {
-      return 'Configuracao do dispositivo invalida.';
+      return 'Configuração do dispositivo invalida.';
     }
     return null;
   }

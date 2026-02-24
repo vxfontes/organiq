@@ -179,7 +179,7 @@ class CreateController implements IBController {
     voiceAvailable.value = ready;
     if (!ready) {
       error.value =
-          'Nao foi possivel acessar o microfone. Verifique as permissoes do app.';
+          'Não foi possível acessar o microfone. Verifique as permissões do app.';
       return;
     }
 
@@ -255,8 +255,8 @@ class CreateController implements IBController {
     }
 
     error.value = message.isNotEmpty
-        ? 'Transcricao de voz: $message'
-        : 'Falha na transcricao por voz.';
+        ? 'Transcrição de voz: $message'
+        : 'Falha na transcrição por voz.';
   }
 
   Future<void> _finalizeVoiceInput() async {
@@ -276,7 +276,7 @@ class CreateController implements IBController {
         selection: TextSelection.collapsed(offset: nextText.length),
       );
     } else if (error.value == null || error.value!.trim().isEmpty) {
-      error.value = 'Nao foi possivel transcrever o audio.';
+      error.value = 'Não foi possível transcrever o audio.';
     }
 
     _clearVoiceSessionState();
@@ -403,7 +403,7 @@ class CreateController implements IBController {
     loading.value = false;
 
     if (failed > 0 && success == 0) {
-      error.value = 'Nao foi possivel processar os textos enviados.';
+      error.value = 'Não foi possível processar os textos enviados.';
       return false;
     }
 
@@ -452,7 +452,7 @@ class CreateController implements IBController {
     );
 
     if (!confirmInput.isValidForConfirm) {
-      return const Left('A IA nao retornou dados suficientes para confirmar.');
+      return const Left('A IA não retornou dados suficientes para confirmar.');
     }
 
     final confirmResult = await _confirmInboxItemUsecase.call(confirmInput);
@@ -482,7 +482,7 @@ class CreateController implements IBController {
         final message = failure.message?.trim();
         error.value = (message != null && message.isNotEmpty)
             ? message
-            : 'Nao foi possivel excluir item criado.';
+            : 'Não foi possível excluir item criado.';
         return false;
       },
       (_) {
@@ -545,7 +545,7 @@ class CreateController implements IBController {
       case CreateEntityType.unknown:
         return Future.value(
           Left(
-            DeleteFailure(message: 'Tipo de item nao suportado para exclusao.'),
+            DeleteFailure(message: 'Tipo de item não suportado para exclusao.'),
           ),
         );
     }

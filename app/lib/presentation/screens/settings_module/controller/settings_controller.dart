@@ -24,7 +24,7 @@ class SettingsController implements IBController {
     return result.fold((failure) {
       error.value = _failureMessage(
         failure,
-        fallback: 'Nao foi possivel sair agora.',
+        fallback: 'Não foi possível sair agora.',
       );
       return false;
     }, (_) => true);

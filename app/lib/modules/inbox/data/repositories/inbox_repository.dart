@@ -84,7 +84,7 @@ class InboxRepository implements IInboxRepository {
         SaveFailure(
           message: ApiErrorMapper.fromResponseData(
             response.data,
-            fallbackMessage: 'Erro ao confirmar sugestao da IA.',
+            fallbackMessage: 'Erro ao confirmar sugestão da IA.',
           ),
         ),
       );

@@ -63,7 +63,7 @@ class SettingsContextsController implements IBController {
     final flagsResult = await _getFlagsUsecase.call(limit: 200);
 
     final loadedFlags = flagsResult.fold<List<FlagOutput>>((failure) {
-      _setError(failure, fallback: 'Nao foi possivel carregar flags.');
+      _setError(failure, fallback: 'Não foi possível carregar flags.');
       return const [];
     }, (output) => _safeFlags(output.items));
 
@@ -83,7 +83,7 @@ class SettingsContextsController implements IBController {
     for (final entry in subflagsResults) {
       entry.value.fold(
         (failure) {
-          _setError(failure, fallback: 'Nao foi possivel carregar subflags.');
+          _setError(failure, fallback: 'Não foi possível carregar subflags.');
           nextSubflagsByFlag[entry.key] = const [];
         },
         (output) {
@@ -128,7 +128,7 @@ class SettingsContextsController implements IBController {
 
     return result.fold(
       (failure) {
-        _setError(failure, fallback: 'Nao foi possivel criar a flag.');
+        _setError(failure, fallback: 'Não foi possível criar a flag.');
         return false;
       },
       (created) {
@@ -173,7 +173,7 @@ class SettingsContextsController implements IBController {
 
     return result.fold(
       (failure) {
-        _setError(failure, fallback: 'Nao foi possivel atualizar a flag.');
+        _setError(failure, fallback: 'Não foi possível atualizar a flag.');
         return false;
       },
       (updated) {
@@ -192,7 +192,7 @@ class SettingsContextsController implements IBController {
 
     return result.fold(
       (failure) {
-        _setError(failure, fallback: 'Nao foi possivel excluir a flag.');
+        _setError(failure, fallback: 'Não foi possível excluir a flag.');
         return false;
       },
       (_) {
@@ -235,7 +235,7 @@ class SettingsContextsController implements IBController {
 
     return result.fold(
       (failure) {
-        _setError(failure, fallback: 'Nao foi possivel criar a subflag.');
+        _setError(failure, fallback: 'Não foi possível criar a subflag.');
         return false;
       },
       (created) {
@@ -263,14 +263,14 @@ class SettingsContextsController implements IBController {
 
     return result.fold(
       (failure) {
-        _setError(failure, fallback: 'Nao foi possivel atualizar a subflag.');
+        _setError(failure, fallback: 'Não foi possível atualizar a subflag.');
         return false;
       },
       (updated) {
         final parentFlagId =
             updated.flag?.id ?? _findParentFlagIdBySubflagId(id);
         if (parentFlagId == null) {
-          error.value = 'Nao foi possivel localizar a subflag para atualizar.';
+          error.value = 'Não foi possível localizar a subflag para atualizar.';
           return false;
         }
         _upsertSubflag(parentFlagId, updated);
@@ -282,7 +282,7 @@ class SettingsContextsController implements IBController {
   Future<bool> deleteSubflag(String id) async {
     final parentFlagId = _findParentFlagIdBySubflagId(id);
     if (parentFlagId == null) {
-      error.value = 'Nao foi possivel localizar a subflag para excluir.';
+      error.value = 'Não foi possível localizar a subflag para excluir.';
       return false;
     }
 
@@ -294,7 +294,7 @@ class SettingsContextsController implements IBController {
 
     return result.fold(
       (failure) {
-        _setError(failure, fallback: 'Nao foi possivel excluir a subflag.');
+        _setError(failure, fallback: 'Não foi possível excluir a subflag.');
         return false;
       },
       (_) {

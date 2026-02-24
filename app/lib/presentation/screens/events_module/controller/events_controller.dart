@@ -96,7 +96,7 @@ class EventsController implements IBController {
     final agendaResult = await _getAgendaUsecase.call(limit: 200);
     agendaResult.fold(
       (failure) {
-        _setError(failure, fallback: 'Nao foi possivel carregar agenda.');
+        _setError(failure, fallback: 'Não foi possível carregar agenda.');
       },
       (output) {
         merged.addAll(_eventItems(output.events));
@@ -111,7 +111,7 @@ class EventsController implements IBController {
     final flagsResult = await _getFlagsUsecase.call(limit: 100);
     flagsResult.fold(
       (failure) =>
-          _setError(failure, fallback: 'Nao foi possivel carregar flags.'),
+          _setError(failure, fallback: 'Não foi possível carregar flags.'),
       (data) => flags.value = _safeFlagItems(data.items),
     );
 
@@ -131,7 +131,7 @@ class EventsController implements IBController {
     );
     result.fold(
       (failure) =>
-          _setError(failure, fallback: 'Nao foi possivel carregar subflags.'),
+          _setError(failure, fallback: 'Não foi possível carregar subflags.'),
       (output) {
         final next = Map<String, List<SubflagOutput>>.from(
           subflagsByFlag.value,
@@ -290,7 +290,7 @@ class EventsController implements IBController {
 
     return result.fold(
       (failure) {
-        _setError(failure, fallback: 'Nao foi possivel criar o evento.');
+        _setError(failure, fallback: 'Não foi possível criar o evento.');
         return false;
       },
       (created) {
@@ -362,7 +362,7 @@ class EventsController implements IBController {
       (failure) {
         _setError(
           failure,
-          fallback: 'Nao foi possivel excluir item da agenda.',
+          fallback: 'Não foi possível excluir item da agenda.',
         );
         return false;
       },

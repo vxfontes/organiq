@@ -77,21 +77,21 @@ class RemindersController implements IBController {
     final taskResult = await _getTasksUsecase.call(limit: 50);
     taskResult.fold(
       (failure) =>
-          _setError(failure, fallback: 'Nao foi possivel carregar tarefas.'),
+          _setError(failure, fallback: 'Não foi possível carregar tarefas.'),
       (data) => _setTasks(_safeTaskItems(data)),
     );
 
     final reminderResult = await _getRemindersUsecase.call(limit: 50);
     reminderResult.fold(
       (failure) =>
-          _setError(failure, fallback: 'Nao foi possivel carregar lembretes.'),
+          _setError(failure, fallback: 'Não foi possível carregar lembretes.'),
       (data) => reminders.value = _safeReminderItems(data),
     );
 
     final flagsResult = await _getFlagsUsecase.call(limit: 100);
     flagsResult.fold(
       (failure) =>
-          _setError(failure, fallback: 'Nao foi possivel carregar flags.'),
+          _setError(failure, fallback: 'Não foi possível carregar flags.'),
       (data) => flags.value = _safeFlagItems(data.items),
     );
 
@@ -109,7 +109,7 @@ class RemindersController implements IBController {
     );
     result.fold(
       (failure) =>
-          _setError(failure, fallback: 'Nao foi possivel carregar subflags.'),
+          _setError(failure, fallback: 'Não foi possível carregar subflags.'),
       (output) {
         final next = Map<String, List<SubflagOutput>>.from(
           subflagsByFlag.value,
@@ -132,7 +132,7 @@ class RemindersController implements IBController {
 
     return result.fold(
       (failure) {
-        _setError(failure, fallback: 'Nao foi possivel atualizar a tarefa.');
+        _setError(failure, fallback: 'Não foi possível atualizar a tarefa.');
         _refreshTasks();
         return false;
       },
@@ -169,7 +169,7 @@ class RemindersController implements IBController {
     final result = await _deleteTaskUsecase.call(id);
     return result.fold(
       (failure) {
-        _setError(failure, fallback: 'Nao foi possivel excluir a tarefa.');
+        _setError(failure, fallback: 'Não foi possível excluir a tarefa.');
         return false;
       },
       (_) {
@@ -212,7 +212,7 @@ class RemindersController implements IBController {
 
     return result.fold(
       (failure) {
-        _setError(failure, fallback: 'Nao foi possivel criar a tarefa.');
+        _setError(failure, fallback: 'Não foi possível criar a tarefa.');
         return false;
       },
       (created) {
@@ -254,7 +254,7 @@ class RemindersController implements IBController {
 
     return result.fold(
       (failure) {
-        _setError(failure, fallback: 'Nao foi possivel criar o lembrete.');
+        _setError(failure, fallback: 'Não foi possível criar o lembrete.');
         return false;
       },
       (created) {

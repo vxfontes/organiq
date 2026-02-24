@@ -168,7 +168,7 @@ class _HomePageState extends IBState<HomePage, HomeController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader(context, 'Visao geral'),
+        _buildSectionHeader(context, 'Visão geral'),
         const SizedBox(height: 12),
         Row(
           children: [

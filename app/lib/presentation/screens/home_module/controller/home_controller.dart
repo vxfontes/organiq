@@ -269,7 +269,7 @@ class HomeController implements IBController {
       (failure) {
         _setError(
           failure,
-          fallback: 'Nao foi possivel atualizar a tarefa pela Home.',
+          fallback: 'Não foi possível atualizar a tarefa pela Home.',
         );
       },
       (updatedTask) {
@@ -306,7 +306,7 @@ class HomeController implements IBController {
 
     agendaResult.fold(
       (failure) =>
-          _setError(failure, fallback: 'Nao foi possivel carregar agenda.'),
+          _setError(failure, fallback: 'Não foi possível carregar agenda.'),
       (output) => agenda.value = output,
     );
 
@@ -314,7 +314,7 @@ class HomeController implements IBController {
       (failure) {
         _setError(
           failure,
-          fallback: 'Nao foi possivel carregar listas de compras.',
+          fallback: 'Não foi possível carregar listas de compras.',
         );
         return const [];
       },
@@ -340,7 +340,7 @@ class HomeController implements IBController {
         (failure) {
           _setError(
             failure,
-            fallback: 'Nao foi possivel carregar itens de compras da Home.',
+            fallback: 'Não foi possível carregar itens de compras da Home.',
           );
           nextItemsByList[entry.key] = const [];
         },
