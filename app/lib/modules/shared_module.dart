@@ -9,6 +9,7 @@ import 'package:inbota/modules/splash/splash_module.dart';
 import 'package:inbota/modules/tasks/tasks_module.dart';
 import 'package:inbota/shared/services/http/dio_http_client.dart';
 import 'package:inbota/shared/services/http/http_client.dart';
+import 'package:inbota/shared/services/speech/speech_transcription_service.dart';
 import 'package:inbota/shared/storage/auth_token_store.dart';
 import 'package:inbota/shared/storage/token_storage.dart';
 
@@ -21,6 +22,9 @@ class SharedModule extends Module {
     );
     i.addLazySingleton<IHttpClient>(
       () => DioHttpClient(Profile.DEV, tokenStore: i.get<AuthTokenStore>()),
+    );
+    i.addLazySingleton<ISpeechTranscriptionService>(
+      SpeechTranscriptionService.new,
     );
 
     // modules

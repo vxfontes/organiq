@@ -36,6 +36,7 @@ class IBIcon extends StatelessWidget {
   static const IconData helpOutline = Icons.help_outline;
   static const IconData lockOutline = Icons.lock_outline;
   static const IconData mailOutline = Icons.mail_outline;
+  static const IconData micRounded = Icons.mic_rounded;
   static const IconData notificationsActiveRounded =
       Icons.notifications_active_rounded;
   static const IconData notificationsNoneOutlined =
@@ -45,6 +46,7 @@ class IBIcon extends StatelessWidget {
   static const IconData shoppingBagOutlined = Icons.shopping_bag_outlined;
   static const IconData starRounded = Icons.star_rounded;
   static const IconData stickyNote2Outlined = Icons.sticky_note_2_outlined;
+  static const IconData stopCircleRounded = Icons.stop_circle_rounded;
   static const IconData taskAltRounded = Icons.task_alt_rounded;
   static const IconData tune = Icons.tune;
   static const IconData verifiedUserOutlined = Icons.verified_user_outlined;

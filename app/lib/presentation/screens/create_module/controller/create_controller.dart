@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:dartz/dartz.dart';
 import 'package:inbota/modules/events/domain/usecases/delete_event_usecase.dart';
@@ -12,6 +14,7 @@ import 'package:inbota/modules/reminders/domain/usecases/delete_reminder_usecase
 import 'package:inbota/modules/shopping/domain/usecases/delete_shopping_list_usecase.dart';
 import 'package:inbota/modules/tasks/domain/usecases/delete_task_usecase.dart';
 import 'package:inbota/shared/errors/failures.dart';
+import 'package:inbota/shared/services/speech/speech_transcription_service.dart';
 import 'package:inbota/shared/state/ib_state.dart';
 
 enum CreateLineStatus { success, failed }
@@ -93,6 +96,7 @@ class CreateController implements IBController {
     this._createInboxItemUsecase,
     this._reprocessInboxItemUsecase,
     this._confirmInboxItemUsecase,
+    this._speechTranscriptionService,
     this._deleteTaskUsecase,
     this._deleteReminderUsecase,
     this._deleteEventUsecase,
@@ -102,6 +106,7 @@ class CreateController implements IBController {
   final CreateInboxItemUsecase _createInboxItemUsecase;
   final ReprocessInboxItemUsecase _reprocessInboxItemUsecase;
   final ConfirmInboxItemUsecase _confirmInboxItemUsecase;
+  final ISpeechTranscriptionService _speechTranscriptionService;
   final DeleteTaskUsecase _deleteTaskUsecase;
   final DeleteReminderUsecase _deleteReminderUsecase;
   final DeleteEventUsecase _deleteEventUsecase;
@@ -109,24 +114,208 @@ class CreateController implements IBController {
 
   final TextEditingController inputController = TextEditingController();
   final ValueNotifier<bool> loading = ValueNotifier(false);
+  final ValueNotifier<bool> listening = ValueNotifier(false);
+  final ValueNotifier<bool> voiceProcessing = ValueNotifier(false);
+  final ValueNotifier<bool> voiceAvailable = ValueNotifier(true);
+  final ValueNotifier<int> recordingSeconds = ValueNotifier(0);
   final ValueNotifier<String?> error = ValueNotifier(null);
   final ValueNotifier<CreateBatchResult?> batchResult = ValueNotifier(null);
 
+  String? _voiceBaseText;
+  String _latestRecognizedText = '';
+  String _finalRecognizedText = '';
+  Completer<void>? _voiceResultCompleter;
+  Timer? _recordingTimer;
+  bool _finalizingVoice = false;
+
   @override
   void dispose() {
+    unawaited(_speechTranscriptionService.cancelListening());
+    _recordingTimer?.cancel();
     inputController.dispose();
     loading.dispose();
+    listening.dispose();
+    voiceProcessing.dispose();
+    voiceAvailable.dispose();
+    recordingSeconds.dispose();
     error.dispose();
     batchResult.dispose();
   }
 
   void clearInput() {
+    if (loading.value || voiceProcessing.value) return;
+    if (listening.value) {
+      unawaited(stopVoiceInput());
+      return;
+    }
     inputController.clear();
     error.value = null;
   }
 
+  Future<void> toggleVoiceInput() async {
+    if (loading.value || voiceProcessing.value) return;
+
+    if (listening.value) {
+      await stopVoiceInput();
+      return;
+    }
+
+    await _startVoiceInput();
+  }
+
+  Future<void> stopVoiceInput() async {
+    if (_finalizingVoice) return;
+    await _speechTranscriptionService.stopListening();
+    await _finalizeVoiceInput();
+  }
+
+  Future<void> _startVoiceInput() async {
+    error.value = null;
+
+    final ready = await _speechTranscriptionService.ensureInitialized(
+      onStatus: _onSpeechStatus,
+      onError: _onSpeechError,
+    );
+    voiceAvailable.value = ready;
+    if (!ready) {
+      error.value =
+          'Nao foi possivel acessar o microfone. Verifique as permissoes do app.';
+      return;
+    }
+
+    _voiceBaseText = inputController.text.trimRight();
+    FocusManager.instance.primaryFocus?.unfocus();
+    _latestRecognizedText = '';
+    _finalRecognizedText = '';
+    _voiceResultCompleter = Completer<void>();
+    recordingSeconds.value = 0;
+    _recordingTimer?.cancel();
+    _recordingTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      recordingSeconds.value += 1;
+    });
+
+    final started = await _speechTranscriptionService.startListening(
+      onResult: _onSpeechResult,
+    );
+    if (!started) {
+      listening.value = false;
+      _recordingTimer?.cancel();
+      error.value = 'Não foi possível iniciar a transcrição por voz.';
+      return;
+    }
+
+    listening.value = true;
+  }
+
+  void _onSpeechResult(String recognizedWords, {required bool isFinal}) {
+    final spokenText = recognizedWords.trim();
+    if (spokenText.isEmpty) return;
+
+    _latestRecognizedText = spokenText;
+
+    if (isFinal) {
+      _finalRecognizedText = spokenText;
+      if (_voiceResultCompleter?.isCompleted == false) {
+        _voiceResultCompleter?.complete();
+      }
+    }
+  }
+
+  void _onSpeechStatus(String status) {
+    final normalized = status.trim().toLowerCase();
+    if (normalized == 'listening') {
+      listening.value = true;
+      return;
+    }
+
+    if (normalized == 'notlistening' || normalized == 'done') {
+      if (listening.value && !_finalizingVoice) {
+        unawaited(_finalizeVoiceInput());
+        return;
+      }
+      listening.value = false;
+      _recordingTimer?.cancel();
+    }
+  }
+
+  void _onSpeechError(String message) {
+    listening.value = false;
+    _recordingTimer?.cancel();
+    if (_voiceResultCompleter?.isCompleted == false) {
+      _voiceResultCompleter?.complete();
+    }
+    if (!_finalizingVoice) {
+      voiceProcessing.value = false;
+      _clearVoiceSessionState();
+    }
+
+    if (_latestRecognizedText.trim().isNotEmpty ||
+        _finalRecognizedText.trim().isNotEmpty) {
+      return;
+    }
+
+    error.value = message.isNotEmpty
+        ? 'Transcricao de voz: $message'
+        : 'Falha na transcricao por voz.';
+  }
+
+  Future<void> _finalizeVoiceInput() async {
+    if (_finalizingVoice) return;
+    _finalizingVoice = true;
+
+    listening.value = false;
+    _recordingTimer?.cancel();
+    voiceProcessing.value = true;
+
+    final transcript = await _resolveTranscript();
+    if (transcript.isNotEmpty) {
+      final baseText = (_voiceBaseText ?? '').trimRight();
+      final nextText = baseText.isEmpty ? transcript : '$baseText\n$transcript';
+      inputController.value = TextEditingValue(
+        text: nextText,
+        selection: TextSelection.collapsed(offset: nextText.length),
+      );
+    } else if (error.value == null || error.value!.trim().isEmpty) {
+      error.value = 'Nao foi possivel transcrever o audio.';
+    }
+
+    _clearVoiceSessionState();
+    voiceProcessing.value = false;
+    _finalizingVoice = false;
+  }
+
+  Future<String> _resolveTranscript() async {
+    final directFinal = _finalRecognizedText.trim();
+    if (directFinal.isNotEmpty) return directFinal;
+
+    final completer = _voiceResultCompleter;
+    if (completer != null && !completer.isCompleted) {
+      await Future.any([
+        completer.future,
+        Future<void>.delayed(const Duration(milliseconds: 900)),
+      ]);
+    }
+
+    final finalized = _finalRecognizedText.trim();
+    if (finalized.isNotEmpty) return finalized;
+    return _latestRecognizedText.trim();
+  }
+
+  void _clearVoiceSessionState({bool resetTimer = true}) {
+    _voiceBaseText = null;
+    _latestRecognizedText = '';
+    _finalRecognizedText = '';
+    _voiceResultCompleter = null;
+    if (resetTimer) {
+      recordingSeconds.value = 0;
+    }
+  }
+
   Future<bool> processText() async {
-    if (loading.value) return false;
+    if (loading.value || voiceProcessing.value) return false;
+    if (listening.value) {
+      await stopVoiceInput();
+    }
 
     final rawText = inputController.text;
     final lines = _extractLines(rawText);

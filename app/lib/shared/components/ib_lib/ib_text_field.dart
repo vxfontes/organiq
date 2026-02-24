@@ -16,6 +16,8 @@ class IBTextField extends StatelessWidget {
     this.onChanged,
     this.minLines,
     this.maxLines = 1,
+    this.readOnly = false,
+    this.enabled = true,
   });
 
   final String label;
@@ -29,6 +31,8 @@ class IBTextField extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final int? minLines;
   final int maxLines;
+  final bool readOnly;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +40,8 @@ class IBTextField extends StatelessWidget {
       controller: controller,
       keyboardType: keyboardType,
       obscureText: obscureText,
+      enabled: enabled,
+      readOnly: readOnly,
       onChanged: onChanged,
       onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
       minLines: minLines,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:inbota/presentation/screens/create_module/components/create_result_line_tile.dart';
+import 'package:inbota/presentation/screens/create_module/components/voice_react_wave_component.dart';
 import 'package:inbota/presentation/screens/create_module/controller/create_controller.dart';
 import 'package:inbota/shared/components/ib_lib/index.dart';
 import 'package:inbota/shared/state/ib_state.dart';
@@ -18,13 +19,22 @@ class _CreatePageState extends IBState<CreatePage, CreateController> {
     return AnimatedBuilder(
       animation: Listenable.merge([
         controller.loading,
+        controller.listening,
+        controller.voiceProcessing,
+        controller.voiceAvailable,
+        controller.recordingSeconds,
         controller.error,
         controller.batchResult,
       ]),
       builder: (context, _) {
         final loading = controller.loading.value;
+        final listening = controller.listening.value;
+        final voiceProcessing = controller.voiceProcessing.value;
+        final voiceAvailable = controller.voiceAvailable.value;
+        final recordingSeconds = controller.recordingSeconds.value;
         final error = controller.error.value;
         final batchResult = controller.batchResult.value;
+        final inputLocked = loading || listening || voiceProcessing;
 
         return ColoredBox(
           color: AppColors.background,
@@ -48,20 +58,47 @@ class _CreatePageState extends IBState<CreatePage, CreateController> {
                       hint:
                           'Ex:\n- Pagar aluguel dia 05\n- Reunião com time amanhã 14h\n- Comprar leite e cafe',
                       controller: controller.inputController,
+                      readOnly: inputLocked,
+                      suffixIcon: IconButton(
+                        tooltip: listening
+                            ? 'Parar transcrição'
+                            : 'Transcrever por voz',
+                        onPressed: (loading || voiceProcessing)
+                            ? null
+                            : controller.toggleVoiceInput,
+                        icon: IBIcon(
+                          listening
+                              ? IBIcon.stopCircleRounded
+                              : IBIcon.micRounded,
+                          color: listening
+                              ? AppColors.danger600
+                              : (voiceAvailable
+                                    ? AppColors.primary600
+                                    : AppColors.textMuted),
+                        ),
+                      ),
                       minLines: 8,
                       maxLines: 10,
                     ),
+                    if (listening) ...[
+                      const SizedBox(height: 8),
+                      _buildVoiceRecordingCard(context, recordingSeconds),
+                    ],
+                    if (voiceProcessing) ...[
+                      const SizedBox(height: 8),
+                      _buildTranscriptionLoadingCard(context),
+                    ],
                     const SizedBox(height: 12),
                     IBButton(
                       label: 'Organizar',
-                      loading: loading,
-                      onPressed: loading ? null : controller.processText,
+                      loading: loading || voiceProcessing,
+                      onPressed: inputLocked ? null : controller.processText,
                     ),
                     const SizedBox(height: 8),
                     IBButton(
                       label: 'Limpar',
                       variant: IBButtonVariant.secondary,
-                      onPressed: loading ? null : controller.clearInput,
+                      onPressed: inputLocked ? null : controller.clearInput,
                     ),
                     if (error != null && error.isNotEmpty) ...[
                       const SizedBox(height: 10),
@@ -152,5 +189,61 @@ class _CreatePageState extends IBState<CreatePage, CreateController> {
         ),
       ],
     );
+  }
+
+  Widget _buildVoiceRecordingCard(BuildContext context, int recordingSeconds) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.primary50,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.primary200),
+      ),
+      child: Row(
+        children: [
+          const IBIcon(IBIcon.micRounded, color: AppColors.danger600, size: 18),
+          const SizedBox(width: 8),
+          IBText(
+            'Gravando ${_formatRecordingTime(recordingSeconds)}',
+            context: context,
+          ).caption.color(AppColors.primary700).build(),
+          const SizedBox(width: 10),
+          const Expanded(
+            child: VoiceReactiveWave(color: AppColors.primary600),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTranscriptionLoadingCard(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.surface2,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.borderStrong),
+      ),
+      child: Row(
+        children: [
+          const SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+          const SizedBox(width: 10),
+          IBText(
+            'Transcrevendo áudio...',
+            context: context,
+          ).caption.color(AppColors.textMuted).build(),
+        ],
+      ),
+    );
+  }
+
+  String _formatRecordingTime(int seconds) {
+    final minutes = (seconds ~/ 60).toString().padLeft(2, '0');
+    final secs = (seconds % 60).toString().padLeft(2, '0');
+    return '$minutes:$secs';
   }
 }

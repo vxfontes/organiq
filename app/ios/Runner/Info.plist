@@ -58,5 +58,9 @@
 		</dict>
 		<key>NSLocalNetworkUsageDescription</key>
 		<string>Permite acessar a rede local (Wi-Fi) para conectar ao servidor.</string>
+		<key>NSMicrophoneUsageDescription</key>
+		<string>Usamos o microfone para transformar sua fala em texto no criador de itens.</string>
+		<key>NSSpeechRecognitionUsageDescription</key>
+		<string>Usamos reconhecimento de fala para transcrever sua voz antes de enviar para a IA.</string>
 	</dict>
 </plist>
