@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
@@ -37,6 +39,7 @@ class SpeechTranscriptionService implements ISpeechTranscriptionService {
   bool _available = false;
   SpeechStatusCallback? _onStatus;
   SpeechErrorCallback? _onError;
+  Future<void> _serialOperation = Future<void>.value();
 
   @override
   bool get isAvailable => _available;
@@ -73,32 +76,54 @@ class SpeechTranscriptionService implements ISpeechTranscriptionService {
     Duration pauseFor = const Duration(seconds: 3),
     bool partialResults = true,
   }) async {
-    if (!_available || !_initialized) return false;
-    if (_speechToText.isListening) {
-      await _speechToText.stop();
-    }
+    return _runSerial(() async {
+      if (!_available || !_initialized) return false;
 
-    final result = await _speechToText.listen(
-      onResult: (SpeechRecognitionResult result) {
-        onResult(result.recognizedWords, isFinal: result.finalResult);
-      },
-      localeId: localeId,
-      listenFor: listenFor,
-      pauseFor: pauseFor,
-      listenOptions: SpeechListenOptions(
-        partialResults: partialResults,
-        listenMode: ListenMode.dictation,
-      ),
-    );
-    if (result is bool) return result;
-    return _speechToText.isListening;
+      try {
+        await _settleSpeechEngine();
+
+        final result = await _speechToText.listen(
+          onResult: (SpeechRecognitionResult result) {
+            onResult(result.recognizedWords, isFinal: result.finalResult);
+          },
+          localeId: localeId,
+          listenFor: listenFor,
+          pauseFor: pauseFor,
+          listenOptions: SpeechListenOptions(
+            partialResults: partialResults,
+            listenMode: ListenMode.dictation,
+          ),
+        );
+        if (result is bool) return result;
+        return _speechToText.isListening;
+      } catch (_) {
+        _onError?.call('Falha ao iniciar captura de voz.');
+        return false;
+      }
+    });
   }
 
   @override
-  Future<void> stopListening() => _speechToText.stop();
+  Future<void> stopListening() {
+    return _runSerial(() async {
+      try {
+        if (_speechToText.isListening) {
+          await _speechToText.stop();
+        }
+      } catch (_) {}
+      await Future<void>.delayed(const Duration(milliseconds: 220));
+    });
+  }
 
   @override
-  Future<void> cancelListening() => _speechToText.cancel();
+  Future<void> cancelListening() {
+    return _runSerial(() async {
+      try {
+        await _speechToText.cancel();
+      } catch (_) {}
+      await Future<void>.delayed(const Duration(milliseconds: 220));
+    });
+  }
 
   void _handleStatus(String status) {
     _onStatus?.call(status);
@@ -109,5 +134,28 @@ class SpeechTranscriptionService implements ISpeechTranscriptionService {
     _onError?.call(
       message.isNotEmpty ? message : 'Falha ao processar transcrição por voz.',
     );
+  }
+
+  Future<void> _settleSpeechEngine() async {
+    if (_speechToText.isListening) {
+      await _speechToText.stop();
+    }
+    await _speechToText.cancel();
+    await Future<void>.delayed(const Duration(milliseconds: 260));
+  }
+
+  Future<T> _runSerial<T>(Future<T> Function() action) {
+    final completer = Completer<T>();
+
+    _serialOperation = _serialOperation.then((_) async {
+      try {
+        final value = await action();
+        completer.complete(value);
+      } catch (err, stack) {
+        completer.completeError(err, stack);
+      }
+    });
+
+    return completer.future;
   }
 }

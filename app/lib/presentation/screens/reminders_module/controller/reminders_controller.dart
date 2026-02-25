@@ -20,6 +20,7 @@ import 'package:inbota/modules/tasks/domain/usecases/delete_task_usecase.dart';
 import 'package:inbota/modules/tasks/domain/usecases/get_tasks_usecase.dart';
 import 'package:inbota/modules/tasks/domain/usecases/update_task_usecase.dart';
 import 'package:inbota/shared/errors/failures.dart';
+import 'package:inbota/shared/services/widget/widget_bridge_service.dart';
 import 'package:inbota/shared/state/ib_state.dart';
 
 class RemindersController implements IBController {
@@ -73,6 +74,7 @@ class RemindersController implements IBController {
     if (loading.value) return;
     loading.value = true;
     error.value = null;
+    await _applyWidgetCompletedTasks();
 
     final taskResult = await _getTasksUsecase.call(limit: 50);
     taskResult.fold(
@@ -274,6 +276,25 @@ class RemindersController implements IBController {
   void _setTasks(List<TaskOutput> items) {
     tasks.value = items;
     _rebuildVisibleTasks();
+    unawaited(_syncTasksToWidget());
+  }
+
+  Future<void> _applyWidgetCompletedTasks() async {
+    final completedTaskIds = await WidgetBridgeService.instance
+        .consumeCompletedTaskIds();
+    if (completedTaskIds.isEmpty) return;
+
+    for (final taskId in completedTaskIds) {
+      await _updateTaskUsecase.call(
+        TaskUpdateInput(id: taskId, status: 'DONE'),
+      );
+    }
+  }
+
+  Future<void> _syncTasksToWidget() async {
+    await WidgetBridgeService.instance.syncTasks(
+      tasks.value.where((task) => !task.isDone).toList(growable: false),
+    );
   }
 
   void _rebuildVisibleTasks() {
