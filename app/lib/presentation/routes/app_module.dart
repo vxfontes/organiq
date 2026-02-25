@@ -17,5 +17,6 @@ class AppModule extends Module {
     r.module(AppRoutes.auth, module: AuthModule());
     r.module(AppRoutes.root, module: RootModule());
     r.module(AppRoutes.settings, module: SettingsModule());
+    r.redirect('/**', to: AppRoutes.splash);
   }
 }
