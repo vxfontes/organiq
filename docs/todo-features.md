@@ -3,11 +3,10 @@
 
 - [ ] push notifications nos horários
   - [ ] alerta e push desses alertas (alguns minutos ou horas antes)
-- [ ] uso de voz para enviar texto para a IA
+- [x] uso de voz para enviar texto para a IA
 - [x] permissões de wifi para android e iOS
 - [ ] projetos e to-dos para os projetos específicos (não sei se só a flag supre) 
 - [ ] versão nativa pra mac
 - [ ] possível site em react ou next
-- [ ] widget pra mac e iphone
-- [ ] versão pra watchOS
+- [x] widget pra mac e iphone
 - [x] login persistente
