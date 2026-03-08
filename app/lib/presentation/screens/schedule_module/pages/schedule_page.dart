@@ -5,6 +5,7 @@ import 'package:inbota/modules/routines/data/models/routine_section.dart';
 import 'package:inbota/presentation/routes/app_navigation.dart';
 import 'package:inbota/presentation/screens/schedule_module/components/create_routine_bottom_sheet.dart';
 import 'package:inbota/presentation/screens/schedule_module/components/routine_detail_bottom_sheet.dart';
+import 'package:inbota/presentation/screens/schedule_module/components/routine_week_selector.dart';
 import 'package:inbota/presentation/screens/schedule_module/components/week_overview.dart';
 import 'package:inbota/presentation/screens/schedule_module/controller/schedule_controller.dart';
 import 'package:inbota/shared/components/ib_lib/index.dart';
@@ -64,7 +65,7 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
                   _buildHeader(context),
                   const SizedBox(height: 16),
                   if (mode == ScheduleViewMode.daily) ...[
-                    _buildWeekSelector(),
+                    RoutineWeekSelector(controller: controller),
                     const SizedBox(height: 20),
                     _buildWeekdayTabs(selectedWeekdayIndex),
                     const SizedBox(height: 20),
@@ -131,45 +132,6 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildWeekSelector() {
-    return Row(
-      children: [
-        _buildWeekButton('Esta semana', 0),
-        const SizedBox(width: 8),
-        _buildWeekButton('Próxima semana', 1),
-      ],
-    );
-  }
-
-  Widget _buildWeekButton(String label, int offset) {
-    final isSelected = controller.selectedWeekOffset.value == offset;
-    final bgColor = isSelected ? AppColors.primary700 : AppColors.surfaceSoft;
-    final textColor = isSelected ? AppColors.surface : AppColors.text;
-    final borderColor = isSelected ? AppColors.primary700 : AppColors.border;
-
-    return Expanded(
-      child: InkWell(
-        onTap: () => controller.selectWeekOffset(offset),
-        borderRadius: BorderRadius.circular(12),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: bgColor,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: borderColor),
-          ),
-          child: Center(
-            child: IBText(label, context: context)
-                .label
-                .color(textColor)
-                .build(),
-          ),
-        ),
-      ),
     );
   }
 
@@ -314,7 +276,7 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
           if (success) {
             IBSnackBar.success(context, 'Rotina "${routine.title}" pulada hoje.');
           }
-          return false; // Don't actually dismiss, the list will refresh
+          return false;
         }
         return await _showDeleteConfirmation(routine);
       },

@@ -65,8 +65,8 @@ class ScheduleController implements IBController {
   final ValueNotifier<String?> error = ValueNotifier(null);
   final ValueNotifier<List<RoutineOutput>> allRoutines = ValueNotifier([]);
   final ValueNotifier<List<RoutineOutput>> routines = ValueNotifier([]);
-  final ValueNotifier<Map<RoutinePeriod, List<RoutineOutput>>> routinesByPeriod =
-      ValueNotifier({});
+  final ValueNotifier<Map<RoutinePeriod, List<RoutineOutput>>> routinesByPeriod = ValueNotifier({});
+  final ValueNotifier<Map<int, List<RoutineOutput>>> routinesByWeekdayInWeek = ValueNotifier({});
   final ValueNotifier<int> selectedWeekday = ValueNotifier(0);
   final ValueNotifier<int> selectedWeekOffset = ValueNotifier(0);
   final ValueNotifier<List<FlagOutput>> flags = ValueNotifier([]);
@@ -131,6 +131,7 @@ class ScheduleController implements IBController {
     allRoutines.dispose();
     routines.dispose();
     routinesByPeriod.dispose();
+    routinesByWeekdayInWeek.dispose();
     selectedWeekday.dispose();
     selectedWeekOffset.dispose();
     flags.dispose();
@@ -165,7 +166,12 @@ class ScheduleController implements IBController {
   void selectWeekOffset(int offset) {
     if (selectedWeekOffset.value == offset) return;
     selectedWeekOffset.value = offset;
-    loadRoutinesForWeekday(selectedWeekday.value);
+    
+    if (viewMode.value == ScheduleViewMode.daily) {
+      loadRoutinesForWeekday(selectedWeekday.value);
+    } else {
+      loadFullWeek();
+    }
   }
 
   bool get hasRoutines =>
@@ -200,6 +206,12 @@ class ScheduleController implements IBController {
     viewMode.value = viewMode.value == ScheduleViewMode.daily
         ? ScheduleViewMode.weekly
         : ScheduleViewMode.daily;
+    
+    if (viewMode.value == ScheduleViewMode.weekly) {
+      loadFullWeek();
+    } else {
+      loadRoutinesForWeekday(selectedWeekday.value);
+    }
   }
 
   Future<void> load() async {
@@ -211,7 +223,12 @@ class ScheduleController implements IBController {
 
     await _loadFlags();
     await _loadAllRoutines();
-    await loadRoutinesForWeekday(selectedWeekday.value);
+    
+    if (viewMode.value == ScheduleViewMode.daily) {
+      await loadRoutinesForWeekday(selectedWeekday.value);
+    } else {
+      await loadFullWeek();
+    }
 
     loading.value = false;
   }
@@ -289,6 +306,40 @@ class ScheduleController implements IBController {
           _groupRoutinesByPeriod();
         },
       );
+    } finally {
+      if (revision == _loadRevision) loading.value = false;
+    }
+  }
+
+  Future<void> loadFullWeek() async {
+    final revision = ++_loadRevision;
+    loading.value = true;
+    
+    try {
+      final weekDays = currentWeekDays;
+      final resultsMap = <int, List<RoutineOutput>>{};
+
+      final futures = List.generate(7, (index) {
+        final date = weekDays[index];
+        final apiWeekday = date.weekday % 7;
+        final dateStr = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+        return _getRoutinesByWeekdayUsecase.call(apiWeekday, date: dateStr);
+      });
+
+      final results = await Future.wait(futures);
+      
+      if (revision != _loadRevision) return;
+
+      for (int i = 0; i < results.length; i++) {
+        final date = weekDays[i];
+        final apiWeekday = date.weekday % 7;
+        results[i].fold(
+          (_) => resultsMap[apiWeekday] = [],
+          (data) => resultsMap[apiWeekday] = data.items,
+        );
+      }
+
+      routinesByWeekdayInWeek.value = resultsMap;
     } finally {
       if (revision == _loadRevision) loading.value = false;
     }
@@ -425,8 +476,7 @@ class ScheduleController implements IBController {
       return false;
     }
     final endTime = createEndTime.value?.trim() ?? '';
-    
-    // Check for overlap
+
     if (_hasOverlap(
       weekdays: weekdays,
       startTime: startTime,
@@ -461,33 +511,6 @@ class ScheduleController implements IBController {
     );
   }
 
-  List<RoutineOutput> getConflicts(RoutineOutput routine) {
-    final conflicts = <RoutineOutput>[];
-    final start = _timeToMinutes(routine.startTime);
-    final end = routine.endTime != null && routine.endTime!.isNotEmpty
-        ? _timeToMinutes(routine.endTime!)
-        : start + 1;
-
-    for (final r in allRoutines.value) {
-      if (r.id == routine.id || !r.isActive) continue;
-
-      final routineWeekdays = r.weekdays.toSet();
-      final hasCommonWeekday =
-          routine.weekdays.any((d) => routineWeekdays.contains(d));
-      if (!hasCommonWeekday) continue;
-
-      final rStart = _timeToMinutes(r.startTime);
-      final rEnd = r.endTime != null && r.endTime!.isNotEmpty
-          ? _timeToMinutes(r.endTime!)
-          : rStart + 1;
-
-      if (start < rEnd && rStart < end) {
-        conflicts.add(r);
-      }
-    }
-    return conflicts;
-  }
-
   bool _hasOverlap({
     required List<int> weekdays,
     required String startTime,
@@ -495,15 +518,13 @@ class ScheduleController implements IBController {
     String? excludeId,
   }) {
     final start = _timeToMinutes(startTime);
-    // If no end time, assume a minimum duration of 1 minute for comparison
     final end = endTime != null && endTime.isNotEmpty
         ? _timeToMinutes(endTime)
         : start + 1;
 
     for (final routine in allRoutines.value) {
-      if (routine.id == excludeId) continue;
+      if (routine.id == excludeId || !routine.isActive) continue;
 
-      // Check if they share any weekday
       final routineWeekdays = routine.weekdays.toSet();
       final hasCommonWeekday = weekdays.any((d) => routineWeekdays.contains(d));
       if (!hasCommonWeekday) continue;
@@ -513,7 +534,6 @@ class ScheduleController implements IBController {
           ? _timeToMinutes(routine.endTime!)
           : rStart + 1;
 
-      // Overlap: (start < rEnd) && (rStart < end)
       if (start < rEnd && rStart < end) {
         return true;
       }
@@ -581,9 +601,13 @@ class ScheduleController implements IBController {
       },
       (created) {
         allRoutines.value = [...allRoutines.value, created];
-        if (created.weekdays.contains(selectedWeekday.value)) {
-          routines.value = [...routines.value, created];
-          _groupRoutinesByPeriod();
+        if (viewMode.value == ScheduleViewMode.daily) {
+          if (created.weekdays.contains(selectedWeekday.value)) {
+            routines.value = [...routines.value, created];
+            _groupRoutinesByPeriod();
+          }
+        } else {
+          loadFullWeek();
         }
         return true;
       },
@@ -628,12 +652,16 @@ class ScheduleController implements IBController {
       (updated) {
         allRoutines.value = allRoutines.value.map((r) => r.id == updated.id ? updated : r).toList();
         
-        final list = routines.value.where((r) => r.id != updated.id).toList();
-        if (updated.weekdays.contains(selectedWeekday.value)) {
-          list.add(updated);
+        if (viewMode.value == ScheduleViewMode.daily) {
+          final list = routines.value.where((r) => r.id != updated.id).toList();
+          if (updated.weekdays.contains(selectedWeekday.value)) {
+            list.add(updated);
+          }
+          routines.value = list;
+          _groupRoutinesByPeriod();
+        } else {
+          loadFullWeek();
         }
-        routines.value = list;
-        _groupRoutinesByPeriod();
         return true;
       },
     );
@@ -675,8 +703,12 @@ class ScheduleController implements IBController {
       (_) {
         final updated = routine.copyWith(isActive: isActive);
         allRoutines.value = allRoutines.value.map((r) => r.id == routine.id ? updated : r).toList();
-        routines.value = routines.value.map((r) => r.id == routine.id ? updated : r).toList();
-        _groupRoutinesByPeriod();
+        if (viewMode.value == ScheduleViewMode.daily) {
+          routines.value = routines.value.map((r) => r.id == routine.id ? updated : r).toList();
+          _groupRoutinesByPeriod();
+        } else {
+          loadFullWeek();
+        }
       },
     );
   }
@@ -703,7 +735,11 @@ class ScheduleController implements IBController {
         return false;
       },
       (_) {
-        loadRoutinesForWeekday(selectedWeekday.value);
+        if (viewMode.value == ScheduleViewMode.daily) {
+          loadRoutinesForWeekday(selectedWeekday.value);
+        } else {
+          loadFullWeek();
+        }
         return true;
       },
     );
@@ -719,11 +755,42 @@ class ScheduleController implements IBController {
       },
       (_) {
         allRoutines.value = allRoutines.value.where((r) => r.id != routineId).toList();
-        routines.value = routines.value.where((r) => r.id != routineId).toList();
-        _groupRoutinesByPeriod();
+        if (viewMode.value == ScheduleViewMode.daily) {
+          routines.value = routines.value.where((r) => r.id != routineId).toList();
+          _groupRoutinesByPeriod();
+        } else {
+          loadFullWeek();
+        }
         return true;
       },
     );
+  }
+
+  List<RoutineOutput> getConflicts(RoutineOutput routine) {
+    final conflicts = <RoutineOutput>[];
+    final start = _timeToMinutes(routine.startTime);
+    final end = routine.endTime != null && routine.endTime!.isNotEmpty
+        ? _timeToMinutes(routine.endTime!)
+        : start + 1;
+
+    for (final r in allRoutines.value) {
+      if (r.id == routine.id || !r.isActive) continue;
+
+      final routineWeekdays = r.weekdays.toSet();
+      final hasCommonWeekday =
+          routine.weekdays.any((d) => routineWeekdays.contains(d));
+      if (!hasCommonWeekday) continue;
+
+      final rStart = _timeToMinutes(r.startTime);
+      final rEnd = r.endTime != null && r.endTime!.isNotEmpty
+          ? _timeToMinutes(r.endTime!)
+          : rStart + 1;
+
+      if (start < rEnd && rStart < end) {
+        conflicts.add(r);
+      }
+    }
+    return conflicts;
   }
 
   Color routineTagColor(RoutineOutput routine) {

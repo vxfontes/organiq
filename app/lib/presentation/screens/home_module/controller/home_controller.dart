@@ -327,14 +327,12 @@ class HomeController implements IBController {
     result.fold(
       (failure) => _setError(failure, fallback: 'Não foi possível atualizar a rotina.'),
       (_) {
-        // Update local list
         final list = List<RoutineOutput>.from(routines.value);
         final idx = list.indexWhere((r) => r.id == routine.id);
         if (idx != -1) {
           list[idx] = list[idx].copyWith(isCompletedToday: completed);
           routines.value = list;
         }
-        // Refresh summary for the progress bar
         _refreshRoutineSummary();
       },
     );
