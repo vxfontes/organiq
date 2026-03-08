@@ -3,10 +3,7 @@ import 'package:inbota/presentation/routes/app_navigation.dart';
 import 'package:inbota/presentation/routes/app_routes.dart';
 import 'package:inbota/presentation/screens/auth_module/controller/signup_controller.dart';
 import 'package:inbota/presentation/screens/auth_module/components/auth_form_scaffold.dart';
-import 'package:inbota/shared/components/ib_lib/ib_button.dart';
-import 'package:inbota/shared/components/ib_lib/ib_icon.dart';
-import 'package:inbota/shared/components/ib_lib/ib_text.dart';
-import 'package:inbota/shared/components/ib_lib/ib_text_field.dart';
+import 'package:inbota/shared/components/ib_lib/index.dart';
 import 'package:inbota/shared/state/ib_state.dart';
 import 'package:inbota/shared/theme/app_colors.dart';
 
@@ -18,6 +15,25 @@ class SignupPage extends StatefulWidget {
 }
 
 class _SignupPageState extends IBState<SignupPage, SignupController> {
+  @override
+  void initState() {
+    super.initState();
+    controller.error.addListener(_onErrorChanged);
+  }
+
+  @override
+  void dispose() {
+    controller.error.removeListener(_onErrorChanged);
+    super.dispose();
+  }
+
+  void _onErrorChanged() {
+    final error = controller.error.value;
+    if (error != null && error.isNotEmpty && mounted) {
+      IBSnackBar.error(context, error);
+    }
+  }
+
   Future<void> _submit() async {
     final locale = WidgetsBinding.instance.platformDispatcher.locale.toLanguageTag();
     final timezone = DateTime.now().timeZoneName;
@@ -59,21 +75,6 @@ class _SignupPageState extends IBState<SignupPage, SignupController> {
           prefixIcon: const IBIcon(IBIcon.lockOutline, color: AppColors.textMuted),
           controller: controller.passwordController,
         ),
-        ValueListenableBuilder<String?>(
-          valueListenable: controller.error,
-          builder: (context, error, _) {
-            if (error == null || error.isEmpty) {
-              return const SizedBox.shrink();
-            }
-            return Padding(
-              padding: const EdgeInsets.only(top: 12),
-              child: IBText(error, context: context)
-                  .caption
-                  .color(AppColors.danger600)
-                  .build(),
-            );
-          },
-        ),
       ],
       primaryAction: ValueListenableBuilder<bool>(
         valueListenable: controller.loading,
@@ -85,12 +86,10 @@ class _SignupPageState extends IBState<SignupPage, SignupController> {
           );
         },
       ),
-      secondaryAction: TextButton(
+      secondaryAction: IBButton(
+        label: 'Já tenho conta',
+        variant: IBButtonVariant.ghost,
         onPressed: () => AppNavigation.push(AppRoutes.login),
-        child: IBText('Ja tenho conta', context: context)
-            .label
-            .color(AppColors.primary700)
-            .build(),
       ),
     );
   }

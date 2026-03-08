@@ -184,6 +184,7 @@ type ConfirmInboxItemResponse struct {
 	Event         *EventResponse         `json:"event,omitempty"`
 	ShoppingList  *ShoppingListResponse  `json:"shoppingList,omitempty"`
 	ShoppingItems []ShoppingItemResponse `json:"shoppingItems,omitempty"`
+	Routine       *RoutineResponse       `json:"routine,omitempty"`
 }
 
 // Tasks
@@ -377,4 +378,105 @@ type UpdateShoppingItemRequest struct {
 	Quantity  *string `json:"quantity,omitempty"`
 	Checked   *bool   `json:"checked,omitempty"`
 	SortOrder *int    `json:"sortOrder,omitempty"`
+}
+
+// Routines
+
+type RoutineResponse struct {
+	ID             string         `json:"id"`
+	Title          string         `json:"title"`
+	Description    *string        `json:"description,omitempty"`
+	RecurrenceType string         `json:"recurrenceType"`
+	Weekdays       []int          `json:"weekdays"`
+	StartTime      string         `json:"startTime"`
+	EndTime        *string        `json:"endTime,omitempty"`
+	WeekOfMonth    *int           `json:"weekOfMonth,omitempty"`
+	StartsOn       string         `json:"startsOn"`
+	EndsOn         *string        `json:"endsOn,omitempty"`
+	Color          *string        `json:"color,omitempty"`
+	IsActive       bool           `json:"isActive"`
+	IsCompletedToday bool         `json:"isCompletedToday"`
+	Flag           *FlagObject    `json:"flag,omitempty"`
+	Subflag        *SubflagObject `json:"subflag,omitempty"`
+	CreatedAt      time.Time      `json:"createdAt"`
+	UpdatedAt      time.Time      `json:"updatedAt"`
+}
+
+type ListRoutinesResponse struct {
+	Items      []RoutineResponse `json:"items"`
+	NextCursor *string           `json:"nextCursor,omitempty"`
+}
+
+type CreateRoutineRequest struct {
+	Title          string  `json:"title"`
+	Description    *string `json:"description,omitempty"`
+	RecurrenceType *string `json:"recurrenceType,omitempty"`
+	Weekdays       []int   `json:"weekdays"`
+	StartTime      string  `json:"startTime"`
+	EndTime        *string `json:"endTime,omitempty"`
+	WeekOfMonth    *int    `json:"weekOfMonth,omitempty"`
+	StartsOn       *string `json:"startsOn,omitempty"`
+	EndsOn         *string `json:"endsOn,omitempty"`
+	Color          *string `json:"color,omitempty"`
+	FlagID         *string `json:"flagId,omitempty"`
+	SubflagID      *string `json:"subflagId,omitempty"`
+}
+
+type UpdateRoutineRequest struct {
+	Title          *string `json:"title,omitempty"`
+	Description    *string `json:"description,omitempty"`
+	RecurrenceType *string `json:"recurrenceType,omitempty"`
+	Weekdays       *[]int  `json:"weekdays,omitempty"`
+	StartTime      *string `json:"startTime,omitempty"`
+	EndTime        *string `json:"endTime,omitempty"`
+	WeekOfMonth    *int    `json:"weekOfMonth,omitempty"`
+	StartsOn       *string `json:"startsOn,omitempty"`
+	EndsOn         *string `json:"endsOn,omitempty"`
+	Color          *string `json:"color,omitempty"`
+	FlagID         *string `json:"flagId,omitempty"`
+	SubflagID      *string `json:"subflagId,omitempty"`
+}
+
+type RoutineExceptionResponse struct {
+	ID            string    `json:"id"`
+	RoutineID     string    `json:"routineId"`
+	ExceptionDate string    `json:"exceptionDate"`
+	Action        string    `json:"action"`
+	NewStartTime  *string   `json:"newStartTime,omitempty"`
+	NewEndTime    *string   `json:"newEndTime,omitempty"`
+	Reason        *string   `json:"reason,omitempty"`
+	CreatedAt     time.Time `json:"createdAt"`
+}
+
+type RoutineCompletionResponse struct {
+	ID          string    `json:"id"`
+	RoutineID   string    `json:"routineId"`
+	CompletedOn string    `json:"completedOn"`
+	CompletedAt time.Time `json:"completedAt"`
+}
+
+type CreateRoutineExceptionRequest struct {
+	ExceptionDate string  `json:"exceptionDate"`
+	Action        *string `json:"action,omitempty"`
+	NewStartTime  *string `json:"newStartTime,omitempty"`
+	NewEndTime    *string `json:"newEndTime,omitempty"`
+	Reason        *string `json:"reason,omitempty"`
+}
+
+type RoutineStreakResponse struct {
+	CurrentStreak    int `json:"currentStreak"`
+	TotalCompletions int `json:"totalCompletions"`
+}
+
+type RoutineTodaySummaryResponse struct {
+	Total     int `json:"total"`
+	Completed int `json:"completed"`
+}
+
+type ToggleRoutineRequest struct {
+	IsActive bool `json:"isActive"`
+}
+
+type CompleteRoutineRequest struct {
+	Date string `json:"date,omitempty"`
 }

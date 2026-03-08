@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:inbota/modules/inbox/data/models/inbox_create_batch_result.dart';
 import 'package:inbota/presentation/screens/create_module/components/create_result_line_tile.dart';
 import 'package:inbota/presentation/screens/create_module/components/voice_react_wave_component.dart';
 import 'package:inbota/presentation/screens/create_module/controller/create_controller.dart';
@@ -15,6 +16,25 @@ class CreatePage extends StatefulWidget {
 
 class _CreatePageState extends IBState<CreatePage, CreateController> {
   @override
+  void initState() {
+    super.initState();
+    controller.error.addListener(_onErrorChanged);
+  }
+
+  @override
+  void dispose() {
+    controller.error.removeListener(_onErrorChanged);
+    super.dispose();
+  }
+
+  void _onErrorChanged() {
+    final error = controller.error.value;
+    if (error != null && error.isNotEmpty && mounted) {
+      IBSnackBar.error(context, error);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: Listenable.merge([
@@ -23,7 +43,6 @@ class _CreatePageState extends IBState<CreatePage, CreateController> {
         controller.voiceProcessing,
         controller.voiceAvailable,
         controller.recordingSeconds,
-        controller.error,
         controller.batchResult,
       ]),
       builder: (context, _) {
@@ -32,7 +51,6 @@ class _CreatePageState extends IBState<CreatePage, CreateController> {
         final voiceProcessing = controller.voiceProcessing.value;
         final voiceAvailable = controller.voiceAvailable.value;
         final recordingSeconds = controller.recordingSeconds.value;
-        final error = controller.error.value;
         final batchResult = controller.batchResult.value;
         final inputLocked = loading || listening || voiceProcessing;
 
@@ -100,13 +118,6 @@ class _CreatePageState extends IBState<CreatePage, CreateController> {
                       variant: IBButtonVariant.secondary,
                       onPressed: inputLocked ? null : controller.clearInput,
                     ),
-                    if (error != null && error.isNotEmpty) ...[
-                      const SizedBox(height: 10),
-                      IBText(
-                        error,
-                        context: context,
-                      ).caption.color(AppColors.danger600).build(),
-                    ],
                   ],
                 ),
               ),
@@ -174,6 +185,10 @@ class _CreatePageState extends IBState<CreatePage, CreateController> {
         IBChip(
           label: 'Eventos ${batchResult.eventsCount}',
           color: AppColors.success600,
+        ),
+        IBChip(
+          label: 'Cronograma ${batchResult.routinesCount}',
+          color: AppColors.primary700,
         ),
         IBChip(
           label: 'Lista de compras ${batchResult.shoppingListsCount}',

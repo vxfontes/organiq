@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:inbota/modules/flags/data/models/flag_output.dart';
 import 'package:inbota/modules/flags/data/models/subflag_output.dart';
+import 'package:inbota/presentation/routes/app_navigation.dart';
 import 'package:inbota/presentation/screens/settings_module/controller/settings_contexts_controller.dart';
 import 'package:inbota/shared/components/ib_lib/index.dart';
 import 'package:inbota/shared/state/ib_state.dart';
@@ -19,6 +20,20 @@ class _SettingsContextsPageState
   void initState() {
     super.initState();
     controller.load();
+    controller.error.addListener(_onErrorChanged);
+  }
+
+  @override
+  void dispose() {
+    controller.error.removeListener(_onErrorChanged);
+    super.dispose();
+  }
+
+  void _onErrorChanged() {
+    final error = controller.error.value;
+    if (error != null && error.isNotEmpty && mounted) {
+      IBSnackBar.error(context, error);
+    }
   }
 
   @override
@@ -29,14 +44,12 @@ class _SettingsContextsPageState
         animation: Listenable.merge([
           controller.loading,
           controller.saving,
-          controller.error,
           controller.flags,
           controller.subflagsByFlag,
         ]),
         builder: (context, _) {
           final loading = controller.loading.value;
           final saving = controller.saving.value;
-          final error = controller.error.value;
           final flags = controller.flags.value;
 
           if (loading && !controller.hasContent) {
@@ -66,13 +79,6 @@ class _SettingsContextsPageState
                 if (saving) ...[
                   const SizedBox(height: 10),
                   const LinearProgressIndicator(minHeight: 2),
-                ],
-                if (error != null && error.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  IBText(
-                    error,
-                    context: context,
-                  ).caption.color(AppColors.danger600).build(),
                 ],
                 const SizedBox(height: 16),
                 if (flags.isEmpty) _buildEmptyState(context, saving),
@@ -163,24 +169,24 @@ class _SettingsContextsPageState
                 onPressed: disabled
                     ? null
                     : () => _onCreateSubflagPressed(flag),
-                icon: const Icon(
-                  Icons.add_rounded,
+                icon: const IBIcon(
+                  IBIcon.addRounded,
                   color: AppColors.primary700,
                 ),
               ),
               IconButton(
                 tooltip: 'Editar flag',
                 onPressed: disabled ? null : () => _onEditFlagPressed(flag),
-                icon: const Icon(
-                  Icons.edit_outlined,
+                icon: const IBIcon(
+                  IBIcon.editOutlineRounded,
                   color: AppColors.textMuted,
                 ),
               ),
               IconButton(
                 tooltip: 'Excluir flag',
                 onPressed: disabled ? null : () => _onDeleteFlagPressed(flag),
-                icon: const Icon(
-                  Icons.delete_outline_rounded,
+                icon: const IBIcon(
+                  IBIcon.deleteOutlineRounded,
                   color: AppColors.danger600,
                 ),
               ),
@@ -202,9 +208,10 @@ class _SettingsContextsPageState
           const SizedBox(height: 4),
           Align(
             alignment: Alignment.centerLeft,
-            child: TextButton(
+            child: IBButton(
+              label: 'Adicionar subflag',
+              variant: IBButtonVariant.ghost,
               onPressed: disabled ? null : () => _onCreateSubflagPressed(flag),
-              child: const Text('Adicionar subflag'),
             ),
           ),
         ],
@@ -245,8 +252,8 @@ class _SettingsContextsPageState
           IconButton(
             tooltip: 'Editar subflag',
             onPressed: disabled ? null : () => _onEditSubflagPressed(subflag),
-            icon: const Icon(
-              Icons.edit_outlined,
+            icon: const IBIcon(
+              IBIcon.editOutlineRounded,
               size: 20,
               color: AppColors.textMuted,
             ),
@@ -254,8 +261,8 @@ class _SettingsContextsPageState
           IconButton(
             tooltip: 'Excluir subflag',
             onPressed: disabled ? null : () => _onDeleteSubflagPressed(subflag),
-            icon: const Icon(
-              Icons.delete_outline_rounded,
+            icon: const IBIcon(
+              IBIcon.deleteOutlineRounded,
               size: 20,
               color: AppColors.danger600,
             ),
@@ -433,15 +440,16 @@ class _FlagFormBottomSheetState extends State<_FlagFormBottomSheet> {
       primaryEnabled: _canSubmit,
       onPrimaryPressed: () {
         if (!_canSubmit) return;
-        Navigator.of(context).pop(
+        AppNavigation.pop(
           _FlagFormData(
             name: _nameController.text,
             color: _selectedColor ?? '',
           ),
+          context,
         );
       },
       secondaryLabel: 'Cancelar',
-      onSecondaryPressed: () => Navigator.of(context).pop(),
+      onSecondaryPressed: () => AppNavigation.pop(null, context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -503,10 +511,10 @@ class _NameFormBottomSheetState extends State<_NameFormBottomSheet> {
       primaryEnabled: _canSubmit,
       onPrimaryPressed: () {
         if (!_canSubmit) return;
-        Navigator.of(context).pop(_controller.text.trim());
+        AppNavigation.pop(_controller.text.trim(), context);
       },
       secondaryLabel: 'Cancelar',
-      onSecondaryPressed: () => Navigator.of(context).pop(),
+      onSecondaryPressed: () => AppNavigation.pop(null, context),
       child: IBTextField(label: widget.label, controller: _controller),
     );
   }
@@ -526,9 +534,9 @@ class _DeleteConfirmationBottomSheet extends StatelessWidget {
     return IBBottomSheet(
       title: title,
       primaryLabel: 'Excluir',
-      onPrimaryPressed: () => Navigator.of(context).pop(true),
+      onPrimaryPressed: () => AppNavigation.pop(true, context),
       secondaryLabel: 'Cancelar',
-      onSecondaryPressed: () => Navigator.of(context).pop(false),
+      onSecondaryPressed: () => AppNavigation.pop(false, context),
       child: IBText(body, context: context).body.build(),
     );
   }

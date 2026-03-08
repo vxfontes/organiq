@@ -74,9 +74,7 @@ class _CreateShoppingItemBottomSheetState
                 widget.errorListenable.value ??
                 'Não foi possível criar o item.';
 
-            ScaffoldMessenger.of(
-              sheetContext,
-            ).showSnackBar(SnackBar(content: Text(message)));
+            IBSnackBar.error(sheetContext, message);
           },
           secondaryLabel: 'Cancelar',
           secondaryEnabled: !loading,

@@ -1,16 +1,16 @@
 
 services:
-  db:
-    image: postgres:16-alpine
-    container_name: inbota_db
-    environment:
-      POSTGRES_DB: inbota
-      POSTGRES_USER: inbota
-      POSTGRES_PASSWORD: inbota
-    ports:
-      - "5432:5432"
-    volumes:
-      - inbota_pgdata:/var/lib/postgresql/data
+#  db:
+#    image: postgres:16-alpine
+#    container_name: inbota_db
+#    environment:
+#      POSTGRES_DB: inbota
+#      POSTGRES_USER: inbota
+#      POSTGRES_PASSWORD: inbota
+#    ports:
+#      - "5432:5432"
+#    volumes:
+#      - inbota_pgdata:/var/lib/postgresql/data
 
   api:
     build:
@@ -29,8 +29,8 @@ services:
     command: ["air", "-c", ".air.toml"]
     ports:
       - "8080:8080"
-    depends_on:
-      - db
+#    depends_on:
+#      - db
 
-volumes:
-  inbota_pgdata:
+#volumes:
+#  inbota_pgdata:

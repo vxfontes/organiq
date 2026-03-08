@@ -22,6 +22,8 @@ flutter run --dart-define-from-file=.env
 ```bash
 cd app
 flutter build ipa --release --dart-define-from-file=.env
+flutter build ipa --release --export-method ad-hoc --dart-define-from-file=.env
+
 ```
 
 ## Gerar APK para Android:
@@ -41,6 +43,12 @@ flutter build apk --release --dart-define-from-file=.env
 cd app
 dart format .
 dart analyze
+```
+
+## gerar json_serializable
+```bash
+cd app
+flutter pub run build_runner build --delete-conflicting-outputs
 ```
 
 ## Gerar imagens

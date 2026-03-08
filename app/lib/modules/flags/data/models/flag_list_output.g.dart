@@ -8,16 +8,14 @@ part of 'flag_list_output.dart';
 
 FlagListOutput _$FlagListOutputFromJson(Map<String, dynamic> json) =>
     FlagListOutput(
-      items:
-          (json['items'] as List<dynamic>?)
-              ?.map((e) => FlagOutput.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          const <FlagOutput>[],
+      items: (json['items'] as List<dynamic>)
+          .map((e) => FlagOutput.fromJson(e as Map<String, dynamic>))
+          .toList(),
       nextCursor: json['nextCursor'] as String?,
     );
 
 Map<String, dynamic> _$FlagListOutputToJson(FlagListOutput instance) =>
     <String, dynamic>{
-      'items': instance.items.map((e) => e.toJson()).toList(),
+      'items': instance.items,
       'nextCursor': instance.nextCursor,
     };

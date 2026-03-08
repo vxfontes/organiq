@@ -2,13 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:inbota/presentation/routes/app_navigation.dart';
 import 'package:inbota/presentation/routes/app_routes.dart';
 import 'package:inbota/presentation/screens/settings_module/controller/settings_controller.dart';
-import 'package:inbota/shared/components/ib_lib/ib_app_bar.dart';
-import 'package:inbota/shared/components/ib_lib/ib_button.dart';
-import 'package:inbota/shared/components/ib_lib/ib_icon.dart';
-import 'package:inbota/shared/components/ib_lib/ib_menu_card.dart';
-import 'package:inbota/shared/components/ib_lib/ib_text.dart';
+import 'package:inbota/shared/components/ib_lib/index.dart';
 import 'package:inbota/shared/state/ib_state.dart';
-import 'package:inbota/shared/theme/app_colors.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -18,6 +13,25 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends IBState<SettingsPage, SettingsController> {
+  @override
+  void initState() {
+    super.initState();
+    controller.error.addListener(_onErrorChanged);
+  }
+
+  @override
+  void dispose() {
+    controller.error.removeListener(_onErrorChanged);
+    super.dispose();
+  }
+
+  void _onErrorChanged() {
+    final error = controller.error.value;
+    if (error != null && error.isNotEmpty && mounted) {
+      IBSnackBar.error(context, error);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -95,21 +109,6 @@ class _SettingsPageState extends IBState<SettingsPage, SettingsController> {
                     loading: loading,
                     onPressed: () async => await controller.logout(),
                     variant: IBButtonVariant.secondary,
-                  );
-                },
-              ),
-              ValueListenableBuilder<String?>(
-                valueListenable: controller.error,
-                builder: (context, error, _) {
-                  if (error == null || error.isEmpty) {
-                    return const SizedBox.shrink();
-                  }
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: IBText(
-                      error,
-                      context: context,
-                    ).caption.color(AppColors.danger600).build(),
                   );
                 },
               ),

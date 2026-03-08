@@ -1,6 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:inbota/modules/events/data/models/event_output.dart';
 import 'package:inbota/modules/reminders/data/models/reminder_output.dart';
+import 'package:inbota/modules/routines/data/models/routine_output.dart';
 import 'package:inbota/modules/shopping/data/models/shopping_item_output.dart';
 import 'package:inbota/modules/shopping/data/models/shopping_list_output.dart';
 import 'package:inbota/modules/tasks/data/models/task_output.dart';
@@ -14,6 +15,7 @@ class InboxConfirmOutput {
     this.task,
     this.reminder,
     this.event,
+    this.routine,
     this.shoppingList,
     this.shoppingItems = const <ShoppingItemOutput>[],
   });
@@ -22,6 +24,7 @@ class InboxConfirmOutput {
   final TaskOutput? task;
   final ReminderOutput? reminder;
   final EventOutput? event;
+  final RoutineOutput? routine;
   final ShoppingListOutput? shoppingList;
   final List<ShoppingItemOutput> shoppingItems;
 

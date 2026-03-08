@@ -3,7 +3,6 @@ import 'package:inbota/modules/auth/data/models/auth_user_model.dart';
 import 'package:inbota/presentation/screens/settings_module/controller/settings_account_controller.dart';
 import 'package:inbota/shared/components/ib_lib/index.dart';
 import 'package:inbota/shared/state/ib_state.dart';
-import 'package:inbota/shared/theme/app_colors.dart';
 
 class SettingsAccountPage extends StatefulWidget {
   const SettingsAccountPage({super.key});
@@ -17,6 +16,20 @@ class _SettingsAccountPageState extends IBState<SettingsAccountPage, SettingsAcc
   void initState() {
     super.initState();
     controller.load();
+    controller.error.addListener(_onErrorChanged);
+  }
+
+  @override
+  void dispose() {
+    controller.error.removeListener(_onErrorChanged);
+    super.dispose();
+  }
+
+  void _onErrorChanged() {
+    final error = controller.error.value;
+    if (error != null && error.isNotEmpty && mounted) {
+      IBSnackBar.error(context, error);
+    }
   }
 
   @override
@@ -26,12 +39,10 @@ class _SettingsAccountPageState extends IBState<SettingsAccountPage, SettingsAcc
       body: AnimatedBuilder(
         animation: Listenable.merge([
           controller.loading,
-          controller.error,
           controller.user,
         ]),
         builder: (context, _) {
           final loading = controller.loading.value;
-          final error = controller.error.value;
           final user = controller.user.value;
 
           if (loading && user == null) {
@@ -52,13 +63,6 @@ class _SettingsAccountPageState extends IBState<SettingsAccountPage, SettingsAcc
                   'Revise seus dados cadastrados.',
                   context: context,
                 ).muted.build(),
-                if (error != null && error.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  IBText(
-                    error,
-                    context: context,
-                  ).caption.color(AppColors.danger600).build(),
-                ],
                 const SizedBox(height: 16),
                 _buildProfileCard(context, user),
               ],

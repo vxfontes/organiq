@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:inbota/presentation/screens/create_module/controller/create_controller.dart';
+import 'package:inbota/modules/inbox/data/models/inbox_create_line_result.dart';
 import 'package:inbota/shared/components/ib_lib/index.dart';
 import 'package:inbota/shared/theme/app_colors.dart';
 

@@ -54,6 +54,11 @@ definitions:
             type: string
         type: object
     type: object
+  dto.CompleteRoutineRequest:
+    properties:
+      date:
+        type: string
+    type: object
   dto.ConfirmInboxItemRequest:
     properties:
       flagId:
@@ -73,6 +78,8 @@ definitions:
         $ref: '#/definitions/dto.EventResponse'
       reminder:
         $ref: '#/definitions/dto.ReminderResponse'
+      routine:
+        $ref: '#/definitions/dto.RoutineResponse'
       shoppingItems:
         items:
           $ref: '#/definitions/dto.ShoppingItemResponse'
@@ -155,6 +162,48 @@ definitions:
         type: string
       title:
         type: string
+    type: object
+  dto.CreateRoutineExceptionRequest:
+    properties:
+      action:
+        type: string
+      exceptionDate:
+        type: string
+      newEndTime:
+        type: string
+      newStartTime:
+        type: string
+      reason:
+        type: string
+    type: object
+  dto.CreateRoutineRequest:
+    properties:
+      color:
+        type: string
+      description:
+        type: string
+      endTime:
+        type: string
+      endsOn:
+        type: string
+      flagId:
+        type: string
+      recurrenceType:
+        type: string
+      startTime:
+        type: string
+      startsOn:
+        type: string
+      subflagId:
+        type: string
+      title:
+        type: string
+      weekOfMonth:
+        type: integer
+      weekdays:
+        items:
+          type: integer
+        type: array
     type: object
   dto.CreateShoppingItemRequest:
     properties:
@@ -337,6 +386,15 @@ definitions:
       nextCursor:
         type: string
     type: object
+  dto.ListRoutinesResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/dto.RoutineResponse'
+        type: array
+      nextCursor:
+        type: string
+    type: object
   dto.ListShoppingItemsResponse:
     properties:
       items:
@@ -393,6 +451,89 @@ definitions:
         type: string
       updatedAt:
         type: string
+    type: object
+  dto.RoutineCompletionResponse:
+    properties:
+      completedAt:
+        type: string
+      completedOn:
+        type: string
+      id:
+        type: string
+      routineId:
+        type: string
+    type: object
+  dto.RoutineExceptionResponse:
+    properties:
+      action:
+        type: string
+      createdAt:
+        type: string
+      exceptionDate:
+        type: string
+      id:
+        type: string
+      newEndTime:
+        type: string
+      newStartTime:
+        type: string
+      reason:
+        type: string
+      routineId:
+        type: string
+    type: object
+  dto.RoutineResponse:
+    properties:
+      color:
+        type: string
+      createdAt:
+        type: string
+      description:
+        type: string
+      endTime:
+        type: string
+      endsOn:
+        type: string
+      flag:
+        $ref: '#/definitions/dto.FlagObject'
+      id:
+        type: string
+      isActive:
+        type: boolean
+      isCompletedToday:
+        type: boolean
+      recurrenceType:
+        type: string
+      startTime:
+        type: string
+      startsOn:
+        type: string
+      subflag:
+        $ref: '#/definitions/dto.SubflagObject'
+      title:
+        type: string
+      updatedAt:
+        type: string
+      weekOfMonth:
+        type: integer
+      weekdays:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.RoutineStreakResponse:
+    properties:
+      currentStreak:
+        type: integer
+      totalCompletions:
+        type: integer
+    type: object
+  dto.RoutineTodaySummaryResponse:
+    properties:
+      completed:
+        type: integer
+      total:
+        type: integer
     type: object
   dto.ShoppingItemResponse:
     properties:
@@ -486,6 +627,11 @@ definitions:
       updatedAt:
         type: string
     type: object
+  dto.ToggleRoutineRequest:
+    properties:
+      isActive:
+        type: boolean
+    type: object
   dto.UpdateContextRuleRequest:
     properties:
       flagId:
@@ -533,6 +679,35 @@ definitions:
         type: string
       title:
         type: string
+    type: object
+  dto.UpdateRoutineRequest:
+    properties:
+      color:
+        type: string
+      description:
+        type: string
+      endTime:
+        type: string
+      endsOn:
+        type: string
+      flagId:
+        type: string
+      recurrenceType:
+        type: string
+      startTime:
+        type: string
+      startsOn:
+        type: string
+      subflagId:
+        type: string
+      title:
+        type: string
+      weekOfMonth:
+        type: integer
+      weekdays:
+        items:
+          type: integer
+        type: array
     type: object
   dto.UpdateShoppingItemRequest:
     properties:
@@ -1533,6 +1708,460 @@ paths:
       summary: Atualizar lembrete
       tags:
       - Reminders
+  /v1/routines:
+    get:
+      parameters:
+      - description: Limite
+        in: query
+        name: limit
+        type: integer
+      - description: Cursor
+        in: query
+        name: cursor
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ListRoutinesResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Listar rotinas
+      tags:
+      - Routines
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Routine payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateRoutineRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.RoutineResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Criar rotina
+      tags:
+      - Routines
+  /v1/routines/{id}:
+    delete:
+      parameters:
+      - description: Routine ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Excluir rotina
+      tags:
+      - Routines
+    get:
+      parameters:
+      - description: Routine ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.RoutineResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Obter rotina
+      tags:
+      - Routines
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Routine ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Routine payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateRoutineRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.RoutineResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Atualizar rotina
+      tags:
+      - Routines
+  /v1/routines/{id}/complete:
+    post:
+      parameters:
+      - description: Routine ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 'Data (opcional, padrão: hoje)'
+        in: body
+        name: body
+        schema:
+          $ref: '#/definitions/dto.CompleteRoutineRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.RoutineCompletionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Marcar rotina como concluída
+      tags:
+      - Routines
+  /v1/routines/{id}/complete/{date}:
+    delete:
+      parameters:
+      - description: Routine ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Data da conclusão
+        in: path
+        name: date
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Desmarcar conclusão de rotina
+      tags:
+      - Routines
+  /v1/routines/{id}/exceptions:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Routine ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Exception payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateRoutineExceptionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.RoutineExceptionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Criar exceção de rotina
+      tags:
+      - Routines
+  /v1/routines/{id}/exceptions/{date}:
+    delete:
+      parameters:
+      - description: Routine ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Data da exceção
+        in: path
+        name: date
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Cancelar exceção de rotina
+      tags:
+      - Routines
+  /v1/routines/{id}/history:
+    get:
+      parameters:
+      - description: Routine ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.RoutineCompletionResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Obter histórico de conclusões
+      tags:
+      - Routines
+  /v1/routines/{id}/streak:
+    get:
+      parameters:
+      - description: Routine ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.RoutineStreakResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Obter streak da rotina
+      tags:
+      - Routines
+  /v1/routines/{id}/toggle:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Routine ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Toggle payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ToggleRoutineRequest'
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Ativar/desativar rotina
+      tags:
+      - Routines
+  /v1/routines/day/{weekday}:
+    get:
+      parameters:
+      - description: Dia da semana (0-6, 0=domingo)
+        in: path
+        name: weekday
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ListRoutinesResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Listar rotinas por dia da semana
+      tags:
+      - Routines
+  /v1/routines/today/summary:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.RoutineTodaySummaryResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Resumo do dia
+      tags:
+      - Routines
   /v1/shopping-items/{id}:
     delete:
       parameters:

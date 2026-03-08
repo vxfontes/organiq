@@ -18,6 +18,9 @@ InboxConfirmOutput _$InboxConfirmOutputFromJson(Map<String, dynamic> json) =>
       event: json['event'] == null
           ? null
           : EventOutput.fromJson(json['event'] as Map<String, dynamic>),
+      routine: json['routine'] == null
+          ? null
+          : RoutineOutput.fromJson(json['routine'] as Map<String, dynamic>),
       shoppingList: json['shoppingList'] == null
           ? null
           : ShoppingListOutput.fromJson(

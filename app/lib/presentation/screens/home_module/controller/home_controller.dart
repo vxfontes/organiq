@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:dartz/dartz.dart';
 import 'package:inbota/modules/events/data/models/agenda_output.dart';
 import 'package:inbota/modules/events/data/models/event_output.dart';
 import 'package:inbota/modules/events/domain/usecases/get_agenda_usecase.dart';
 import 'package:inbota/modules/reminders/data/models/reminder_output.dart';
+import 'package:inbota/modules/routines/data/models/routine_list_output.dart';
+import 'package:inbota/modules/routines/data/models/routine_output.dart';
+import 'package:inbota/modules/routines/data/models/routine_today_summary_output.dart';
+import 'package:inbota/modules/routines/domain/usecases/complete_routine_usecase.dart';
+import 'package:inbota/modules/routines/domain/usecases/get_routines_by_weekday_usecase.dart';
+import 'package:inbota/modules/routines/domain/usecases/get_today_summary_usecase.dart';
+import 'package:inbota/modules/routines/domain/usecases/uncomplete_routine_usecase.dart';
 import 'package:inbota/modules/shopping/data/models/shopping_item_output.dart';
+import 'package:inbota/modules/shopping/data/models/shopping_list_list_output.dart';
 import 'package:inbota/modules/shopping/data/models/shopping_list_output.dart';
 import 'package:inbota/modules/shopping/domain/usecases/get_shopping_items_usecase.dart';
 import 'package:inbota/modules/shopping/domain/usecases/get_shopping_lists_usecase.dart';
@@ -19,19 +28,31 @@ class HomeController implements IBController {
     this._getShoppingListsUsecase,
     this._getShoppingItemsUsecase,
     this._updateTaskUsecase,
+    this._getRoutinesByWeekdayUsecase,
+    this._completeRoutineUsecase,
+    this._uncompleteRoutineUsecase,
+    this._getTodaySummaryUsecase,
   );
 
   final GetAgendaUsecase _getAgendaUsecase;
   final GetShoppingListsUsecase _getShoppingListsUsecase;
   final GetShoppingItemsUsecase _getShoppingItemsUsecase;
   final UpdateTaskUsecase _updateTaskUsecase;
+  final GetRoutinesByWeekdayUsecase _getRoutinesByWeekdayUsecase;
+  final CompleteRoutineUsecase _completeRoutineUsecase;
+  final UncompleteRoutineUsecase _uncompleteRoutineUsecase;
+  final GetTodaySummaryUsecase _getTodaySummaryUsecase;
 
   final ValueNotifier<bool> loading = ValueNotifier(false);
   final ValueNotifier<bool> refreshing = ValueNotifier(false);
   final ValueNotifier<String?> error = ValueNotifier(null);
+  
   final ValueNotifier<AgendaOutput> agenda = ValueNotifier(
     const AgendaOutput(events: [], tasks: [], reminders: []),
   );
+  final ValueNotifier<List<RoutineOutput>> routines = ValueNotifier([]);
+  final ValueNotifier<RoutineTodaySummaryOutput?> routineSummary = ValueNotifier(null);
+  
   final ValueNotifier<List<ShoppingListOutput>> shoppingLists = ValueNotifier(
     const [],
   );
@@ -39,12 +60,14 @@ class HomeController implements IBController {
   shoppingItemsByList = ValueNotifier(const {});
 
   final Set<String> _updatingTaskIds = <String>{};
+  final Set<String> _updatingRoutineIds = <String>{};
 
   bool get hasContent {
     return agenda.value.events.isNotEmpty ||
         agenda.value.tasks.isNotEmpty ||
         agenda.value.reminders.isNotEmpty ||
-        shoppingLists.value.isNotEmpty;
+        shoppingLists.value.isNotEmpty ||
+        routines.value.isNotEmpty;
   }
 
   List<TaskOutput> get openTasks {
@@ -288,6 +311,38 @@ class HomeController implements IBController {
     );
   }
 
+  Future<void> toggleRoutine(RoutineOutput routine, bool completed) async {
+    if (_updatingRoutineIds.contains(routine.id)) return;
+
+    _updatingRoutineIds.add(routine.id);
+    final now = DateTime.now();
+    final dateStr = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+
+    final result = completed 
+      ? await _completeRoutineUsecase.call(routine.id, date: dateStr)
+      : await _uncompleteRoutineUsecase.call(routine.id, dateStr);
+    
+    _updatingRoutineIds.remove(routine.id);
+
+    result.fold(
+      (failure) => _setError(failure, fallback: 'Não foi possível atualizar a rotina.'),
+      (_) {
+        final list = List<RoutineOutput>.from(routines.value);
+        final idx = list.indexWhere((r) => r.id == routine.id);
+        if (idx != -1) {
+          list[idx] = list[idx].copyWith(isCompletedToday: completed);
+          routines.value = list;
+        }
+        _refreshRoutineSummary();
+      },
+    );
+  }
+
+  Future<void> _refreshRoutineSummary() async {
+    final result = await _getTodaySummaryUsecase.call();
+    result.fold((_) => null, (summary) => routineSummary.value = summary);
+  }
+
   Future<void> _fetch({required bool initialLoad}) async {
     if (loading.value || refreshing.value) return;
 
@@ -300,14 +355,38 @@ class HomeController implements IBController {
 
     final agendaFuture = _getAgendaUsecase.call(limit: 200);
     final listsFuture = _getShoppingListsUsecase.call(limit: 20);
+    
+    final now = DateTime.now();
+    final weekday = now.weekday % 7;
+    final dateStr = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+    final routinesFuture = _getRoutinesByWeekdayUsecase.call(weekday, date: dateStr);
+    final summaryFuture = _getTodaySummaryUsecase.call();
 
-    final agendaResult = await agendaFuture;
-    final listsResult = await listsFuture;
+    final results = await Future.wait([
+      agendaFuture,
+      listsFuture,
+      routinesFuture,
+      summaryFuture,
+    ]);
+
+    final agendaResult = results[0] as Either<Failure, AgendaOutput>;
+    final listsResult = results[1] as Either<Failure, ShoppingListListOutput>;
+    final routinesResult = results[2] as Either<Failure, RoutineListOutput>;
+    final summaryResult = results[3] as Either<Failure, RoutineTodaySummaryOutput>;
 
     agendaResult.fold(
       (failure) =>
           _setError(failure, fallback: 'Não foi possível carregar agenda.'),
       (output) => agenda.value = output,
+    );
+
+    summaryResult.fold((_) => null, (summary) => routineSummary.value = summary);
+
+    routinesResult.fold(
+      (failure) => _setError(failure, fallback: 'Não foi possível carregar rotinas.'),
+      (data) {
+        routines.value = data.items;
+      },
     );
 
     final lists = listsResult.fold<List<ShoppingListOutput>>(
@@ -373,6 +452,8 @@ class HomeController implements IBController {
     refreshing.dispose();
     error.dispose();
     agenda.dispose();
+    routines.dispose();
+    routineSummary.dispose();
     shoppingLists.dispose();
     shoppingItemsByList.dispose();
   }

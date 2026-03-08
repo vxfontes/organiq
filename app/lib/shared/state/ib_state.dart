@@ -8,6 +8,9 @@ abstract class IBController {
 abstract class IBState<T extends StatefulWidget, C extends IBController> extends State<T> {
   late final C controller;
 
+  @protected
+  bool get disposeController => false;
+
   @override
   void initState() {
     super.initState();
@@ -16,7 +19,9 @@ abstract class IBState<T extends StatefulWidget, C extends IBController> extends
 
   @override
   void dispose() {
-    controller.dispose();
+    if (disposeController) {
+      controller.dispose();
+    }
     super.dispose();
   }
 }

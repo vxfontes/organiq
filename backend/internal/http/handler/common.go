@@ -66,6 +66,8 @@ func writeUsecaseError(c *gin.Context, err error) {
 		writeError(c, http.StatusBadRequest, "invalid_password")
 	case errors.Is(err, usecase.ErrInvalidDisplayName):
 		writeError(c, http.StatusBadRequest, "invalid_display_name")
+	case errors.Is(err, usecase.ErrRoutineOverlap):
+		writeError(c, http.StatusConflict, "routine_overlap")
 	case errors.Is(err, usecase.ErrInvalidCredentials):
 		writeError(c, http.StatusUnauthorized, "invalid_credentials")
 	case errors.Is(err, usecase.ErrDependencyMissing):

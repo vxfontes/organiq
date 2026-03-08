@@ -48,4 +48,18 @@ class AppPath {
 
   static const String shoppingItems = '/shopping-items';
   static String shoppingItemById(String id) => '$shoppingItems/$id';
+
+  // Routines
+  static const String routines = '/routines';
+  static String routineById(String id) => '$routines/$id';
+  static String routineDay(int weekday) => '$routines/day/$weekday';
+  static const String routineTodaySummary = '/routines/today/summary';
+  static String routineComplete(String id) => '$routines/$id/complete';
+  static String routineCompleteByDate(String id, String date) =>
+      '$routines/$id/complete/$date';
+  static String routineHistory(String id) => '$routines/$id/history';
+  static String routineStreak(String id) => '$routines/$id/streak';
+  static String routineExceptions(String id) => '$routines/$id/exceptions';
+  static String routineExceptionByDate(String id, String date) =>
+      '$routines/$id/exceptions/$date';
 }

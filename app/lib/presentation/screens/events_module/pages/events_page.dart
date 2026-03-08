@@ -20,6 +20,20 @@ class _EventsPageState extends IBState<EventsPage, EventsController> {
   void initState() {
     super.initState();
     controller.load();
+    controller.error.addListener(_onErrorChanged);
+  }
+
+  @override
+  void dispose() {
+    controller.error.removeListener(_onErrorChanged);
+    super.dispose();
+  }
+
+  void _onErrorChanged() {
+    final error = controller.error.value;
+    if (error != null && error.isNotEmpty && mounted) {
+      IBSnackBar.error(context, error);
+    }
   }
 
   @override
@@ -27,7 +41,6 @@ class _EventsPageState extends IBState<EventsPage, EventsController> {
     return AnimatedBuilder(
       animation: Listenable.merge([
         controller.loading,
-        controller.error,
         controller.calendarDays,
         controller.selectedDate,
         controller.selectedFilter,
@@ -35,7 +48,6 @@ class _EventsPageState extends IBState<EventsPage, EventsController> {
       ]),
       builder: (context, _) {
         final loading = controller.loading.value;
-        final error = controller.error.value;
         final days = controller.calendarDays.value;
         final selectedDate = controller.selectedDate.value;
         final selectedFilter = controller.selectedFilter.value;
@@ -47,13 +59,6 @@ class _EventsPageState extends IBState<EventsPage, EventsController> {
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
             children: [
               _buildHeader(context),
-              if (error != null && error.isNotEmpty) ...[
-                const SizedBox(height: 10),
-                IBText(
-                  error,
-                  context: context,
-                ).caption.color(AppColors.danger600).build(),
-              ],
               const SizedBox(height: 16),
               EventCalendarStrip(
                 days: days,

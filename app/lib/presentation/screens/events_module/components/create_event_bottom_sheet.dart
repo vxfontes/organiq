@@ -133,9 +133,7 @@ class _CreateEventBottomSheetState extends State<CreateEventBottomSheet> {
             final message =
                 widget.errorListenable.value ??
                 'Não foi possível criar o evento.';
-            ScaffoldMessenger.of(
-              sheetContext,
-            ).showSnackBar(SnackBar(content: Text(message)));
+            IBSnackBar.error(sheetContext, message);
           },
           secondaryLabel: 'Cancelar',
           secondaryEnabled: !loading,

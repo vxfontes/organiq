@@ -92,6 +92,7 @@ class _IBTodoListState extends State<IBTodoList> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (widget.title != null) ...[
+            const SizedBox(height: 6),
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -112,7 +113,10 @@ class _IBTodoListState extends State<IBTodoList> {
             const SizedBox(height: 12),
           ],
           if (widget.items.isEmpty && widget.emptyLabel != null) ...[
-            IBText(widget.emptyLabel!, context: context).muted.build(),
+            SizedBox(
+              width: double.infinity,
+              child: IBText(widget.emptyLabel!, context: context).muted.build(),
+            ),
             const SizedBox(height: 8),
           ],
           for (var i = 0; i < widget.items.length; i++) ...[

@@ -79,6 +79,9 @@ func main() {
 		eventRepo := postgres.NewEventRepository(db)
 		shoppingListRepo := postgres.NewShoppingListRepository(db)
 		shoppingItemRepo := postgres.NewShoppingItemRepository(db)
+		routineRepo := postgres.NewRoutineRepository(db)
+		routineExceptionRepo := postgres.NewRoutineExceptionRepository(db)
+		routineCompletionRepo := postgres.NewRoutineCompletionRepository(db)
 
 		flagUC := &usecase.FlagUsecase{Flags: flagRepo}
 		subflagUC := &usecase.SubflagUsecase{Subflags: subflagRepo, Flags: flagRepo}
@@ -96,6 +99,13 @@ func main() {
 		}
 		shoppingListUC := &usecase.ShoppingListUsecase{Lists: shoppingListRepo}
 		shoppingItemUC := &usecase.ShoppingItemUsecase{Items: shoppingItemRepo}
+		routineUC := &usecase.RoutineUsecase{
+			Routines:    routineRepo,
+			Exceptions:  routineExceptionRepo,
+			Completions: routineCompletionRepo,
+			Flags:       flagRepo,
+			Subflags:    subflagRepo,
+		}
 		txRunner := postgres.NewTxRunner(db)
 
 		var aiClient service.AIClient
@@ -144,6 +154,7 @@ func main() {
 			Events:        handler.NewEventsHandler(eventUC, inboxUC, flagUC, subflagUC),
 			ShoppingLists: handler.NewShoppingListsHandler(shoppingListUC, inboxUC),
 			ShoppingItems: handler.NewShoppingItemsHandler(shoppingItemUC, shoppingListUC),
+			Routines:      handler.NewRoutinesHandler(routineUC, flagUC, subflagUC),
 		}
 	}
 

@@ -11,6 +11,7 @@ type TxRepositories struct {
 	Events        EventRepository
 	ShoppingLists ShoppingListRepository
 	ShoppingItems ShoppingItemRepository
+	Routines      RoutineRepository
 }
 
 // TxRunner executes functions inside a transaction.

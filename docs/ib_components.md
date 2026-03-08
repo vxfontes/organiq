@@ -14,8 +14,10 @@
 - IBFlagsField: Campo de selecao de flags (single select) com chips.
 - IBLoader: Indicador de carregamento com label opcional.
 - IBScaffold: Scaffold base com padding e bottom bar.
+- IBSnackBar: Helper para exibir feedbacks rápidos (erro/sucesso) de forma flutuante e não intrusiva.
 - IBText: Helper de texto com variacoes (titulo, subtitulo, body, muted, caption, label).
 - IBTextField: Input padronizado (suporta `minLines` e `maxLines`).
+- IBTimeField: Campo visual de horário com seletor nativo estilizado (estilo IBDateField).
 - IBHugeIcon: Enum helper para icones do HugeIcons.
 - IBIcon: Wrapper para icones do Material (padroniza tamanho/cor e opcionalmente fundo).
   - Variantes: use `IBIcon.<nome>` no lugar de `Icons.<nome>` (todos os icones usados no app estao mapeados aqui).
@@ -45,4 +47,6 @@
 - IBIcon pode ser usado sozinho ou com `backgroundColor` e `padding` para virar um “icone em bolha”.
 - Para filtros e classificacao por contexto em formularios, prefira `IBFlagsField` em vez de montar chips locais na tela.
 - Para selecao de data em formularios, prefira `IBDateField` em vez de construir layouts locais repetidos.
+- Para selecao de horario em formularios, prefira `IBTimeField`.
 - Para selecao de cor (flags/subflags), prefira `IBColorPicker` em vez de inputs manuais de hex.
+- Para feedbacks globais (erros de API, validacoes de negocio ou sucesso de acoes), prefira `IBSnackBar` em vez de textos inline que empurram o layout.

@@ -1447,6 +1447,728 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/routines": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Routines"
+                ],
+                "summary": "Listar rotinas",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Limite",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Cursor",
+                        "name": "cursor",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ListRoutinesResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Routines"
+                ],
+                "summary": "Criar rotina",
+                "parameters": [
+                    {
+                        "description": "Routine payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateRoutineRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.RoutineResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/routines/day/{weekday}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Routines"
+                ],
+                "summary": "Listar rotinas por dia da semana",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Dia da semana (0-6, 0=domingo)",
+                        "name": "weekday",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ListRoutinesResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/routines/today/summary": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Routines"
+                ],
+                "summary": "Resumo do dia",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.RoutineTodaySummaryResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/routines/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Routines"
+                ],
+                "summary": "Obter rotina",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Routine ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.RoutineResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "Routines"
+                ],
+                "summary": "Excluir rotina",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Routine ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Routines"
+                ],
+                "summary": "Atualizar rotina",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Routine ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Routine payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateRoutineRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.RoutineResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/routines/{id}/complete": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Routines"
+                ],
+                "summary": "Marcar rotina como concluída",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Routine ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Data (opcional, padrão: hoje)",
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/dto.CompleteRoutineRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.RoutineCompletionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/routines/{id}/complete/{date}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "Routines"
+                ],
+                "summary": "Desmarcar conclusão de rotina",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Routine ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Data da conclusão",
+                        "name": "date",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/routines/{id}/exceptions": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Routines"
+                ],
+                "summary": "Criar exceção de rotina",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Routine ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Exception payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateRoutineExceptionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.RoutineExceptionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/routines/{id}/exceptions/{date}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "Routines"
+                ],
+                "summary": "Cancelar exceção de rotina",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Routine ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Data da exceção",
+                        "name": "date",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/routines/{id}/history": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Routines"
+                ],
+                "summary": "Obter histórico de conclusões",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Routine ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.RoutineCompletionResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/routines/{id}/streak": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Routines"
+                ],
+                "summary": "Obter streak da rotina",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Routine ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.RoutineStreakResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/routines/{id}/toggle": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Routines"
+                ],
+                "summary": "Ativar/desativar rotina",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Routine ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Toggle payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ToggleRoutineRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/shopping-items/{id}": {
             "delete": {
                 "security": [
@@ -2258,6 +2980,14 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.CompleteRoutineRequest": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.ConfirmInboxItemRequest": {
             "type": "object",
             "properties": {
@@ -2286,6 +3016,9 @@ const docTemplate = `{
                 },
                 "reminder": {
                     "$ref": "#/definitions/dto.ReminderResponse"
+                },
+                "routine": {
+                    "$ref": "#/definitions/dto.RoutineResponse"
                 },
                 "shoppingItems": {
                     "type": "array",
@@ -2412,6 +3145,70 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.CreateRoutineExceptionRequest": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "string"
+                },
+                "exceptionDate": {
+                    "type": "string"
+                },
+                "newEndTime": {
+                    "type": "string"
+                },
+                "newStartTime": {
+                    "type": "string"
+                },
+                "reason": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.CreateRoutineRequest": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "endTime": {
+                    "type": "string"
+                },
+                "endsOn": {
+                    "type": "string"
+                },
+                "flagId": {
+                    "type": "string"
+                },
+                "recurrenceType": {
+                    "type": "string"
+                },
+                "startTime": {
+                    "type": "string"
+                },
+                "startsOn": {
+                    "type": "string"
+                },
+                "subflagId": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "weekOfMonth": {
+                    "type": "integer"
+                },
+                "weekdays": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 }
             }
         },
@@ -2694,6 +3491,20 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.ListRoutinesResponse": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.RoutineResponse"
+                    }
+                },
+                "nextCursor": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.ListShoppingItemsResponse": {
             "type": "object",
             "properties": {
@@ -2779,6 +3590,133 @@ const docTemplate = `{
                 },
                 "updatedAt": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.RoutineCompletionResponse": {
+            "type": "object",
+            "properties": {
+                "completedAt": {
+                    "type": "string"
+                },
+                "completedOn": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "routineId": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.RoutineExceptionResponse": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "exceptionDate": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "newEndTime": {
+                    "type": "string"
+                },
+                "newStartTime": {
+                    "type": "string"
+                },
+                "reason": {
+                    "type": "string"
+                },
+                "routineId": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.RoutineResponse": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "endTime": {
+                    "type": "string"
+                },
+                "endsOn": {
+                    "type": "string"
+                },
+                "flag": {
+                    "$ref": "#/definitions/dto.FlagObject"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "isCompletedToday": {
+                    "type": "boolean"
+                },
+                "recurrenceType": {
+                    "type": "string"
+                },
+                "startTime": {
+                    "type": "string"
+                },
+                "startsOn": {
+                    "type": "string"
+                },
+                "subflag": {
+                    "$ref": "#/definitions/dto.SubflagObject"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "weekOfMonth": {
+                    "type": "integer"
+                },
+                "weekdays": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "dto.RoutineStreakResponse": {
+            "type": "object",
+            "properties": {
+                "currentStreak": {
+                    "type": "integer"
+                },
+                "totalCompletions": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.RoutineTodaySummaryResponse": {
+            "type": "object",
+            "properties": {
+                "completed": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
                 }
             }
         },
@@ -2923,6 +3861,14 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.ToggleRoutineRequest": {
+            "type": "object",
+            "properties": {
+                "isActive": {
+                    "type": "boolean"
+                }
+            }
+        },
         "dto.UpdateContextRuleRequest": {
             "type": "object",
             "properties": {
@@ -2994,6 +3940,50 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.UpdateRoutineRequest": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "endTime": {
+                    "type": "string"
+                },
+                "endsOn": {
+                    "type": "string"
+                },
+                "flagId": {
+                    "type": "string"
+                },
+                "recurrenceType": {
+                    "type": "string"
+                },
+                "startTime": {
+                    "type": "string"
+                },
+                "startsOn": {
+                    "type": "string"
+                },
+                "subflagId": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "weekOfMonth": {
+                    "type": "integer"
+                },
+                "weekdays": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 }
             }
         },

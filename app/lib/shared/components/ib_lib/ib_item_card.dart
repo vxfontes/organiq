@@ -18,6 +18,7 @@ class IBItemCard extends StatelessWidget {
     this.doneLabel = 'Feito',
     this.timeIcon,
     this.footer,
+    this.onToggle,
   });
 
   final String title;
@@ -30,6 +31,7 @@ class IBItemCard extends StatelessWidget {
   final String timeLabel;
   final IconData? timeIcon;
   final Widget? footer;
+  final ValueChanged<bool>? onToggle;
 
   @override
   Widget build(BuildContext context) {
@@ -66,6 +68,30 @@ class IBItemCard extends StatelessWidget {
                   ],
                 ),
               ),
+              if (onToggle != null)
+                GestureDetector(
+                  onTap: () => onToggle!(!done),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: 18,
+                    height: 18,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: done ? AppColors.primary600 : Colors.transparent,
+                      border: Border.all(
+                        color: done ? AppColors.primary600 : AppColors.borderStrong,
+                        width: 2,
+                      ),
+                    ),
+                    child: done
+                        ? const Icon(
+                            Icons.check,
+                            size: 14,
+                            color: AppColors.surface,
+                          )
+                        : null,
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 10),

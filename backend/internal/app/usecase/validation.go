@@ -101,6 +101,8 @@ func parseSuggestionType(value string) (domain.AiSuggestionType, bool) {
 		return domain.AiSuggestionTypeShopping, true
 	case string(domain.AiSuggestionTypeNote):
 		return domain.AiSuggestionTypeNote, true
+	case string(domain.AiSuggestionTypeRoutine):
+		return domain.AiSuggestionTypeRoutine, true
 	default:
 		return "", false
 	}

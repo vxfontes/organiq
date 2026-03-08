@@ -21,6 +21,20 @@ class _ShoppingPageState extends IBState<ShoppingPage, ShoppingController> {
   void initState() {
     super.initState();
     controller.load();
+    controller.error.addListener(_onErrorChanged);
+  }
+
+  @override
+  void dispose() {
+    controller.error.removeListener(_onErrorChanged);
+    super.dispose();
+  }
+
+  void _onErrorChanged() {
+    final error = controller.error.value;
+    if (error != null && error.isNotEmpty && mounted) {
+      IBSnackBar.error(context, error);
+    }
   }
 
   @override
@@ -28,13 +42,11 @@ class _ShoppingPageState extends IBState<ShoppingPage, ShoppingController> {
     return AnimatedBuilder(
       animation: Listenable.merge([
         controller.loading,
-        controller.error,
         controller.visibleShoppingLists,
         controller.itemsByList,
       ]),
       builder: (context, _) {
         final loading = controller.loading.value;
-        final error = controller.error.value;
         final shoppingLists = controller.visibleShoppingLists.value;
         final itemsByList = controller.itemsByList.value;
 
@@ -48,13 +60,6 @@ class _ShoppingPageState extends IBState<ShoppingPage, ShoppingController> {
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
                 children: [
                   _buildHeader(context),
-                  if (error != null && error.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    IBText(
-                      error,
-                      context: context,
-                    ).caption.color(AppColors.danger600).build(),
-                  ],
                   const SizedBox(height: 18),
                   if (shoppingLists.isEmpty)
                     const IBCard(
@@ -157,9 +162,10 @@ class _ShoppingPageState extends IBState<ShoppingPage, ShoppingController> {
             ),
           ),
           if (canConclude)
-            TextButton(
+            IBButton(
+              label: 'Concluir',
+              variant: IBButtonVariant.ghost,
               onPressed: () => controller.concludeList(shoppingList.id),
-              child: IBText('Concluir', context: context).label.build(),
             ),
         ],
       ),

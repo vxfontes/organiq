@@ -13,4 +13,5 @@ var (
 	ErrInvalidEmail          = errors.New("invalid_email")
 	ErrInvalidPassword       = errors.New("invalid_password")
 	ErrInvalidDisplayName    = errors.New("invalid_display_name")
+	ErrRoutineOverlap        = errors.New("routine_overlap")
 )

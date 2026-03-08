@@ -55,7 +55,7 @@ class IBBottomNav extends StatelessWidget {
                     ),
                     _NavIcon(
                       index: 1,
-                      icon: IBHugeIcon.reminder,
+                      icon: IBHugeIcon.schedule,
                       isActive: currentIndex == 1,
                       onTap: onTap,
                     ),

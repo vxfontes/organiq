@@ -260,3 +260,35 @@ func toShoppingItemResponse(item domain.ShoppingItem, list *domain.ShoppingList)
 		UpdatedAt: item.UpdatedAt,
 	}
 }
+
+func toRoutineResponse(routine domain.Routine, flag *domain.Flag, subflag *domain.Subflag) dto.RoutineResponse {
+	var flagObj *dto.FlagObject
+	if flag != nil {
+		obj := toFlagObject(*flag)
+		flagObj = &obj
+	}
+	var subflagObj *dto.SubflagObject
+	if subflag != nil {
+		obj := toSubflagObject(*subflag, flag)
+		subflagObj = &obj
+	}
+	return dto.RoutineResponse{
+		ID:             routine.ID,
+		Title:          routine.Title,
+		Description:    routine.Description,
+		RecurrenceType: routine.RecurrenceType,
+		Weekdays:       routine.Weekdays,
+		StartTime:      routine.StartTime,
+		EndTime:        routine.EndTime,
+		WeekOfMonth:    routine.WeekOfMonth,
+		StartsOn:       routine.StartsOn,
+		EndsOn:         routine.EndsOn,
+		Color:          routine.Color,
+		IsActive:       routine.IsActive,
+		IsCompletedToday: routine.IsCompletedToday,
+		Flag:           flagObj,
+		Subflag:        subflagObj,
+		CreatedAt:      routine.CreatedAt,
+		UpdatedAt:      routine.UpdatedAt,
+	}
+}

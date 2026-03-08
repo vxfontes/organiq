@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:inbota/modules/shopping/data/models/shopping_list_output.dart';
+import 'package:inbota/presentation/routes/app_navigation.dart';
+import 'package:inbota/presentation/routes/app_routes.dart';
 import 'package:inbota/presentation/screens/home_module/controller/home_controller.dart';
 import 'package:inbota/shared/components/ib_lib/index.dart';
 import 'package:inbota/shared/state/ib_state.dart';
@@ -18,6 +20,20 @@ class _HomePageState extends IBState<HomePage, HomeController> {
   void initState() {
     super.initState();
     controller.load();
+    controller.error.addListener(_onErrorChanged);
+  }
+
+  @override
+  void dispose() {
+    controller.error.removeListener(_onErrorChanged);
+    super.dispose();
+  }
+
+  void _onErrorChanged() {
+    final error = controller.error.value;
+    if (error != null && error.isNotEmpty && mounted) {
+      IBSnackBar.error(context, error);
+    }
   }
 
   @override
@@ -26,15 +42,15 @@ class _HomePageState extends IBState<HomePage, HomeController> {
       animation: Listenable.merge([
         controller.loading,
         controller.refreshing,
-        controller.error,
         controller.agenda,
+        controller.routines,
+        controller.routineSummary,
         controller.shoppingLists,
         controller.shoppingItemsByList,
       ]),
       builder: (context, _) {
         final loading = controller.loading.value;
         final refreshing = controller.refreshing.value;
-        final error = controller.error.value;
 
         if (loading && !controller.hasContent) {
           return const ColoredBox(
@@ -52,21 +68,19 @@ class _HomePageState extends IBState<HomePage, HomeController> {
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
               children: [
                 _buildHeader(context, refreshing),
-                if (error != null && error.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  _buildErrorBanner(context, error),
-                ],
+                const SizedBox(height: 16),
+                _buildRoutineProgress(),
                 const SizedBox(height: 16),
                 _buildAgendaSnapshot(context),
                 const SizedBox(height: 20),
                 _buildOverviewSection(context),
                 const SizedBox(height: 20),
+                _buildRoutinesSection(),
                 _buildTodoSection(),
                 const SizedBox(height: 20),
                 _buildEventsSection(context),
                 const SizedBox(height: 20),
                 _buildReminderSection(context),
-                const SizedBox(height: 20),
                 _buildShoppingSection(context),
                 const SizedBox(height: 12),
               ],
@@ -95,6 +109,11 @@ class _HomePageState extends IBState<HomePage, HomeController> {
           ),
         ),
         IconButton(
+          tooltip: 'Ver todos os lembretes',
+          onPressed: () => AppNavigation.push(AppRoutes.rootReminders),
+          icon: const IBIcon(IBIcon.alarmOutlined, color: AppColors.primary700),
+        ),
+        IconButton(
           tooltip: 'Atualizar',
           onPressed: refreshing ? null : controller.refresh,
           icon: refreshing
@@ -103,36 +122,44 @@ class _HomePageState extends IBState<HomePage, HomeController> {
                   height: 18,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Icon(Icons.refresh_rounded, color: AppColors.primary700),
+              : const IBIcon(IBIcon.refreshRounded, color: AppColors.primary700),
         ),
       ],
     );
   }
 
-  Widget _buildErrorBanner(BuildContext context, String message) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: AppColors.danger600.withAlpha((0.1 * 255).round()),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColors.danger600.withAlpha((0.25 * 255).round()),
-        ),
-      ),
-      child: Row(
+  Widget _buildRoutineProgress() {
+    final summary = controller.routineSummary.value;
+    if (summary == null || summary.total == 0) return const SizedBox.shrink();
+
+    final percent = summary.total > 0 ? summary.completed / summary.total : 0.0;
+    const color = AppColors.primary600;
+
+    return IBCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const IBIcon(
-            Icons.error_outline_rounded,
-            color: AppColors.danger600,
-            size: 18,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IBText('Rotinas de hoje', context: context).label.weight(FontWeight.w600).build(),
+              IBText('${summary.completed}/${summary.total}', context: context).caption.color(color).build(),
+            ],
           ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: IBText(
-              message,
-              context: context,
-            ).caption.color(AppColors.danger600).build(),
+          const SizedBox(height: 10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: percent,
+              backgroundColor: AppColors.surfaceSoft,
+              valueColor: const AlwaysStoppedAnimation<Color>(color),
+              minHeight: 8,
+            ),
           ),
+          if (percent >= 1.0) ...[
+            const SizedBox(height: 8),
+            IBText('Tudo pronto por hoje!', context: context).caption.color(color).build(),
+          ],
         ],
       ),
     );
@@ -221,6 +248,34 @@ class _HomePageState extends IBState<HomePage, HomeController> {
     );
   }
 
+  Widget _buildRoutinesSection() {
+    final routines = controller.routines.value;
+    final pending = routines.where((r) => !r.isCompletedToday).toList();
+    if (routines.isEmpty) return const SizedBox.shrink();
+    if (pending.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(context, 'Rotinas pendentes'),
+        const SizedBox(height: 12),
+        IBTodoList(
+          items: routines.where((r) => !r.isCompletedToday).map((r) => IBTodoItemData(
+            id: r.id,
+            title: r.title,
+            subtitle: r.timeLabel,
+            done: r.isCompletedToday,
+          )).toList(),
+          emptyLabel: 'Todas as rotinas concluídas!',
+          onToggle: (index, done) {
+            controller.toggleRoutine(pending[index], done);
+          },
+        ),
+        const SizedBox(height: 20),
+      ],
+    );
+  }
+
   Widget _buildTodoSection() {
     final tasks = controller.criticalTasks;
     return IBTodoList(
@@ -287,22 +342,7 @@ class _HomePageState extends IBState<HomePage, HomeController> {
 
   Widget _buildReminderSection(BuildContext context) {
     final reminders = controller.homeUpcomingRemindersPreview;
-    if (reminders.isEmpty) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildSectionHeader(context, 'Proximos lembretes'),
-          const SizedBox(height: 12),
-          const IBCard(
-            child: IBEmptyState(
-              title: 'Sem lembretes proximos',
-              subtitle: 'Quando houver novos lembretes, eles aparecem aqui.',
-              icon: IBHugeIcon.reminder,
-            ),
-          ),
-        ],
-      );
-    }
+    if (reminders.isEmpty) return const SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -322,6 +362,7 @@ class _HomePageState extends IBState<HomePage, HomeController> {
                 if (i != reminders.length - 1)
                   const Divider(height: 20, color: AppColors.border),
               ],
+              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -331,22 +372,7 @@ class _HomePageState extends IBState<HomePage, HomeController> {
 
   Widget _buildShoppingSection(BuildContext context) {
     final lists = controller.homeShoppingListsPreview;
-    if (lists.isEmpty) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildSectionHeader(context, 'Compras em aberto'),
-          const SizedBox(height: 12),
-          const IBCard(
-            child: IBEmptyState(
-              title: 'Sem listas pendentes',
-              subtitle: 'As listas de compras pendentes aparecem aqui.',
-              icon: IBHugeIcon.shoppingBag,
-            ),
-          ),
-        ],
-      );
-    }
+    if (lists.isEmpty) return const SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

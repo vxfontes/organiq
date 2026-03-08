@@ -3,12 +3,13 @@
 
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
+CREATE DATABASE inbota;
+
 -- Base schema namespace (optional)
 CREATE SCHEMA IF NOT EXISTS inbota;
 
 
 -- Main tables, relations, and indexes.
-
 CREATE TABLE IF NOT EXISTS inbota.users (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   email text,
@@ -152,3 +153,4 @@ CREATE INDEX IF NOT EXISTS idx_reminders_user_remind ON inbota.reminders (user_i
 CREATE INDEX IF NOT EXISTS idx_events_user_start ON inbota.events (user_id, start_at);
 CREATE INDEX IF NOT EXISTS idx_lists_user_status ON inbota.shopping_lists (user_id, status);
 CREATE INDEX IF NOT EXISTS idx_items_list_checked ON inbota.shopping_items (list_id, checked, sort_order);
+commit;

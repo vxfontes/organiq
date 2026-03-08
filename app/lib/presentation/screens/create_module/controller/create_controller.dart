@@ -5,91 +5,20 @@ import 'package:dartz/dartz.dart';
 import 'package:inbota/modules/events/domain/usecases/delete_event_usecase.dart';
 import 'package:inbota/modules/inbox/data/models/inbox_confirm_input.dart';
 import 'package:inbota/modules/inbox/data/models/inbox_confirm_output.dart';
+import 'package:inbota/modules/inbox/data/models/inbox_create_batch_result.dart';
 import 'package:inbota/modules/inbox/data/models/inbox_create_input.dart';
+import 'package:inbota/modules/inbox/data/models/inbox_create_line_result.dart';
 import 'package:inbota/modules/inbox/data/models/inbox_item_output.dart';
 import 'package:inbota/modules/inbox/domain/usecases/confirm_inbox_item_usecase.dart';
 import 'package:inbota/modules/inbox/domain/usecases/create_inbox_item_usecase.dart';
 import 'package:inbota/modules/inbox/domain/usecases/reprocess_inbox_item_usecase.dart';
 import 'package:inbota/modules/reminders/domain/usecases/delete_reminder_usecase.dart';
+import 'package:inbota/modules/routines/domain/usecases/delete_routine_usecase.dart';
 import 'package:inbota/modules/shopping/domain/usecases/delete_shopping_list_usecase.dart';
 import 'package:inbota/modules/tasks/domain/usecases/delete_task_usecase.dart';
 import 'package:inbota/shared/errors/failures.dart';
 import 'package:inbota/shared/services/speech/speech_transcription_service.dart';
 import 'package:inbota/shared/state/ib_state.dart';
-
-enum CreateLineStatus { success, failed }
-
-enum CreateEntityType { task, reminder, event, shoppingList, unknown }
-
-class CreateLineResult {
-  const CreateLineResult({
-    required this.sourceText,
-    required this.status,
-    required this.message,
-    this.entityId,
-    this.entityType = CreateEntityType.unknown,
-    this.deleted = false,
-    this.deleting = false,
-  });
-
-  final String sourceText;
-  final CreateLineStatus status;
-  final String message;
-  final String? entityId;
-  final CreateEntityType entityType;
-  final bool deleted;
-  final bool deleting;
-
-  bool get canDelete =>
-      status == CreateLineStatus.success &&
-      !deleted &&
-      !deleting &&
-      entityId != null &&
-      entityId!.trim().isNotEmpty &&
-      entityType != CreateEntityType.unknown;
-
-  CreateLineResult copyWith({
-    String? message,
-    String? entityId,
-    CreateEntityType? entityType,
-    bool? deleted,
-    bool? deleting,
-  }) {
-    return CreateLineResult(
-      sourceText: sourceText,
-      status: status,
-      message: message ?? this.message,
-      entityId: entityId ?? this.entityId,
-      entityType: entityType ?? this.entityType,
-      deleted: deleted ?? this.deleted,
-      deleting: deleting ?? this.deleting,
-    );
-  }
-}
-
-class CreateBatchResult {
-  const CreateBatchResult({
-    required this.totalInputs,
-    required this.successCount,
-    required this.failedCount,
-    required this.tasksCount,
-    required this.remindersCount,
-    required this.eventsCount,
-    required this.shoppingListsCount,
-    required this.shoppingItemsCount,
-    required this.lines,
-  });
-
-  final int totalInputs;
-  final int successCount;
-  final int failedCount;
-  final int tasksCount;
-  final int remindersCount;
-  final int eventsCount;
-  final int shoppingListsCount;
-  final int shoppingItemsCount;
-  final List<CreateLineResult> lines;
-}
 
 class CreateController implements IBController {
   CreateController(
@@ -101,6 +30,7 @@ class CreateController implements IBController {
     this._deleteReminderUsecase,
     this._deleteEventUsecase,
     this._deleteShoppingListUsecase,
+    this._deleteRoutineUsecase,
   );
 
   final CreateInboxItemUsecase _createInboxItemUsecase;
@@ -111,6 +41,7 @@ class CreateController implements IBController {
   final DeleteReminderUsecase _deleteReminderUsecase;
   final DeleteEventUsecase _deleteEventUsecase;
   final DeleteShoppingListUsecase _deleteShoppingListUsecase;
+  final DeleteRoutineUsecase _deleteRoutineUsecase;
 
   final TextEditingController inputController = TextEditingController();
   final ValueNotifier<bool> loading = ValueNotifier(false);
@@ -334,6 +265,7 @@ class CreateController implements IBController {
     var events = 0;
     var shoppingLists = 0;
     var shoppingItems = 0;
+    var routines = 0;
 
     final lineResults = <CreateLineResult>[];
 
@@ -364,6 +296,9 @@ class CreateController implements IBController {
               break;
             case 'event':
               events++;
+              break;
+            case 'routine':
+              routines++;
               break;
             case 'shopping':
               if (output.shoppingList != null) {
@@ -397,6 +332,7 @@ class CreateController implements IBController {
       eventsCount: events,
       shoppingListsCount: shoppingLists,
       shoppingItemsCount: shoppingItems,
+      routinesCount: routines,
       lines: lineResults,
     );
 
@@ -525,6 +461,7 @@ class CreateController implements IBController {
       eventsCount: currentBatch.eventsCount,
       shoppingListsCount: currentBatch.shoppingListsCount,
       shoppingItemsCount: currentBatch.shoppingItemsCount,
+      routinesCount: currentBatch.routinesCount,
       lines: nextLines,
     );
   }
@@ -542,6 +479,8 @@ class CreateController implements IBController {
         return _deleteEventUsecase.call(id);
       case CreateEntityType.shoppingList:
         return _deleteShoppingListUsecase.call(id);
+      case CreateEntityType.routine:
+        return _deleteRoutineUsecase.call(id);
       case CreateEntityType.unknown:
         return Future.value(
           Left(
@@ -563,6 +502,8 @@ class CreateController implements IBController {
         return (CreateEntityType.event, output.event?.id);
       case 'shopping':
         return (CreateEntityType.shoppingList, output.shoppingList?.id);
+      case 'routine':
+        return (CreateEntityType.routine, output.routine?.id);
       default:
         return (CreateEntityType.unknown, null);
     }
@@ -673,6 +614,8 @@ class CreateController implements IBController {
         return 'Evento';
       case 'shopping':
         return 'Lista de compras';
+      case 'routine':
+        return 'Cronograma';
       default:
         return 'Item';
     }

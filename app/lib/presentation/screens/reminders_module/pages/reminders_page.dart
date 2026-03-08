@@ -22,6 +22,20 @@ class _RemindersPageState extends IBState<RemindersPage, RemindersController> {
   void initState() {
     super.initState();
     controller.load();
+    controller.error.addListener(_onErrorChanged);
+  }
+
+  @override
+  void dispose() {
+    controller.error.removeListener(_onErrorChanged);
+    super.dispose();
+  }
+
+  void _onErrorChanged() {
+    final error = controller.error.value;
+    if (error != null && error.isNotEmpty && mounted) {
+      IBSnackBar.error(context, error);
+    }
   }
 
   @override
@@ -29,7 +43,6 @@ class _RemindersPageState extends IBState<RemindersPage, RemindersController> {
     return AnimatedBuilder(
       animation: Listenable.merge([
         controller.loading,
-        controller.error,
         controller.visibleTasks,
         controller.reminders,
       ]),
@@ -37,7 +50,6 @@ class _RemindersPageState extends IBState<RemindersPage, RemindersController> {
         final tasks = controller.visibleTasks.value;
         final reminders = controller.reminders.value;
         final loading = controller.loading.value;
-        final error = controller.error.value;
         final showFullLoading = loading;
         final loadingLabel = tasks.isEmpty && reminders.isEmpty
             ? 'Carregando...'
@@ -51,13 +63,6 @@ class _RemindersPageState extends IBState<RemindersPage, RemindersController> {
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
                 children: [
                   _buildHeader(context),
-                  if (error != null && error.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    IBText(
-                      error,
-                      context: context,
-                    ).caption.color(AppColors.danger600).build(),
-                  ],
                   const SizedBox(height: 20),
                   _buildTodoSection(context, tasks),
                   _buildTodaySection(context, reminders),
