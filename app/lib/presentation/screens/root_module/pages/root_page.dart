@@ -46,14 +46,14 @@ class _RootPageState extends State<RootPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final path = AppNavigation.path;
-      if (path == AppRoutes.root || path == '/root') {
+      if (path == AppRoutes.root || path == '${AppRoutes.root}/') {
         AppNavigation.navigate(AppRoutes.rootHome);
       }
     });
   }
 
   int _indexForPath(String path) {
-    if (path.startsWith(AppRoutes.rootReminders)) return 1;
+    if (path.startsWith(AppRoutes.rootSchedule)) return 1;
     if (path.startsWith(AppRoutes.rootCreate)) return 2;
     if (path.startsWith(AppRoutes.rootShopping)) return 3;
     if (path.startsWith(AppRoutes.rootEvents)) return 4;
@@ -66,7 +66,7 @@ class _RootPageState extends State<RootPage> {
         AppNavigation.navigate(AppRoutes.rootHome);
         break;
       case 1:
-        AppNavigation.navigate(AppRoutes.rootReminders);
+        AppNavigation.navigate(AppRoutes.rootSchedule);
         break;
       case 2:
         AppNavigation.navigate(AppRoutes.rootCreate);

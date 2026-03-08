@@ -45,6 +45,12 @@ dart format .
 dart analyze
 ```
 
+## gerar json_serializable
+```bash
+cd app
+flutter pub run build_runner build --delete-conflicting-outputs
+```
+
 ## Gerar imagens
 
 1. Abra o SVG no Preview.

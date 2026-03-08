@@ -6,6 +6,7 @@ import 'package:inbota/presentation/screens/events_module/events_module.dart';
 import 'package:inbota/presentation/screens/home_module/home_module.dart';
 import 'package:inbota/presentation/screens/reminders_module/reminders_module.dart';
 import 'package:inbota/presentation/screens/root_module/pages/root_page.dart';
+import 'package:inbota/presentation/screens/schedule_module/schedule_module.dart';
 import 'package:inbota/presentation/screens/shopping_module/shopping_module.dart';
 
 class RootModule extends Module {
@@ -23,6 +24,12 @@ class RootModule extends Module {
         ModuleRoute(
           AppRoutes.home,
           module: HomeModule(),
+          transition: TransitionType.noTransition,
+          duration: Duration.zero,
+        ),
+        ModuleRoute(
+          AppRoutes.schedule,
+          module: ScheduleModule(),
           transition: TransitionType.noTransition,
           duration: Duration.zero,
         ),

@@ -4,6 +4,7 @@ import 'package:inbota/modules/events/events_module.dart';
 import 'package:inbota/modules/flags/flags_module.dart';
 import 'package:inbota/modules/inbox/inbox_module.dart';
 import 'package:inbota/modules/reminders/reminders_module.dart';
+import 'package:inbota/modules/routines/routines_module.dart';
 import 'package:inbota/modules/shopping/shopping_module.dart';
 import 'package:inbota/modules/splash/splash_module.dart';
 import 'package:inbota/modules/tasks/tasks_module.dart';
@@ -33,6 +34,7 @@ class SharedModule extends Module {
     FlagsModule.binds(i);
     InboxModule.binds(i);
     RemindersModule.binds(i);
+    RoutinesModule.binds(i);
     ShoppingModule.binds(i);
     SplashModule.binds(i);
     TasksModule.binds(i);
