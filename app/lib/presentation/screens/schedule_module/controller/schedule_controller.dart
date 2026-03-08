@@ -392,11 +392,6 @@ class ScheduleController implements IBController {
       error.value = 'Informe o horário da rotina.';
       return false;
     }
-    final normalizedEndTime = endTime?.trim() ?? '';
-    if (normalizedEndTime.isEmpty) {
-      error.value = 'Informe o horário de término da rotina.';
-      return false;
-    }
 
     loading.value = true;
     error.value = null;
@@ -406,7 +401,7 @@ class ScheduleController implements IBController {
         title: trimmed,
         weekdays: weekdays,
         startTime: startTime,
-        endTime: normalizedEndTime,
+        endTime: endTime,
         recurrenceType: recurrenceType,
         flagId: flagId,
         subflagId: subflagId,

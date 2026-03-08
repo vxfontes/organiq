@@ -77,7 +77,10 @@ func (r *RoutineRepositoryImpl) Delete(ctx context.Context, userID, id string) e
 
 func (r *RoutineRepositoryImpl) Get(ctx context.Context, userID, id string) (domain.Routine, error) {
 	row := r.db.QueryRowContext(ctx, `
-		SELECT id, user_id, title, description, recurrence_type, weekdays, start_time, end_time, week_of_month, starts_on, ends_on, color, is_active, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
+		SELECT id, user_id, title, description, recurrence_type, weekdays,
+			to_char(start_time, 'HH24:MI') as start_time,
+			to_char(end_time, 'HH24:MI') as end_time,
+			week_of_month, starts_on, ends_on, color, is_active, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
 		FROM inbota.routines
 		WHERE id = $1 AND user_id = $2
 		LIMIT 1
@@ -124,7 +127,10 @@ func (r *RoutineRepositoryImpl) List(ctx context.Context, userID string, opts re
 	}
 
 	rows, err := r.db.QueryContext(ctx, `
-		SELECT id, user_id, title, description, recurrence_type, weekdays, start_time, end_time, week_of_month, starts_on, ends_on, color, is_active, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
+		SELECT id, user_id, title, description, recurrence_type, weekdays,
+			to_char(start_time, 'HH24:MI') as start_time,
+			to_char(end_time, 'HH24:MI') as end_time,
+			week_of_month, starts_on, ends_on, color, is_active, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
 		FROM inbota.routines
 		WHERE user_id = $1 AND is_active = true
 		ORDER BY start_time, created_at
@@ -177,7 +183,10 @@ func (r *RoutineRepositoryImpl) List(ctx context.Context, userID string, opts re
 
 func (r *RoutineRepositoryImpl) ListByWeekday(ctx context.Context, userID string, weekday int) ([]domain.Routine, error) {
 	rows, err := r.db.QueryContext(ctx, `
-		SELECT id, user_id, title, description, recurrence_type, weekdays, start_time, end_time, week_of_month, starts_on, ends_on, color, is_active, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
+		SELECT id, user_id, title, description, recurrence_type, weekdays,
+			to_char(start_time, 'HH24:MI') as start_time,
+			to_char(end_time, 'HH24:MI') as end_time,
+			week_of_month, starts_on, ends_on, color, is_active, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
 		FROM inbota.routines
 		WHERE user_id = $1 AND is_active = true AND $2 = ANY(weekdays)
 		ORDER BY start_time, created_at

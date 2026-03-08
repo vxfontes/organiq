@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS inbota.routines (
   recurrence_type      text NOT NULL DEFAULT 'weekly',
   weekdays             int[] NOT NULL,        -- 0=sun, 1=mon, ..., 6=sat
   start_time           time NOT NULL,
-  end_time             time,
+  end_time             time NOT NULL,
   week_of_month        int,                   -- only for recurrence_type = 'monthly_week' (1–5)
   starts_on            date NOT NULL DEFAULT CURRENT_DATE,
   ends_on              date,
@@ -27,6 +27,13 @@ CREATE TABLE IF NOT EXISTS inbota.routines (
   created_at           timestamptz NOT NULL DEFAULT now(),
   updated_at           timestamptz NOT NULL DEFAULT now()
 );
+
+-- Ensure time columns are stored as TIME (safety for older schemas)
+ALTER TABLE inbota.routines
+  ALTER COLUMN start_time TYPE time USING start_time::time;
+
+ALTER TABLE inbota.routines
+  ALTER COLUMN end_time TYPE time USING end_time::time;
 
 -- action values: 'skip' | 'reschedule'
 CREATE TABLE IF NOT EXISTS inbota.routine_exceptions (
