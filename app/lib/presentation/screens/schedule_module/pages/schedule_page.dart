@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:inbota/modules/routines/data/models/routine_output.dart';
 import 'package:inbota/modules/routines/data/models/routine_section.dart';
+import 'package:inbota/presentation/routes/app_navigation.dart';
 import 'package:inbota/presentation/screens/schedule_module/components/create_routine_bottom_sheet.dart';
 import 'package:inbota/presentation/screens/schedule_module/controller/schedule_controller.dart';
 import 'package:inbota/shared/components/ib_lib/index.dart';
@@ -20,6 +21,20 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
   void initState() {
     super.initState();
     controller.load();
+    controller.error.addListener(_onErrorChanged);
+  }
+
+  @override
+  void dispose() {
+    controller.error.removeListener(_onErrorChanged);
+    super.dispose();
+  }
+
+  void _onErrorChanged() {
+    final error = controller.error.value;
+    if (error != null && error.isNotEmpty && mounted) {
+      IBSnackBar.error(context, error);
+    }
   }
 
   @override
@@ -27,13 +42,11 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
     return AnimatedBuilder(
       animation: Listenable.merge([
         controller.loading,
-        controller.error,
         controller.routinesByPeriod,
         controller.selectedWeekday,
         controller.selectedWeekOffset,
       ]),
       builder: (context, _) {
-        final error = controller.error.value;
         final selectedWeekdayIndex = controller.selectedWeekdayIndex;
         final routineSections = controller.routineSections;
 
@@ -45,13 +58,6 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
                 children: [
                   _buildHeader(context),
-                  if (error != null && error.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    IBText(error, context: context)
-                        .caption
-                        .color(AppColors.danger600)
-                        .build(),
-                  ],
                   const SizedBox(height: 16),
                   _buildWeekSelector(),
                   const SizedBox(height: 20),
@@ -116,20 +122,20 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
 
   Widget _buildWeekButton(String label, int offset) {
     final isSelected = controller.selectedWeekOffset.value == offset;
-    final bgColor = isSelected ? AppColors.primary700 : AppColors.surface;
+    final bgColor = isSelected ? AppColors.primary700 : AppColors.surfaceSoft;
     final textColor = isSelected ? AppColors.surface : AppColors.text;
     final borderColor = isSelected ? AppColors.primary700 : AppColors.border;
 
     return Expanded(
       child: InkWell(
         onTap: () => controller.selectWeekOffset(offset),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
             color: bgColor,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
             border: Border.all(color: borderColor),
           ),
           child: Center(
@@ -159,19 +165,19 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
           final dayStr = date.day.toString().padLeft(2, '0');
           
           final textColor =
-              isSelected ? AppColors.surface : AppColors.textMuted;
+              isSelected ? AppColors.surface : AppColors.text;
           final dateColor =
-              isSelected ? AppColors.surface.withValues(alpha: 0.8) : AppColors.textMuted.withValues(alpha: 0.8);
+              isSelected ? AppColors.surface.withValues(alpha: 0.8) : AppColors.textMuted;
 
           return InkWell(
             onTap: () => controller.selectWeekdayIndex(index),
             borderRadius: BorderRadius.circular(12),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              width: 56,
+              width: 58,
               padding: const EdgeInsets.symmetric(vertical: 8),
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary700 : AppColors.surface,
+                color: isSelected ? AppColors.primary700 : AppColors.surfaceSoft,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: isSelected ? AppColors.primary700 : AppColors.border,
@@ -216,11 +222,11 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
         IBText(title, context: context).subtitulo.build(),
         const SizedBox(height: 12),
         ...routines.map((routine) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.only(bottom: 10),
               child: _buildRoutineCard(routine),
             )),
       ],
@@ -241,7 +247,7 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
         padding: const EdgeInsets.only(right: 20),
         decoration: BoxDecoration(
           color: AppColors.danger600,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
         ),
         child: const IBIcon(
           IBIcon.deleteOutlineRounded,
@@ -284,27 +290,29 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: IBText('Excluir rotina?', context: context).subtitulo.build(),
         content: IBText(
           'Tem certeza que deseja excluir "${routine.title}"?',
           context: context,
         ).body.build(),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: IBText('Cancelar', context: context).label.build(),
+          IBButton(
+            label: 'Cancelar',
+            variant: IBButtonVariant.ghost,
+            onPressed: () => AppNavigation.pop(false, context),
           ),
-          TextButton(
+          IBButton(
+            label: 'Excluir',
+            variant: IBButtonVariant.primary,
             onPressed: () async {
               await controller.deleteRoutine(routine.id);
               if (context.mounted) {
-                Navigator.of(context).pop(true);
+                AppNavigation.pop(true, context);
               }
             },
-            child: IBText('Excluir', context: context)
-                .label
-                .color(AppColors.danger600)
-                .build(),
           ),
         ],
       ),
