@@ -40,6 +40,7 @@ class ScheduleController implements IBController {
   final ValueNotifier<Map<RoutinePeriod, List<RoutineOutput>>> routinesByPeriod =
       ValueNotifier({});
   final ValueNotifier<int> selectedWeekday = ValueNotifier(0);
+  final ValueNotifier<int> selectedWeekOffset = ValueNotifier(0);
   final ValueNotifier<List<FlagOutput>> flags = ValueNotifier([]);
   final ValueNotifier<Map<String, List<SubflagOutput>>> subflagsByFlag =
       ValueNotifier({});
@@ -95,6 +96,7 @@ class ScheduleController implements IBController {
     routines.dispose();
     routinesByPeriod.dispose();
     selectedWeekday.dispose();
+    selectedWeekOffset.dispose();
     flags.dispose();
     subflagsByFlag.dispose();
     createSelectedWeekdays.dispose();
@@ -109,6 +111,23 @@ class ScheduleController implements IBController {
   int get currentWeekday => DateTime.now().weekday % 7;
   int get selectedWeekdayIndex =>
       selectedWeekday.value == 0 ? 6 : selectedWeekday.value - 1;
+
+  DateTime get _currentMonday {
+    final now = DateTime.now();
+    final daysSinceMonday = now.weekday - 1;
+    final monday = now.subtract(Duration(days: daysSinceMonday));
+    return DateTime(monday.year, monday.month, monday.day).add(Duration(days: selectedWeekOffset.value * 7));
+  }
+
+  List<DateTime> get currentWeekDays {
+    final monday = _currentMonday;
+    return List.generate(7, (index) => monday.add(Duration(days: index)));
+  }
+
+  void selectWeekOffset(int offset) {
+    if (selectedWeekOffset.value == offset) return;
+    selectedWeekOffset.value = offset;
+  }
 
   bool get hasRoutines =>
       routinesByPeriod.value.values.any((list) => list.isNotEmpty);

@@ -30,6 +30,7 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
         controller.error,
         controller.routinesByPeriod,
         controller.selectedWeekday,
+        controller.selectedWeekOffset,
       ]),
       builder: (context, _) {
         final error = controller.error.value;
@@ -51,6 +52,8 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
                         .color(AppColors.danger600)
                         .build(),
                   ],
+                  const SizedBox(height: 16),
+                  _buildWeekSelector(),
                   const SizedBox(height: 20),
                   _buildWeekdayTabs(selectedWeekdayIndex),
                   const SizedBox(height: 20),
@@ -101,9 +104,50 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
     );
   }
 
+  Widget _buildWeekSelector() {
+    return Row(
+      children: [
+        _buildWeekButton('Esta semana', 0),
+        const SizedBox(width: 8),
+        _buildWeekButton('Próxima semana', 1),
+      ],
+    );
+  }
+
+  Widget _buildWeekButton(String label, int offset) {
+    final isSelected = controller.selectedWeekOffset.value == offset;
+    final bgColor = isSelected ? AppColors.primary700 : AppColors.surface;
+    final textColor = isSelected ? AppColors.surface : AppColors.text;
+    final borderColor = isSelected ? AppColors.primary700 : AppColors.border;
+
+    return Expanded(
+      child: InkWell(
+        onTap: () => controller.selectWeekOffset(offset),
+        borderRadius: BorderRadius.circular(8),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: bgColor,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: borderColor),
+          ),
+          child: Center(
+            child: IBText(label, context: context)
+                .label
+                .color(textColor)
+                .build(),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildWeekdayTabs(int selectedIndex) {
+    final weekDays = controller.currentWeekDays;
+
     return SizedBox(
-      height: 44,
+      height: 64,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: ScheduleController.weekdayTabLabels.length,
@@ -111,26 +155,41 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
         itemBuilder: (context, index) {
           final isSelected = index == selectedIndex;
           final label = ScheduleController.weekdayTabLabels[index];
+          final date = weekDays[index];
+          final dayStr = date.day.toString().padLeft(2, '0');
+          
           final textColor =
               isSelected ? AppColors.surface : AppColors.textMuted;
+          final dateColor =
+              isSelected ? AppColors.surface.withValues(alpha: 0.8) : AppColors.textMuted.withValues(alpha: 0.8);
+
           return InkWell(
             onTap: () => controller.selectWeekdayIndex(index),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              width: 56,
+              padding: const EdgeInsets.symmetric(vertical: 8),
               decoration: BoxDecoration(
                 color: isSelected ? AppColors.primary700 : AppColors.surface,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: isSelected ? AppColors.primary700 : AppColors.border,
                 ),
               ),
-              child: Center(
-                child: IBText(label, context: context)
-                    .label
-                    .color(textColor)
-                    .build(),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IBText(label, context: context)
+                      .label
+                      .color(textColor)
+                      .build(),
+                  const SizedBox(height: 2),
+                  IBText(dayStr, context: context)
+                      .caption
+                      .color(dateColor)
+                      .build(),
+                ],
               ),
             ),
           );
