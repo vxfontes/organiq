@@ -55,6 +55,11 @@ class IBIcon extends StatelessWidget {
   static const IconData errorOutlineRounded = Icons.error_outline_rounded;
   static const IconData editOutlineRounded = Icons.edit_outlined;
   static const IconData refreshRounded = Icons.refresh_rounded;
+  static const IconData calendarMonthRounded = Icons.calendar_month_rounded;
+  static const IconData calendarTodayRounded = Icons.calendar_today_rounded;
+  static const IconData skipNextRounded = Icons.skip_next_rounded;
+  static const IconData calendar = Icons.calendar_today_outlined;
+  static const IconData fire = Icons.local_fire_department_outlined;
 
   @override
   Widget build(BuildContext context) {

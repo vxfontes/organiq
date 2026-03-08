@@ -4,6 +4,8 @@ import 'package:inbota/modules/routines/data/models/routine_output.dart';
 import 'package:inbota/modules/routines/data/models/routine_section.dart';
 import 'package:inbota/presentation/routes/app_navigation.dart';
 import 'package:inbota/presentation/screens/schedule_module/components/create_routine_bottom_sheet.dart';
+import 'package:inbota/presentation/screens/schedule_module/components/routine_detail_bottom_sheet.dart';
+import 'package:inbota/presentation/screens/schedule_module/components/week_overview.dart';
 import 'package:inbota/presentation/screens/schedule_module/controller/schedule_controller.dart';
 import 'package:inbota/shared/components/ib_lib/index.dart';
 import 'package:inbota/shared/state/ib_state.dart';
@@ -42,11 +44,13 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
     return AnimatedBuilder(
       animation: Listenable.merge([
         controller.loading,
+        controller.viewMode,
         controller.routinesByPeriod,
         controller.selectedWeekday,
         controller.selectedWeekOffset,
       ]),
       builder: (context, _) {
+        final mode = controller.viewMode.value;
         final selectedWeekdayIndex = controller.selectedWeekdayIndex;
         final routineSections = controller.routineSections;
 
@@ -59,11 +63,15 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
                 children: [
                   _buildHeader(context),
                   const SizedBox(height: 16),
-                  _buildWeekSelector(),
-                  const SizedBox(height: 20),
-                  _buildWeekdayTabs(selectedWeekdayIndex),
-                  const SizedBox(height: 20),
-                  _buildRoutineList(routineSections),
+                  if (mode == ScheduleViewMode.daily) ...[
+                    _buildWeekSelector(),
+                    const SizedBox(height: 20),
+                    _buildWeekdayTabs(selectedWeekdayIndex),
+                    const SizedBox(height: 20),
+                    _buildRoutineList(routineSections),
+                  ] else ...[
+                    WeekOverview(controller: controller),
+                  ],
                 ],
               ),
             ),
@@ -96,6 +104,22 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
               ).muted.build(),
             ],
           ),
+        ),
+        ValueListenableBuilder<ScheduleViewMode>(
+          valueListenable: controller.viewMode,
+          builder: (context, mode, _) {
+            return IconButton(
+              tooltip: mode == ScheduleViewMode.daily ? 'Ver semana' : 'Ver dia',
+              onPressed: controller.toggleViewMode,
+              icon: IBIcon(
+                mode == ScheduleViewMode.daily
+                    ? IBIcon.calendarMonthRounded
+                    : IBIcon.calendarTodayRounded,
+                color: AppColors.primary700,
+                size: 20,
+              ),
+            );
+          },
         ),
         IconButton(
           tooltip: 'Adicionar rotina',
@@ -238,30 +262,70 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
     final recurrenceLabel = routine.recurrenceTypeLabel;
     final secondaryLabel =
         '$recurrenceLabel • ${routine.weekdaysLabel}'.trim();
+    final conflicts = controller.getConflicts(routine);
+
+    final typeLabel = routine.subflagName != null 
+        ? '${routine.flagName} > ${routine.subflagName}' 
+        : (routine.flagName ?? 'Rotina');
 
     return Dismissible(
       key: Key(routine.id),
-      direction: DismissDirection.endToStart,
+      direction: DismissDirection.horizontal,
       background: Container(
+        alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.only(left: 20),
+        decoration: BoxDecoration(
+          color: AppColors.warning500,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            const IBIcon(
+              IBIcon.skipNextRounded,
+              color: AppColors.surface,
+            ),
+            const SizedBox(width: 8),
+            IBText('Pular', context: null).label.color(AppColors.surface).build(),
+          ],
+        ),
+      ),
+      secondaryBackground: Container(
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
         decoration: BoxDecoration(
           color: AppColors.danger600,
           borderRadius: BorderRadius.circular(16),
         ),
-        child: const IBIcon(
-          IBIcon.deleteOutlineRounded,
-          color: AppColors.surface,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            IBText('Excluir', context: null).label.color(AppColors.surface).build(),
+            const SizedBox(width: 8),
+            const IBIcon(
+              IBIcon.deleteOutlineRounded,
+              color: AppColors.surface,
+            ),
+          ],
         ),
       ),
       confirmDismiss: (direction) async {
+        if (direction == DismissDirection.startToEnd) {
+          final success = await controller.skipToday(routine);
+          if (success) {
+            IBSnackBar.success(context, 'Rotina "${routine.title}" pulada hoje.');
+          }
+          return false; // Don't actually dismiss, the list will refresh
+        }
         return await _showDeleteConfirmation(routine);
       },
-      onDismissed: (_) async {
-        await controller.deleteRoutine(routine.id);
+      onDismissed: (direction) async {
+        if (direction == DismissDirection.endToStart) {
+          await controller.deleteRoutine(routine.id);
+        }
       },
       child: GestureDetector(
-        onTap: () => _openEditRoutine(routine),
+        onTap: () => _openRoutineDetails(routine),
+        onLongPress: () => _openEditRoutine(routine),
         child: IBItemCard(
           title: routine.title,
           secondary: secondaryLabel,
@@ -269,11 +333,27 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
           doneLabel: 'Concluída',
           // TODO: decidir se vai implementar toggle de conclusão de rotina (naquele dia)
           // onToggle: (val) => controller.toggleRoutine(routine, val),
-          typeLabel: routine.flagName ?? 'Rotina',
+          typeLabel: typeLabel,
           typeColor: cardColor,
           typeIcon: IBIcon.repeatRounded,
           timeLabel: routine.timeLabel,
           timeIcon: IBIcon.alarmOutlined,
+          footer: conflicts.isNotEmpty
+              ? Row(
+                  children: [
+                    const IBIcon(
+                      IBIcon.errorOutlineRounded,
+                      color: AppColors.warning500,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 6),
+                    IBText(
+                      'Conflito com: ${conflicts.first.title}',
+                      context: context,
+                    ).caption.color(AppColors.warning600).build(),
+                  ],
+                )
+              : null,
         ),
       ),
     );
@@ -331,6 +411,19 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
       smallBottomSheet: false,
       context: context,
       child: CreateRoutineBottomSheet(
+        controller: controller,
+      ),
+    );
+  }
+
+  Future<void> _openRoutineDetails(RoutineOutput routine) async {
+    if (!mounted) return;
+
+    await IBBottomSheet.show<void>(
+      context: context,
+      isFitWithContent: true,
+      child: RoutineDetailBottomSheet(
+        routine: routine,
         controller: controller,
       ),
     );

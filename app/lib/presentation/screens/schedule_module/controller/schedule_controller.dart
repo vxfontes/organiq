@@ -1,19 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:dartz/dartz.dart';
 
 import 'package:inbota/modules/flags/data/models/flag_output.dart';
 import 'package:inbota/modules/flags/data/models/subflag_output.dart';
 import 'package:inbota/modules/flags/domain/usecases/get_flags_usecase.dart';
 import 'package:inbota/modules/flags/domain/usecases/get_subflags_by_flag_usecase.dart';
+import 'package:inbota/modules/routines/data/models/routine_completion_output.dart';
 import 'package:inbota/modules/routines/data/models/routine_create_input.dart';
+import 'package:inbota/modules/routines/data/models/routine_exception_input.dart';
 import 'package:inbota/modules/routines/data/models/routine_output.dart';
 import 'package:inbota/modules/routines/data/models/routine_section.dart';
+import 'package:inbota/modules/routines/data/models/routine_streak_output.dart';
 import 'package:inbota/modules/routines/data/models/routine_update_input.dart';
 import 'package:inbota/modules/routines/data/models/routine_week_option.dart';
 import 'package:inbota/modules/routines/domain/usecases/complete_routine_usecase.dart';
+import 'package:inbota/modules/routines/domain/usecases/create_routine_exception_usecase.dart';
 import 'package:inbota/modules/routines/domain/usecases/create_routine_usecase.dart';
 import 'package:inbota/modules/routines/domain/usecases/delete_routine_usecase.dart';
+import 'package:inbota/modules/routines/domain/usecases/get_routine_history_usecase.dart';
+import 'package:inbota/modules/routines/domain/usecases/get_routine_streak_usecase.dart';
 import 'package:inbota/modules/routines/domain/usecases/get_routines_by_weekday_usecase.dart';
 import 'package:inbota/modules/routines/domain/usecases/get_routines_usecase.dart';
+import 'package:inbota/modules/routines/domain/usecases/toggle_routine_usecase.dart';
 import 'package:inbota/modules/routines/domain/usecases/uncomplete_routine_usecase.dart';
 import 'package:inbota/modules/routines/domain/usecases/update_routine_usecase.dart';
 import 'package:inbota/shared/errors/failures.dart';
@@ -31,6 +39,10 @@ class ScheduleController implements IBController {
     this._getRoutinesUsecase,
     this._completeRoutineUsecase,
     this._uncompleteRoutineUsecase,
+    this._getRoutineHistoryUsecase,
+    this._getRoutineStreakUsecase,
+    this._toggleRoutineUsecase,
+    this._createRoutineExceptionUsecase,
   );
 
   final GetRoutinesByWeekdayUsecase _getRoutinesByWeekdayUsecase;
@@ -42,8 +54,14 @@ class ScheduleController implements IBController {
   final GetRoutinesUsecase _getRoutinesUsecase;
   final CompleteRoutineUsecase _completeRoutineUsecase;
   final UncompleteRoutineUsecase _uncompleteRoutineUsecase;
+  final GetRoutineHistoryUsecase _getRoutineHistoryUsecase;
+  final GetRoutineStreakUsecase _getRoutineStreakUsecase;
+  final ToggleRoutineUsecase _toggleRoutineUsecase;
+  final CreateRoutineExceptionUsecase _createRoutineExceptionUsecase;
 
   final ValueNotifier<bool> loading = ValueNotifier(false);
+  final ValueNotifier<bool> detailsLoading = ValueNotifier(false);
+  final ValueNotifier<ScheduleViewMode> viewMode = ValueNotifier(ScheduleViewMode.daily);
   final ValueNotifier<String?> error = ValueNotifier(null);
   final ValueNotifier<List<RoutineOutput>> allRoutines = ValueNotifier([]);
   final ValueNotifier<List<RoutineOutput>> routines = ValueNotifier([]);
@@ -54,6 +72,10 @@ class ScheduleController implements IBController {
   final ValueNotifier<List<FlagOutput>> flags = ValueNotifier([]);
   final ValueNotifier<Map<String, List<SubflagOutput>>> subflagsByFlag =
       ValueNotifier({});
+  
+  final ValueNotifier<List<RoutineCompletionOutput>> currentRoutineHistory = ValueNotifier([]);
+  final ValueNotifier<RoutineStreakOutput?> currentRoutineStreak = ValueNotifier(null);
+
   int _loadRevision = 0;
 
   final TextEditingController createTitleController = TextEditingController();
@@ -103,6 +125,8 @@ class ScheduleController implements IBController {
   @override
   void dispose() {
     loading.dispose();
+    detailsLoading.dispose();
+    viewMode.dispose();
     error.dispose();
     allRoutines.dispose();
     routines.dispose();
@@ -111,6 +135,8 @@ class ScheduleController implements IBController {
     selectedWeekOffset.dispose();
     flags.dispose();
     subflagsByFlag.dispose();
+    currentRoutineHistory.dispose();
+    currentRoutineStreak.dispose();
     createSelectedWeekdays.dispose();
     createStartTime.dispose();
     createEndTime.dispose();
@@ -168,6 +194,12 @@ class ScheduleController implements IBController {
   void selectWeekdayIndex(int index) {
     final apiWeekday = (index + 1) % 7;
     selectWeekday(apiWeekday);
+  }
+
+  void toggleViewMode() {
+    viewMode.value = viewMode.value == ScheduleViewMode.daily
+        ? ScheduleViewMode.weekly
+        : ScheduleViewMode.daily;
   }
 
   Future<void> load() async {
@@ -260,6 +292,25 @@ class ScheduleController implements IBController {
     } finally {
       if (revision == _loadRevision) loading.value = false;
     }
+  }
+
+  Future<void> loadRoutineDetails(String id) async {
+    detailsLoading.value = true;
+    currentRoutineHistory.value = [];
+    currentRoutineStreak.value = null;
+
+    final results = await Future.wait([
+      _getRoutineHistoryUsecase.call(id),
+      _getRoutineStreakUsecase.call(id),
+    ]);
+
+    final historyResult = results[0] as Either<Failure, List<RoutineCompletionOutput>>;
+    final streakResult = results[1] as Either<Failure, RoutineStreakOutput>;
+
+    historyResult.fold((_) => null, (data) => currentRoutineHistory.value = data);
+    streakResult.fold((_) => null, (data) => currentRoutineStreak.value = data);
+
+    detailsLoading.value = false;
   }
 
   void _groupRoutinesByPeriod() {
@@ -408,6 +459,33 @@ class ScheduleController implements IBController {
       flagId: createSelectedFlagId.value,
       subflagId: createSelectedSubflagId.value,
     );
+  }
+
+  List<RoutineOutput> getConflicts(RoutineOutput routine) {
+    final conflicts = <RoutineOutput>[];
+    final start = _timeToMinutes(routine.startTime);
+    final end = routine.endTime != null && routine.endTime!.isNotEmpty
+        ? _timeToMinutes(routine.endTime!)
+        : start + 1;
+
+    for (final r in allRoutines.value) {
+      if (r.id == routine.id || !r.isActive) continue;
+
+      final routineWeekdays = r.weekdays.toSet();
+      final hasCommonWeekday =
+          routine.weekdays.any((d) => routineWeekdays.contains(d));
+      if (!hasCommonWeekday) continue;
+
+      final rStart = _timeToMinutes(r.startTime);
+      final rEnd = r.endTime != null && r.endTime!.isNotEmpty
+          ? _timeToMinutes(r.endTime!)
+          : rStart + 1;
+
+      if (start < rEnd && rStart < end) {
+        conflicts.add(r);
+      }
+    }
+    return conflicts;
   }
 
   bool _hasOverlap({
@@ -587,6 +665,50 @@ class ScheduleController implements IBController {
     );
   }
 
+  Future<void> toggleRoutineActive(RoutineOutput routine, bool isActive) async {
+    loading.value = true;
+    final result = await _toggleRoutineUsecase.call(routine.id, isActive);
+    loading.value = false;
+
+    result.fold(
+      (failure) => _setError(failure, fallback: 'Não foi possível alterar o status da rotina.'),
+      (_) {
+        final updated = routine.copyWith(isActive: isActive);
+        allRoutines.value = allRoutines.value.map((r) => r.id == routine.id ? updated : r).toList();
+        routines.value = routines.value.map((r) => r.id == routine.id ? updated : r).toList();
+        _groupRoutinesByPeriod();
+      },
+    );
+  }
+
+  Future<bool> skipToday(RoutineOutput routine) async {
+    if (loading.value) return false;
+    loading.value = true;
+    error.value = null;
+
+    final dateStr = _dateForWeekday(selectedWeekday.value);
+    final result = await _createRoutineExceptionUsecase.call(
+      routine.id,
+      RoutineExceptionInput(
+        exceptionDate: dateStr,
+        action: 'skip',
+      ),
+    );
+
+    loading.value = false;
+
+    return result.fold(
+      (failure) {
+        _setError(failure, fallback: 'Não foi possível pular a rotina hoje.');
+        return false;
+      },
+      (_) {
+        loadRoutinesForWeekday(selectedWeekday.value);
+        return true;
+      },
+    );
+  }
+
   Future<bool> deleteRoutine(String routineId) async {
     final result = await _deleteRoutineUsecase.call(routineId);
 
@@ -654,3 +776,5 @@ class ScheduleController implements IBController {
 }
 
 enum RoutinePeriod { morning, afternoon, night, allDay }
+
+enum ScheduleViewMode { daily, weekly }
