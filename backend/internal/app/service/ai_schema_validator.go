@@ -53,6 +53,16 @@ type NotePayload struct {
 	Content string
 }
 
+type RoutinePayload struct {
+	Weekdays       []int   `json:"weekdays"`
+	StartTime      string  `json:"startTime"`
+	EndTime        *string `json:"endTime,omitempty"`
+	RecurrenceType string  `json:"recurrenceType"`
+	WeekOfMonth    *int    `json:"weekOfMonth,omitempty"`
+	StartsOn       *string `json:"startsOn,omitempty"`
+	EndsOn         *string `json:"endsOn,omitempty"`
+}
+
 type ValidatedOutput struct {
 	Output  AIOutput
 	Payload any
@@ -149,6 +159,13 @@ func normalizeOutputAliases(raw []byte) []byte {
 		case "event":
 			renameKey(payloadMap, "startAt", "start")
 			renameKey(payloadMap, "endAt", "end")
+		case "routine":
+			renameKey(payloadMap, "start_time", "startTime")
+			renameKey(payloadMap, "end_time", "endTime")
+			renameKey(payloadMap, "recurrence_type", "recurrenceType")
+			renameKey(payloadMap, "week_of_month", "weekOfMonth")
+			renameKey(payloadMap, "starts_on", "startsOn")
+			renameKey(payloadMap, "ends_on", "endsOn")
 		}
 	}
 
@@ -284,6 +301,8 @@ func (v *AiSchemaValidator) validatePayload(typ string, payload json.RawMessage)
 		return parseShoppingPayload(payload)
 	case "note":
 		return parseNotePayload(payload)
+	case "routine":
+		return parseRoutinePayload(payload)
 	default:
 		return nil, fmt.Errorf("%w: invalid_type", ErrAISchemaInvalid)
 	}
@@ -396,6 +415,51 @@ func parseNotePayload(payload json.RawMessage) (NotePayload, error) {
 		return NotePayload{}, fmt.Errorf("%w: note_content_required", ErrAISchemaInvalid)
 	}
 	return NotePayload{Content: raw.Content}, nil
+}
+
+func parseRoutinePayload(payload json.RawMessage) (RoutinePayload, error) {
+	var raw struct {
+		Weekdays       []int   `json:"weekdays"`
+		StartTime      string  `json:"startTime"`
+		EndTime        *string `json:"endTime"`
+		RecurrenceType string  `json:"recurrenceType"`
+		WeekOfMonth    *int    `json:"weekOfMonth"`
+		StartsOn       *string `json:"startsOn"`
+		EndsOn         *string `json:"endsOn"`
+	}
+	if err := decodeStrict(payload, &raw); err != nil {
+		return RoutinePayload{}, err
+	}
+
+	if len(raw.Weekdays) == 0 {
+		return RoutinePayload{}, fmt.Errorf("%w: routine_weekdays_required", ErrAISchemaInvalid)
+	}
+	if raw.StartTime == "" {
+		return RoutinePayload{}, fmt.Errorf("%w: routine_start_time_required", ErrAISchemaInvalid)
+	}
+
+	validRecurrenceTypes := map[string]bool{
+		"weekly":       true,
+		"biweekly":     true,
+		"triweekly":    true,
+		"monthly_week": true,
+	}
+	if raw.RecurrenceType == "" {
+		raw.RecurrenceType = "weekly"
+	}
+	if !validRecurrenceTypes[raw.RecurrenceType] {
+		return RoutinePayload{}, fmt.Errorf("%w: routine_invalid_recurrence_type", ErrAISchemaInvalid)
+	}
+
+	return RoutinePayload{
+		Weekdays:       raw.Weekdays,
+		StartTime:      raw.StartTime,
+		EndTime:        raw.EndTime,
+		RecurrenceType: raw.RecurrenceType,
+		WeekOfMonth:    raw.WeekOfMonth,
+		StartsOn:       raw.StartsOn,
+		EndsOn:         raw.EndsOn,
+	}, nil
 }
 
 func decodeStrict(payload json.RawMessage, target any) error {

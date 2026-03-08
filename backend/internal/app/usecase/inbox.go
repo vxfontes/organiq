@@ -25,6 +25,7 @@ type InboxUsecase struct {
 	Events          repository.EventRepository
 	ShoppingLists   repository.ShoppingListRepository
 	ShoppingItems   repository.ShoppingItemRepository
+	Routines        repository.RoutineRepository
 	PromptBuilder   *service.PromptBuilder
 	AIClient        service.AIClient
 	SchemaValidator *service.AiSchemaValidator
@@ -58,6 +59,7 @@ type ConfirmResult struct {
 	Event         *domain.Event
 	ShoppingList  *domain.ShoppingList
 	ShoppingItems []domain.ShoppingItem
+	Routine       *domain.Routine
 }
 
 func (uc *InboxUsecase) CreateInboxItem(ctx context.Context, userID string, source *string, rawText string, rawMediaURL *string) (domain.InboxItem, error) {
@@ -583,6 +585,38 @@ func (uc *InboxUsecase) ConfirmInboxItem(ctx context.Context, userID, id string,
 					items = append(items, created)
 				}
 				result.ShoppingItems = items
+			case domain.AiSuggestionTypeRoutine:
+				if tx.Routines == nil {
+					return ErrDependencyMissing
+				}
+				routinePayload, ok := validated.Payload.(service.RoutinePayload)
+				if !ok {
+					return ErrInvalidPayload
+				}
+				startsOn := time.Now().Format("2006-01-02")
+				if routinePayload.StartsOn != nil {
+					startsOn = *routinePayload.StartsOn
+				}
+				routine := domain.Routine{
+					UserID:            userID,
+					Title:             title,
+					RecurrenceType:    routinePayload.RecurrenceType,
+					Weekdays:          routinePayload.Weekdays,
+					StartTime:         routinePayload.StartTime,
+					EndTime:           routinePayload.EndTime,
+					WeekOfMonth:       routinePayload.WeekOfMonth,
+					StartsOn:          startsOn,
+					EndsOn:            routinePayload.EndsOn,
+					IsActive:          true,
+					FlagID:            flagID,
+					SubflagID:         subflagID,
+					SourceInboxItemID: &item.ID,
+				}
+				created, err := tx.Routines.Create(ctx, routine)
+				if err != nil {
+					return err
+				}
+				result.Routine = &created
 			default:
 				return ErrInvalidType
 			}
@@ -699,6 +733,38 @@ func (uc *InboxUsecase) ConfirmInboxItem(ctx context.Context, userID, id string,
 				items = append(items, created)
 			}
 			result.ShoppingItems = items
+		case domain.AiSuggestionTypeRoutine:
+			if uc.Routines == nil {
+				return ConfirmResult{}, ErrDependencyMissing
+			}
+			routinePayload, ok := validated.Payload.(service.RoutinePayload)
+			if !ok {
+				return ConfirmResult{}, ErrInvalidPayload
+			}
+			startsOn := time.Now().Format("2006-01-02")
+			if routinePayload.StartsOn != nil {
+				startsOn = *routinePayload.StartsOn
+			}
+			routine := domain.Routine{
+				UserID:            userID,
+				Title:             title,
+				RecurrenceType:    routinePayload.RecurrenceType,
+				Weekdays:          routinePayload.Weekdays,
+				StartTime:         routinePayload.StartTime,
+				EndTime:           routinePayload.EndTime,
+				WeekOfMonth:       routinePayload.WeekOfMonth,
+				StartsOn:          startsOn,
+				EndsOn:            routinePayload.EndsOn,
+				IsActive:          true,
+				FlagID:            flagID,
+				SubflagID:         subflagID,
+				SourceInboxItemID: &item.ID,
+			}
+			created, err := uc.Routines.Create(ctx, routine)
+			if err != nil {
+				return ConfirmResult{}, err
+			}
+			result.Routine = &created
 		default:
 			return ConfirmResult{}, ErrInvalidType
 		}

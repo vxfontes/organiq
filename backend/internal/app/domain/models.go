@@ -32,6 +32,7 @@ const (
 	AiSuggestionTypeEvent    AiSuggestionType = "event"
 	AiSuggestionTypeShopping AiSuggestionType = "shopping"
 	AiSuggestionTypeNote     AiSuggestionType = "note"
+	AiSuggestionTypeRoutine  AiSuggestionType = "routine"
 )
 
 type TaskStatus string
@@ -185,4 +186,43 @@ type ShoppingItem struct {
 	SortOrder int
 	CreatedAt time.Time
 	UpdatedAt time.Time
+}
+
+type Routine struct {
+	ID                string
+	UserID            string
+	Title             string
+	Description       *string
+	RecurrenceType    string
+	Weekdays          []int
+	StartTime         string
+	EndTime           *string
+	WeekOfMonth       *int
+	StartsOn          string
+	EndsOn            *string
+	Color             *string
+	IsActive          bool
+	FlagID            *string
+	SubflagID         *string
+	SourceInboxItemID *string
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
+}
+
+type RoutineException struct {
+	ID            string
+	RoutineID     string
+	ExceptionDate string
+	Action        string
+	NewStartTime  *string
+	NewEndTime    *string
+	Reason        *string
+	CreatedAt     time.Time
+}
+
+type RoutineCompletion struct {
+	ID          string
+	RoutineID   string
+	CompletedOn string
+	CompletedAt time.Time
 }

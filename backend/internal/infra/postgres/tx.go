@@ -29,6 +29,7 @@ func (r *TxRunner) WithTx(ctx context.Context, fn func(tx repository.TxRepositor
 		Events:        NewEventRepositoryTx(tx),
 		ShoppingLists: NewShoppingListRepositoryTx(tx),
 		ShoppingItems: NewShoppingItemRepositoryTx(tx),
+		Routines:      NewRoutineRepositoryTx(tx),
 	}
 
 	if err := fn(repos); err != nil {

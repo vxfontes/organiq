@@ -95,6 +95,22 @@ func NewRouter(cfg config.Config, log *slog.Logger, authHandler *handler.AuthHan
 			authGroup.PATCH("/shopping-items/:id", apiHandlers.ShoppingItems.Update)
 			authGroup.DELETE("/shopping-items/:id", apiHandlers.ShoppingItems.Delete)
 		}
+		if apiHandlers.Routines != nil {
+			authGroup.GET("/routines", apiHandlers.Routines.List)
+			authGroup.GET("/routines/day/:weekday", apiHandlers.Routines.ListByWeekday)
+			authGroup.GET("/routines/today/summary", apiHandlers.Routines.GetTodaySummary)
+			authGroup.GET("/routines/:id", apiHandlers.Routines.Get)
+			authGroup.POST("/routines", apiHandlers.Routines.Create)
+			authGroup.PATCH("/routines/:id", apiHandlers.Routines.Update)
+			authGroup.DELETE("/routines/:id", apiHandlers.Routines.Delete)
+			authGroup.PATCH("/routines/:id/toggle", apiHandlers.Routines.Toggle)
+			authGroup.POST("/routines/:id/complete", apiHandlers.Routines.Complete)
+			authGroup.DELETE("/routines/:id/complete/:date", apiHandlers.Routines.Uncomplete)
+			authGroup.GET("/routines/:id/history", apiHandlers.Routines.GetHistory)
+			authGroup.GET("/routines/:id/streak", apiHandlers.Routines.GetStreak)
+			authGroup.POST("/routines/:id/exceptions", apiHandlers.Routines.CreateException)
+			authGroup.DELETE("/routines/:id/exceptions/:date", apiHandlers.Routines.DeleteException)
+		}
 	}
 
 	return engine

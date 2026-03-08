@@ -1,28 +1,28 @@
 basePath: /
 definitions:
-  dto.AgendaResponse:
+  inbota_backend_internal_http_dto.AgendaResponse:
     properties:
       events:
         items:
-          $ref: '#/definitions/dto.EventResponse'
+          $ref: '#/definitions/inbota_backend_internal_http_dto.EventResponse'
         type: array
       reminders:
         items:
-          $ref: '#/definitions/dto.ReminderResponse'
+          $ref: '#/definitions/inbota_backend_internal_http_dto.ReminderResponse'
         type: array
       tasks:
         items:
-          $ref: '#/definitions/dto.TaskResponse'
+          $ref: '#/definitions/inbota_backend_internal_http_dto.TaskResponse'
         type: array
     type: object
-  dto.AiSuggestionResponse:
+  inbota_backend_internal_http_dto.AiSuggestionResponse:
     properties:
       confidence:
         type: number
       createdAt:
         type: string
       flag:
-        $ref: '#/definitions/dto.FlagObject'
+        $ref: '#/definitions/inbota_backend_internal_http_dto.FlagObject'
       id:
         type: string
       needsReview:
@@ -30,13 +30,13 @@ definitions:
       payload:
         type: object
       subflag:
-        $ref: '#/definitions/dto.SubflagObject'
+        $ref: '#/definitions/inbota_backend_internal_http_dto.SubflagObject'
       title:
         type: string
       type:
         type: string
     type: object
-  dto.AuthResponse:
+  inbota_backend_internal_http_dto.AuthResponse:
     properties:
       token:
         type: string
@@ -54,7 +54,12 @@ definitions:
             type: string
         type: object
     type: object
-  dto.ConfirmInboxItemRequest:
+  inbota_backend_internal_http_dto.CompleteRoutineRequest:
+    properties:
+      date:
+        type: string
+    type: object
+  inbota_backend_internal_http_dto.ConfirmInboxItemRequest:
     properties:
       flagId:
         type: string
@@ -67,39 +72,41 @@ definitions:
       type:
         type: string
     type: object
-  dto.ConfirmInboxItemResponse:
+  inbota_backend_internal_http_dto.ConfirmInboxItemResponse:
     properties:
       event:
-        $ref: '#/definitions/dto.EventResponse'
+        $ref: '#/definitions/inbota_backend_internal_http_dto.EventResponse'
       reminder:
-        $ref: '#/definitions/dto.ReminderResponse'
+        $ref: '#/definitions/inbota_backend_internal_http_dto.ReminderResponse'
+      routine:
+        $ref: '#/definitions/inbota_backend_internal_http_dto.RoutineResponse'
       shoppingItems:
         items:
-          $ref: '#/definitions/dto.ShoppingItemResponse'
+          $ref: '#/definitions/inbota_backend_internal_http_dto.ShoppingItemResponse'
         type: array
       shoppingList:
-        $ref: '#/definitions/dto.ShoppingListResponse'
+        $ref: '#/definitions/inbota_backend_internal_http_dto.ShoppingListResponse'
       task:
-        $ref: '#/definitions/dto.TaskResponse'
+        $ref: '#/definitions/inbota_backend_internal_http_dto.TaskResponse'
       type:
         type: string
     type: object
-  dto.ContextRuleResponse:
+  inbota_backend_internal_http_dto.ContextRuleResponse:
     properties:
       createdAt:
         type: string
       flag:
-        $ref: '#/definitions/dto.FlagObject'
+        $ref: '#/definitions/inbota_backend_internal_http_dto.FlagObject'
       id:
         type: string
       keyword:
         type: string
       subflag:
-        $ref: '#/definitions/dto.SubflagObject'
+        $ref: '#/definitions/inbota_backend_internal_http_dto.SubflagObject'
       updatedAt:
         type: string
     type: object
-  dto.CreateContextRuleRequest:
+  inbota_backend_internal_http_dto.CreateContextRuleRequest:
     properties:
       flagId:
         type: string
@@ -108,7 +115,7 @@ definitions:
       subflagId:
         type: string
     type: object
-  dto.CreateEventRequest:
+  inbota_backend_internal_http_dto.CreateEventRequest:
     properties:
       allDay:
         type: boolean
@@ -125,7 +132,7 @@ definitions:
       title:
         type: string
     type: object
-  dto.CreateFlagRequest:
+  inbota_backend_internal_http_dto.CreateFlagRequest:
     properties:
       color:
         type: string
@@ -134,7 +141,7 @@ definitions:
       sortOrder:
         type: integer
     type: object
-  dto.CreateInboxItemRequest:
+  inbota_backend_internal_http_dto.CreateInboxItemRequest:
     properties:
       rawMediaUrl:
         type: string
@@ -143,7 +150,7 @@ definitions:
       source:
         type: string
     type: object
-  dto.CreateReminderRequest:
+  inbota_backend_internal_http_dto.CreateReminderRequest:
     properties:
       flagId:
         type: string
@@ -156,7 +163,49 @@ definitions:
       title:
         type: string
     type: object
-  dto.CreateShoppingItemRequest:
+  inbota_backend_internal_http_dto.CreateRoutineExceptionRequest:
+    properties:
+      action:
+        type: string
+      exceptionDate:
+        type: string
+      newEndTime:
+        type: string
+      newStartTime:
+        type: string
+      reason:
+        type: string
+    type: object
+  inbota_backend_internal_http_dto.CreateRoutineRequest:
+    properties:
+      color:
+        type: string
+      description:
+        type: string
+      endTime:
+        type: string
+      endsOn:
+        type: string
+      flagId:
+        type: string
+      recurrenceType:
+        type: string
+      startTime:
+        type: string
+      startsOn:
+        type: string
+      subflagId:
+        type: string
+      title:
+        type: string
+      weekOfMonth:
+        type: integer
+      weekdays:
+        items:
+          type: integer
+        type: array
+    type: object
+  inbota_backend_internal_http_dto.CreateShoppingItemRequest:
     properties:
       checked:
         type: boolean
@@ -167,21 +216,21 @@ definitions:
       title:
         type: string
     type: object
-  dto.CreateShoppingListRequest:
+  inbota_backend_internal_http_dto.CreateShoppingListRequest:
     properties:
       status:
         type: string
       title:
         type: string
     type: object
-  dto.CreateSubflagRequest:
+  inbota_backend_internal_http_dto.CreateSubflagRequest:
     properties:
       name:
         type: string
       sortOrder:
         type: integer
     type: object
-  dto.CreateTaskRequest:
+  inbota_backend_internal_http_dto.CreateTaskRequest:
     properties:
       description:
         type: string
@@ -196,14 +245,14 @@ definitions:
       title:
         type: string
     type: object
-  dto.ErrorResponse:
+  inbota_backend_internal_http_dto.ErrorResponse:
     properties:
       error:
         type: string
       requestId:
         type: string
     type: object
-  dto.EventResponse:
+  inbota_backend_internal_http_dto.EventResponse:
     properties:
       allDay:
         type: boolean
@@ -212,23 +261,23 @@ definitions:
       endAt:
         type: string
       flag:
-        $ref: '#/definitions/dto.FlagObject'
+        $ref: '#/definitions/inbota_backend_internal_http_dto.FlagObject'
       id:
         type: string
       location:
         type: string
       sourceInboxItem:
-        $ref: '#/definitions/dto.InboxItemObject'
+        $ref: '#/definitions/inbota_backend_internal_http_dto.InboxItemObject'
       startAt:
         type: string
       subflag:
-        $ref: '#/definitions/dto.SubflagObject'
+        $ref: '#/definitions/inbota_backend_internal_http_dto.SubflagObject'
       title:
         type: string
       updatedAt:
         type: string
     type: object
-  dto.FlagObject:
+  inbota_backend_internal_http_dto.FlagObject:
     properties:
       color:
         type: string
@@ -237,7 +286,7 @@ definitions:
       name:
         type: string
     type: object
-  dto.FlagResponse:
+  inbota_backend_internal_http_dto.FlagResponse:
     properties:
       color:
         type: string
@@ -252,7 +301,7 @@ definitions:
       updatedAt:
         type: string
     type: object
-  dto.InboxItemObject:
+  inbota_backend_internal_http_dto.InboxItemObject:
     properties:
       createdAt:
         type: string
@@ -271,7 +320,7 @@ definitions:
       updatedAt:
         type: string
     type: object
-  dto.InboxItemResponse:
+  inbota_backend_internal_http_dto.InboxItemResponse:
     properties:
       createdAt:
         type: string
@@ -288,113 +337,203 @@ definitions:
       status:
         type: string
       suggestion:
-        $ref: '#/definitions/dto.AiSuggestionResponse'
+        $ref: '#/definitions/inbota_backend_internal_http_dto.AiSuggestionResponse'
       updatedAt:
         type: string
     type: object
-  dto.ListContextRulesResponse:
+  inbota_backend_internal_http_dto.ListContextRulesResponse:
     properties:
       items:
         items:
-          $ref: '#/definitions/dto.ContextRuleResponse'
+          $ref: '#/definitions/inbota_backend_internal_http_dto.ContextRuleResponse'
         type: array
       nextCursor:
         type: string
     type: object
-  dto.ListEventsResponse:
+  inbota_backend_internal_http_dto.ListEventsResponse:
     properties:
       items:
         items:
-          $ref: '#/definitions/dto.EventResponse'
+          $ref: '#/definitions/inbota_backend_internal_http_dto.EventResponse'
         type: array
       nextCursor:
         type: string
     type: object
-  dto.ListFlagsResponse:
+  inbota_backend_internal_http_dto.ListFlagsResponse:
     properties:
       items:
         items:
-          $ref: '#/definitions/dto.FlagResponse'
+          $ref: '#/definitions/inbota_backend_internal_http_dto.FlagResponse'
         type: array
       nextCursor:
         type: string
     type: object
-  dto.ListInboxItemsResponse:
+  inbota_backend_internal_http_dto.ListInboxItemsResponse:
     properties:
       items:
         items:
-          $ref: '#/definitions/dto.InboxItemResponse'
+          $ref: '#/definitions/inbota_backend_internal_http_dto.InboxItemResponse'
         type: array
       nextCursor:
         type: string
     type: object
-  dto.ListRemindersResponse:
+  inbota_backend_internal_http_dto.ListRemindersResponse:
     properties:
       items:
         items:
-          $ref: '#/definitions/dto.ReminderResponse'
+          $ref: '#/definitions/inbota_backend_internal_http_dto.ReminderResponse'
         type: array
       nextCursor:
         type: string
     type: object
-  dto.ListShoppingItemsResponse:
+  inbota_backend_internal_http_dto.ListRoutinesResponse:
     properties:
       items:
         items:
-          $ref: '#/definitions/dto.ShoppingItemResponse'
+          $ref: '#/definitions/inbota_backend_internal_http_dto.RoutineResponse'
         type: array
       nextCursor:
         type: string
     type: object
-  dto.ListShoppingListsResponse:
+  inbota_backend_internal_http_dto.ListShoppingItemsResponse:
     properties:
       items:
         items:
-          $ref: '#/definitions/dto.ShoppingListResponse'
+          $ref: '#/definitions/inbota_backend_internal_http_dto.ShoppingItemResponse'
         type: array
       nextCursor:
         type: string
     type: object
-  dto.ListSubflagsResponse:
+  inbota_backend_internal_http_dto.ListShoppingListsResponse:
     properties:
       items:
         items:
-          $ref: '#/definitions/dto.SubflagResponse'
+          $ref: '#/definitions/inbota_backend_internal_http_dto.ShoppingListResponse'
         type: array
       nextCursor:
         type: string
     type: object
-  dto.ListTasksResponse:
+  inbota_backend_internal_http_dto.ListSubflagsResponse:
     properties:
       items:
         items:
-          $ref: '#/definitions/dto.TaskResponse'
+          $ref: '#/definitions/inbota_backend_internal_http_dto.SubflagResponse'
         type: array
       nextCursor:
         type: string
     type: object
-  dto.ReminderResponse:
+  inbota_backend_internal_http_dto.ListTasksResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/inbota_backend_internal_http_dto.TaskResponse'
+        type: array
+      nextCursor:
+        type: string
+    type: object
+  inbota_backend_internal_http_dto.ReminderResponse:
     properties:
       createdAt:
         type: string
       flag:
-        $ref: '#/definitions/dto.FlagObject'
+        $ref: '#/definitions/inbota_backend_internal_http_dto.FlagObject'
       id:
         type: string
       remindAt:
         type: string
       sourceInboxItem:
-        $ref: '#/definitions/dto.InboxItemObject'
+        $ref: '#/definitions/inbota_backend_internal_http_dto.InboxItemObject'
       status:
         type: string
       subflag:
-        $ref: '#/definitions/dto.SubflagObject'
+        $ref: '#/definitions/inbota_backend_internal_http_dto.SubflagObject'
       title:
         type: string
       updatedAt:
         type: string
     type: object
-  dto.ShoppingItemResponse:
+  inbota_backend_internal_http_dto.RoutineCompletionResponse:
+    properties:
+      completedAt:
+        type: string
+      completedOn:
+        type: string
+      id:
+        type: string
+      routineId:
+        type: string
+    type: object
+  inbota_backend_internal_http_dto.RoutineExceptionResponse:
+    properties:
+      action:
+        type: string
+      createdAt:
+        type: string
+      exceptionDate:
+        type: string
+      id:
+        type: string
+      newEndTime:
+        type: string
+      newStartTime:
+        type: string
+      reason:
+        type: string
+      routineId:
+        type: string
+    type: object
+  inbota_backend_internal_http_dto.RoutineResponse:
+    properties:
+      color:
+        type: string
+      createdAt:
+        type: string
+      description:
+        type: string
+      endTime:
+        type: string
+      endsOn:
+        type: string
+      flag:
+        $ref: '#/definitions/inbota_backend_internal_http_dto.FlagObject'
+      id:
+        type: string
+      isActive:
+        type: boolean
+      recurrenceType:
+        type: string
+      startTime:
+        type: string
+      startsOn:
+        type: string
+      subflag:
+        $ref: '#/definitions/inbota_backend_internal_http_dto.SubflagObject'
+      title:
+        type: string
+      updatedAt:
+        type: string
+      weekOfMonth:
+        type: integer
+      weekdays:
+        items:
+          type: integer
+        type: array
+    type: object
+  inbota_backend_internal_http_dto.RoutineStreakResponse:
+    properties:
+      currentStreak:
+        type: integer
+      totalCompletions:
+        type: integer
+    type: object
+  inbota_backend_internal_http_dto.RoutineTodaySummaryResponse:
+    properties:
+      completed:
+        type: integer
+      total:
+        type: integer
+    type: object
+  inbota_backend_internal_http_dto.ShoppingItemResponse:
     properties:
       checked:
         type: boolean
@@ -403,7 +542,7 @@ definitions:
       id:
         type: string
       list:
-        $ref: '#/definitions/dto.ShoppingListObject'
+        $ref: '#/definitions/inbota_backend_internal_http_dto.ShoppingListObject'
       quantity:
         type: string
       sortOrder:
@@ -413,7 +552,7 @@ definitions:
       updatedAt:
         type: string
     type: object
-  dto.ShoppingListObject:
+  inbota_backend_internal_http_dto.ShoppingListObject:
     properties:
       id:
         type: string
@@ -422,14 +561,14 @@ definitions:
       title:
         type: string
     type: object
-  dto.ShoppingListResponse:
+  inbota_backend_internal_http_dto.ShoppingListResponse:
     properties:
       createdAt:
         type: string
       id:
         type: string
       sourceInboxItem:
-        $ref: '#/definitions/dto.InboxItemObject'
+        $ref: '#/definitions/inbota_backend_internal_http_dto.InboxItemObject'
       status:
         type: string
       title:
@@ -437,7 +576,7 @@ definitions:
       updatedAt:
         type: string
     type: object
-  dto.SubflagObject:
+  inbota_backend_internal_http_dto.SubflagObject:
     properties:
       color:
         type: string
@@ -446,14 +585,14 @@ definitions:
       name:
         type: string
     type: object
-  dto.SubflagResponse:
+  inbota_backend_internal_http_dto.SubflagResponse:
     properties:
       color:
         type: string
       createdAt:
         type: string
       flag:
-        $ref: '#/definitions/dto.FlagObject'
+        $ref: '#/definitions/inbota_backend_internal_http_dto.FlagObject'
       id:
         type: string
       name:
@@ -463,7 +602,7 @@ definitions:
       updatedAt:
         type: string
     type: object
-  dto.TaskResponse:
+  inbota_backend_internal_http_dto.TaskResponse:
     properties:
       createdAt:
         type: string
@@ -472,21 +611,26 @@ definitions:
       dueAt:
         type: string
       flag:
-        $ref: '#/definitions/dto.FlagObject'
+        $ref: '#/definitions/inbota_backend_internal_http_dto.FlagObject'
       id:
         type: string
       sourceInboxItem:
-        $ref: '#/definitions/dto.InboxItemObject'
+        $ref: '#/definitions/inbota_backend_internal_http_dto.InboxItemObject'
       status:
         type: string
       subflag:
-        $ref: '#/definitions/dto.SubflagObject'
+        $ref: '#/definitions/inbota_backend_internal_http_dto.SubflagObject'
       title:
         type: string
       updatedAt:
         type: string
     type: object
-  dto.UpdateContextRuleRequest:
+  inbota_backend_internal_http_dto.ToggleRoutineRequest:
+    properties:
+      isActive:
+        type: boolean
+    type: object
+  inbota_backend_internal_http_dto.UpdateContextRuleRequest:
     properties:
       flagId:
         type: string
@@ -495,7 +639,7 @@ definitions:
       subflagId:
         type: string
     type: object
-  dto.UpdateEventRequest:
+  inbota_backend_internal_http_dto.UpdateEventRequest:
     properties:
       allDay:
         type: boolean
@@ -512,7 +656,7 @@ definitions:
       title:
         type: string
     type: object
-  dto.UpdateFlagRequest:
+  inbota_backend_internal_http_dto.UpdateFlagRequest:
     properties:
       color:
         type: string
@@ -521,7 +665,7 @@ definitions:
       sortOrder:
         type: integer
     type: object
-  dto.UpdateReminderRequest:
+  inbota_backend_internal_http_dto.UpdateReminderRequest:
     properties:
       flagId:
         type: string
@@ -534,7 +678,36 @@ definitions:
       title:
         type: string
     type: object
-  dto.UpdateShoppingItemRequest:
+  inbota_backend_internal_http_dto.UpdateRoutineRequest:
+    properties:
+      color:
+        type: string
+      description:
+        type: string
+      endTime:
+        type: string
+      endsOn:
+        type: string
+      flagId:
+        type: string
+      recurrenceType:
+        type: string
+      startTime:
+        type: string
+      startsOn:
+        type: string
+      subflagId:
+        type: string
+      title:
+        type: string
+      weekOfMonth:
+        type: integer
+      weekdays:
+        items:
+          type: integer
+        type: array
+    type: object
+  inbota_backend_internal_http_dto.UpdateShoppingItemRequest:
     properties:
       checked:
         type: boolean
@@ -545,21 +718,21 @@ definitions:
       title:
         type: string
     type: object
-  dto.UpdateShoppingListRequest:
+  inbota_backend_internal_http_dto.UpdateShoppingListRequest:
     properties:
       status:
         type: string
       title:
         type: string
     type: object
-  dto.UpdateSubflagRequest:
+  inbota_backend_internal_http_dto.UpdateSubflagRequest:
     properties:
       name:
         type: string
       sortOrder:
         type: integer
     type: object
-  dto.UpdateTaskRequest:
+  inbota_backend_internal_http_dto.UpdateTaskRequest:
     properties:
       description:
         type: string
@@ -574,7 +747,7 @@ definitions:
       title:
         type: string
     type: object
-  handler.AuthRequest:
+  internal_http_handler.AuthRequest:
     properties:
       displayName:
         type: string
@@ -593,7 +766,7 @@ definitions:
     - password
     - timezone
     type: object
-  handler.AuthResponse:
+  internal_http_handler.AuthResponse:
     properties:
       token:
         type: string
@@ -611,14 +784,14 @@ definitions:
             type: string
         type: object
     type: object
-  handler.HealthResponse:
+  internal_http_handler.HealthResponse:
     properties:
       status:
         type: string
       time:
         type: string
     type: object
-  handler.LoginRequest:
+  internal_http_handler.LoginRequest:
     properties:
       email:
         type: string
@@ -642,7 +815,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.HealthResponse'
+            $ref: '#/definitions/internal_http_handler.HealthResponse'
       summary: Healthcheck (liveness)
   /readyz:
     get:
@@ -652,11 +825,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.HealthResponse'
+            $ref: '#/definitions/internal_http_handler.HealthResponse'
         "503":
           description: Service Unavailable
           schema:
-            $ref: '#/definitions/handler.HealthResponse'
+            $ref: '#/definitions/internal_http_handler.HealthResponse'
       summary: Readiness
   /v1/agenda:
     get:
@@ -671,15 +844,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.AgendaResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.AgendaResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Listar agenda consolidada
@@ -695,14 +868,14 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/handler.LoginRequest'
+          $ref: '#/definitions/internal_http_handler.LoginRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.AuthResponse'
+            $ref: '#/definitions/internal_http_handler.AuthResponse'
         "401":
           description: Unauthorized
           schema:
@@ -722,14 +895,14 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/handler.AuthRequest'
+          $ref: '#/definitions/internal_http_handler.AuthRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/handler.AuthResponse'
+            $ref: '#/definitions/internal_http_handler.AuthResponse'
         "400":
           description: Bad Request
           schema:
@@ -756,15 +929,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.ListContextRulesResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ListContextRulesResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Listar regras de contexto
@@ -779,22 +952,22 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/dto.CreateContextRuleRequest'
+          $ref: '#/definitions/inbota_backend_internal_http_dto.CreateContextRuleRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/dto.ContextRuleResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ContextRuleResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Criar regra de contexto
@@ -814,11 +987,11 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Remover regra de contexto
@@ -838,26 +1011,26 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/dto.UpdateContextRuleRequest'
+          $ref: '#/definitions/inbota_backend_internal_http_dto.UpdateContextRuleRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.ContextRuleResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ContextRuleResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Atualizar regra de contexto
@@ -880,15 +1053,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.ListEventsResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ListEventsResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Listar eventos
@@ -903,22 +1076,22 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/dto.CreateEventRequest'
+          $ref: '#/definitions/inbota_backend_internal_http_dto.CreateEventRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/dto.EventResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.EventResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Criar evento
@@ -938,15 +1111,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Excluir evento
@@ -966,26 +1139,26 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/dto.UpdateEventRequest'
+          $ref: '#/definitions/inbota_backend_internal_http_dto.UpdateEventRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.EventResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.EventResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Atualizar evento
@@ -1008,15 +1181,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.ListFlagsResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ListFlagsResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Listar flags
@@ -1031,22 +1204,22 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/dto.CreateFlagRequest'
+          $ref: '#/definitions/inbota_backend_internal_http_dto.CreateFlagRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/dto.FlagResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.FlagResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Criar flag
@@ -1066,11 +1239,11 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Remover flag
@@ -1090,26 +1263,26 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/dto.UpdateFlagRequest'
+          $ref: '#/definitions/inbota_backend_internal_http_dto.UpdateFlagRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.FlagResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.FlagResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Atualizar flag
@@ -1137,15 +1310,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.ListSubflagsResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ListSubflagsResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Listar subflags por flag
@@ -1165,22 +1338,22 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/dto.CreateSubflagRequest'
+          $ref: '#/definitions/inbota_backend_internal_http_dto.CreateSubflagRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/dto.SubflagResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.SubflagResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Criar subflag
@@ -1211,15 +1384,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.ListInboxItemsResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ListInboxItemsResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Listar inbox items
@@ -1234,22 +1407,22 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/dto.CreateInboxItemRequest'
+          $ref: '#/definitions/inbota_backend_internal_http_dto.CreateInboxItemRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/dto.InboxItemResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.InboxItemResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Criar inbox item
@@ -1269,15 +1442,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.InboxItemResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.InboxItemResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Obter inbox item
@@ -1298,26 +1471,26 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/dto.ConfirmInboxItemRequest'
+          $ref: '#/definitions/inbota_backend_internal_http_dto.ConfirmInboxItemRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.ConfirmInboxItemResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ConfirmInboxItemResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Confirmar inbox item
@@ -1337,19 +1510,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.InboxItemResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.InboxItemResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Descartar inbox item
@@ -1369,19 +1542,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.InboxItemResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.InboxItemResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Reprocessar inbox item
@@ -1395,11 +1568,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.AuthResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.AuthResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Obter perfil do usuario logado
@@ -1422,15 +1595,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.ListRemindersResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ListRemindersResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Listar lembretes
@@ -1445,22 +1618,22 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/dto.CreateReminderRequest'
+          $ref: '#/definitions/inbota_backend_internal_http_dto.CreateReminderRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/dto.ReminderResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ReminderResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Criar lembrete
@@ -1480,15 +1653,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Excluir lembrete
@@ -1508,31 +1681,485 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/dto.UpdateReminderRequest'
+          $ref: '#/definitions/inbota_backend_internal_http_dto.UpdateReminderRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.ReminderResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ReminderResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Atualizar lembrete
       tags:
       - Reminders
+  /v1/routines:
+    get:
+      parameters:
+      - description: Limite
+        in: query
+        name: limit
+        type: integer
+      - description: Cursor
+        in: query
+        name: cursor
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ListRoutinesResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Listar rotinas
+      tags:
+      - Routines
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Routine payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/inbota_backend_internal_http_dto.CreateRoutineRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.RoutineResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Criar rotina
+      tags:
+      - Routines
+  /v1/routines/{id}:
+    delete:
+      parameters:
+      - description: Routine ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Excluir rotina
+      tags:
+      - Routines
+    get:
+      parameters:
+      - description: Routine ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.RoutineResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Obter rotina
+      tags:
+      - Routines
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Routine ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Routine payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/inbota_backend_internal_http_dto.UpdateRoutineRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.RoutineResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Atualizar rotina
+      tags:
+      - Routines
+  /v1/routines/{id}/complete:
+    post:
+      parameters:
+      - description: Routine ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 'Data (opcional, padrão: hoje)'
+        in: body
+        name: body
+        schema:
+          $ref: '#/definitions/inbota_backend_internal_http_dto.CompleteRoutineRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.RoutineCompletionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Marcar rotina como concluída
+      tags:
+      - Routines
+  /v1/routines/{id}/complete/{date}:
+    delete:
+      parameters:
+      - description: Routine ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Data da conclusão
+        in: path
+        name: date
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Desmarcar conclusão de rotina
+      tags:
+      - Routines
+  /v1/routines/{id}/exceptions:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Routine ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Exception payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/inbota_backend_internal_http_dto.CreateRoutineExceptionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.RoutineExceptionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Criar exceção de rotina
+      tags:
+      - Routines
+  /v1/routines/{id}/exceptions/{date}:
+    delete:
+      parameters:
+      - description: Routine ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Data da exceção
+        in: path
+        name: date
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Cancelar exceção de rotina
+      tags:
+      - Routines
+  /v1/routines/{id}/history:
+    get:
+      parameters:
+      - description: Routine ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/inbota_backend_internal_http_dto.RoutineCompletionResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Obter histórico de conclusões
+      tags:
+      - Routines
+  /v1/routines/{id}/streak:
+    get:
+      parameters:
+      - description: Routine ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.RoutineStreakResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Obter streak da rotina
+      tags:
+      - Routines
+  /v1/routines/{id}/toggle:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Routine ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Toggle payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/inbota_backend_internal_http_dto.ToggleRoutineRequest'
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Ativar/desativar rotina
+      tags:
+      - Routines
+  /v1/routines/day/{weekday}:
+    get:
+      parameters:
+      - description: Dia da semana (0-6, 0=domingo)
+        in: path
+        name: weekday
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ListRoutinesResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Listar rotinas por dia da semana
+      tags:
+      - Routines
+  /v1/routines/today/summary:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.RoutineTodaySummaryResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Resumo do dia
+      tags:
+      - Routines
   /v1/shopping-items/{id}:
     delete:
       parameters:
@@ -1547,15 +2174,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Excluir item de compra
@@ -1575,26 +2202,26 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/dto.UpdateShoppingItemRequest'
+          $ref: '#/definitions/inbota_backend_internal_http_dto.UpdateShoppingItemRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.ShoppingItemResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ShoppingItemResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Atualizar item de compra
@@ -1617,15 +2244,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.ListShoppingListsResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ListShoppingListsResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Listar listas de compras
@@ -1640,22 +2267,22 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/dto.CreateShoppingListRequest'
+          $ref: '#/definitions/inbota_backend_internal_http_dto.CreateShoppingListRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/dto.ShoppingListResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ShoppingListResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Criar lista de compras
@@ -1675,15 +2302,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Excluir lista de compras
@@ -1703,26 +2330,26 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/dto.UpdateShoppingListRequest'
+          $ref: '#/definitions/inbota_backend_internal_http_dto.UpdateShoppingListRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.ShoppingListResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ShoppingListResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Atualizar lista de compras
@@ -1750,15 +2377,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.ListShoppingItemsResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ListShoppingItemsResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Listar itens da lista
@@ -1778,22 +2405,22 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/dto.CreateShoppingItemRequest'
+          $ref: '#/definitions/inbota_backend_internal_http_dto.CreateShoppingItemRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/dto.ShoppingItemResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ShoppingItemResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Criar item de compra
@@ -1813,11 +2440,11 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Remover subflag
@@ -1837,26 +2464,26 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/dto.UpdateSubflagRequest'
+          $ref: '#/definitions/inbota_backend_internal_http_dto.UpdateSubflagRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.SubflagResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.SubflagResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Atualizar subflag
@@ -1879,15 +2506,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.ListTasksResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ListTasksResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Listar tarefas
@@ -1902,22 +2529,22 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/dto.CreateTaskRequest'
+          $ref: '#/definitions/inbota_backend_internal_http_dto.CreateTaskRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/dto.TaskResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.TaskResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Criar tarefa
@@ -1937,15 +2564,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Excluir tarefa
@@ -1965,26 +2592,26 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/dto.UpdateTaskRequest'
+          $ref: '#/definitions/inbota_backend_internal_http_dto.UpdateTaskRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.TaskResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.TaskResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/dto.ErrorResponse'
+            $ref: '#/definitions/inbota_backend_internal_http_dto.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Atualizar tarefa

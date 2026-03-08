@@ -25,7 +25,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.HealthResponse"
+                            "$ref": "#/definitions/internal_http_handler.HealthResponse"
                         }
                     }
                 }
@@ -41,13 +41,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.HealthResponse"
+                            "$ref": "#/definitions/internal_http_handler.HealthResponse"
                         }
                     },
                     "503": {
                         "description": "Service Unavailable",
                         "schema": {
-                            "$ref": "#/definitions/handler.HealthResponse"
+                            "$ref": "#/definitions/internal_http_handler.HealthResponse"
                         }
                     }
                 }
@@ -79,19 +79,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.AgendaResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.AgendaResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -116,7 +116,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.LoginRequest"
+                            "$ref": "#/definitions/internal_http_handler.LoginRequest"
                         }
                     }
                 ],
@@ -124,7 +124,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.AuthResponse"
+                            "$ref": "#/definitions/internal_http_handler.AuthResponse"
                         }
                     },
                     "401": {
@@ -158,7 +158,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.AuthRequest"
+                            "$ref": "#/definitions/internal_http_handler.AuthRequest"
                         }
                     }
                 ],
@@ -166,7 +166,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/handler.AuthResponse"
+                            "$ref": "#/definitions/internal_http_handler.AuthResponse"
                         }
                     },
                     "400": {
@@ -213,19 +213,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ListContextRulesResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ListContextRulesResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -253,7 +253,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.CreateContextRuleRequest"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.CreateContextRuleRequest"
                         }
                     }
                 ],
@@ -261,19 +261,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/dto.ContextRuleResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ContextRuleResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -306,13 +306,13 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -347,7 +347,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UpdateContextRuleRequest"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.UpdateContextRuleRequest"
                         }
                     }
                 ],
@@ -355,25 +355,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ContextRuleResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ContextRuleResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -411,19 +411,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ListEventsResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ListEventsResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -451,7 +451,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.CreateEventRequest"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.CreateEventRequest"
                         }
                     }
                 ],
@@ -459,19 +459,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/dto.EventResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.EventResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -504,19 +504,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -551,7 +551,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UpdateEventRequest"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.UpdateEventRequest"
                         }
                     }
                 ],
@@ -559,25 +559,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.EventResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.EventResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -615,19 +615,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ListFlagsResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ListFlagsResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -655,7 +655,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.CreateFlagRequest"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.CreateFlagRequest"
                         }
                     }
                 ],
@@ -663,19 +663,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/dto.FlagResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.FlagResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -708,13 +708,13 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -749,7 +749,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UpdateFlagRequest"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.UpdateFlagRequest"
                         }
                     }
                 ],
@@ -757,25 +757,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.FlagResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.FlagResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -820,19 +820,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ListSubflagsResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ListSubflagsResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -867,7 +867,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.CreateSubflagRequest"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.CreateSubflagRequest"
                         }
                     }
                 ],
@@ -875,19 +875,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/dto.SubflagResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.SubflagResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -937,19 +937,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ListInboxItemsResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ListInboxItemsResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -977,7 +977,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.CreateInboxItemRequest"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.CreateInboxItemRequest"
                         }
                     }
                 ],
@@ -985,19 +985,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/dto.InboxItemResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.InboxItemResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -1030,19 +1030,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.InboxItemResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.InboxItemResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -1079,7 +1079,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.ConfirmInboxItemRequest"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ConfirmInboxItemRequest"
                         }
                     }
                 ],
@@ -1087,25 +1087,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ConfirmInboxItemResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ConfirmInboxItemResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -1138,25 +1138,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.InboxItemResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.InboxItemResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -1189,25 +1189,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.InboxItemResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.InboxItemResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -1231,13 +1231,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.AuthResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.AuthResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -1275,19 +1275,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ListRemindersResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ListRemindersResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -1315,7 +1315,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.CreateReminderRequest"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.CreateReminderRequest"
                         }
                     }
                 ],
@@ -1323,19 +1323,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/dto.ReminderResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ReminderResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -1368,19 +1368,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -1415,7 +1415,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UpdateReminderRequest"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.UpdateReminderRequest"
                         }
                     }
                 ],
@@ -1423,25 +1423,747 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ReminderResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ReminderResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/routines": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Routines"
+                ],
+                "summary": "Listar rotinas",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Limite",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Cursor",
+                        "name": "cursor",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ListRoutinesResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Routines"
+                ],
+                "summary": "Criar rotina",
+                "parameters": [
+                    {
+                        "description": "Routine payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.CreateRoutineRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.RoutineResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/routines/day/{weekday}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Routines"
+                ],
+                "summary": "Listar rotinas por dia da semana",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Dia da semana (0-6, 0=domingo)",
+                        "name": "weekday",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ListRoutinesResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/routines/today/summary": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Routines"
+                ],
+                "summary": "Resumo do dia",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.RoutineTodaySummaryResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/routines/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Routines"
+                ],
+                "summary": "Obter rotina",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Routine ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.RoutineResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "Routines"
+                ],
+                "summary": "Excluir rotina",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Routine ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Routines"
+                ],
+                "summary": "Atualizar rotina",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Routine ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Routine payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.UpdateRoutineRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.RoutineResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/routines/{id}/complete": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Routines"
+                ],
+                "summary": "Marcar rotina como concluída",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Routine ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Data (opcional, padrão: hoje)",
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.CompleteRoutineRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.RoutineCompletionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/routines/{id}/complete/{date}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "Routines"
+                ],
+                "summary": "Desmarcar conclusão de rotina",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Routine ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Data da conclusão",
+                        "name": "date",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/routines/{id}/exceptions": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Routines"
+                ],
+                "summary": "Criar exceção de rotina",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Routine ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Exception payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.CreateRoutineExceptionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.RoutineExceptionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/routines/{id}/exceptions/{date}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "Routines"
+                ],
+                "summary": "Cancelar exceção de rotina",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Routine ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Data da exceção",
+                        "name": "date",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/routines/{id}/history": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Routines"
+                ],
+                "summary": "Obter histórico de conclusões",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Routine ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/inbota_backend_internal_http_dto.RoutineCompletionResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/routines/{id}/streak": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Routines"
+                ],
+                "summary": "Obter streak da rotina",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Routine ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.RoutineStreakResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/routines/{id}/toggle": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Routines"
+                ],
+                "summary": "Ativar/desativar rotina",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Routine ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Toggle payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ToggleRoutineRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -1474,19 +2196,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -1521,7 +2243,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UpdateShoppingItemRequest"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.UpdateShoppingItemRequest"
                         }
                     }
                 ],
@@ -1529,25 +2251,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ShoppingItemResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ShoppingItemResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -1585,19 +2307,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ListShoppingListsResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ListShoppingListsResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -1625,7 +2347,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.CreateShoppingListRequest"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.CreateShoppingListRequest"
                         }
                     }
                 ],
@@ -1633,19 +2355,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/dto.ShoppingListResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ShoppingListResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -1678,19 +2400,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -1725,7 +2447,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UpdateShoppingListRequest"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.UpdateShoppingListRequest"
                         }
                     }
                 ],
@@ -1733,25 +2455,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ShoppingListResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ShoppingListResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -1796,19 +2518,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ListShoppingItemsResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ListShoppingItemsResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -1843,7 +2565,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.CreateShoppingItemRequest"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.CreateShoppingItemRequest"
                         }
                     }
                 ],
@@ -1851,19 +2573,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/dto.ShoppingItemResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ShoppingItemResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -1896,13 +2618,13 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -1937,7 +2659,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UpdateSubflagRequest"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.UpdateSubflagRequest"
                         }
                     }
                 ],
@@ -1945,25 +2667,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.SubflagResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.SubflagResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -2001,19 +2723,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ListTasksResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ListTasksResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -2041,7 +2763,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.CreateTaskRequest"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.CreateTaskRequest"
                         }
                     }
                 ],
@@ -2049,19 +2771,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/dto.TaskResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.TaskResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -2094,19 +2816,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -2141,7 +2863,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UpdateTaskRequest"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.UpdateTaskRequest"
                         }
                     }
                 ],
@@ -2149,25 +2871,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.TaskResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.TaskResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/inbota_backend_internal_http_dto.ErrorResponse"
                         }
                     }
                 }
@@ -2175,30 +2897,30 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "dto.AgendaResponse": {
+        "inbota_backend_internal_http_dto.AgendaResponse": {
             "type": "object",
             "properties": {
                 "events": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.EventResponse"
+                        "$ref": "#/definitions/inbota_backend_internal_http_dto.EventResponse"
                     }
                 },
                 "reminders": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.ReminderResponse"
+                        "$ref": "#/definitions/inbota_backend_internal_http_dto.ReminderResponse"
                     }
                 },
                 "tasks": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.TaskResponse"
+                        "$ref": "#/definitions/inbota_backend_internal_http_dto.TaskResponse"
                     }
                 }
             }
         },
-        "dto.AiSuggestionResponse": {
+        "inbota_backend_internal_http_dto.AiSuggestionResponse": {
             "type": "object",
             "properties": {
                 "confidence": {
@@ -2208,7 +2930,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "flag": {
-                    "$ref": "#/definitions/dto.FlagObject"
+                    "$ref": "#/definitions/inbota_backend_internal_http_dto.FlagObject"
                 },
                 "id": {
                     "type": "string"
@@ -2220,7 +2942,7 @@ const docTemplate = `{
                     "type": "object"
                 },
                 "subflag": {
-                    "$ref": "#/definitions/dto.SubflagObject"
+                    "$ref": "#/definitions/inbota_backend_internal_http_dto.SubflagObject"
                 },
                 "title": {
                     "type": "string"
@@ -2230,7 +2952,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.AuthResponse": {
+        "inbota_backend_internal_http_dto.AuthResponse": {
             "type": "object",
             "properties": {
                 "token": {
@@ -2258,7 +2980,15 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ConfirmInboxItemRequest": {
+        "inbota_backend_internal_http_dto.CompleteRoutineRequest": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string"
+                }
+            }
+        },
+        "inbota_backend_internal_http_dto.ConfirmInboxItemRequest": {
             "type": "object",
             "properties": {
                 "flagId": {
@@ -2278,40 +3008,43 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ConfirmInboxItemResponse": {
+        "inbota_backend_internal_http_dto.ConfirmInboxItemResponse": {
             "type": "object",
             "properties": {
                 "event": {
-                    "$ref": "#/definitions/dto.EventResponse"
+                    "$ref": "#/definitions/inbota_backend_internal_http_dto.EventResponse"
                 },
                 "reminder": {
-                    "$ref": "#/definitions/dto.ReminderResponse"
+                    "$ref": "#/definitions/inbota_backend_internal_http_dto.ReminderResponse"
+                },
+                "routine": {
+                    "$ref": "#/definitions/inbota_backend_internal_http_dto.RoutineResponse"
                 },
                 "shoppingItems": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.ShoppingItemResponse"
+                        "$ref": "#/definitions/inbota_backend_internal_http_dto.ShoppingItemResponse"
                     }
                 },
                 "shoppingList": {
-                    "$ref": "#/definitions/dto.ShoppingListResponse"
+                    "$ref": "#/definitions/inbota_backend_internal_http_dto.ShoppingListResponse"
                 },
                 "task": {
-                    "$ref": "#/definitions/dto.TaskResponse"
+                    "$ref": "#/definitions/inbota_backend_internal_http_dto.TaskResponse"
                 },
                 "type": {
                     "type": "string"
                 }
             }
         },
-        "dto.ContextRuleResponse": {
+        "inbota_backend_internal_http_dto.ContextRuleResponse": {
             "type": "object",
             "properties": {
                 "createdAt": {
                     "type": "string"
                 },
                 "flag": {
-                    "$ref": "#/definitions/dto.FlagObject"
+                    "$ref": "#/definitions/inbota_backend_internal_http_dto.FlagObject"
                 },
                 "id": {
                     "type": "string"
@@ -2320,14 +3053,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "subflag": {
-                    "$ref": "#/definitions/dto.SubflagObject"
+                    "$ref": "#/definitions/inbota_backend_internal_http_dto.SubflagObject"
                 },
                 "updatedAt": {
                     "type": "string"
                 }
             }
         },
-        "dto.CreateContextRuleRequest": {
+        "inbota_backend_internal_http_dto.CreateContextRuleRequest": {
             "type": "object",
             "properties": {
                 "flagId": {
@@ -2341,7 +3074,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.CreateEventRequest": {
+        "inbota_backend_internal_http_dto.CreateEventRequest": {
             "type": "object",
             "properties": {
                 "allDay": {
@@ -2367,7 +3100,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.CreateFlagRequest": {
+        "inbota_backend_internal_http_dto.CreateFlagRequest": {
             "type": "object",
             "properties": {
                 "color": {
@@ -2381,7 +3114,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.CreateInboxItemRequest": {
+        "inbota_backend_internal_http_dto.CreateInboxItemRequest": {
             "type": "object",
             "properties": {
                 "rawMediaUrl": {
@@ -2395,7 +3128,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.CreateReminderRequest": {
+        "inbota_backend_internal_http_dto.CreateReminderRequest": {
             "type": "object",
             "properties": {
                 "flagId": {
@@ -2415,7 +3148,71 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.CreateShoppingItemRequest": {
+        "inbota_backend_internal_http_dto.CreateRoutineExceptionRequest": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "string"
+                },
+                "exceptionDate": {
+                    "type": "string"
+                },
+                "newEndTime": {
+                    "type": "string"
+                },
+                "newStartTime": {
+                    "type": "string"
+                },
+                "reason": {
+                    "type": "string"
+                }
+            }
+        },
+        "inbota_backend_internal_http_dto.CreateRoutineRequest": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "endTime": {
+                    "type": "string"
+                },
+                "endsOn": {
+                    "type": "string"
+                },
+                "flagId": {
+                    "type": "string"
+                },
+                "recurrenceType": {
+                    "type": "string"
+                },
+                "startTime": {
+                    "type": "string"
+                },
+                "startsOn": {
+                    "type": "string"
+                },
+                "subflagId": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "weekOfMonth": {
+                    "type": "integer"
+                },
+                "weekdays": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "inbota_backend_internal_http_dto.CreateShoppingItemRequest": {
             "type": "object",
             "properties": {
                 "checked": {
@@ -2432,7 +3229,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.CreateShoppingListRequest": {
+        "inbota_backend_internal_http_dto.CreateShoppingListRequest": {
             "type": "object",
             "properties": {
                 "status": {
@@ -2443,7 +3240,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.CreateSubflagRequest": {
+        "inbota_backend_internal_http_dto.CreateSubflagRequest": {
             "type": "object",
             "properties": {
                 "name": {
@@ -2454,7 +3251,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.CreateTaskRequest": {
+        "inbota_backend_internal_http_dto.CreateTaskRequest": {
             "type": "object",
             "properties": {
                 "description": {
@@ -2477,7 +3274,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ErrorResponse": {
+        "inbota_backend_internal_http_dto.ErrorResponse": {
             "type": "object",
             "properties": {
                 "error": {
@@ -2488,7 +3285,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.EventResponse": {
+        "inbota_backend_internal_http_dto.EventResponse": {
             "type": "object",
             "properties": {
                 "allDay": {
@@ -2501,7 +3298,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "flag": {
-                    "$ref": "#/definitions/dto.FlagObject"
+                    "$ref": "#/definitions/inbota_backend_internal_http_dto.FlagObject"
                 },
                 "id": {
                     "type": "string"
@@ -2510,13 +3307,13 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "sourceInboxItem": {
-                    "$ref": "#/definitions/dto.InboxItemObject"
+                    "$ref": "#/definitions/inbota_backend_internal_http_dto.InboxItemObject"
                 },
                 "startAt": {
                     "type": "string"
                 },
                 "subflag": {
-                    "$ref": "#/definitions/dto.SubflagObject"
+                    "$ref": "#/definitions/inbota_backend_internal_http_dto.SubflagObject"
                 },
                 "title": {
                     "type": "string"
@@ -2526,7 +3323,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.FlagObject": {
+        "inbota_backend_internal_http_dto.FlagObject": {
             "type": "object",
             "properties": {
                 "color": {
@@ -2540,7 +3337,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.FlagResponse": {
+        "inbota_backend_internal_http_dto.FlagResponse": {
             "type": "object",
             "properties": {
                 "color": {
@@ -2563,7 +3360,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.InboxItemObject": {
+        "inbota_backend_internal_http_dto.InboxItemObject": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -2592,7 +3389,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.InboxItemResponse": {
+        "inbota_backend_internal_http_dto.InboxItemResponse": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -2617,20 +3414,20 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "suggestion": {
-                    "$ref": "#/definitions/dto.AiSuggestionResponse"
+                    "$ref": "#/definitions/inbota_backend_internal_http_dto.AiSuggestionResponse"
                 },
                 "updatedAt": {
                     "type": "string"
                 }
             }
         },
-        "dto.ListContextRulesResponse": {
+        "inbota_backend_internal_http_dto.ListContextRulesResponse": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.ContextRuleResponse"
+                        "$ref": "#/definitions/inbota_backend_internal_http_dto.ContextRuleResponse"
                     }
                 },
                 "nextCursor": {
@@ -2638,13 +3435,13 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ListEventsResponse": {
+        "inbota_backend_internal_http_dto.ListEventsResponse": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.EventResponse"
+                        "$ref": "#/definitions/inbota_backend_internal_http_dto.EventResponse"
                     }
                 },
                 "nextCursor": {
@@ -2652,13 +3449,13 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ListFlagsResponse": {
+        "inbota_backend_internal_http_dto.ListFlagsResponse": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.FlagResponse"
+                        "$ref": "#/definitions/inbota_backend_internal_http_dto.FlagResponse"
                     }
                 },
                 "nextCursor": {
@@ -2666,13 +3463,13 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ListInboxItemsResponse": {
+        "inbota_backend_internal_http_dto.ListInboxItemsResponse": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.InboxItemResponse"
+                        "$ref": "#/definitions/inbota_backend_internal_http_dto.InboxItemResponse"
                     }
                 },
                 "nextCursor": {
@@ -2680,13 +3477,13 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ListRemindersResponse": {
+        "inbota_backend_internal_http_dto.ListRemindersResponse": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.ReminderResponse"
+                        "$ref": "#/definitions/inbota_backend_internal_http_dto.ReminderResponse"
                     }
                 },
                 "nextCursor": {
@@ -2694,13 +3491,13 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ListShoppingItemsResponse": {
+        "inbota_backend_internal_http_dto.ListRoutinesResponse": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.ShoppingItemResponse"
+                        "$ref": "#/definitions/inbota_backend_internal_http_dto.RoutineResponse"
                     }
                 },
                 "nextCursor": {
@@ -2708,13 +3505,13 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ListShoppingListsResponse": {
+        "inbota_backend_internal_http_dto.ListShoppingItemsResponse": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.ShoppingListResponse"
+                        "$ref": "#/definitions/inbota_backend_internal_http_dto.ShoppingItemResponse"
                     }
                 },
                 "nextCursor": {
@@ -2722,13 +3519,13 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ListSubflagsResponse": {
+        "inbota_backend_internal_http_dto.ListShoppingListsResponse": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.SubflagResponse"
+                        "$ref": "#/definitions/inbota_backend_internal_http_dto.ShoppingListResponse"
                     }
                 },
                 "nextCursor": {
@@ -2736,13 +3533,13 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ListTasksResponse": {
+        "inbota_backend_internal_http_dto.ListSubflagsResponse": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.TaskResponse"
+                        "$ref": "#/definitions/inbota_backend_internal_http_dto.SubflagResponse"
                     }
                 },
                 "nextCursor": {
@@ -2750,14 +3547,28 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ReminderResponse": {
+        "inbota_backend_internal_http_dto.ListTasksResponse": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/inbota_backend_internal_http_dto.TaskResponse"
+                    }
+                },
+                "nextCursor": {
+                    "type": "string"
+                }
+            }
+        },
+        "inbota_backend_internal_http_dto.ReminderResponse": {
             "type": "object",
             "properties": {
                 "createdAt": {
                     "type": "string"
                 },
                 "flag": {
-                    "$ref": "#/definitions/dto.FlagObject"
+                    "$ref": "#/definitions/inbota_backend_internal_http_dto.FlagObject"
                 },
                 "id": {
                     "type": "string"
@@ -2766,13 +3577,13 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "sourceInboxItem": {
-                    "$ref": "#/definitions/dto.InboxItemObject"
+                    "$ref": "#/definitions/inbota_backend_internal_http_dto.InboxItemObject"
                 },
                 "status": {
                     "type": "string"
                 },
                 "subflag": {
-                    "$ref": "#/definitions/dto.SubflagObject"
+                    "$ref": "#/definitions/inbota_backend_internal_http_dto.SubflagObject"
                 },
                 "title": {
                     "type": "string"
@@ -2782,7 +3593,131 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ShoppingItemResponse": {
+        "inbota_backend_internal_http_dto.RoutineCompletionResponse": {
+            "type": "object",
+            "properties": {
+                "completedAt": {
+                    "type": "string"
+                },
+                "completedOn": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "routineId": {
+                    "type": "string"
+                }
+            }
+        },
+        "inbota_backend_internal_http_dto.RoutineExceptionResponse": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "exceptionDate": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "newEndTime": {
+                    "type": "string"
+                },
+                "newStartTime": {
+                    "type": "string"
+                },
+                "reason": {
+                    "type": "string"
+                },
+                "routineId": {
+                    "type": "string"
+                }
+            }
+        },
+        "inbota_backend_internal_http_dto.RoutineResponse": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "endTime": {
+                    "type": "string"
+                },
+                "endsOn": {
+                    "type": "string"
+                },
+                "flag": {
+                    "$ref": "#/definitions/inbota_backend_internal_http_dto.FlagObject"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "recurrenceType": {
+                    "type": "string"
+                },
+                "startTime": {
+                    "type": "string"
+                },
+                "startsOn": {
+                    "type": "string"
+                },
+                "subflag": {
+                    "$ref": "#/definitions/inbota_backend_internal_http_dto.SubflagObject"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "weekOfMonth": {
+                    "type": "integer"
+                },
+                "weekdays": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "inbota_backend_internal_http_dto.RoutineStreakResponse": {
+            "type": "object",
+            "properties": {
+                "currentStreak": {
+                    "type": "integer"
+                },
+                "totalCompletions": {
+                    "type": "integer"
+                }
+            }
+        },
+        "inbota_backend_internal_http_dto.RoutineTodaySummaryResponse": {
+            "type": "object",
+            "properties": {
+                "completed": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "inbota_backend_internal_http_dto.ShoppingItemResponse": {
             "type": "object",
             "properties": {
                 "checked": {
@@ -2795,7 +3730,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "list": {
-                    "$ref": "#/definitions/dto.ShoppingListObject"
+                    "$ref": "#/definitions/inbota_backend_internal_http_dto.ShoppingListObject"
                 },
                 "quantity": {
                     "type": "string"
@@ -2811,7 +3746,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ShoppingListObject": {
+        "inbota_backend_internal_http_dto.ShoppingListObject": {
             "type": "object",
             "properties": {
                 "id": {
@@ -2825,7 +3760,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ShoppingListResponse": {
+        "inbota_backend_internal_http_dto.ShoppingListResponse": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -2835,7 +3770,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "sourceInboxItem": {
-                    "$ref": "#/definitions/dto.InboxItemObject"
+                    "$ref": "#/definitions/inbota_backend_internal_http_dto.InboxItemObject"
                 },
                 "status": {
                     "type": "string"
@@ -2848,7 +3783,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.SubflagObject": {
+        "inbota_backend_internal_http_dto.SubflagObject": {
             "type": "object",
             "properties": {
                 "color": {
@@ -2862,7 +3797,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.SubflagResponse": {
+        "inbota_backend_internal_http_dto.SubflagResponse": {
             "type": "object",
             "properties": {
                 "color": {
@@ -2872,7 +3807,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "flag": {
-                    "$ref": "#/definitions/dto.FlagObject"
+                    "$ref": "#/definitions/inbota_backend_internal_http_dto.FlagObject"
                 },
                 "id": {
                     "type": "string"
@@ -2888,7 +3823,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.TaskResponse": {
+        "inbota_backend_internal_http_dto.TaskResponse": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -2901,19 +3836,19 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "flag": {
-                    "$ref": "#/definitions/dto.FlagObject"
+                    "$ref": "#/definitions/inbota_backend_internal_http_dto.FlagObject"
                 },
                 "id": {
                     "type": "string"
                 },
                 "sourceInboxItem": {
-                    "$ref": "#/definitions/dto.InboxItemObject"
+                    "$ref": "#/definitions/inbota_backend_internal_http_dto.InboxItemObject"
                 },
                 "status": {
                     "type": "string"
                 },
                 "subflag": {
-                    "$ref": "#/definitions/dto.SubflagObject"
+                    "$ref": "#/definitions/inbota_backend_internal_http_dto.SubflagObject"
                 },
                 "title": {
                     "type": "string"
@@ -2923,7 +3858,15 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UpdateContextRuleRequest": {
+        "inbota_backend_internal_http_dto.ToggleRoutineRequest": {
+            "type": "object",
+            "properties": {
+                "isActive": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "inbota_backend_internal_http_dto.UpdateContextRuleRequest": {
             "type": "object",
             "properties": {
                 "flagId": {
@@ -2937,7 +3880,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UpdateEventRequest": {
+        "inbota_backend_internal_http_dto.UpdateEventRequest": {
             "type": "object",
             "properties": {
                 "allDay": {
@@ -2963,7 +3906,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UpdateFlagRequest": {
+        "inbota_backend_internal_http_dto.UpdateFlagRequest": {
             "type": "object",
             "properties": {
                 "color": {
@@ -2977,7 +3920,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UpdateReminderRequest": {
+        "inbota_backend_internal_http_dto.UpdateReminderRequest": {
             "type": "object",
             "properties": {
                 "flagId": {
@@ -2997,7 +3940,51 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UpdateShoppingItemRequest": {
+        "inbota_backend_internal_http_dto.UpdateRoutineRequest": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "endTime": {
+                    "type": "string"
+                },
+                "endsOn": {
+                    "type": "string"
+                },
+                "flagId": {
+                    "type": "string"
+                },
+                "recurrenceType": {
+                    "type": "string"
+                },
+                "startTime": {
+                    "type": "string"
+                },
+                "startsOn": {
+                    "type": "string"
+                },
+                "subflagId": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "weekOfMonth": {
+                    "type": "integer"
+                },
+                "weekdays": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "inbota_backend_internal_http_dto.UpdateShoppingItemRequest": {
             "type": "object",
             "properties": {
                 "checked": {
@@ -3014,7 +4001,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UpdateShoppingListRequest": {
+        "inbota_backend_internal_http_dto.UpdateShoppingListRequest": {
             "type": "object",
             "properties": {
                 "status": {
@@ -3025,7 +4012,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UpdateSubflagRequest": {
+        "inbota_backend_internal_http_dto.UpdateSubflagRequest": {
             "type": "object",
             "properties": {
                 "name": {
@@ -3036,7 +4023,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UpdateTaskRequest": {
+        "inbota_backend_internal_http_dto.UpdateTaskRequest": {
             "type": "object",
             "properties": {
                 "description": {
@@ -3059,7 +4046,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.AuthRequest": {
+        "internal_http_handler.AuthRequest": {
             "type": "object",
             "required": [
                 "displayName",
@@ -3086,7 +4073,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.AuthResponse": {
+        "internal_http_handler.AuthResponse": {
             "type": "object",
             "properties": {
                 "token": {
@@ -3114,7 +4101,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.HealthResponse": {
+        "internal_http_handler.HealthResponse": {
             "type": "object",
             "properties": {
                 "status": {
@@ -3125,7 +4112,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.LoginRequest": {
+        "internal_http_handler.LoginRequest": {
             "type": "object",
             "required": [
                 "email",

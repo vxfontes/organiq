@@ -387,6 +387,22 @@ func (h *InboxHandler) Confirm(c *gin.Context) {
 		}
 		resp.ShoppingItems = items
 	}
+	if result.Routine != nil {
+		var flag *domain.Flag
+		var subflag *domain.Subflag
+		if h.Flags != nil && result.Routine.FlagID != nil {
+			if f, err := h.Flags.Get(c.Request.Context(), userID, *result.Routine.FlagID); err == nil {
+				flag = &f
+			}
+		}
+		if h.Subflags != nil && result.Routine.SubflagID != nil {
+			if sf, err := h.Subflags.Get(c.Request.Context(), userID, *result.Routine.SubflagID); err == nil {
+				subflag = &sf
+			}
+		}
+		routine := toRoutineResponse(*result.Routine, flag, subflag)
+		resp.Routine = &routine
+	}
 
 	c.JSON(http.StatusOK, resp)
 }
