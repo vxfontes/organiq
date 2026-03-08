@@ -52,6 +52,7 @@ class AppPath {
   // Routines
   static const String routines = '/routines';
   static String routineById(String id) => '$routines/$id';
+  static String routineToggle(String id) => '$routines/$id/toggle';
   static String routineDay(int weekday) => '$routines/day/$weekday';
   static const String routineTodaySummary = '/routines/today/summary';
   static String routineComplete(String id) => '$routines/$id/complete';

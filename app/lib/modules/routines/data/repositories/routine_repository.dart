@@ -191,7 +191,7 @@ class RoutineRepository implements IRoutineRepository {
   Future<Either<Failure, Unit>> toggleRoutine(String id, bool isActive) async {
     try {
       final response = await _httpClient.patch(
-        AppPath.routineById(id),
+        AppPath.routineToggle(id),
         data: {'isActive': isActive},
       );
 
