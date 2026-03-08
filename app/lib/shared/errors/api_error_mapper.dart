@@ -14,6 +14,8 @@ class ApiErrorMapper {
     'invalid_password': 'Senha inválida.',
     'invalid_display_name': 'Nome de exibição inválido.',
     'routine_overlap': 'Já existe uma rotina neste horário em um dos dias selecionados.',
+    'routine_exception_failed': 'Não foi possível registrar exceção na rotina.',
+    'uncomplete_failed': 'Não foi possível desmarcar a rotina.',
     'invalid_credentials': 'Credenciais inválidas.',
     'invalid_limit': 'Limite inválido.',
     'invalid_cursor': 'Cursor inválido.',

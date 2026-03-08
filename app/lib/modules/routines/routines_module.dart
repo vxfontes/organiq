@@ -12,6 +12,7 @@ import 'package:inbota/modules/routines/domain/usecases/get_routine_usecase.dart
 import 'package:inbota/modules/routines/domain/usecases/get_routines_by_weekday_usecase.dart';
 import 'package:inbota/modules/routines/domain/usecases/get_routines_usecase.dart';
 import 'package:inbota/modules/routines/domain/usecases/get_today_summary_usecase.dart';
+import 'package:inbota/modules/routines/domain/usecases/toggle_routine_usecase.dart';
 import 'package:inbota/modules/routines/domain/usecases/uncomplete_routine_usecase.dart';
 import 'package:inbota/modules/routines/domain/usecases/update_routine_usecase.dart';
 
@@ -29,6 +30,7 @@ class RoutinesModule {
     i.addLazySingleton(UncompleteRoutineUsecase.new);
     i.addLazySingleton(GetRoutineHistoryUsecase.new);
     i.addLazySingleton(GetRoutineStreakUsecase.new);
+    i.addLazySingleton(ToggleRoutineUsecase.new);
     i.addLazySingleton(GetTodaySummaryUsecase.new);
     i.addLazySingleton(CreateRoutineExceptionUsecase.new);
     i.addLazySingleton(DeleteRoutineExceptionUsecase.new);
