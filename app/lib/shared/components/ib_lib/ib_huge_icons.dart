@@ -4,6 +4,7 @@ enum IBHugeIcon {
   home,
   inbox,
   reminder,
+  schedule,
   shoppingBag,
   calendar,
   add,
@@ -19,6 +20,8 @@ extension IBHugeIconData on IBHugeIcon {
         return HugeIcons.strokeRoundedInbox;
       case IBHugeIcon.reminder:
         return HugeIcons.strokeRoundedReminder;
+      case IBHugeIcon.schedule:
+        return HugeIcons.strokeRoundedCalendar04;
       case IBHugeIcon.shoppingBag:
         return HugeIcons.strokeRoundedShoppingBag01;
       case IBHugeIcon.calendar:

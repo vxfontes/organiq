@@ -16,7 +16,7 @@ abstract class IRoutineRepository {
     String? cursor,
   });
 
-  Future<Either<Failure, RoutineListOutput>> fetchRoutinesByWeekday(int weekday);
+  Future<Either<Failure, RoutineListOutput>> fetchRoutinesByWeekday(int weekday, {String? date});
 
   Future<Either<Failure, RoutineOutput>> getRoutine(String id);
 

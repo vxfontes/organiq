@@ -8,7 +8,7 @@ class GetRoutinesByWeekdayUsecase {
 
   final IRoutineRepository _repository;
 
-  Future<Either<Failure, RoutineListOutput>> call(int weekday) {
-    return _repository.fetchRoutinesByWeekday(weekday);
+  Future<Either<Failure, RoutineListOutput>> call(int weekday, {String? date}) {
+    return _repository.fetchRoutinesByWeekday(weekday, date: date);
   }
 }

@@ -56,10 +56,14 @@ class RoutineRepository implements IRoutineRepository {
 
   @override
   Future<Either<Failure, RoutineListOutput>> fetchRoutinesByWeekday(
-    int weekday,
-  ) async {
+    int weekday, {
+    String? date,
+  }) async {
     try {
-      final response = await _httpClient.get(AppPath.routineDay(weekday));
+      final response = await _httpClient.get(
+        AppPath.routineDay(weekday),
+        queryParameters: date != null ? {'date': date} : null,
+      );
 
       final statusCode = response.statusCode ?? 0;
       if (_isSuccess(statusCode)) {

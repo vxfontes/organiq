@@ -44,7 +44,7 @@ class ScheduleController implements IBController {
   final ValueNotifier<List<FlagOutput>> flags = ValueNotifier([]);
   final ValueNotifier<Map<String, List<SubflagOutput>>> subflagsByFlag =
       ValueNotifier({});
-  bool _routinesLoading = false;
+  int _loadRevision = 0;
 
   final TextEditingController createTitleController = TextEditingController();
   final ValueNotifier<Set<int>> createSelectedWeekdays = ValueNotifier(<int>{});
@@ -127,6 +127,7 @@ class ScheduleController implements IBController {
   void selectWeekOffset(int offset) {
     if (selectedWeekOffset.value == offset) return;
     selectedWeekOffset.value = offset;
+    loadRoutinesForWeekday(selectedWeekday.value);
   }
 
   bool get hasRoutines =>
@@ -208,12 +209,20 @@ class ScheduleController implements IBController {
     await loadRoutinesForWeekday(weekday);
   }
 
+  String _dateForWeekday(int weekday) {
+    final index = weekday == 0 ? 6 : weekday - 1;
+    final date = currentWeekDays[index];
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
+
   Future<void> loadRoutinesForWeekday(int weekday) async {
-    if (_routinesLoading) return;
-    _routinesLoading = true;
+    final revision = ++_loadRevision;
     loading.value = true;
     try {
-      final result = await _getRoutinesByWeekdayUsecase.call(weekday);
+      final date = _dateForWeekday(weekday);
+      final result = await _getRoutinesByWeekdayUsecase.call(weekday, date: date);
+
+      if (revision != _loadRevision) return;
 
       result.fold(
         (failure) => _setError(
@@ -226,8 +235,7 @@ class ScheduleController implements IBController {
         },
       );
     } finally {
-      loading.value = false;
-      _routinesLoading = false;
+      if (revision == _loadRevision) loading.value = false;
     }
   }
 
