@@ -17,14 +17,14 @@ type RoutineRepository interface {
 }
 
 type RoutineExceptionRepository interface {
-	Create(ctx context.Context, exception domain.RoutineException) (domain.RoutineException, error)
+	Create(ctx context.Context, userID string, exception domain.RoutineException) (domain.RoutineException, error)
 	Delete(ctx context.Context, userID, routineID, exceptionDate string) error
 	GetByRoutine(ctx context.Context, userID, routineID string) ([]domain.RoutineException, error)
 	GetForDate(ctx context.Context, userID, routineID, date string) (*domain.RoutineException, error)
 }
 
 type RoutineCompletionRepository interface {
-	Create(ctx context.Context, completion domain.RoutineCompletion) (domain.RoutineCompletion, error)
+	Create(ctx context.Context, userID string, completion domain.RoutineCompletion) (domain.RoutineCompletion, error)
 	Delete(ctx context.Context, userID, routineID, completedOn string) error
 	GetByRoutine(ctx context.Context, userID, routineID string) ([]domain.RoutineCompletion, error)
 	GetByDate(ctx context.Context, userID, date string) ([]domain.RoutineCompletion, error)

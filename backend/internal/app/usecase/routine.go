@@ -406,7 +406,7 @@ func (uc *RoutineUsecase) Complete(ctx context.Context, userID, routineID, date 
 		CompletedOn: date,
 	}
 
-	return uc.Completions.Create(ctx, completion)
+	return uc.Completions.Create(ctx, userID, completion)
 }
 
 func (uc *RoutineUsecase) Uncomplete(ctx context.Context, userID, routineID, date string) error {
@@ -458,7 +458,7 @@ func (uc *RoutineUsecase) CreateException(ctx context.Context, userID, routineID
 		Reason:        reason,
 	}
 
-	return uc.Exceptions.Create(ctx, exception)
+	return uc.Exceptions.Create(ctx, userID, exception)
 }
 
 func (uc *RoutineUsecase) DeleteException(ctx context.Context, userID, routineID, date string) error {

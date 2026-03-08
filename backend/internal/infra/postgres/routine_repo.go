@@ -267,18 +267,22 @@ func NewRoutineExceptionRepositoryTx(tx *sql.Tx) *RoutineExceptionRepositoryImpl
 	return &RoutineExceptionRepositoryImpl{db: tx}
 }
 
-func (r *RoutineExceptionRepositoryImpl) Create(ctx context.Context, exception domain.RoutineException) (domain.RoutineException, error) {
+func (r *RoutineExceptionRepositoryImpl) Create(ctx context.Context, userID string, exception domain.RoutineException) (domain.RoutineException, error) {
 	if exception.Action == "" {
 		exception.Action = "skip"
 	}
 
 	row := r.db.QueryRowContext(ctx, `
 		INSERT INTO inbota.routine_exceptions (routine_id, exception_date, action, new_start_time, new_end_time, reason)
-		VALUES ($1, $2, $3, $4, $5, $6)
+		SELECT $1, $2, $3, $4, $5, $6
+		WHERE EXISTS (SELECT 1 FROM inbota.routines WHERE id = $1 AND user_id = $7)
 		RETURNING id, created_at
-	`, exception.RoutineID, exception.ExceptionDate, exception.Action, exception.NewStartTime, exception.NewEndTime, exception.Reason)
+	`, exception.RoutineID, exception.ExceptionDate, exception.Action, exception.NewStartTime, exception.NewEndTime, exception.Reason, userID)
 
 	if err := row.Scan(&exception.ID, &exception.CreatedAt); err != nil {
+		if err == sql.ErrNoRows {
+			return domain.RoutineException{}, ErrNotFound
+		}
 		return domain.RoutineException{}, err
 	}
 	return exception, nil
@@ -374,14 +378,18 @@ func NewRoutineCompletionRepositoryTx(tx *sql.Tx) *RoutineCompletionRepositoryIm
 	return &RoutineCompletionRepositoryImpl{db: tx}
 }
 
-func (r *RoutineCompletionRepositoryImpl) Create(ctx context.Context, completion domain.RoutineCompletion) (domain.RoutineCompletion, error) {
+func (r *RoutineCompletionRepositoryImpl) Create(ctx context.Context, userID string, completion domain.RoutineCompletion) (domain.RoutineCompletion, error) {
 	row := r.db.QueryRowContext(ctx, `
 		INSERT INTO inbota.routine_completions (routine_id, completed_on)
-		VALUES ($1, $2)
+		SELECT $1, $2
+		WHERE EXISTS (SELECT 1 FROM inbota.routines WHERE id = $1 AND user_id = $3)
 		RETURNING id, completed_at
-	`, completion.RoutineID, completion.CompletedOn)
+	`, completion.RoutineID, completion.CompletedOn, userID)
 
 	if err := row.Scan(&completion.ID, &completion.CompletedAt); err != nil {
+		if err == sql.ErrNoRows {
+			return domain.RoutineCompletion{}, ErrNotFound
+		}
 		return domain.RoutineCompletion{}, err
 	}
 	return completion, nil
@@ -391,8 +399,8 @@ func (r *RoutineCompletionRepositoryImpl) Delete(ctx context.Context, userID, ro
 	result, err := r.db.ExecContext(ctx, `
 		DELETE FROM inbota.routine_completions
 		WHERE routine_id = $1 AND completed_on = $2
-		AND EXISTS (SELECT 1 FROM inbota.routines WHERE id = $1 AND user_id = $2)
-	`, routineID, completedOn)
+		AND EXISTS (SELECT 1 FROM inbota.routines WHERE id = $1 AND user_id = $3)
+	`, routineID, completedOn, userID)
 	if err != nil {
 		return err
 	}
