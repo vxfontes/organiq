@@ -358,6 +358,14 @@ func shouldShowRoutineForDate(r domain.Routine, targetDate time.Time) bool {
 		return weeksDiff%2 == 0
 	case "triweekly":
 		return weeksDiff%3 == 0
+	case "monthly_week":
+		if r.WeekOfMonth == nil {
+			return true
+		}
+		// Week of month: 1st, 2nd, 3rd, 4th, 5th
+		// Logic: (day-1)/7 + 1
+		targetWeek := (targetDate.Day()-1)/7 + 1
+		return targetWeek == *r.WeekOfMonth
 	default:
 		return true
 	}
