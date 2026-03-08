@@ -12,6 +12,7 @@ import 'package:inbota/modules/routines/data/models/routine_week_option.dart';
 import 'package:inbota/modules/routines/domain/usecases/create_routine_usecase.dart';
 import 'package:inbota/modules/routines/domain/usecases/delete_routine_usecase.dart';
 import 'package:inbota/modules/routines/domain/usecases/get_routines_by_weekday_usecase.dart';
+import 'package:inbota/modules/routines/domain/usecases/get_routines_usecase.dart';
 import 'package:inbota/modules/routines/domain/usecases/update_routine_usecase.dart';
 import 'package:inbota/shared/errors/failures.dart';
 import 'package:inbota/shared/state/ib_state.dart';
@@ -25,6 +26,7 @@ class ScheduleController implements IBController {
     this._deleteRoutineUsecase,
     this._getFlagsUsecase,
     this._getSubflagsByFlagUsecase,
+    this._getRoutinesUsecase,
   );
 
   final GetRoutinesByWeekdayUsecase _getRoutinesByWeekdayUsecase;
@@ -33,9 +35,11 @@ class ScheduleController implements IBController {
   final DeleteRoutineUsecase _deleteRoutineUsecase;
   final GetFlagsUsecase _getFlagsUsecase;
   final GetSubflagsByFlagUsecase _getSubflagsByFlagUsecase;
+  final GetRoutinesUsecase _getRoutinesUsecase;
 
   final ValueNotifier<bool> loading = ValueNotifier(false);
   final ValueNotifier<String?> error = ValueNotifier(null);
+  final ValueNotifier<List<RoutineOutput>> allRoutines = ValueNotifier([]);
   final ValueNotifier<List<RoutineOutput>> routines = ValueNotifier([]);
   final ValueNotifier<Map<RoutinePeriod, List<RoutineOutput>>> routinesByPeriod =
       ValueNotifier({});
@@ -93,6 +97,7 @@ class ScheduleController implements IBController {
   void dispose() {
     loading.dispose();
     error.dispose();
+    allRoutines.dispose();
     routines.dispose();
     routinesByPeriod.dispose();
     selectedWeekday.dispose();
@@ -166,9 +171,20 @@ class ScheduleController implements IBController {
     selectedWeekday.value = currentWeekday;
 
     await _loadFlags();
+    await _loadAllRoutines();
     await loadRoutinesForWeekday(selectedWeekday.value);
 
     loading.value = false;
+  }
+
+  Future<void> _loadAllRoutines() async {
+    final result = await _getRoutinesUsecase.call(limit: 1000);
+    result.fold(
+      (failure) {},
+      (data) {
+        allRoutines.value = data.items;
+      },
+    );
   }
 
   Future<void> _loadFlags() async {
@@ -351,8 +367,15 @@ class ScheduleController implements IBController {
       return false;
     }
     final endTime = createEndTime.value?.trim() ?? '';
-    if (endTime.isEmpty) {
-      error.value = 'Informe o horário de término da rotina.';
+    
+    // Check for overlap
+    if (_hasOverlap(
+      weekdays: weekdays,
+      startTime: startTime,
+      endTime: endTime,
+      excludeId: _editingRoutineId,
+    )) {
+      error.value = 'Já existe uma rotina neste horário em um dos dias selecionados.';
       return false;
     }
 
@@ -378,6 +401,49 @@ class ScheduleController implements IBController {
       flagId: createSelectedFlagId.value,
       subflagId: createSelectedSubflagId.value,
     );
+  }
+
+  bool _hasOverlap({
+    required List<int> weekdays,
+    required String startTime,
+    String? endTime,
+    String? excludeId,
+  }) {
+    final start = _timeToMinutes(startTime);
+    // If no end time, assume a minimum duration of 1 minute for comparison
+    final end = endTime != null && endTime.isNotEmpty
+        ? _timeToMinutes(endTime)
+        : start + 1;
+
+    for (final routine in allRoutines.value) {
+      if (routine.id == excludeId) continue;
+
+      // Check if they share any weekday
+      final routineWeekdays = routine.weekdays.toSet();
+      final hasCommonWeekday = weekdays.any((d) => routineWeekdays.contains(d));
+      if (!hasCommonWeekday) continue;
+
+      final rStart = _timeToMinutes(routine.startTime);
+      final rEnd = routine.endTime != null && routine.endTime!.isNotEmpty
+          ? _timeToMinutes(routine.endTime!)
+          : rStart + 1;
+
+      // Overlap: (start < rEnd) && (rStart < end)
+      if (start < rEnd && rStart < end) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  int _timeToMinutes(String time) {
+    try {
+      final parts = time.split(':');
+      if (parts.length < 2) return 0;
+      return int.parse(parts[0]) * 60 + int.parse(parts[1]);
+    } catch (_) {
+      return 0;
+    }
   }
 
   Future<bool> createRoutine({
@@ -429,6 +495,7 @@ class ScheduleController implements IBController {
         return false;
       },
       (created) {
+        allRoutines.value = [...allRoutines.value, created];
         if (created.weekdays.contains(selectedWeekday.value)) {
           routines.value = [...routines.value, created];
           _groupRoutinesByPeriod();
@@ -474,6 +541,8 @@ class ScheduleController implements IBController {
         return false;
       },
       (updated) {
+        allRoutines.value = allRoutines.value.map((r) => r.id == updated.id ? updated : r).toList();
+        
         final list = routines.value.where((r) => r.id != updated.id).toList();
         if (updated.weekdays.contains(selectedWeekday.value)) {
           list.add(updated);
@@ -494,6 +563,7 @@ class ScheduleController implements IBController {
         return false;
       },
       (_) {
+        allRoutines.value = allRoutines.value.where((r) => r.id != routineId).toList();
         routines.value = routines.value.where((r) => r.id != routineId).toList();
         _groupRoutinesByPeriod();
         return true;

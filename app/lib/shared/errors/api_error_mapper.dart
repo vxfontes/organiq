@@ -13,6 +13,7 @@ class ApiErrorMapper {
     'invalid_email': 'E-mail inválido.',
     'invalid_password': 'Senha inválida.',
     'invalid_display_name': 'Nome de exibição inválido.',
+    'routine_overlap': 'Já existe uma rotina neste horário em um dos dias selecionados.',
     'invalid_credentials': 'Credenciais inválidas.',
     'invalid_limit': 'Limite inválido.',
     'invalid_cursor': 'Cursor inválido.',
