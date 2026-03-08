@@ -16,7 +16,7 @@ RoutineOutput _$RoutineOutputFromJson(Map<String, dynamic> json) =>
           .map((e) => (e as num).toInt())
           .toList(),
       startTime: json['startTime'] as String,
-      endTime: json['endTime'] as String?,
+      endTime: json['endTime'] as String,
       weekOfMonth: (json['weekOfMonth'] as num?)?.toInt(),
       startsOn: json['startsOn'] as String,
       endsOn: json['endsOn'] as String?,
