@@ -6,30 +6,13 @@ import 'package:inbota/modules/flags/domain/usecases/get_flags_usecase.dart';
 import 'package:inbota/modules/flags/domain/usecases/get_subflags_by_flag_usecase.dart';
 import 'package:inbota/modules/routines/data/models/routine_create_input.dart';
 import 'package:inbota/modules/routines/data/models/routine_output.dart';
+import 'package:inbota/modules/routines/data/models/routine_section.dart';
 import 'package:inbota/modules/routines/data/models/routine_update_input.dart';
+import 'package:inbota/modules/routines/data/models/routine_week_option.dart';
 import 'package:inbota/modules/routines/domain/usecases/routine_usecases.dart';
 import 'package:inbota/shared/errors/failures.dart';
 import 'package:inbota/shared/state/ib_state.dart';
 import 'package:inbota/shared/theme/app_colors.dart';
-
-enum RoutinePeriod { morning, afternoon, night, allDay }
-
-class WeekdayOption {
-  const WeekdayOption(this.label, this.value);
-
-  final String label;
-  final int value;
-}
-
-class RoutineSection {
-  const RoutineSection({
-    required this.title,
-    required this.items,
-  });
-
-  final String title;
-  final List<RoutineOutput> items;
-}
 
 class ScheduleController implements IBController {
   ScheduleController(
@@ -536,3 +519,5 @@ class ScheduleController implements IBController {
     }
   }
 }
+
+enum RoutinePeriod { morning, afternoon, night, allDay }
