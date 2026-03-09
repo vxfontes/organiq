@@ -214,7 +214,8 @@ func (r *InboxRepository) ListWithSuggestion(ctx context.Context, userID string,
 
 	query := `
 		SELECT id, user_id, source, raw_text, raw_media_url, status, last_error, created_at, updated_at,
-		       suggestion_id, suggestion_type, suggestion_title, suggestion_confidence, payload_json
+		       suggestion_id, suggestion_type, suggestion_title, suggestion_confidence, payload_json,
+		       suggestion_needs_review, suggestion_created_at, suggestion_flag_id, suggestion_subflag_id
 		FROM inbota.view_inbox_with_latest_suggestion
 		WHERE ` + strings.Join(clauses, " AND ") + `
 		ORDER BY created_at DESC
@@ -233,10 +234,14 @@ func (r *InboxRepository) ListWithSuggestion(ctx context.Context, userID string,
 		var rawMedia, lastError, suggID, suggType, suggTitle sql.NullString
 		var suggConf sql.NullFloat64
 		var payload []byte
+		var suggNeedsReview sql.NullBool
+		var suggCreatedAt sql.NullTime
+		var suggFlagID, suggSubflagID sql.NullString
 
 		if err := rows.Scan(
 			&item.ID, &item.UserID, &source, &item.RawText, &rawMedia, &status, &lastError, &item.CreatedAt, &item.UpdatedAt,
 			&suggID, &suggType, &suggTitle, &suggConf, &payload,
+			&suggNeedsReview, &suggCreatedAt, &suggFlagID, &suggSubflagID,
 		); err != nil {
 			return nil, nil, err
 		}
@@ -252,6 +257,16 @@ func (r *InboxRepository) ListWithSuggestion(ctx context.Context, userID string,
 			item.SuggestionConfidence = &suggConf.Float64
 		}
 		item.PayloadJSON = payload
+		if suggNeedsReview.Valid {
+			v := suggNeedsReview.Bool
+			item.SuggestionNeedsReview = &v
+		}
+		if suggCreatedAt.Valid {
+			v := suggCreatedAt.Time
+			item.SuggestionCreatedAt = &v
+		}
+		item.SuggestionFlagID = stringPtrFromNull(suggFlagID)
+		item.SuggestionSubflagID = stringPtrFromNull(suggSubflagID)
 
 		items = append(items, item)
 	}
@@ -266,7 +281,8 @@ func (r *InboxRepository) ListWithSuggestion(ctx context.Context, userID string,
 func (r *InboxRepository) GetWithSuggestion(ctx context.Context, userID, id string) (repository.InboxWithSuggestion, error) {
 	query := `
 		SELECT id, user_id, source, raw_text, raw_media_url, status, last_error, created_at, updated_at,
-		       suggestion_id, suggestion_type, suggestion_title, suggestion_confidence, payload_json
+		       suggestion_id, suggestion_type, suggestion_title, suggestion_confidence, payload_json,
+		       suggestion_needs_review, suggestion_created_at, suggestion_flag_id, suggestion_subflag_id
 		FROM inbota.view_inbox_with_latest_suggestion
 		WHERE id = $1 AND user_id = $2
 		LIMIT 1
@@ -279,10 +295,14 @@ func (r *InboxRepository) GetWithSuggestion(ctx context.Context, userID, id stri
 	var rawMedia, lastError, suggID, suggType, suggTitle sql.NullString
 	var suggConf sql.NullFloat64
 	var payload []byte
+	var suggNeedsReview sql.NullBool
+	var suggCreatedAt sql.NullTime
+	var suggFlagID, suggSubflagID sql.NullString
 
 	if err := row.Scan(
 		&item.ID, &item.UserID, &source, &item.RawText, &rawMedia, &status, &lastError, &item.CreatedAt, &item.UpdatedAt,
 		&suggID, &suggType, &suggTitle, &suggConf, &payload,
+		&suggNeedsReview, &suggCreatedAt, &suggFlagID, &suggSubflagID,
 	); err != nil {
 		if err == sql.ErrNoRows {
 			return repository.InboxWithSuggestion{}, ErrNotFound
@@ -301,6 +321,16 @@ func (r *InboxRepository) GetWithSuggestion(ctx context.Context, userID, id stri
 		item.SuggestionConfidence = &suggConf.Float64
 	}
 	item.PayloadJSON = payload
+	if suggNeedsReview.Valid {
+		v := suggNeedsReview.Bool
+		item.SuggestionNeedsReview = &v
+	}
+	if suggCreatedAt.Valid {
+		v := suggCreatedAt.Time
+		item.SuggestionCreatedAt = &v
+	}
+	item.SuggestionFlagID = stringPtrFromNull(suggFlagID)
+	item.SuggestionSubflagID = stringPtrFromNull(suggSubflagID)
 
 	return item, nil
 }

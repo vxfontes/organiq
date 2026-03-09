@@ -123,7 +123,15 @@ func (uc *InboxUsecase) ListInboxItems(ctx context.Context, userID string, input
 				Type:        domain.AiSuggestionType(*item.SuggestionType),
 				Title:       *item.SuggestionTitle,
 				Confidence:  item.SuggestionConfidence,
+				FlagID:      item.SuggestionFlagID,
+				SubflagID:   item.SuggestionSubflagID,
 				PayloadJSON: item.PayloadJSON,
+			}
+			if item.SuggestionNeedsReview != nil {
+				suggestion.NeedsReview = *item.SuggestionNeedsReview
+			}
+			if item.SuggestionCreatedAt != nil {
+				suggestion.CreatedAt = *item.SuggestionCreatedAt
 			}
 		}
 		results = append(results, InboxItemResult{Item: item.InboxItem, Suggestion: suggestion})
@@ -150,7 +158,15 @@ func (uc *InboxUsecase) GetInboxItem(ctx context.Context, userID, id string) (In
 			Type:        domain.AiSuggestionType(*item.SuggestionType),
 			Title:       *item.SuggestionTitle,
 			Confidence:  item.SuggestionConfidence,
+			FlagID:      item.SuggestionFlagID,
+			SubflagID:   item.SuggestionSubflagID,
 			PayloadJSON: item.PayloadJSON,
+		}
+		if item.SuggestionNeedsReview != nil {
+			suggestion.NeedsReview = *item.SuggestionNeedsReview
+		}
+		if item.SuggestionCreatedAt != nil {
+			suggestion.CreatedAt = *item.SuggestionCreatedAt
 		}
 	}
 
