@@ -228,6 +228,17 @@ type RoutineCompletion struct {
 	CompletedAt time.Time
 }
 
+type NotificationTemplate struct {
+	ID            string
+	Type          NotificationType
+	TriggerKey    string
+	TitleTemplate string
+	BodyTemplate  string
+	IsActive      bool
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+}
+
 type DevicePlatform string
 
 const (

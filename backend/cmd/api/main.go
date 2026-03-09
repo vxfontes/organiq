@@ -72,6 +72,8 @@ func main() {
 		deviceTokenRepo := postgres.NewDeviceTokenRepository(db)
 		notificationPrefsRepo := postgres.NewNotificationPreferencesRepository(db)
 		notificationLogRepo := postgres.NewNotificationLogRepository(db)
+		notificationTemplateRepo := postgres.NewNotificationTemplateRepository(db)
+		appConfigRepo := postgres.NewAppConfigRepository(db)
 
 		authUC := &usecase.AuthUsecase{
 			Users:             userRepo,
@@ -166,6 +168,7 @@ func main() {
 			Prefs:  notificationPrefsRepo,
 			Log:    notificationLogRepo,
 			Tokens: deviceTokenRepo,
+			Config: appConfigRepo,
 			FCM:    fcmClient,
 		}
 
@@ -178,6 +181,8 @@ func main() {
 			Events:    eventRepo,
 			Tasks:     taskRepo,
 			Routines:  routineRepo,
+			Templates: notificationTemplateRepo,
+			Config:    appConfigRepo,
 			FCM:       fcmClient,
 			Logger:    log,
 		}

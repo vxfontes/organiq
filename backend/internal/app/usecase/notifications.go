@@ -10,10 +10,11 @@ import (
 )
 
 type NotificationUsecase struct {
-	Prefs  repository.NotificationPreferencesRepository
-	Log    repository.NotificationLogRepository
-	Tokens repository.DeviceTokenRepository
-	FCM    *push.FCMClient
+	Prefs   repository.NotificationPreferencesRepository
+	Log     repository.NotificationLogRepository
+	Tokens  repository.DeviceTokenRepository
+	Config  repository.AppConfigRepository
+	FCM     *push.FCMClient
 }
 
 func (uc *NotificationUsecase) GetPreferences(ctx context.Context, userID string) (domain.NotificationPreferences, error) {
@@ -33,8 +34,8 @@ func (uc *NotificationUsecase) ListNotifications(ctx context.Context, userID str
 	return uc.Log.ListByUserID(ctx, userID, limit, offset)
 }
 
-func (uc *NotificationUsecase) MarkAsRead(ctx context.Context, id string) error {
-	return uc.Log.MarkAsRead(ctx, id)
+func (uc *NotificationUsecase) MarkAsRead(ctx context.Context, id, userID string) error {
+	return uc.Log.MarkAsRead(ctx, id, userID)
 }
 
 func (uc *NotificationUsecase) MarkAllAsRead(ctx context.Context, userID string) error {
@@ -51,13 +52,23 @@ func (uc *NotificationUsecase) SendTestNotification(ctx context.Context, userID 
 		return fmt.Errorf("no_active_devices")
 	}
 
-	data := map[string]string{
-		"type": "test",
+	title := "Teste de Notificação"
+	body := "Isso é um teste do Inbota! 🎉"
+	if uc.Config != nil {
+		if cfg, err := uc.Config.GetAll(ctx); err == nil {
+			if v := cfg["notification.test_title"]; v != "" {
+				title = v
+			}
+			if v := cfg["notification.test_body"]; v != "" {
+				body = v
+			}
+		}
 	}
 
+	data := map[string]string{"type": "test"}
 	for _, t := range tokens {
 		if uc.FCM != nil {
-			_ = uc.FCM.Send(ctx, t.Token, "Teste de Notificação", "Isso é um teste do Inbota! 🎉", data)
+			_ = uc.FCM.Send(ctx, t.Token, title, body, data)
 		}
 	}
 

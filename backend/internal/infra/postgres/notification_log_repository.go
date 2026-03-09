@@ -47,7 +47,7 @@ func (r *NotificationLogRepository) ListPending(ctx context.Context, scheduledBe
 		}
 		logs = append(logs, l)
 	}
-	return logs, nil
+	return logs, rows.Err()
 }
 
 func (r *NotificationLogRepository) UpdateStatus(ctx context.Context, id string, status domain.NotificationStatus, errorMsg *string) error {
@@ -88,12 +88,12 @@ func (r *NotificationLogRepository) ListByUserID(ctx context.Context, userID str
 	return logs, nil
 }
 
-func (r *NotificationLogRepository) MarkAsRead(ctx context.Context, id string) error {
+func (r *NotificationLogRepository) MarkAsRead(ctx context.Context, id, userID string) error {
 	_, err := r.db.ExecContext(ctx, `
 		UPDATE inbota.notification_log
 		SET read_at = now(), status = 'read'
-		WHERE id = $1
-	`, id)
+		WHERE id = $1 AND user_id = $2
+	`, id, userID)
 	return err
 }
 

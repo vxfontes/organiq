@@ -172,8 +172,12 @@ func (h *NotificationsHandler) ListNotifications(c *gin.Context) {
 // @Failure 401 {object} dto.ErrorResponse
 // @Router /v1/notifications/{id}/read [patch]
 func (h *NotificationsHandler) MarkAsRead(c *gin.Context) {
+	userID, ok := getUserID(c)
+	if !ok {
+		return
+	}
 	id := c.Param("id")
-	err := h.Usecase.MarkAsRead(c.Request.Context(), id)
+	err := h.Usecase.MarkAsRead(c.Request.Context(), id, userID)
 	if err != nil {
 		writeUsecaseError(c, err)
 		return
@@ -218,6 +222,10 @@ func (h *NotificationsHandler) SendTestNotification(c *gin.Context) {
 
 	err := h.Usecase.SendTestNotification(c.Request.Context(), userID)
 	if err != nil {
+		if err.Error() == "no_active_devices" {
+			writeError(c, http.StatusBadRequest, "no_active_devices")
+			return
+		}
 		writeUsecaseError(c, err)
 		return
 	}

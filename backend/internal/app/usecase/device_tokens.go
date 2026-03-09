@@ -29,6 +29,6 @@ func (uc *DeviceTokenUsecase) RegisterToken(ctx context.Context, userID, token, 
 	return uc.DeviceTokens.Upsert(ctx, dt)
 }
 
-func (uc *DeviceTokenUsecase) UnregisterToken(ctx context.Context, token string) error {
-	return uc.DeviceTokens.Delete(ctx, token)
+func (uc *DeviceTokenUsecase) UnregisterToken(ctx context.Context, token, userID string) error {
+	return uc.DeviceTokens.Delete(ctx, token, userID)
 }

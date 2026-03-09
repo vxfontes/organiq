@@ -70,13 +70,18 @@ func (h *DevicesHandler) RegisterToken(c *gin.Context) {
 // @Failure 401 {object} dto.ErrorResponse
 // @Router /v1/devices/token [delete]
 func (h *DevicesHandler) UnregisterToken(c *gin.Context) {
+	userID, ok := getUserID(c)
+	if !ok {
+		return
+	}
+
 	var req dto.RegisterTokenRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		writeError(c, http.StatusBadRequest, "invalid_payload")
 		return
 	}
 
-	err := h.Usecase.UnregisterToken(c.Request.Context(), req.Token)
+	err := h.Usecase.UnregisterToken(c.Request.Context(), req.Token, userID)
 	if err != nil {
 		writeUsecaseError(c, err)
 		return

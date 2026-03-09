@@ -29,8 +29,8 @@ func (r *DeviceTokenRepository) Upsert(ctx context.Context, token domain.DeviceT
 	return err
 }
 
-func (r *DeviceTokenRepository) Delete(ctx context.Context, token string) error {
-	_, err := r.db.ExecContext(ctx, `DELETE FROM inbota.device_tokens WHERE token = $1`, token)
+func (r *DeviceTokenRepository) Delete(ctx context.Context, token, userID string) error {
+	_, err := r.db.ExecContext(ctx, `DELETE FROM inbota.device_tokens WHERE token = $1 AND user_id = $2`, token, userID)
 	return err
 }
 
@@ -53,7 +53,7 @@ func (r *DeviceTokenRepository) ListByUserID(ctx context.Context, userID string)
 		}
 		tokens = append(tokens, t)
 	}
-	return tokens, nil
+	return tokens, rows.Err()
 }
 
 func (r *DeviceTokenRepository) Deactivate(ctx context.Context, token string) error {
