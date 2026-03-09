@@ -836,7 +836,7 @@ paths:
   /v1/agenda:
     get:
       parameters:
-      - description: Limite de itens. Max 1000.
+      - description: Limite de itens. Max 200.
         in: query
         name: limit
         type: integer

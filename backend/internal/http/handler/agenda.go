@@ -29,7 +29,7 @@ func NewAgendaHandler(
 // @Tags Agenda
 // @Security BearerAuth
 // @Produce json
-// @Param limit query int false "Limite de itens. Max 1000."
+// @Param limit query int false "Limite de itens. Max 200."
 // @Success 200 {object} dto.AgendaResponse
 // @Failure 400 {object} dto.ErrorResponse
 // @Failure 401 {object} dto.ErrorResponse

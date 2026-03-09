@@ -70,7 +70,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Limite de itens. Max 1000.",
+                        "description": "Limite de itens. Max 200.",
                         "name": "limit",
                         "in": "query"
                     }
