@@ -6,17 +6,24 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type NtfyClient struct {
 	BaseURL string
+	client  *http.Client
 }
 
 func NewNtfyClient(baseURL string) *NtfyClient {
 	if baseURL == "" {
 		baseURL = "https://ntfy.sh"
 	}
-	return &NtfyClient{BaseURL: baseURL}
+	return &NtfyClient{
+		BaseURL: baseURL,
+		client: &http.Client{
+			Timeout: 10 * time.Second,
+		},
+	}
 }
 
 func (c *NtfyClient) Send(ctx context.Context, topic, title, body string, data map[string]string) error {
@@ -48,7 +55,7 @@ func (c *NtfyClient) Send(ctx context.Context, topic, title, body string, data m
 	// but ntfy has some limitations on header sizes.
 	// For simple deep linking, "Click" or custom tags are usually enough.
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := c.client.Do(req)
 	if err != nil {
 		return fmt.Errorf("failed to send ntfy notification: %w", err)
 	}
