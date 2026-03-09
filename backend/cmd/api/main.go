@@ -28,6 +28,7 @@ import (
 	"inbota/backend/internal/http/handler"
 	"inbota/backend/internal/infra/ai"
 	"inbota/backend/internal/infra/postgres"
+	"inbota/backend/internal/infra/push"
 	"inbota/backend/internal/observability"
 	"inbota/backend/internal/scheduler"
 )
@@ -158,11 +159,16 @@ func main() {
 			TxRunner:        txRunner,
 		}
 
+		// ntfy.sh client
+		ntfyClient := push.NewNtfyClient("") // default baseURL: https://ntfy.sh
+		log.Info("ntfy_client_ready")
+
 		notificationUC := &usecase.NotificationUsecase{
 			Prefs:  notificationPrefsRepo,
 			Log:    notificationLogRepo,
 			Tokens: deviceTokenRepo,
 			Config: appConfigRepo,
+			Ntfy:   ntfyClient,
 		}
 
 		notifScheduler := &scheduler.NotificationScheduler{
@@ -176,6 +182,7 @@ func main() {
 			Routines:  routineRepo,
 			Templates: notificationTemplateRepo,
 			Config:    appConfigRepo,
+			Ntfy:      ntfyClient,
 			Logger:    log,
 		}
 		go notifScheduler.Run(ctx)

@@ -395,10 +395,10 @@ const docTemplate = `{
                 "tags": [
                     "Devices"
                 ],
-                "summary": "Registrar token de dispositivo",
+                "summary": "Registrar tópico de dispositivo",
                 "parameters": [
                     {
-                        "description": "Register token request",
+                        "description": "Register topic request",
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -446,10 +446,10 @@ const docTemplate = `{
                 "tags": [
                     "Devices"
                 ],
-                "summary": "Remover token de dispositivo",
+                "summary": "Remover tópico de dispositivo",
                 "parameters": [
                     {
-                        "description": "Unregister token request",
+                        "description": "Unregister topic request",
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -4018,7 +4018,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "platform",
-                "token"
+                "topic"
             ],
             "properties": {
                 "appVersion": {
@@ -4031,7 +4031,7 @@ const docTemplate = `{
                     "description": "ios | android",
                     "type": "string"
                 },
-                "token": {
+                "topic": {
                     "type": "string"
                 }
             }
@@ -4347,10 +4347,10 @@ const docTemplate = `{
         "dto.UnregisterTokenRequest": {
             "type": "object",
             "required": [
-                "token"
+                "topic"
             ],
             "properties": {
-                "token": {
+                "topic": {
                     "type": "string"
                 }
             }

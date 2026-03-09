@@ -11,10 +11,10 @@ type DeviceTokenUsecase struct {
 	DeviceTokens repository.DeviceTokenRepository
 }
 
-func (uc *DeviceTokenUsecase) RegisterToken(ctx context.Context, userID, token, platform, deviceName, appVersion string) error {
+func (uc *DeviceTokenUsecase) RegisterToken(ctx context.Context, userID, topic, platform, deviceName, appVersion string) error {
 	dt := domain.DeviceToken{
 		UserID:     userID,
-		Token:      token,
+		Topic:      topic,
 		Platform:   domain.DevicePlatform(platform),
 		DeviceName: &deviceName,
 		AppVersion: &appVersion,
@@ -29,6 +29,6 @@ func (uc *DeviceTokenUsecase) RegisterToken(ctx context.Context, userID, token, 
 	return uc.DeviceTokens.Upsert(ctx, dt)
 }
 
-func (uc *DeviceTokenUsecase) UnregisterToken(ctx context.Context, token, userID string) error {
-	return uc.DeviceTokens.Delete(ctx, token, userID)
+func (uc *DeviceTokenUsecase) UnregisterToken(ctx context.Context, topic, userID string) error {
+	return uc.DeviceTokens.Delete(ctx, topic, userID)
 }

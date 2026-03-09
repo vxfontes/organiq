@@ -17,13 +17,13 @@ func NewDevicesHandler(uc *usecase.DeviceTokenUsecase) *DevicesHandler {
 	return &DevicesHandler{Usecase: uc}
 }
 
-// RegisterToken registers or updates a device token.
-// @Summary Registrar token de dispositivo
+// RegisterToken registers or updates a device topic.
+// @Summary Registrar tópico de dispositivo
 // @Tags Devices
 // @Security BearerAuth
 // @Accept json
 // @Produce json
-// @Param body body dto.RegisterTokenRequest true "Register token request"
+// @Param body body dto.RegisterTokenRequest true "Register topic request"
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} dto.ErrorResponse
 // @Failure 401 {object} dto.ErrorResponse
@@ -49,7 +49,7 @@ func (h *DevicesHandler) RegisterToken(c *gin.Context) {
 		appVersion = *req.AppVersion
 	}
 
-	err := h.Usecase.RegisterToken(c.Request.Context(), userID, req.Token, req.Platform, deviceName, appVersion)
+	err := h.Usecase.RegisterToken(c.Request.Context(), userID, req.Topic, req.Platform, deviceName, appVersion)
 	if err != nil {
 		writeUsecaseError(c, err)
 		return
@@ -58,13 +58,13 @@ func (h *DevicesHandler) RegisterToken(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "ok"})
 }
 
-// UnregisterToken removes a device token.
-// @Summary Remover token de dispositivo
+// UnregisterToken removes a device topic.
+// @Summary Remover tópico de dispositivo
 // @Tags Devices
 // @Security BearerAuth
 // @Accept json
 // @Produce json
-// @Param body body dto.UnregisterTokenRequest true "Unregister token request"
+// @Param body body dto.UnregisterTokenRequest true "Unregister topic request"
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} dto.ErrorResponse
 // @Failure 401 {object} dto.ErrorResponse
@@ -81,7 +81,7 @@ func (h *DevicesHandler) UnregisterToken(c *gin.Context) {
 		return
 	}
 
-	err := h.Usecase.UnregisterToken(c.Request.Context(), req.Token, userID)
+	err := h.Usecase.UnregisterToken(c.Request.Context(), req.Topic, userID)
 	if err != nil {
 		writeUsecaseError(c, err)
 		return

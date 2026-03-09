@@ -388,10 +388,10 @@
                 "tags": [
                     "Devices"
                 ],
-                "summary": "Registrar token de dispositivo",
+                "summary": "Registrar tópico de dispositivo",
                 "parameters": [
                     {
-                        "description": "Register token request",
+                        "description": "Register topic request",
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -439,15 +439,15 @@
                 "tags": [
                     "Devices"
                 ],
-                "summary": "Remover token de dispositivo",
+                "summary": "Remover tópico de dispositivo",
                 "parameters": [
                     {
-                        "description": "Unregister token request (only token needed)",
+                        "description": "Unregister topic request",
                         "name": "body",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.RegisterTokenRequest"
+                            "$ref": "#/definitions/dto.UnregisterTokenRequest"
                         }
                     }
                 ],
@@ -4011,7 +4011,7 @@
             "type": "object",
             "required": [
                 "platform",
-                "token"
+                "topic"
             ],
             "properties": {
                 "appVersion": {
@@ -4024,7 +4024,7 @@
                     "description": "ios | android",
                     "type": "string"
                 },
-                "token": {
+                "topic": {
                     "type": "string"
                 }
             }
@@ -4334,6 +4334,17 @@
             "properties": {
                 "isActive": {
                     "type": "boolean"
+                }
+            }
+        },
+        "dto.UnregisterTokenRequest": {
+            "type": "object",
+            "required": [
+                "topic"
+            ],
+            "properties": {
+                "topic": {
+                    "type": "string"
                 }
             }
         },

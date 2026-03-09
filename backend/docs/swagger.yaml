@@ -519,11 +519,11 @@ definitions:
       platform:
         description: ios | android
         type: string
-      token:
+      topic:
         type: string
     required:
     - platform
-    - token
+    - topic
     type: object
   dto.ReminderResponse:
     properties:
@@ -725,6 +725,13 @@ definitions:
     properties:
       isActive:
         type: boolean
+    type: object
+  dto.UnregisterTokenRequest:
+    properties:
+      topic:
+        type: string
+    required:
+    - topic
     type: object
   dto.UpdateContextRuleRequest:
     properties:
@@ -1178,12 +1185,12 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: Unregister token request (only token needed)
+      - description: Unregister topic request
         in: body
         name: body
         required: true
         schema:
-          $ref: '#/definitions/dto.RegisterTokenRequest'
+          $ref: '#/definitions/dto.UnregisterTokenRequest'
       produces:
       - application/json
       responses:
@@ -1203,14 +1210,14 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
-      summary: Remover token de dispositivo
+      summary: Remover tópico de dispositivo
       tags:
       - Devices
     post:
       consumes:
       - application/json
       parameters:
-      - description: Register token request
+      - description: Register topic request
         in: body
         name: body
         required: true
@@ -1235,7 +1242,7 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
-      summary: Registrar token de dispositivo
+      summary: Registrar tópico de dispositivo
       tags:
       - Devices
   /v1/events:
