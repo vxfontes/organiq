@@ -118,15 +118,15 @@ func (h *AgendaHandler) List(c *gin.Context) {
 			})
 		case "task":
 			taskItems = append(taskItems, dto.TaskResponse{
-				ID:        item.ID,
-				Title:     item.Title,
+				ID:          item.ID,
+				Title:       item.Title,
 				Description: item.Description,
-				Status:    item.Status,
-				DueAt:     item.DueAt,
-				Flag:      flag,
-				Subflag:   subflag,
-				CreatedAt: item.CreatedAt,
-				UpdatedAt: item.UpdatedAt,
+				Status:      item.Status,
+				DueAt:       item.DueAt,
+				Flag:        flag,
+				Subflag:     subflag,
+				CreatedAt:   item.CreatedAt,
+				UpdatedAt:   item.UpdatedAt,
 			})
 		case "reminder":
 			reminderItems = append(reminderItems, dto.ReminderResponse{

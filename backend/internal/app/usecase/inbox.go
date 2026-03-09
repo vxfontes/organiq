@@ -10,7 +10,6 @@ import (
 	"inbota/backend/internal/app/domain"
 	"inbota/backend/internal/app/repository"
 	"inbota/backend/internal/app/service"
-	"inbota/backend/internal/infra/postgres"
 )
 
 type InboxUsecase struct {
@@ -495,7 +494,7 @@ func (uc *InboxUsecase) ConfirmInboxItem(ctx context.Context, userID, id string,
 	if validated.Output.Context != nil {
 		rawFlagID := normalizeOptionalString(validated.Output.Context.FlagID)
 		rawSubflagID := normalizeOptionalString(validated.Output.Context.SubflagID)
-		
+
 		if uc.RoutinesUsecase != nil {
 			var err error
 			flagID, subflagID, err = uc.RoutinesUsecase.ResolveFlagAndSubflag(ctx, userID, rawFlagID, rawSubflagID)

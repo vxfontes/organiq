@@ -29,6 +29,7 @@ class ApiErrorMapper {
     'missing_jwt_secret': 'Erro de configuração de segurança (JWT).',
     'unauthorized': 'Não autorizado.',
     'internal_error': 'Erro interno do servidor.',
+    'no_active_devices': 'Nenhum dispositivo ativo encontrado para este usuário.',
   };
 
   static String fromResponseData(

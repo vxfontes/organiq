@@ -372,6 +372,154 @@
                 }
             }
         },
+        "/v1/daily-summary": {
+            "get": {
+                "description": "Retorna o resumo consolidado do dia do usuário (rotinas, agenda, tarefas, compras).",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Digest"
+                ],
+                "summary": "Resumo diário público",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Daily summary token",
+                        "name": "token",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/digest.DigestData"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/devices/token": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Devices"
+                ],
+                "summary": "Registrar dispositivo",
+                "parameters": [
+                    {
+                        "description": "Register device request",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.RegisterTokenRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.RegisterTokenResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Devices"
+                ],
+                "summary": "Remover dispositivo",
+                "parameters": [
+                    {
+                        "description": "Unregister device request",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UnregisterTokenRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/events": {
             "get": {
                 "security": [
@@ -1225,6 +1373,236 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/dto.AuthResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/notification-preferences": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Buscar preferências de notificação",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.NotificationPreferencesResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Atualizar preferências de notificação",
+                "parameters": [
+                    {
+                        "description": "Update preferences request",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateNotificationPreferencesRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.NotificationPreferencesResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/notifications": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Listar notificações",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Limite",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ListNotificationsResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/notifications/read-all": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Marcar todas como lidas",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/notifications/test": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Enviar notificação de teste",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/notifications/{id}/read": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Marcar notificação como lida",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Notification ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "401": {
@@ -2890,6 +3268,179 @@
         }
     },
     "definitions": {
+        "digest.AgendaItemData": {
+            "type": "object",
+            "properties": {
+                "context": {
+                    "type": "string"
+                },
+                "time": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "typeKey": {
+                    "type": "string"
+                }
+            }
+        },
+        "digest.DigestData": {
+            "type": "object",
+            "properties": {
+                "agenda": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/digest.AgendaItemData"
+                    }
+                },
+                "date": {
+                    "type": "string"
+                },
+                "detail": {
+                    "$ref": "#/definitions/digest.DigestDetail"
+                },
+                "hasAgenda": {
+                    "type": "boolean"
+                },
+                "hasOpenTasks": {
+                    "type": "boolean"
+                },
+                "hasReminders": {
+                    "type": "boolean"
+                },
+                "hasSchedule": {
+                    "type": "boolean"
+                },
+                "hasShoppingLists": {
+                    "type": "boolean"
+                },
+                "hasTasks": {
+                    "type": "boolean"
+                },
+                "openTasks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/digest.TaskItemData"
+                    }
+                },
+                "reminders": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/digest.ReminderItemData"
+                    }
+                },
+                "schedule": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/digest.ScheduleItemData"
+                    }
+                },
+                "shoppingLists": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/digest.ShoppingListData"
+                    }
+                },
+                "tasks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/digest.TaskItemData"
+                    }
+                }
+            }
+        },
+        "digest.DigestDetail": {
+            "type": "object",
+            "properties": {
+                "agenda": {
+                    "type": "string"
+                },
+                "flags": {
+                    "type": "string"
+                },
+                "openTasks": {
+                    "type": "string"
+                },
+                "purpose": {
+                    "type": "string"
+                },
+                "reminders": {
+                    "type": "string"
+                },
+                "schedule": {
+                    "type": "string"
+                },
+                "shoppingLists": {
+                    "type": "string"
+                },
+                "tasks": {
+                    "type": "string"
+                }
+            }
+        },
+        "digest.ReminderItemData": {
+            "type": "object",
+            "properties": {
+                "time": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "digest.ScheduleItemData": {
+            "type": "object",
+            "properties": {
+                "context": {
+                    "type": "string"
+                },
+                "isCompleted": {
+                    "type": "boolean"
+                },
+                "recurrence": {
+                    "type": "string"
+                },
+                "time": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "digest.ShoppingListData": {
+            "type": "object",
+            "properties": {
+                "pendingCount": {
+                    "type": "integer"
+                },
+                "pendingItems": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "digest.TaskItemData": {
+            "type": "object",
+            "properties": {
+                "dueTime": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.AgendaResponse": {
             "type": "object",
             "properties": {
@@ -3470,6 +4021,20 @@
                 }
             }
         },
+        "dto.ListNotificationsResponse": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.NotificationLogResponse"
+                    }
+                },
+                "nextCursor": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.ListRemindersResponse": {
             "type": "object",
             "properties": {
@@ -3550,6 +4115,147 @@
                     }
                 },
                 "nextCursor": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.NotificationLogResponse": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "leadMins": {
+                    "type": "integer"
+                },
+                "readAt": {
+                    "type": "string"
+                },
+                "referenceId": {
+                    "type": "string"
+                },
+                "scheduledFor": {
+                    "type": "string"
+                },
+                "sentAt": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.NotificationPreferencesResponse": {
+            "type": "object",
+            "properties": {
+                "dailyDigestEnabled": {
+                    "type": "boolean"
+                },
+                "dailyDigestHour": {
+                    "type": "integer"
+                },
+                "eventAtTime": {
+                    "type": "boolean"
+                },
+                "eventLeadMins": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "eventsEnabled": {
+                    "type": "boolean"
+                },
+                "quietEnd": {
+                    "description": "\"HH:MM\"",
+                    "type": "string"
+                },
+                "quietHoursEnabled": {
+                    "type": "boolean"
+                },
+                "quietStart": {
+                    "description": "\"HH:MM\"",
+                    "type": "string"
+                },
+                "reminderAtTime": {
+                    "type": "boolean"
+                },
+                "reminderLeadMins": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "remindersEnabled": {
+                    "type": "boolean"
+                },
+                "routineAtTime": {
+                    "type": "boolean"
+                },
+                "routineLeadMins": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "routinesEnabled": {
+                    "type": "boolean"
+                },
+                "taskAtTime": {
+                    "type": "boolean"
+                },
+                "taskLeadMins": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "tasksEnabled": {
+                    "type": "boolean"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.RegisterTokenRequest": {
+            "type": "object",
+            "required": [
+                "deviceId",
+                "platform"
+            ],
+            "properties": {
+                "appVersion": {
+                    "type": "string"
+                },
+                "deviceId": {
+                    "type": "string"
+                },
+                "deviceName": {
+                    "type": "string"
+                },
+                "platform": {
+                    "description": "ios | android",
+                    "type": "string"
+                }
+            }
+        },
+        "dto.RegisterTokenResponse": {
+            "type": "object",
+            "properties": {
+                "topic": {
                     "type": "string"
                 }
             }
@@ -3862,6 +4568,17 @@
                 }
             }
         },
+        "dto.UnregisterTokenRequest": {
+            "type": "object",
+            "required": [
+                "deviceId"
+            ],
+            "properties": {
+                "deviceId": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.UpdateContextRuleRequest": {
             "type": "object",
             "properties": {
@@ -3913,6 +4630,74 @@
                 },
                 "sortOrder": {
                     "type": "integer"
+                }
+            }
+        },
+        "dto.UpdateNotificationPreferencesRequest": {
+            "type": "object",
+            "properties": {
+                "dailyDigestEnabled": {
+                    "type": "boolean"
+                },
+                "dailyDigestHour": {
+                    "type": "integer"
+                },
+                "eventAtTime": {
+                    "type": "boolean"
+                },
+                "eventLeadMins": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "eventsEnabled": {
+                    "type": "boolean"
+                },
+                "quietEnd": {
+                    "type": "string"
+                },
+                "quietHoursEnabled": {
+                    "type": "boolean"
+                },
+                "quietStart": {
+                    "type": "string"
+                },
+                "reminderAtTime": {
+                    "type": "boolean"
+                },
+                "reminderLeadMins": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "remindersEnabled": {
+                    "type": "boolean"
+                },
+                "routineAtTime": {
+                    "type": "boolean"
+                },
+                "routineLeadMins": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "routinesEnabled": {
+                    "type": "boolean"
+                },
+                "taskAtTime": {
+                    "type": "boolean"
+                },
+                "taskLeadMins": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "tasksEnabled": {
+                    "type": "boolean"
                 }
             }
         },

@@ -21,13 +21,13 @@ type AgendaItem struct {
 	AllDay   *bool      `db:"all_day"`
 	Location *string    `db:"location"`
 
-	FlagID        *string `db:"flag_id"`
-	SubflagID     *string `db:"subflag_id"`
+	FlagID         *string `db:"flag_id"`
+	SubflagID      *string `db:"subflag_id"`
 	ResolvedFlagID *string `db:"resolved_flag_id"`
-	FlagName      *string `db:"flag_name"`
-	FlagColor     *string `db:"flag_color"`
-	SubflagName   *string `db:"subflag_name"`
-	SubflagColor  *string `db:"subflag_color"`
+	FlagName       *string `db:"flag_name"`
+	FlagColor      *string `db:"flag_color"`
+	SubflagName    *string `db:"subflag_name"`
+	SubflagColor   *string `db:"subflag_color"`
 
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`

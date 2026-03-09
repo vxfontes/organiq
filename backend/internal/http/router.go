@@ -26,6 +26,11 @@ func NewRouter(cfg config.Config, log *slog.Logger, authHandler *handler.AuthHan
 	v1 := engine.Group("/v1")
 
 	v1.GET("/healthz", handler.HealthHandler)
+
+	// Public daily summary endpoint (token-based, no JWT)
+	if apiHandlers != nil && apiHandlers.Digest != nil {
+		v1.GET("/daily-summary", apiHandlers.Digest.GetDailySummary)
+	}
 	if authHandler != nil {
 		v1.POST("/auth/signup", authHandler.Signup)
 		v1.POST("/auth/login", authHandler.Login)
@@ -110,6 +115,23 @@ func NewRouter(cfg config.Config, log *slog.Logger, authHandler *handler.AuthHan
 			authGroup.GET("/routines/:id/streak", apiHandlers.Routines.GetStreak)
 			authGroup.POST("/routines/:id/exceptions", apiHandlers.Routines.CreateException)
 			authGroup.DELETE("/routines/:id/exceptions/:date", apiHandlers.Routines.DeleteException)
+		}
+		if apiHandlers.Devices != nil {
+			authGroup.POST("/devices/token", apiHandlers.Devices.RegisterToken)
+			authGroup.DELETE("/devices/token", apiHandlers.Devices.UnregisterToken)
+		}
+		if apiHandlers.Notifications != nil {
+			authGroup.GET("/notification-preferences", apiHandlers.Notifications.GetPreferences)
+			authGroup.PUT("/notification-preferences", apiHandlers.Notifications.UpdatePreferences)
+			authGroup.GET("/notification-preferences/daily-summary-token", apiHandlers.Notifications.GetDailySummaryToken)
+			authGroup.POST("/notification-preferences/daily-summary-token/rotate", apiHandlers.Notifications.RotateDailySummaryToken)
+			authGroup.GET("/notifications", apiHandlers.Notifications.ListNotifications)
+			authGroup.POST("/notifications/test", apiHandlers.Notifications.SendTestNotification)
+			authGroup.PATCH("/notifications/:id/read", apiHandlers.Notifications.MarkAsRead)
+			authGroup.PATCH("/notifications/read-all", apiHandlers.Notifications.MarkAllAsRead)
+		}
+		if apiHandlers.Digest != nil {
+			authGroup.POST("/digest/test", apiHandlers.Digest.SendTestEmail)
 		}
 	}
 

@@ -1,5 +1,118 @@
 basePath: /
 definitions:
+  digest.AgendaItemData:
+    properties:
+      context:
+        type: string
+      time:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+      typeKey:
+        type: string
+    type: object
+  digest.DigestData:
+    properties:
+      agenda:
+        items:
+          $ref: '#/definitions/digest.AgendaItemData'
+        type: array
+      date:
+        type: string
+      detail:
+        $ref: '#/definitions/digest.DigestDetail'
+      hasAgenda:
+        type: boolean
+      hasOpenTasks:
+        type: boolean
+      hasReminders:
+        type: boolean
+      hasSchedule:
+        type: boolean
+      hasShoppingLists:
+        type: boolean
+      hasTasks:
+        type: boolean
+      openTasks:
+        items:
+          $ref: '#/definitions/digest.TaskItemData'
+        type: array
+      reminders:
+        items:
+          $ref: '#/definitions/digest.ReminderItemData'
+        type: array
+      schedule:
+        items:
+          $ref: '#/definitions/digest.ScheduleItemData'
+        type: array
+      shoppingLists:
+        items:
+          $ref: '#/definitions/digest.ShoppingListData'
+        type: array
+      tasks:
+        items:
+          $ref: '#/definitions/digest.TaskItemData'
+        type: array
+    type: object
+  digest.DigestDetail:
+    properties:
+      agenda:
+        type: string
+      flags:
+        type: string
+      openTasks:
+        type: string
+      purpose:
+        type: string
+      reminders:
+        type: string
+      schedule:
+        type: string
+      shoppingLists:
+        type: string
+      tasks:
+        type: string
+    type: object
+  digest.ReminderItemData:
+    properties:
+      time:
+        type: string
+      title:
+        type: string
+    type: object
+  digest.ScheduleItemData:
+    properties:
+      context:
+        type: string
+      isCompleted:
+        type: boolean
+      recurrence:
+        type: string
+      time:
+        type: string
+      title:
+        type: string
+    type: object
+  digest.ShoppingListData:
+    properties:
+      pendingCount:
+        type: integer
+      pendingItems:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+    type: object
+  digest.TaskItemData:
+    properties:
+      dueTime:
+        type: string
+      title:
+        type: string
+    type: object
   dto.AgendaResponse:
     properties:
       events:
@@ -377,6 +490,15 @@ definitions:
       nextCursor:
         type: string
     type: object
+  dto.ListNotificationsResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/dto.NotificationLogResponse'
+        type: array
+      nextCursor:
+        type: string
+    type: object
   dto.ListRemindersResponse:
     properties:
       items:
@@ -429,6 +551,100 @@ definitions:
           $ref: '#/definitions/dto.TaskResponse'
         type: array
       nextCursor:
+        type: string
+    type: object
+  dto.NotificationLogResponse:
+    properties:
+      body:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: string
+      leadMins:
+        type: integer
+      readAt:
+        type: string
+      referenceId:
+        type: string
+      scheduledFor:
+        type: string
+      sentAt:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+    type: object
+  dto.NotificationPreferencesResponse:
+    properties:
+      dailyDigestEnabled:
+        type: boolean
+      dailyDigestHour:
+        type: integer
+      eventAtTime:
+        type: boolean
+      eventLeadMins:
+        items:
+          type: integer
+        type: array
+      eventsEnabled:
+        type: boolean
+      quietEnd:
+        description: '"HH:MM"'
+        type: string
+      quietHoursEnabled:
+        type: boolean
+      quietStart:
+        description: '"HH:MM"'
+        type: string
+      reminderAtTime:
+        type: boolean
+      reminderLeadMins:
+        items:
+          type: integer
+        type: array
+      remindersEnabled:
+        type: boolean
+      routineAtTime:
+        type: boolean
+      routineLeadMins:
+        items:
+          type: integer
+        type: array
+      routinesEnabled:
+        type: boolean
+      taskAtTime:
+        type: boolean
+      taskLeadMins:
+        items:
+          type: integer
+        type: array
+      tasksEnabled:
+        type: boolean
+      updatedAt:
+        type: string
+    type: object
+  dto.RegisterTokenRequest:
+    properties:
+      appVersion:
+        type: string
+      deviceId:
+        type: string
+      deviceName:
+        type: string
+      platform:
+        description: ios | android
+        type: string
+    required:
+    - deviceId
+    - platform
+    type: object
+  dto.RegisterTokenResponse:
+    properties:
+      topic:
         type: string
     type: object
   dto.ReminderResponse:
@@ -632,6 +848,13 @@ definitions:
       isActive:
         type: boolean
     type: object
+  dto.UnregisterTokenRequest:
+    properties:
+      deviceId:
+        type: string
+    required:
+    - deviceId
+    type: object
   dto.UpdateContextRuleRequest:
     properties:
       flagId:
@@ -666,6 +889,51 @@ definitions:
         type: string
       sortOrder:
         type: integer
+    type: object
+  dto.UpdateNotificationPreferencesRequest:
+    properties:
+      dailyDigestEnabled:
+        type: boolean
+      dailyDigestHour:
+        type: integer
+      eventAtTime:
+        type: boolean
+      eventLeadMins:
+        items:
+          type: integer
+        type: array
+      eventsEnabled:
+        type: boolean
+      quietEnd:
+        type: string
+      quietHoursEnabled:
+        type: boolean
+      quietStart:
+        type: string
+      reminderAtTime:
+        type: boolean
+      reminderLeadMins:
+        items:
+          type: integer
+        type: array
+      remindersEnabled:
+        type: boolean
+      routineAtTime:
+        type: boolean
+      routineLeadMins:
+        items:
+          type: integer
+        type: array
+      routinesEnabled:
+        type: boolean
+      taskAtTime:
+        type: boolean
+      taskLeadMins:
+        items:
+          type: integer
+        type: array
+      tasksEnabled:
+        type: boolean
     type: object
   dto.UpdateReminderRequest:
     properties:
@@ -1038,6 +1306,101 @@ paths:
       summary: Atualizar regra de contexto
       tags:
       - ContextRules
+  /v1/daily-summary:
+    get:
+      description: Retorna o resumo consolidado do dia do usuário (rotinas, agenda,
+        tarefas, compras).
+      parameters:
+      - description: Daily summary token
+        in: query
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/digest.DigestData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Resumo diário público
+      tags:
+      - Digest
+  /v1/devices/token:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Unregister device request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UnregisterTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Remover dispositivo
+      tags:
+      - Devices
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Register device request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RegisterTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.RegisterTokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Registrar dispositivo
+      tags:
+      - Devices
   /v1/events:
     get:
       parameters:
@@ -1580,6 +1943,147 @@ paths:
       summary: Obter perfil do usuario logado
       tags:
       - Me
+  /v1/notification-preferences:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.NotificationPreferencesResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Buscar preferências de notificação
+      tags:
+      - Notifications
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Update preferences request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateNotificationPreferencesRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.NotificationPreferencesResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Atualizar preferências de notificação
+      tags:
+      - Notifications
+  /v1/notifications:
+    get:
+      parameters:
+      - description: Limite
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ListNotificationsResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Listar notificações
+      tags:
+      - Notifications
+  /v1/notifications/{id}/read:
+    patch:
+      parameters:
+      - description: Notification ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Marcar notificação como lida
+      tags:
+      - Notifications
+  /v1/notifications/read-all:
+    patch:
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Marcar todas como lidas
+      tags:
+      - Notifications
+  /v1/notifications/test:
+    post:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Enviar notificação de teste
+      tags:
+      - Notifications
   /v1/reminders:
     get:
       parameters:

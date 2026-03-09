@@ -88,6 +88,16 @@ class _RootPageState extends State<RootPage> {
         padding: const EdgeInsets.only(left: 12, right: 12),
         actions: [
           IconButton(
+            onPressed: () => AppNavigation.push(AppRoutes.notificationHistory),
+            tooltip: 'Histórico de notificações',
+            icon: const HugeIcon(
+              icon: HugeIcons.strokeRoundedNotification03,
+              color: AppColors.surface,
+              size: 22,
+              strokeWidth: 1.8,
+            ),
+          ),
+          IconButton(
             onPressed: () => AppNavigation.push(AppRoutes.settings),
             icon: const HugeIcon(
               icon: HugeIcons.strokeRoundedSettings01,

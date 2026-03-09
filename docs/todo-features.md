@@ -1,8 +1,8 @@
 # MVP pra v1.0.0
 ## features para implementar
 
-- [ ] push notifications nos horários
-  - [ ] alerta e push desses alertas (alguns minutos ou horas antes)
+- [x] push notifications nos horários
+  - [x] alerta e push desses alertas (alguns minutos ou horas antes)
 - [x] uso de voz para enviar texto para a IA
 - [x] permissões de wifi para android e iOS
 - [ ] projetos e to-dos para os projetos específicos (não sei se só a flag supre) 

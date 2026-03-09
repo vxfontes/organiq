@@ -383,23 +383,23 @@ type UpdateShoppingItemRequest struct {
 // Routines
 
 type RoutineResponse struct {
-	ID             string         `json:"id"`
-	Title          string         `json:"title"`
-	Description    *string        `json:"description,omitempty"`
-	RecurrenceType string         `json:"recurrenceType"`
-	Weekdays       []int          `json:"weekdays"`
-	StartTime      string         `json:"startTime"`
-	EndTime        string         `json:"endTime"`
-	WeekOfMonth    *int           `json:"weekOfMonth,omitempty"`
-	StartsOn       string         `json:"startsOn"`
-	EndsOn         *string        `json:"endsOn,omitempty"`
-	Color          *string        `json:"color,omitempty"`
-	IsActive       bool           `json:"isActive"`
-	IsCompletedToday bool         `json:"isCompletedToday"`
-	Flag           *FlagObject    `json:"flag,omitempty"`
-	Subflag        *SubflagObject `json:"subflag,omitempty"`
-	CreatedAt      time.Time      `json:"createdAt"`
-	UpdatedAt      time.Time      `json:"updatedAt"`
+	ID               string         `json:"id"`
+	Title            string         `json:"title"`
+	Description      *string        `json:"description,omitempty"`
+	RecurrenceType   string         `json:"recurrenceType"`
+	Weekdays         []int          `json:"weekdays"`
+	StartTime        string         `json:"startTime"`
+	EndTime          string         `json:"endTime"`
+	WeekOfMonth      *int           `json:"weekOfMonth,omitempty"`
+	StartsOn         string         `json:"startsOn"`
+	EndsOn           *string        `json:"endsOn,omitempty"`
+	Color            *string        `json:"color,omitempty"`
+	IsActive         bool           `json:"isActive"`
+	IsCompletedToday bool           `json:"isCompletedToday"`
+	Flag             *FlagObject    `json:"flag,omitempty"`
+	Subflag          *SubflagObject `json:"subflag,omitempty"`
+	CreatedAt        time.Time      `json:"createdAt"`
+	UpdatedAt        time.Time      `json:"updatedAt"`
 }
 
 type ListRoutinesResponse struct {
@@ -479,4 +479,88 @@ type ToggleRoutineRequest struct {
 
 type CompleteRoutineRequest struct {
 	Date string `json:"date,omitempty"`
+}
+
+// Devices
+
+type RegisterTokenRequest struct {
+	DeviceID   string  `json:"deviceId" binding:"required"`
+	Platform   string  `json:"platform" binding:"required"` // ios | android
+	DeviceName *string `json:"deviceName,omitempty"`
+	AppVersion *string `json:"appVersion,omitempty"`
+}
+
+type RegisterTokenResponse struct {
+	Topic string `json:"topic"`
+}
+
+type UnregisterTokenRequest struct {
+	DeviceID string `json:"deviceId" binding:"required"`
+}
+
+// Notifications
+
+type NotificationPreferencesResponse struct {
+	RemindersEnabled  bool      `json:"remindersEnabled"`
+	ReminderAtTime    bool      `json:"reminderAtTime"`
+	ReminderLeadMins  []int     `json:"reminderLeadMins"`
+	EventsEnabled     bool      `json:"eventsEnabled"`
+	EventAtTime       bool      `json:"eventAtTime"`
+	EventLeadMins     []int     `json:"eventLeadMins"`
+	TasksEnabled      bool      `json:"tasksEnabled"`
+	TaskAtTime        bool      `json:"taskAtTime"`
+	TaskLeadMins      []int     `json:"taskLeadMins"`
+	RoutinesEnabled   bool      `json:"routinesEnabled"`
+	RoutineAtTime     bool      `json:"routineAtTime"`
+	RoutineLeadMins   []int     `json:"routineLeadMins"`
+	QuietHoursEnabled bool      `json:"quietHoursEnabled"`
+	QuietStart        *string   `json:"quietStart,omitempty"` // "HH:MM"
+	QuietEnd          *string   `json:"quietEnd,omitempty"`   // "HH:MM"
+	DailyDigestEnabled bool      `json:"dailyDigestEnabled"`
+	DailyDigestHour    int       `json:"dailyDigestHour"`
+	UpdatedAt         time.Time `json:"updatedAt"`
+}
+
+type DailySummaryTokenResponse struct {
+	Token string `json:"token"`
+	Url   string `json:"url"`
+}
+
+type UpdateNotificationPreferencesRequest struct {
+	RemindersEnabled  *bool   `json:"remindersEnabled,omitempty"`
+	ReminderAtTime    *bool   `json:"reminderAtTime,omitempty"`
+	ReminderLeadMins  *[]int  `json:"reminderLeadMins,omitempty"`
+	EventsEnabled     *bool   `json:"eventsEnabled,omitempty"`
+	EventAtTime       *bool   `json:"eventAtTime,omitempty"`
+	EventLeadMins     *[]int  `json:"eventLeadMins,omitempty"`
+	TasksEnabled      *bool   `json:"tasksEnabled,omitempty"`
+	TaskAtTime        *bool   `json:"taskAtTime,omitempty"`
+	TaskLeadMins      *[]int  `json:"taskLeadMins,omitempty"`
+	RoutinesEnabled   *bool   `json:"routinesEnabled,omitempty"`
+	RoutineAtTime     *bool   `json:"routineAtTime,omitempty"`
+	RoutineLeadMins   *[]int  `json:"routineLeadMins,omitempty"`
+	QuietHoursEnabled *bool   `json:"quietHoursEnabled,omitempty"`
+	QuietStart        *string `json:"quietStart,omitempty"`
+	QuietEnd          *string `json:"quietEnd,omitempty"`
+	DailyDigestEnabled *bool   `json:"dailyDigestEnabled,omitempty"`
+	DailyDigestHour    *int    `json:"dailyDigestHour,omitempty"`
+}
+
+type NotificationLogResponse struct {
+	ID           string     `json:"id"`
+	Type         string     `json:"type"`
+	ReferenceID  string     `json:"referenceId"`
+	Title        string     `json:"title"`
+	Body         string     `json:"body"`
+	LeadMins     *int       `json:"leadMins,omitempty"`
+	Status       string     `json:"status"`
+	ScheduledFor time.Time  `json:"scheduledFor"`
+	SentAt       *time.Time `json:"sentAt,omitempty"`
+	ReadAt       *time.Time `json:"readAt,omitempty"`
+	CreatedAt    time.Time  `json:"createdAt"`
+}
+
+type ListNotificationsResponse struct {
+	Items      []NotificationLogResponse `json:"items"`
+	NextCursor *string                   `json:"nextCursor,omitempty"`
 }

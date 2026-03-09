@@ -571,3 +571,61 @@ func (r *RoutineCompletionRepositoryImpl) GetStreak(ctx context.Context, userID,
 
 	return currentStreak, totalCompletions, nil
 }
+
+func (r *RoutineRepositoryImpl) ListAllByWeekday(ctx context.Context, weekday int) ([]domain.Routine, error) {
+	rows, err := r.db.QueryContext(ctx, `
+		SELECT id, user_id, title, description, recurrence_type, weekdays,
+			to_char(start_time, 'HH24:MI') as start_time,
+			to_char(end_time, 'HH24:MI') as end_time,
+			week_of_month, starts_on, ends_on, color, is_active, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
+		FROM inbota.routines
+		WHERE is_active = true AND $1 = ANY(weekdays)
+		ORDER BY start_time, created_at
+	`, weekday)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	items := make([]domain.Routine, 0)
+	for rows.Next() {
+		var routine domain.Routine
+		var description, endTime, endsOn, color, flagID, subflagID, sourceInboxItemID sql.NullString
+		var weekOfMonth sql.NullInt64
+		var weekdays pq.Int64Array
+
+		if err := rows.Scan(&routine.ID, &routine.UserID, &routine.Title, &description, &routine.RecurrenceType, &weekdays, &routine.StartTime, &endTime, &weekOfMonth, &routine.StartsOn, &endsOn, &color, &routine.IsActive, &flagID, &subflagID, &sourceInboxItemID, &routine.CreatedAt, &routine.UpdatedAt); err != nil {
+			return nil, err
+		}
+
+		routine.Description = stringPtrFromNull(description)
+		if endTime.Valid {
+			routine.EndTime = endTime.String
+		} else {
+			routine.EndTime = routine.StartTime
+		}
+		if weekOfMonth.Valid {
+			v := int(weekOfMonth.Int64)
+			routine.WeekOfMonth = &v
+		}
+		routine.EndsOn = stringPtrFromNull(endsOn)
+		routine.Color = stringPtrFromNull(color)
+		routine.FlagID = stringPtrFromNull(flagID)
+		routine.SubflagID = stringPtrFromNull(subflagID)
+		routine.SourceInboxItemID = stringPtrFromNull(sourceInboxItemID)
+
+		if len(weekdays) > 0 {
+			routine.Weekdays = make([]int, len(weekdays))
+			for i, v := range weekdays {
+				routine.Weekdays[i] = int(v)
+			}
+		}
+
+		items = append(items, routine)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return items, nil
+}

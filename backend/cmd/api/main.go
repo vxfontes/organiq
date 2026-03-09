@@ -21,14 +21,18 @@ import (
 	"github.com/gin-gonic/gin"
 
 	_ "inbota/backend/docs"
+	"inbota/backend/internal/app/digest"
 	"inbota/backend/internal/app/service"
 	"inbota/backend/internal/app/usecase"
 	"inbota/backend/internal/config"
 	inbotahttp "inbota/backend/internal/http"
 	"inbota/backend/internal/http/handler"
 	"inbota/backend/internal/infra/ai"
+	"inbota/backend/internal/infra/mailer"
 	"inbota/backend/internal/infra/postgres"
+	"inbota/backend/internal/infra/push"
 	"inbota/backend/internal/observability"
+	"inbota/backend/internal/scheduler"
 )
 
 func main() {
@@ -66,7 +70,19 @@ func main() {
 		}
 		userRepo := postgres.NewUserRepository(db)
 		authSvc := service.NewAuthService(cfg.JWTSecret, usecase.DefaultTokenTTL)
-		authUC := &usecase.AuthUsecase{Users: userRepo, Auth: authSvc}
+
+		deviceTokenRepo := postgres.NewDeviceTokenRepository(db)
+		notificationPrefsRepo := postgres.NewNotificationPreferencesRepository(db)
+		notificationLogRepo := postgres.NewNotificationLogRepository(db)
+		notificationTemplateRepo := postgres.NewNotificationTemplateRepository(db)
+		appConfigRepo := postgres.NewAppConfigRepository(db)
+		emailDigestRepo := postgres.NewEmailDigestRepository(db)
+
+		authUC := &usecase.AuthUsecase{
+			Users:             userRepo,
+			Auth:              authSvc,
+			NotificationPrefs: notificationPrefsRepo,
+		}
 		authHandler = handler.NewAuthHandler(authUC)
 
 		flagRepo := postgres.NewFlagRepository(db)
@@ -108,6 +124,7 @@ func main() {
 			Subflags:    subflagRepo,
 		}
 		agendaUC := usecase.NewAgendaUsecase(agendaRepo)
+		deviceTokenUC := &usecase.DeviceTokenUsecase{DeviceTokens: deviceTokenRepo}
 		txRunner := postgres.NewTxRunner(db)
 
 		var aiClient service.AIClient
@@ -145,6 +162,79 @@ func main() {
 			TxRunner:        txRunner,
 		}
 
+		// ntfy.sh client
+		ntfyClient := push.NewNtfyClient("") // default baseURL: https://ntfy.sh
+		log.Info("ntfy_client_ready")
+
+		notificationUC := &usecase.NotificationUsecase{
+			Prefs:  notificationPrefsRepo,
+			Log:    notificationLogRepo,
+			Tokens: deviceTokenRepo,
+			Config: appConfigRepo,
+			Ntfy:   ntfyClient,
+		}
+
+		var digestHandler *handler.DigestHandler
+		resendMailer := mailer.NewResendMailer(cfg.ResendAPIKey, cfg.ResendFrom)
+		digestSvc, err := digest.NewDigestService(
+			userRepo,
+			notificationPrefsRepo,
+			emailDigestRepo,
+			routineUC,
+			agendaRepo,
+			taskRepo,
+			shoppingListRepo,
+			shoppingItemRepo,
+			flagRepo,
+			subflagRepo,
+			resendMailer,
+		)
+		if err != nil {
+			log.Error("digest_service_init_error", slog.String("error", err.Error()))
+		} else {
+			digestSvc.SetLogger(log)
+			digestHandler = handler.NewDigestHandler(digestSvc)
+
+			// Digest Scheduler (every configured interval)
+			go func() {
+				ticker := time.NewTicker(cfg.DigestJobInterval)
+				defer ticker.Stop()
+
+				log.Info("running_daily_digest_job")
+				if err := digestSvc.ProcessPendingDigests(ctx); err != nil {
+					log.Error("daily_digest_job_error", slog.String("error", err.Error()))
+				}
+
+				for {
+					select {
+					case <-ctx.Done():
+						return
+					case <-ticker.C:
+						log.Info("running_daily_digest_job")
+						if err := digestSvc.ProcessPendingDigests(ctx); err != nil {
+							log.Error("daily_digest_job_error", slog.String("error", err.Error()))
+						}
+					}
+				}
+			}()
+		}
+
+		notifScheduler := &scheduler.NotificationScheduler{
+			Prefs:     notificationPrefsRepo,
+			Log:       notificationLogRepo,
+			Tokens:    deviceTokenRepo,
+			Users:     userRepo,
+			Reminders: reminderRepo,
+			Events:    eventRepo,
+			Tasks:     taskRepo,
+			Routines:  routineRepo,
+			Templates: notificationTemplateRepo,
+			Config:    appConfigRepo,
+			Ntfy:      ntfyClient,
+			Logger:    log,
+		}
+		go notifScheduler.Run(ctx)
+
 		apiHandlers = &handler.APIHandlers{
 			Me:            handler.NewMeHandler(authUC),
 			Flags:         handler.NewFlagsHandler(flagUC),
@@ -158,6 +248,9 @@ func main() {
 			ShoppingLists: handler.NewShoppingListsHandler(shoppingListUC, inboxUC),
 			ShoppingItems: handler.NewShoppingItemsHandler(shoppingItemUC, shoppingListUC),
 			Routines:      handler.NewRoutinesHandler(routineUC, flagUC, subflagUC),
+			Devices:       handler.NewDevicesHandler(deviceTokenUC),
+			Notifications: handler.NewNotificationsHandler(notificationUC),
+			Digest:        digestHandler,
 		}
 	}
 

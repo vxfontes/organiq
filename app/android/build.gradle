@@ -1,3 +1,13 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        // (removed) google-services plugin: add back only when Firebase is configured.
+    }
+}
+
 allprojects {
     repositories {
         google()

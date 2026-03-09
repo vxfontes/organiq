@@ -28,11 +28,13 @@ func (r *AgendaRepository) List(ctx context.Context, userID string, opts reposit
 		       created_at, updated_at
 		FROM inbota.view_agenda_consolidada
 		WHERE user_id = $1
-		ORDER BY scheduled_at
-		LIMIT $2 OFFSET $3
+		  AND ($2::timestamptz IS NULL OR scheduled_at >= $2::timestamptz)
+		  AND ($3::timestamptz IS NULL OR scheduled_at < $3::timestamptz)
+		ORDER BY scheduled_at, created_at
+		LIMIT $4 OFFSET $5
 	`
 
-	rows, err := r.db.QueryContext(ctx, query, userID, limit, offset)
+	rows, err := r.db.QueryContext(ctx, query, userID, opts.StartAt, opts.EndAt, limit, offset)
 	if err != nil {
 		return nil, err
 	}

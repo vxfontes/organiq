@@ -14,15 +14,15 @@ type InboxListFilter struct {
 
 type InboxWithSuggestion struct {
 	domain.InboxItem
-	SuggestionID         *string    `db:"suggestion_id"`
-	SuggestionType       *string    `db:"suggestion_type"`
-	SuggestionTitle      *string    `db:"suggestion_title"`
-	SuggestionConfidence *float64   `db:"suggestion_confidence"`
-	PayloadJSON          []byte     `db:"payload_json"`
-	SuggestionNeedsReview *bool     `db:"suggestion_needs_review"`
+	SuggestionID          *string    `db:"suggestion_id"`
+	SuggestionType        *string    `db:"suggestion_type"`
+	SuggestionTitle       *string    `db:"suggestion_title"`
+	SuggestionConfidence  *float64   `db:"suggestion_confidence"`
+	PayloadJSON           []byte     `db:"payload_json"`
+	SuggestionNeedsReview *bool      `db:"suggestion_needs_review"`
 	SuggestionCreatedAt   *time.Time `db:"suggestion_created_at"`
-	SuggestionFlagID      *string   `db:"suggestion_flag_id"`
-	SuggestionSubflagID   *string   `db:"suggestion_subflag_id"`
+	SuggestionFlagID      *string    `db:"suggestion_flag_id"`
+	SuggestionSubflagID   *string    `db:"suggestion_subflag_id"`
 }
 
 type InboxRepository interface {
