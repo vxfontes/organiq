@@ -244,6 +244,10 @@ func (uc *RoutineUsecase) Validate(ctx context.Context, routine domain.Routine) 
 }
 
 func (uc *RoutineUsecase) checkOverlap(ctx context.Context, userID, excludeID string, weekdays []int, startTime string, endTime string) error {
+	if timeToMinutes(endTime) <= timeToMinutes(startTime) {
+		return ErrInvalidTimeRange
+	}
+
 	var excludeIDPtr *string
 	if excludeID != "" {
 		excludeIDPtr = &excludeID
