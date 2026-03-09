@@ -557,7 +557,7 @@ func (s *NotificationScheduler) dispatchOne(ctx context.Context, l domain.Notifi
 	success := false
 	for _, t := range tokens {
 		if s.Ntfy != nil {
-			err := s.Ntfy.Send(ctx, t.Topic, l.Title, l.Body, data)
+			err := s.Ntfy.Send(ctx, t.Topic, l.Body, l.Title, data)
 			if err == nil {
 				success = true
 			} else {
