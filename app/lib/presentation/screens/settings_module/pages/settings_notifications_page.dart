@@ -217,7 +217,7 @@ class _SettingsNotificationsPageState extends IBState<SettingsNotificationsPage,
         : 'Desativado';
 
     return SettingsAccordionSection(
-      title: 'Daily Digest',
+      title: 'Resumo Diário',
       subtitle: 'Resumo diário por e-mail com sua agenda.',
       collapsedSummary: digestSummary,
       icon: IBIcon.mailOutlineRounded,
@@ -249,7 +249,7 @@ class _SettingsNotificationsPageState extends IBState<SettingsNotificationsPage,
 
   Widget _buildDailySummaryTokenSection() {
     return SettingsAccordionSection(
-      title: 'Daily Summary',
+      title: 'Resumo Diario API',
       subtitle: 'Token de acesso para seu resumo diário via API.',
       collapsedSummary: 'Copiar/rotacionar token',
       icon: IBIcon.keyRounded,

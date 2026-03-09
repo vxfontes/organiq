@@ -63,32 +63,96 @@ class SettingsNotificationsDailySummaryTokenContent extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: IBButton(
-                label: 'Copiar link',
-                variant: IBButtonVariant.secondary,
-                onPressed: (url?.trim().isNotEmpty == true)
-                    ? () {
-                        Clipboard.setData(ClipboardData(text: url!));
-                        IBSnackBar.success(context, 'Link copiado!');
-                      }
-                    : null,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceSoft,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Row(
+                  children: [
+                    const SizedBox(width: 12),
+                    const IBIcon(
+                      IBIcon.linkRounded,
+                      size: 16,
+                      color: AppColors.textMuted,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: IBText(url ?? 'URL indisponível', context: context)
+                          .body
+                          .maxLines(1)
+                          .build(),
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: IBButton(
-                label: 'Rotacionar',
-                variant: IBButtonVariant.secondary,
-                onPressed: loading ? null : () => unawaited(onRotate()),
+            const SizedBox(width: 8),
+            IconButton(
+              onPressed: (url?.trim().isNotEmpty == true)
+                  ? () {
+                      Clipboard.setData(ClipboardData(text: url!));
+                      IBSnackBar.success(context, 'Link copiado!');
+                    }
+                  : null,
+              tooltip: 'Copiar link',
+              icon: const Icon(Icons.copy_rounded, size: 18),
+              style: IconButton.styleFrom(
+                backgroundColor: url?.trim().isNotEmpty == true
+                    ? AppColors.primary50
+                    : AppColors.surfaceSoft,
+                foregroundColor: url?.trim().isNotEmpty == true
+                    ? AppColors.primary700
+                    : AppColors.textMuted,
+                disabledBackgroundColor: AppColors.surfaceSoft,
+                disabledForegroundColor: AppColors.textMuted,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: const EdgeInsets.all(10),
+              ),
+            ),
+            const SizedBox(width: 6),
+            IconButton(
+              onPressed: loading
+                  ? null
+                  : () => unawaited(onRotate()),
+              tooltip: 'Rotacionar token',
+              icon: loading
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.textMuted,
+                      ),
+                    )
+                  : const IBIcon(IBIcon.autoRenew, size: 18),
+              style: IconButton.styleFrom(
+                backgroundColor: loading
+                    ? AppColors.surfaceSoft
+                    : AppColors.primary50,
+                foregroundColor: loading
+                    ? AppColors.textMuted
+                    : AppColors.primary700,
+                disabledBackgroundColor: AppColors.surfaceSoft,
+                disabledForegroundColor: AppColors.textMuted,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: const EdgeInsets.all(10),
               ),
             ),
           ],
         ),
         const SizedBox(height: 10),
-        IBButton(
-          label: 'Atualizar',
-          variant: IBButtonVariant.ghost,
-          onPressed: loading ? null : onRefresh,
+        Center(
+          child: IBButton(
+            label: 'Atualizar',
+            variant: IBButtonVariant.ghost,
+            onPressed: loading ? null : onRefresh,
+          ),
         ),
       ],
     );

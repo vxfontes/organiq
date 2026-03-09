@@ -62,6 +62,8 @@ class IBIcon extends StatelessWidget {
   static const IconData fire = Icons.local_fire_department_outlined;
   static const IconData mailOutlineRounded = Icons.mail_outline_rounded;
   static const IconData keyRounded = Icons.key_rounded;
+  static const IconData autoRenew = Icons.autorenew_rounded;
+  static const IconData linkRounded = Icons.link_rounded;
 
   @override
   Widget build(BuildContext context) {

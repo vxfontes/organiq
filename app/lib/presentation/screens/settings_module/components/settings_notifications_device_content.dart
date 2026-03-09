@@ -51,7 +51,7 @@ class SettingsNotificationsDeviceContent extends StatelessWidget {
                               size: 16,
                               color: AppColors.textMuted,
                             ),
-                            const SizedBox(width: 8),
+                    const SizedBox(width: 6),
                             Expanded(
                               child: IBText(
                                 topicLabel,
@@ -71,13 +71,23 @@ class SettingsNotificationsDeviceContent extends StatelessWidget {
                               IBSnackBar.success(context, 'Tópico copiado!');
                             },
                       tooltip: 'Copiar tópico',
-                      icon: const Icon(Icons.copy_rounded, size: 20),
+                      icon: const Icon(Icons.copy_rounded, size: 18),
                       style: IconButton.styleFrom(
-                        backgroundColor: AppColors.surfaceSoft,
-                        foregroundColor: AppColors.primary700,
+                        backgroundColor: topic == null
+                            ? AppColors.surfaceSoft
+                            : AppColors.primary50,
+                        foregroundColor: topic == null
+                            ? AppColors.textMuted
+                            : AppColors.primary700,
+                        disabledBackgroundColor: AppColors.surfaceSoft,
                         disabledForegroundColor: AppColors.textMuted,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.all(10),
                       ),
                     ),
+                    const SizedBox(width: 6),
                     IconButton(
                       onPressed: loading
                           ? null
@@ -87,11 +97,29 @@ class SettingsNotificationsDeviceContent extends StatelessWidget {
                               ),
                             ),
                       tooltip: 'Gerar novamente',
-                      icon: const Icon(Icons.refresh_rounded, size: 20),
+                      icon: loading
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.textMuted,
+                              ),
+                            )
+                          : const Icon(Icons.refresh_rounded, size: 18),
                       style: IconButton.styleFrom(
-                        backgroundColor: AppColors.surfaceSoft,
-                        foregroundColor: AppColors.primary700,
+                        backgroundColor: loading
+                            ? AppColors.surfaceSoft
+                            : AppColors.primary50,
+                        foregroundColor: loading
+                            ? AppColors.textMuted
+                            : AppColors.primary700,
+                        disabledBackgroundColor: AppColors.surfaceSoft,
                         disabledForegroundColor: AppColors.textMuted,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.all(10),
                       ),
                     ),
                   ],

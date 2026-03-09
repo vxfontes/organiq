@@ -26,7 +26,7 @@ class SettingsNotificationsDailyDigestContent extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         IBToggle(
-          title: 'Daily Digest por e-mail',
+          title: 'Resumo diário por e-mail',
           subtitle: 'Receba um resumo matinal com sua agenda e tarefas.',
           leadingIcon: IBIcon.mailOutlineRounded,
           value: prefs.dailyDigestEnabled,
