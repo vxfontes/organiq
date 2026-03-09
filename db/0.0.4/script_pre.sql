@@ -95,3 +95,26 @@ CREATE INDEX idx_notification_log_pending
 -- Histórico por usuário
 CREATE INDEX idx_notification_log_user
     ON inbota.notification_log(user_id, created_at DESC);
+
+-- notification_templates: templates de mensagem configuráveis sem necessidade de redeploy
+CREATE TABLE inbota.notification_templates (
+       id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+       type           inbota.notification_type NOT NULL,
+       trigger_key    TEXT NOT NULL,  -- 'at_time', 'lead_time', 'lead_time_day'
+       title_template TEXT NOT NULL,  -- ex: '{{title}}'
+       body_template  TEXT NOT NULL,  -- ex: 'Lembrete em {{lead_mins}} minutos'
+       is_active      BOOLEAN NOT NULL DEFAULT true,
+       created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+       updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE UNIQUE INDEX idx_notification_templates_unique
+    ON inbota.notification_templates(type, trigger_key);
+
+-- app_config: configurações dinâmicas da aplicação (scheduler, notificações, etc.)
+CREATE TABLE inbota.app_config (
+       key         TEXT PRIMARY KEY,
+       value       TEXT NOT NULL,
+       description TEXT,
+       updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
