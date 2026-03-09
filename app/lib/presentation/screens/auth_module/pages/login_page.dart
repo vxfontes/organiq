@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
+import 'package:inbota/modules/notifications/domain/repositories/i_notifications_repository.dart';
 import 'package:inbota/presentation/routes/app_navigation.dart';
 import 'package:inbota/presentation/routes/app_routes.dart';
 import 'package:inbota/presentation/screens/auth_module/controller/login_controller.dart';
 import 'package:inbota/presentation/screens/auth_module/components/auth_form_scaffold.dart';
 import 'package:inbota/shared/components/ib_lib/index.dart';
+import 'package:inbota/shared/services/push/push_notification_service.dart';
 import 'package:inbota/shared/state/ib_state.dart';
 import 'package:inbota/shared/theme/app_colors.dart';
 
@@ -37,6 +40,13 @@ class _LoginPageState extends IBState<LoginPage, LoginController> {
   Future<void> _submit() async {
     final success = await controller.submit();
     if (!success || !mounted) return;
+
+    // Initialize Push Notifications
+    final pushService = PushNotificationService.instance;
+    pushService.setRepository(Modular.get<INotificationsRepository>());
+    await pushService.initialize();
+    await pushService.registerToken();
+
     AppNavigation.clearAndPush(AppRoutes.rootHome);
   }
 
