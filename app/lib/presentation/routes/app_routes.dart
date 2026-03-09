@@ -11,6 +11,7 @@ class AppRoutes {
   static const contexts = '/contexts';
   static const account = '/account';
   static const notifications = '/notifications';
+  static const notificationHistory = '/notification-history';
   static const settingsComponents = '/settings/components';
   static const settingsContexts = '/settings/contexts';
   static const settingsAccount = '/settings/account';

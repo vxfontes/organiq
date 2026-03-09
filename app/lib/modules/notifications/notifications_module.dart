@@ -4,6 +4,9 @@ import 'package:inbota/modules/notifications/data/repositories/notifications_rep
 import 'package:inbota/modules/notifications/domain/repositories/i_notification_prefs_repository.dart';
 import 'package:inbota/modules/notifications/domain/repositories/i_notifications_repository.dart';
 import 'package:inbota/modules/notifications/domain/usecases/get_notification_prefs_usecase.dart';
+import 'package:inbota/modules/notifications/domain/usecases/get_notifications_usecase.dart';
+import 'package:inbota/modules/notifications/domain/usecases/mark_all_notifications_as_read_usecase.dart';
+import 'package:inbota/modules/notifications/domain/usecases/mark_notification_as_read_usecase.dart';
 import 'package:inbota/modules/notifications/domain/usecases/send_test_email_digest_usecase.dart';
 import 'package:inbota/modules/notifications/domain/usecases/send_test_notification_usecase.dart';
 import 'package:inbota/modules/notifications/domain/usecases/update_notification_prefs_usecase.dart';
@@ -19,5 +22,8 @@ class NotificationsModule {
     i.addLazySingleton<UpdateNotificationPrefsUsecase>(UpdateNotificationPrefsUsecase.new);
     i.addLazySingleton<SendTestNotificationUsecase>(SendTestNotificationUsecase.new);
     i.addLazySingleton<SendTestEmailDigestUsecase>(SendTestEmailDigestUsecase.new);
+    i.addLazySingleton<GetNotificationsUsecase>(GetNotificationsUsecase.new);
+    i.addLazySingleton<MarkNotificationAsReadUsecase>(MarkNotificationAsReadUsecase.new);
+    i.addLazySingleton<MarkAllNotificationsAsReadUsecase>(MarkAllNotificationsAsReadUsecase.new);
   }
 }

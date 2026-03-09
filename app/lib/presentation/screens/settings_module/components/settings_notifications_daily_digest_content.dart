@@ -41,19 +41,19 @@ class SettingsNotificationsDailyDigestContent extends StatelessWidget {
                   children: [
                     IBTimeField(
                       label: 'Horário de envio',
-                      valueLabel: '${prefs.dailyDigestHour.toString().padLeft(2, '0')}:00',
+                      valueLabel:
+                          '${prefs.dailyDigestHour.toString().padLeft(2, '0')}:00',
                       enabled: true,
                       hasValue: true,
                       onTap: onPickHour,
                     ),
                     const SizedBox(height: 16),
-                    // IBButton(
-                    //   label: 'Enviar e-mail de teste agora',
-                    //   variant: IBButtonVariant.secondary,
-                    //   onPressed: onSendTest,
-                    //   loading: sendingTest,
-                    //   // icon: IBIcon.sendRounded,
-                    // ),
+                    IBButton(
+                      label: 'Enviar e-mail de teste agora',
+                      variant: IBButtonVariant.secondary,
+                      onPressed: onSendTest,
+                      loading: sendingTest,
+                    ),
                   ],
                 )
               : Container(

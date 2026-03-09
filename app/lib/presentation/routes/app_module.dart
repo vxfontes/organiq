@@ -2,6 +2,7 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:inbota/modules/shared_module.dart';
 
 import '../screens/auth_module/auth_module.dart';
+import '../screens/notifications_module/notifications_module.dart';
 import '../screens/root_module/root_module.dart';
 import '../screens/settings_module/settings_module.dart';
 import '../screens/splash_module/splash_module.dart';
@@ -17,6 +18,7 @@ class AppModule extends Module {
     r.module(AppRoutes.auth, module: AuthModule());
     r.module(AppRoutes.root, module: RootModule());
     r.module(AppRoutes.settings, module: SettingsModule());
+    r.module(AppRoutes.notificationHistory, module: NotificationsModule());
     r.redirect('/**', to: AppRoutes.splash);
   }
 }
