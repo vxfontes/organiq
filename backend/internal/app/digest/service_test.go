@@ -76,6 +76,20 @@ func (f *fakeAgendaRepo) List(ctx context.Context, userID string, opts repositor
 	return f.items, nil
 }
 
+type fakeRoutineLister struct {
+	items       []domain.Routine
+	callCount   int
+	lastWeekday int
+	lastDate    string
+}
+
+func (f *fakeRoutineLister) ListByWeekday(ctx context.Context, userID string, weekday int, date string) ([]domain.Routine, error) {
+	f.callCount++
+	f.lastWeekday = weekday
+	f.lastDate = date
+	return f.items, nil
+}
+
 type fakeTaskRepo struct {
 	items []domain.Task
 }
@@ -164,9 +178,18 @@ func (f *fakeMailer) Send(ctx context.Context, req mailer.SendRequest) (string, 
 func TestBuildDigestData(t *testing.T) {
 	loc := time.FixedZone("BRT", -3*3600)
 	target := time.Date(2026, 3, 9, 4, 0, 0, 0, loc)
+	routines := &fakeRoutineLister{items: []domain.Routine{
+		{Title: "Treino", StartTime: "06:30", EndTime: "07:30", RecurrenceType: "weekly"},
+		{Title: "Planejamento", StartTime: "19:00", EndTime: "19:30", RecurrenceType: "biweekly"},
+	}}
 
 	agenda := &fakeAgendaRepo{items: []repository.AgendaItem{
-		{ItemType: "event", Title: "Reunião", ScheduledAt: time.Date(2026, 3, 9, 10, 0, 0, 0, loc)},
+		{
+			ItemType:    "event",
+			Title:       "Reunião",
+			ScheduledAt: time.Date(2026, 3, 9, 10, 0, 0, 0, loc),
+			EndAt:       ptrTime(time.Date(2026, 3, 9, 11, 30, 0, 0, loc)),
+		},
 		{ItemType: "reminder", Title: "Tomar água", ScheduledAt: time.Date(2026, 3, 9, 9, 0, 0, 0, loc)},
 		{ItemType: "event", Title: "Ontem", ScheduledAt: time.Date(2026, 3, 8, 22, 0, 0, 0, loc)},
 	}}
@@ -193,10 +216,13 @@ func TestBuildDigestData(t *testing.T) {
 		&fakeUserRepo{},
 		&fakePrefsRepo{},
 		&fakeEmailDigestRepo{},
+		routines,
 		agenda,
 		tasks,
 		lists,
 		items,
+		nil,
+		nil,
 		&fakeMailer{},
 	)
 	if err != nil {
@@ -211,6 +237,21 @@ func TestBuildDigestData(t *testing.T) {
 	if !data.HasAgenda || len(data.Agenda) != 2 {
 		t.Fatalf("expected agenda with 2 items, got hasAgenda=%v len=%d", data.HasAgenda, len(data.Agenda))
 	}
+	if !data.HasSchedule || len(data.Schedule) != 2 {
+		t.Fatalf("expected schedule with 2 routines, got hasSchedule=%v len=%d", data.HasSchedule, len(data.Schedule))
+	}
+	if routines.callCount != 1 || routines.lastWeekday != 1 || routines.lastDate != "2026-03-09" {
+		t.Fatalf("expected routines fetched for weekday/date target, got calls=%d weekday=%d date=%s", routines.callCount, routines.lastWeekday, routines.lastDate)
+	}
+	if data.Schedule[0].Recurrence == "" || data.Schedule[1].Recurrence == "" {
+		t.Fatalf("expected recurrence labels in schedule items, got %+v", data.Schedule)
+	}
+	if data.Agenda[0].Type == "" || data.Agenda[1].Type == "" {
+		t.Fatalf("expected agenda items with type labels, got %+v", data.Agenda)
+	}
+	if data.Agenda[0].Time != "10:00 - 11:30" {
+		t.Fatalf("expected event range time in agenda, got %q", data.Agenda[0].Time)
+	}
 	if !data.HasReminders || len(data.Reminders) != 1 {
 		t.Fatalf("expected 1 reminder, got hasReminders=%v len=%d", data.HasReminders, len(data.Reminders))
 	}
@@ -223,6 +264,9 @@ func TestBuildDigestData(t *testing.T) {
 	if !data.HasShoppingLists || len(data.ShoppingLists) != 1 || data.ShoppingLists[0].PendingCount != 1 {
 		t.Fatalf("expected 1 shopping list with 1 pending item, got %+v", data.ShoppingLists)
 	}
+	if len(data.ShoppingLists[0].PendingItems) != 1 {
+		t.Fatalf("expected pending items listed, got %+v", data.ShoppingLists[0].PendingItems)
+	}
 }
 
 func TestSendDigestSkipsWhenAlreadyReserved(t *testing.T) {
@@ -233,10 +277,13 @@ func TestSendDigestSkipsWhenAlreadyReserved(t *testing.T) {
 		&fakeUserRepo{},
 		&fakePrefsRepo{},
 		digests,
+		&fakeRoutineLister{},
 		&fakeAgendaRepo{},
 		&fakeTaskRepo{},
 		&fakeShoppingListRepo{},
 		&fakeShoppingItemRepo{itemsByList: map[string][]domain.ShoppingItem{}},
+		nil,
+		nil,
 		mail,
 	)
 	if err != nil {
@@ -263,10 +310,13 @@ func TestSendTestDigestBypassesTracking(t *testing.T) {
 		&fakeUserRepo{},
 		&fakePrefsRepo{},
 		digests,
+		&fakeRoutineLister{},
 		&fakeAgendaRepo{},
 		&fakeTaskRepo{},
 		&fakeShoppingListRepo{},
 		&fakeShoppingItemRepo{itemsByList: map[string][]domain.ShoppingItem{}},
+		nil,
+		nil,
 		mail,
 	)
 	if err != nil {
@@ -301,10 +351,13 @@ func TestProcessPendingDigestsRespectsHour(t *testing.T) {
 		users,
 		prefs,
 		digests,
+		&fakeRoutineLister{},
 		&fakeAgendaRepo{},
 		&fakeTaskRepo{},
 		&fakeShoppingListRepo{},
 		&fakeShoppingItemRepo{itemsByList: map[string][]domain.ShoppingItem{}},
+		nil,
+		nil,
 		mail,
 	)
 	if err != nil {

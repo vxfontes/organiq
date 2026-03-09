@@ -180,10 +180,13 @@ func main() {
 			userRepo,
 			notificationPrefsRepo,
 			emailDigestRepo,
+			routineUC,
 			agendaRepo,
 			taskRepo,
 			shoppingListRepo,
 			shoppingItemRepo,
+			flagRepo,
+			subflagRepo,
 			resendMailer,
 		)
 		if err != nil {

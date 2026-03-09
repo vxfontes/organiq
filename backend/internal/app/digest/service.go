@@ -10,6 +10,7 @@ import (
 	"inbota/backend/internal/infra/mailer"
 	"log/slog"
 	"sort"
+	"strconv"
 	"strings"
 	texttemplate "text/template"
 	"time"
@@ -21,14 +22,21 @@ const (
 	defaultDigestSubject = "Seu dia no Inbota"
 )
 
+type RoutineWeekdayLister interface {
+	ListByWeekday(ctx context.Context, userID string, weekday int, date string) ([]domain.Routine, error)
+}
+
 type DigestService struct {
 	userRepo         repository.UserRepository
 	notifPrefsRepo   repository.NotificationPreferencesRepository
 	emailDigestRepo  repository.EmailDigestRepository
+	routineLister    RoutineWeekdayLister
 	agendaRepo       repository.AgendaRepository
 	taskRepo         repository.TaskRepository
 	shoppingListRepo repository.ShoppingListRepository
 	shoppingItemRepo repository.ShoppingItemRepository
+	flagRepo         repository.FlagRepository
+	subflagRepo      repository.SubflagRepository
 	mailer           mailer.Mailer
 	htmlTemplate     *htmltemplate.Template
 	textTemplate     *texttemplate.Template
@@ -40,10 +48,13 @@ func NewDigestService(
 	userRepo repository.UserRepository,
 	notifPrefsRepo repository.NotificationPreferencesRepository,
 	emailDigestRepo repository.EmailDigestRepository,
+	routineLister RoutineWeekdayLister,
 	agendaRepo repository.AgendaRepository,
 	taskRepo repository.TaskRepository,
 	shoppingListRepo repository.ShoppingListRepository,
 	shoppingItemRepo repository.ShoppingItemRepository,
+	flagRepo repository.FlagRepository,
+	subflagRepo repository.SubflagRepository,
 	mailClient mailer.Mailer,
 ) (*DigestService, error) {
 	htmlTmpl, textTmpl, err := mailer.ParseDailyDigestTemplates()
@@ -55,10 +66,13 @@ func NewDigestService(
 		userRepo:         userRepo,
 		notifPrefsRepo:   notifPrefsRepo,
 		emailDigestRepo:  emailDigestRepo,
+		routineLister:    routineLister,
 		agendaRepo:       agendaRepo,
 		taskRepo:         taskRepo,
 		shoppingListRepo: shoppingListRepo,
 		shoppingItemRepo: shoppingItemRepo,
+		flagRepo:         flagRepo,
+		subflagRepo:      subflagRepo,
 		mailer:           mailClient,
 		htmlTemplate:     htmlTmpl,
 		textTemplate:     textTmpl,
@@ -69,6 +83,8 @@ func NewDigestService(
 
 type DigestData struct {
 	Date             string
+	HasSchedule      bool
+	Schedule         []ScheduleItemData
 	HasAgenda        bool
 	Agenda           []AgendaItemData
 	HasReminders     bool
@@ -81,10 +97,20 @@ type DigestData struct {
 	ShoppingLists    []ShoppingListData
 }
 
+type ScheduleItemData struct {
+	Time        string
+	Title       string
+	Recurrence  string
+	Context     string
+	IsCompleted bool
+}
+
 type AgendaItemData struct {
-	Time  string
-	Title string
-	Flag  string
+	Time    string
+	Type    string
+	TypeKey string
+	Title   string
+	Context string
 }
 
 type ReminderItemData struct {
@@ -100,6 +126,7 @@ type TaskItemData struct {
 type ShoppingListData struct {
 	Title        string
 	PendingCount int
+	PendingItems []string
 }
 
 func (s *DigestService) SetNow(nowFn func() time.Time) {
@@ -127,7 +154,17 @@ func (s *DigestService) BuildDigestData(ctx context.Context, userID string, targ
 	startOfDay := time.Date(targetDate.Year(), targetDate.Month(), targetDate.Day(), 0, 0, 0, 0, loc)
 	endOfDay := startOfDay.Add(24 * time.Hour)
 
-	agendaItems, err := s.agendaRepo.List(ctx, userID, repository.ListOptions{Limit: maxDigestPageSize})
+	scheduleItems, err := s.buildScheduleItems(ctx, userID, targetDate)
+	if err != nil {
+		return DigestData{}, err
+	}
+	data.Schedule = scheduleItems
+
+	agendaItems, err := s.agendaRepo.List(ctx, userID, repository.ListOptions{
+		Limit:   maxDigestPageSize,
+		StartAt: &startOfDay,
+		EndAt:   &endOfDay,
+	})
 	if err != nil {
 		return DigestData{}, fmt.Errorf("list agenda: %w", err)
 	}
@@ -137,21 +174,20 @@ func (s *DigestService) BuildDigestData(ctx context.Context, userID string, targ
 		if scheduledAt.Before(startOfDay) || !scheduledAt.Before(endOfDay) {
 			continue
 		}
-
-		flag := ""
-		if item.FlagName != nil {
-			flag = *item.FlagName
-		}
+		typeLabel, typeKey := agendaType(item.ItemType)
+		contextLabel := contextPath(item.FlagName, item.SubflagName)
 
 		data.Agenda = append(data.Agenda, AgendaItemData{
-			Time:  scheduledAt.Format("15:04"),
-			Title: item.Title,
-			Flag:  flag,
+			Time:    agendaTimeLabel(item, scheduledAt),
+			Type:    typeLabel,
+			TypeKey: typeKey,
+			Title:   item.Title,
+			Context: contextLabel,
 		})
 
 		if item.ItemType == "reminder" {
 			data.Reminders = append(data.Reminders, ReminderItemData{
-				Time:  scheduledAt.Format("15:04"),
+				Time:  agendaTimeLabel(item, scheduledAt),
 				Title: item.Title,
 			})
 		}
@@ -195,19 +231,20 @@ func (s *DigestService) BuildDigestData(ctx context.Context, userID string, targ
 			return DigestData{}, fmt.Errorf("list shopping items for list %s: %w", list.ID, err)
 		}
 
-		pendingCount := 0
+		pendingItems := make([]string, 0)
 		for _, item := range items {
 			if !item.Checked {
-				pendingCount++
+				pendingItems = append(pendingItems, shoppingItemLabel(item))
 			}
 		}
-		if pendingCount == 0 {
+		if len(pendingItems) == 0 {
 			continue
 		}
 
 		data.ShoppingLists = append(data.ShoppingLists, ShoppingListData{
 			Title:        list.Title,
-			PendingCount: pendingCount,
+			PendingCount: len(pendingItems),
+			PendingItems: pendingItems,
 		})
 	}
 
@@ -218,6 +255,7 @@ func (s *DigestService) BuildDigestData(ctx context.Context, userID string, targ
 		return data.Reminders[i].Time < data.Reminders[j].Time
 	})
 
+	data.HasSchedule = len(data.Schedule) > 0
 	data.HasAgenda = len(data.Agenda) > 0
 	data.HasReminders = len(data.Reminders) > 0
 	data.HasTasks = len(data.Tasks) > 0
@@ -225,6 +263,219 @@ func (s *DigestService) BuildDigestData(ctx context.Context, userID string, targ
 	data.HasShoppingLists = len(data.ShoppingLists) > 0
 
 	return data, nil
+}
+
+func (s *DigestService) buildScheduleItems(ctx context.Context, userID string, targetDate time.Time) ([]ScheduleItemData, error) {
+	if s.routineLister == nil {
+		return nil, nil
+	}
+
+	weekday := int(targetDate.Weekday())
+	date := targetDate.Format("2006-01-02")
+
+	routines, err := s.routineLister.ListByWeekday(ctx, userID, weekday, date)
+	if err != nil {
+		return nil, fmt.Errorf("list routines: %w", err)
+	}
+	if len(routines) == 0 {
+		return nil, nil
+	}
+
+	flagNames, subflagNames := s.loadRoutineContextMaps(ctx, userID, routines)
+
+	items := make([]ScheduleItemData, 0, len(routines))
+	for _, routine := range routines {
+		items = append(items, ScheduleItemData{
+			Time:        routineTimeLabel(routine.StartTime, routine.EndTime),
+			Title:       routine.Title,
+			Recurrence:  routineRecurrenceLabel(routine.RecurrenceType),
+			Context:     routineContextPath(routine.FlagID, routine.SubflagID, flagNames, subflagNames),
+			IsCompleted: routine.IsCompletedToday,
+		})
+	}
+
+	return items, nil
+}
+
+func (s *DigestService) loadRoutineContextMaps(ctx context.Context, userID string, routines []domain.Routine) (map[string]string, map[string]string) {
+	flagNames := make(map[string]string)
+	subflagNames := make(map[string]string)
+
+	if s.flagRepo != nil {
+		flagIDs := collectIDs(routines, func(r domain.Routine) *string { return r.FlagID })
+		if len(flagIDs) > 0 {
+			flags, err := s.flagRepo.GetByIDs(ctx, userID, flagIDs)
+			if err != nil {
+				s.log.Warn("digest_flag_lookup_failed", slog.String("user_id", userID), slog.String("error", err.Error()))
+			} else {
+				for _, flag := range flags {
+					flagNames[flag.ID] = flag.Name
+				}
+			}
+		}
+	}
+
+	if s.subflagRepo != nil {
+		subflagIDs := collectIDs(routines, func(r domain.Routine) *string { return r.SubflagID })
+		if len(subflagIDs) > 0 {
+			subflags, err := s.subflagRepo.GetByIDs(ctx, userID, subflagIDs)
+			if err != nil {
+				s.log.Warn("digest_subflag_lookup_failed", slog.String("user_id", userID), slog.String("error", err.Error()))
+			} else {
+				for _, subflag := range subflags {
+					subflagNames[subflag.ID] = subflag.Name
+				}
+			}
+		}
+	}
+
+	return flagNames, subflagNames
+}
+
+func collectIDs(routines []domain.Routine, selector func(domain.Routine) *string) []string {
+	unique := make(map[string]struct{})
+	ids := make([]string, 0)
+	for _, routine := range routines {
+		id := strings.TrimSpace(derefString(selector(routine)))
+		if id == "" {
+			continue
+		}
+		if _, ok := unique[id]; ok {
+			continue
+		}
+		unique[id] = struct{}{}
+		ids = append(ids, id)
+	}
+	return ids
+}
+
+func routineTimeLabel(startTime, endTime string) string {
+	start := normalizeClock(startTime)
+	end := normalizeClock(endTime)
+
+	switch {
+	case start == "" && end == "":
+		return "Dia todo"
+	case start == "":
+		return end
+	case end == "" || end == start:
+		return start
+	default:
+		return fmt.Sprintf("%s - %s", start, end)
+	}
+}
+
+func normalizeClock(raw string) string {
+	value := strings.TrimSpace(raw)
+	if value == "" {
+		return ""
+	}
+
+	parts := strings.Split(value, ":")
+	if len(parts) < 2 {
+		return value
+	}
+
+	hour, errHour := strconv.Atoi(parts[0])
+	minute, errMinute := strconv.Atoi(parts[1])
+	if errHour != nil || errMinute != nil {
+		return value
+	}
+
+	return fmt.Sprintf("%02d:%02d", hour, minute)
+}
+
+func routineRecurrenceLabel(recurrenceType string) string {
+	switch recurrenceType {
+	case "", "weekly":
+		return "Semanal"
+	case "biweekly":
+		return "Quinzenal"
+	case "triweekly":
+		return "A cada 3 semanas"
+	case "monthly_week":
+		return "Mensal"
+	default:
+		return recurrenceType
+	}
+}
+
+func routineContextPath(flagID, subflagID *string, flagNames, subflagNames map[string]string) string {
+	flag := strings.TrimSpace(flagNames[derefString(flagID)])
+	subflag := strings.TrimSpace(subflagNames[derefString(subflagID)])
+
+	switch {
+	case flag != "" && subflag != "":
+		return flag + " > " + subflag
+	case flag != "":
+		return flag
+	case subflag != "":
+		return subflag
+	default:
+		return ""
+	}
+}
+
+func agendaType(itemType string) (string, string) {
+	switch itemType {
+	case "event":
+		return "Evento", "event"
+	case "task":
+		return "Task", "task"
+	case "reminder":
+		return "Lembrete", "reminder"
+	default:
+		return "Item", "item"
+	}
+}
+
+func contextPath(flagName, subflagName *string) string {
+	flag := strings.TrimSpace(derefString(flagName))
+	subflag := strings.TrimSpace(derefString(subflagName))
+
+	switch {
+	case flag != "" && subflag != "":
+		return flag + " > " + subflag
+	case flag != "":
+		return flag
+	case subflag != "":
+		return subflag
+	default:
+		return ""
+	}
+}
+
+func agendaTimeLabel(item repository.AgendaItem, scheduledAt time.Time) string {
+	if item.ItemType == "event" && item.AllDay != nil && *item.AllDay {
+		return "Dia inteiro"
+	}
+	if item.ItemType == "event" && item.EndAt != nil {
+		endAt := item.EndAt.In(scheduledAt.Location())
+		start := scheduledAt.Format("15:04")
+		end := endAt.Format("15:04")
+		if start != end {
+			return fmt.Sprintf("%s - %s", start, end)
+		}
+	}
+	return scheduledAt.Format("15:04")
+}
+
+func shoppingItemLabel(item domain.ShoppingItem) string {
+	title := strings.TrimSpace(item.Title)
+	if item.Quantity != nil {
+		qty := strings.TrimSpace(*item.Quantity)
+		if qty != "" {
+			return fmt.Sprintf("%s (%s)", title, qty)
+		}
+	}
+	return title
+}
+
+func derefString(value *string) string {
+	if value == nil {
+		return ""
+	}
+	return *value
 }
 
 func (s *DigestService) ProcessPendingDigests(ctx context.Context) error {

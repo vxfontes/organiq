@@ -1,83 +1,332 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Seu Digest Diário - Inbota</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seu dia no Inbota</title>
     <style>
-        body { font-family: sans-serif; line-height: 1.6; color: #333; }
-        .header { background-color: #f4f4f4; padding: 20px; text-align: center; }
-        .section { margin: 20px 0; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-        .section-title { color: #2c3e50; border-left: 4px solid #3498db; padding-left: 10px; margin-bottom: 10px; }
-        .item { margin-bottom: 5px; }
-        .time { color: #7f8c8d; font-size: 0.9em; margin-right: 10px; }
-        .footer { font-size: 0.8em; color: #95a5a6; margin-top: 30px; text-align: center; }
+        body {
+            margin: 0;
+            padding: 0;
+            background: #FAFAFA;
+            color: #111827;
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 1.5;
+        }
+
+        .wrapper {
+            width: 100%;
+            padding: 24px 12px;
+        }
+
+        .container {
+            max-width: 680px;
+            margin: 0 auto;
+            background: #FFFFFF;
+            border: 1px solid #E5E7EB;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .hero {
+            background: #0F766E;
+            color: #FFFFFF;
+            padding: 28px 24px;
+        }
+
+        .hero-kicker {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.20);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .hero h1 {
+            margin: 0;
+            font-size: 26px;
+            line-height: 1.25;
+            font-weight: 700;
+        }
+
+        .hero p {
+            margin: 8px 0 0;
+            font-size: 15px;
+            opacity: 0.95;
+        }
+
+        .content {
+            padding: 24px;
+        }
+
+        .section {
+            border: 1px solid #E5E7EB;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            margin: 0;
+            padding: 12px 14px;
+            background: #F3F4F6;
+            border-bottom: 1px solid #E5E7EB;
+            font-size: 15px;
+            font-weight: 700;
+            color: #0F766E;
+        }
+
+        .item {
+            padding: 12px 14px;
+            border-bottom: 1px solid #E5E7EB;
+            font-size: 14px;
+        }
+
+        .item:last-child {
+            border-bottom: none;
+        }
+
+        .time {
+            display: inline-block;
+            min-width: 46px;
+            margin-right: 10px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: #F3F4F6;
+            color: #0F766E;
+            font-size: 12px;
+            font-weight: 700;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .title {
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .type {
+            display: inline-block;
+            margin-right: 8px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+            text-transform: uppercase;
+            vertical-align: middle;
+        }
+
+        .type-event {
+            background: rgba(79, 70, 229, 0.14);
+            color: #4F46E5;
+        }
+
+        .type-task {
+            background: rgba(13, 148, 136, 0.14);
+            color: #0D9488;
+        }
+
+        .type-reminder {
+            background: rgba(245, 158, 11, 0.16);
+            color: #B45309;
+        }
+
+        .type-item {
+            background: #E5E7EB;
+            color: #6B7280;
+        }
+
+        .meta {
+            color: #6B7280;
+            font-size: 13px;
+        }
+
+        .item-context {
+            display: block;
+            margin-top: 4px;
+        }
+
+        .item-meta {
+            display: block;
+            margin-top: 4px;
+        }
+
+        .is-completed {
+            color: #6B7280;
+            text-decoration: line-through;
+        }
+
+        .schedule-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: #14B8A6;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        .pending-items {
+            margin: 8px 0 0;
+            padding-left: 18px;
+            color: #111827;
+        }
+
+        .pending-items li {
+            margin: 2px 0;
+            font-size: 13px;
+        }
+
+        .empty {
+            border: 1px dashed #D1D5DB;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            background: #F3F4F6;
+            color: #6B7280;
+            font-size: 14px;
+        }
+
+        .footer {
+            padding: 16px 24px 24px;
+            text-align: center;
+            color: #6B7280;
+            font-size: 12px;
+        }
+
+        @media only screen and (max-width: 640px) {
+            .hero h1 {
+                font-size: 22px;
+            }
+
+            .content {
+                padding: 16px;
+            }
+
+            .hero {
+                padding: 22px 16px;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Seu dia no Inbota</h1>
-        <p>{{.Date}}</p>
-    </div>
+    <div class="wrapper">
+        <div class="container">
+            <div class="hero">
+                <div class="hero-kicker">Daily Digest</div>
+                <h1>Seu dia no Inbota</h1>
+                <p>{{.Date}}</p>
+            </div>
 
-    {{if .HasAgenda}}
-    <div class="section">
-        <h2 class="section-title">Agenda de Hoje</h2>
-        {{range .Agenda}}
-        <div class="item">
-            <span class="time">{{.Time}}</span>
-            <strong>{{.Title}}</strong>
-            {{if .Flag}} <small>({{.Flag}})</small> {{end}}
+            <div class="content">
+                {{if or .HasSchedule .HasAgenda .HasReminders .HasTasks .HasOpenTasks .HasShoppingLists}}
+
+                {{if .HasSchedule}}
+                <div class="section">
+                    <h2 class="section-title">Cronograma do dia</h2>
+                    {{range .Schedule}}
+                    <div class="item">
+                        <span class="schedule-dot"></span>
+                        <span class="time">{{.Time}}</span>
+                        <span class="title{{if .IsCompleted}} is-completed{{end}}">{{.Title}}</span>
+                        {{if or .Recurrence .Context}}
+                        <span class="meta item-meta">
+                            {{if .Recurrence}}{{.Recurrence}}{{end}}{{if and .Recurrence .Context}} • {{end}}{{if .Context}}{{.Context}}{{end}}
+                        </span>
+                        {{end}}
+                    </div>
+                    {{end}}
+                </div>
+                {{end}}
+
+                {{if .HasAgenda}}
+                <div class="section">
+                    <h2 class="section-title">Agenda do dia</h2>
+                    {{range .Agenda}}
+                    <div class="item">
+                        <span class="time">{{.Time}}</span>
+                        <span class="type type-{{.TypeKey}}">{{.Type}}</span>
+                        <span class="title">{{.Title}}</span>
+                        {{if .Context}}<span class="meta item-context">{{.Context}}</span>{{end}}
+                    </div>
+                    {{end}}
+                </div>
+                {{end}}
+
+                {{if .HasReminders}}
+                <div class="section">
+                    <h2 class="section-title">Lembretes</h2>
+                    {{range .Reminders}}
+                    <div class="item">
+                        <span class="time">{{.Time}}</span>
+                        <span class="title">{{.Title}}</span>
+                    </div>
+                    {{end}}
+                </div>
+                {{end}}
+
+                {{if .HasTasks}}
+                <div class="section">
+                    <h2 class="section-title">Tarefas de hoje</h2>
+                    {{range .Tasks}}
+                    <div class="item">
+                        {{if .DueTime}}<span class="time">{{.DueTime}}</span>{{end}}
+                        <span class="title">{{.Title}}</span>
+                    </div>
+                    {{end}}
+                </div>
+                {{end}}
+
+                {{if .HasOpenTasks}}
+                <div class="section">
+                    <h2 class="section-title">Tarefas pendentes</h2>
+                    {{range .OpenTasks}}
+                    <div class="item">
+                        <span class="title">{{.Title}}</span>
+                    </div>
+                    {{end}}
+                </div>
+                {{end}}
+
+                {{if .HasShoppingLists}}
+                <div class="section">
+                    <h2 class="section-title">Listas de compra</h2>
+                    {{range .ShoppingLists}}
+                    <div class="item">
+                        <span class="title">{{.Title}}</span>
+                        <span class="meta"> - {{.PendingCount}} itens pendentes</span>
+                        {{if .PendingItems}}
+                        <ul class="pending-items">
+                            {{range .PendingItems}}
+                            <li>{{.}}</li>
+                            {{end}}
+                        </ul>
+                        {{end}}
+                    </div>
+                    {{end}}
+                </div>
+                {{end}}
+
+                {{else}}
+                <div class="empty">
+                    Nenhum item para hoje. Aproveite para respirar e planejar o resto da semana.
+                </div>
+                {{end}}
+            </div>
+
+            <div class="footer">
+                Enviado automaticamente pelo Inbota.
+            </div>
         </div>
-        {{end}}
-    </div>
-    {{end}}
-
-    {{if .HasReminders}}
-    <div class="section">
-        <h2 class="section-title">Lembretes</h2>
-        {{range .Reminders}}
-        <div class="item">
-            <span class="time">{{.Time}}</span>
-            {{.Title}}
-        </div>
-        {{end}}
-    </div>
-    {{end}}
-
-    {{if .HasTasks}}
-    <div class="section">
-        <h2 class="section-title">Tasks (com data)</h2>
-        {{range .Tasks}}
-        <div class="item">
-            {{if .DueTime}}<span class="time">{{.DueTime}}</span>{{end}}
-            {{.Title}}
-        </div>
-        {{end}}
-    </div>
-    {{end}}
-
-    {{if .HasOpenTasks}}
-    <div class="section">
-        <h2 class="section-title">Tasks Pendentes</h2>
-        {{range .OpenTasks}}
-        <div class="item">• {{.Title}}</div>
-        {{end}}
-    </div>
-    {{end}}
-
-    {{if .HasShoppingLists}}
-    <div class="section">
-        <h2 class="section-title">Listas de Compra</h2>
-        {{range .ShoppingLists}}
-        <div class="item">
-            <strong>{{.Title}}</strong>: {{.PendingCount}} itens pendentes
-        </div>
-        {{end}}
-    </div>
-    {{end}}
-
-    <div class="footer">
-        <p>Enviado com ❤️ pelo Inbota.</p>
     </div>
 </body>
 </html>
