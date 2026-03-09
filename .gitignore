@@ -3,3 +3,8 @@
 **/tmp
 
 .DS_Store
+
+## Google Services
+app/ios/Runner/GoogleService-Info.plist
+app/android/app/google-services.json
+app/config/firebasesdk.json
