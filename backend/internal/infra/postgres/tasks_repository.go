@@ -181,5 +181,8 @@ func (r *TaskRepository) ListUpcoming(ctx context.Context, start, end time.Time)
 		task.SourceInboxItemID = stringPtrFromNull(sourceInboxID)
 		items = append(items, task)
 	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
 	return items, nil
 }

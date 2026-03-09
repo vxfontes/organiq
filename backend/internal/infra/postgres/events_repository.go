@@ -177,5 +177,8 @@ func (r *EventRepository) ListUpcoming(ctx context.Context, start, end time.Time
 		event.SourceInboxItemID = stringPtrFromNull(sourceInboxID)
 		items = append(items, event)
 	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
 	return items, nil
 }

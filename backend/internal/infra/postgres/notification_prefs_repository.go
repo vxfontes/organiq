@@ -137,7 +137,7 @@ func (r *NotificationPreferencesRepository) ListEnabled(ctx context.Context) ([]
 			&prefs.TasksEnabled, &prefs.TaskAtTime, &taskLeadMins,
 			&prefs.RoutinesEnabled, &prefs.RoutineAtTime, &routineLeadMins,
 			&prefs.QuietHoursEnabled, &quietStart, &quietEnd,
-			&prefs.DailyDigestEnabled, &prefs.DailyDigestHour,
+			&prefs.DailyDigestEnabled, &prefs.DailyDigestHour, &prefs.DailySummaryToken,
 			&prefs.CreatedAt, &prefs.UpdatedAt,
 		)
 		if err != nil {
@@ -156,6 +156,9 @@ func (r *NotificationPreferencesRepository) ListEnabled(ctx context.Context) ([]
 			prefs.QuietEnd = &quietEnd.String
 		}
 		results = append(results, prefs)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 	return results, nil
 }
