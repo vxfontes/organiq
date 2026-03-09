@@ -73,6 +73,11 @@ class AppPath {
 
   // Digest
   static const String digestTest = '/digest/test';
+  static const String dailySummary = '/daily-summary'; // public (token)
+
+  // Notification prefs extra
+  static const String dailySummaryToken = '/notification-preferences/daily-summary-token';
+  static const String dailySummaryTokenRotate = '/notification-preferences/daily-summary-token/rotate';
 
   // Devices
   static const String deviceToken = '/devices/token';

@@ -23,6 +23,9 @@ class SettingsNotificationsController implements IBController {
   final ValueNotifier<bool> loading = ValueNotifier(false);
   final ValueNotifier<bool> sendingTest = ValueNotifier(false);
   final ValueNotifier<bool> sendingEmailTest = ValueNotifier(false);
+  final ValueNotifier<bool> loadingDailySummaryToken = ValueNotifier(false);
+  final ValueNotifier<String?> dailySummaryToken = ValueNotifier(null);
+  final ValueNotifier<String?> dailySummaryUrl = ValueNotifier(null);
   final ValueNotifier<String?> error = ValueNotifier(null);
   final ValueNotifier<NotificationPreferencesModel?> prefs = ValueNotifier(null);
 
@@ -38,6 +41,40 @@ class SettingsNotificationsController implements IBController {
     );
 
     loading.value = false;
+  }
+
+  Future<void> fetchDailySummaryToken() async {
+    loadingDailySummaryToken.value = true;
+
+    final result = await _getPrefsUsecase.repository.getDailySummaryToken();
+    result.fold(
+      (failure) {
+        error.value = _failureMessage(failure, fallback: 'Erro ao carregar token.');
+      },
+      (data) {
+        dailySummaryToken.value = data['token'];
+        dailySummaryUrl.value = data['url'];
+      },
+    );
+
+    loadingDailySummaryToken.value = false;
+  }
+
+  Future<void> rotateDailySummaryToken() async {
+    loadingDailySummaryToken.value = true;
+
+    final result = await _getPrefsUsecase.repository.rotateDailySummaryToken();
+    result.fold(
+      (failure) {
+        error.value = _failureMessage(failure, fallback: 'Erro ao rotacionar token.');
+      },
+      (data) {
+        dailySummaryToken.value = data['token'];
+        dailySummaryUrl.value = data['url'];
+      },
+    );
+
+    loadingDailySummaryToken.value = false;
   }
 
   Future<void> updatePreferences(NotificationPreferencesModel newPrefs) async {
@@ -97,6 +134,9 @@ class SettingsNotificationsController implements IBController {
     loading.dispose();
     sendingTest.dispose();
     sendingEmailTest.dispose();
+    loadingDailySummaryToken.dispose();
+    dailySummaryToken.dispose();
+    dailySummaryUrl.dispose();
     error.dispose();
     prefs.dispose();
   }

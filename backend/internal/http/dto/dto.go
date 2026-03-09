@@ -521,6 +521,11 @@ type NotificationPreferencesResponse struct {
 	UpdatedAt         time.Time `json:"updatedAt"`
 }
 
+type DailySummaryTokenResponse struct {
+	Token string `json:"token"`
+	Url   string `json:"url"`
+}
+
 type UpdateNotificationPreferencesRequest struct {
 	RemindersEnabled  *bool   `json:"remindersEnabled,omitempty"`
 	ReminderAtTime    *bool   `json:"reminderAtTime,omitempty"`

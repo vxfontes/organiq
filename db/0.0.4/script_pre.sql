@@ -66,9 +66,16 @@ CREATE TABLE inbota.notification_preferences (
     daily_digest_enabled BOOLEAN NOT NULL DEFAULT false,
     daily_digest_hour    INT NOT NULL DEFAULT 4,           -- 0-23 (default 04:00)
 
+    -- Daily Summary (endpoint público com token longo prazo)
+    daily_summary_token  TEXT NOT NULL DEFAULT gen_random_uuid()::text,
+
     created_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at           TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Token público precisa ser único
+CREATE UNIQUE INDEX idx_notification_prefs_daily_summary_token
+    ON inbota.notification_preferences(daily_summary_token);
 
 -- -----------------------------------------------------------------------------
 -- email_digests: controle de envio e idempotência de digests por e-mail

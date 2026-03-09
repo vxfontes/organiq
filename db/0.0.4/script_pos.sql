@@ -3,6 +3,11 @@ INSERT INTO inbota.notification_preferences (user_id)
 SELECT id FROM inbota.users
 ON CONFLICT (user_id) DO NOTHING;
 
+-- Garante token para quem já tinha prefs antes do campo existir (segurança / idempotência)
+UPDATE inbota.notification_preferences
+SET daily_summary_token = gen_random_uuid()::text
+WHERE daily_summary_token IS NULL OR daily_summary_token = '';
+
 -- Seed: templates de mensagens por tipo e gatilho
 -- Placeholders suportados: {{title}}, {{lead_mins}}
 INSERT INTO inbota.notification_templates (type, trigger_key, title_template, body_template) VALUES

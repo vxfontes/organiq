@@ -25,7 +25,7 @@ func (r *NotificationPreferencesRepository) GetByUserID(ctx context.Context, use
 			tasks_enabled, task_at_time, task_lead_mins,
 			routines_enabled, routine_at_time, routine_lead_mins,
 			quiet_hours_enabled, to_char(quiet_start, 'HH24:MI'), to_char(quiet_end, 'HH24:MI'),
-			daily_digest_enabled, daily_digest_hour,
+			daily_digest_enabled, daily_digest_hour, daily_summary_token,
 			created_at, updated_at
 		FROM inbota.notification_preferences
 		WHERE user_id = $1
@@ -42,7 +42,7 @@ func (r *NotificationPreferencesRepository) GetByUserID(ctx context.Context, use
 		&prefs.TasksEnabled, &prefs.TaskAtTime, &taskLeadMins,
 		&prefs.RoutinesEnabled, &prefs.RoutineAtTime, &routineLeadMins,
 		&prefs.QuietHoursEnabled, &quietStart, &quietEnd,
-		&prefs.DailyDigestEnabled, &prefs.DailyDigestHour,
+		&prefs.DailyDigestEnabled, &prefs.DailyDigestHour, &prefs.DailySummaryToken,
 		&prefs.CreatedAt, &prefs.UpdatedAt,
 	)
 
@@ -115,7 +115,7 @@ func (r *NotificationPreferencesRepository) ListEnabled(ctx context.Context) ([]
 			tasks_enabled, task_at_time, task_lead_mins,
 			routines_enabled, routine_at_time, routine_lead_mins,
 			quiet_hours_enabled, to_char(quiet_start, 'HH24:MI'), to_char(quiet_end, 'HH24:MI'),
-			daily_digest_enabled, daily_digest_hour,
+			daily_digest_enabled, daily_digest_hour, daily_summary_token,
 			created_at, updated_at
 		FROM inbota.notification_preferences
 		WHERE daily_digest_enabled = true

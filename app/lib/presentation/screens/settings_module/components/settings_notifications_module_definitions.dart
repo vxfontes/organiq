@@ -10,6 +10,7 @@ enum SettingsNotificationsSection {
   routines,
   quietHours,
   dailyDigest,
+  dailySummaryToken,
   device,
 }
 

@@ -53,6 +53,39 @@ func (h *NotificationsHandler) GetPreferences(c *gin.Context) {
 // @Failure 400 {object} dto.ErrorResponse
 // @Failure 401 {object} dto.ErrorResponse
 // @Router /v1/notification-preferences [put]
+func (h *NotificationsHandler) GetDailySummaryToken(c *gin.Context) {
+	userID, ok := getUserID(c)
+	if !ok {
+		return
+	}
+
+	token, err := h.Usecase.GetDailySummaryToken(c.Request.Context(), userID)
+	if err != nil {
+		writeUsecaseError(c, err)
+		return
+	}
+
+	// Keep it relative; client can prepend API_HOST.
+	url := "/v1/daily-summary?token=" + token
+	c.JSON(http.StatusOK, dto.DailySummaryTokenResponse{Token: token, Url: url})
+}
+
+func (h *NotificationsHandler) RotateDailySummaryToken(c *gin.Context) {
+	userID, ok := getUserID(c)
+	if !ok {
+		return
+	}
+
+	token, err := h.Usecase.RotateDailySummaryToken(c.Request.Context(), userID)
+	if err != nil {
+		writeUsecaseError(c, err)
+		return
+	}
+
+	url := "/v1/daily-summary?token=" + token
+	c.JSON(http.StatusOK, dto.DailySummaryTokenResponse{Token: token, Url: url})
+}
+
 func (h *NotificationsHandler) UpdatePreferences(c *gin.Context) {
 	userID, ok := getUserID(c)
 	if !ok {

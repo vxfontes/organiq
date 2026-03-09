@@ -299,6 +299,7 @@ type NotificationPreferences struct {
 
 	DailyDigestEnabled bool
 	DailyDigestHour    int
+	DailySummaryToken  string
 
 	CreatedAt         time.Time
 	UpdatedAt         time.Time

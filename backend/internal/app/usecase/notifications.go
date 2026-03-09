@@ -18,6 +18,14 @@ type NotificationUsecase struct {
 	Ntfy    *push.NtfyClient
 }
 
+func (uc *NotificationUsecase) GetDailySummaryToken(ctx context.Context, userID string) (string, error) {
+	return uc.Prefs.GetDailySummaryTokenByUserID(ctx, userID)
+}
+
+func (uc *NotificationUsecase) RotateDailySummaryToken(ctx context.Context, userID string) (string, error) {
+	return uc.Prefs.RotateDailySummaryToken(ctx, userID)
+}
+
 func (uc *NotificationUsecase) GetPreferences(ctx context.Context, userID string) (domain.NotificationPreferences, error) {
 	return uc.Prefs.GetByUserID(ctx, userID)
 }

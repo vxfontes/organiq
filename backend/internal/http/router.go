@@ -23,14 +23,14 @@ func NewRouter(cfg config.Config, log *slog.Logger, authHandler *handler.AuthHan
 	engine.GET("/readyz", handler.ReadinessHandler(readinessCheckers...))
 	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// Public daily summary endpoint
-	if apiHandlers != nil && apiHandlers.Digest != nil {
-		engine.GET("/daily-summary", apiHandlers.Digest.GetDailySummary)
-	}
-
 	v1 := engine.Group("/v1")
 
 	v1.GET("/healthz", handler.HealthHandler)
+
+	// Public daily summary endpoint (token-based, no JWT)
+	if apiHandlers != nil && apiHandlers.Digest != nil {
+		v1.GET("/daily-summary", apiHandlers.Digest.GetDailySummary)
+	}
 	if authHandler != nil {
 		v1.POST("/auth/signup", authHandler.Signup)
 		v1.POST("/auth/login", authHandler.Login)
@@ -123,6 +123,8 @@ func NewRouter(cfg config.Config, log *slog.Logger, authHandler *handler.AuthHan
 		if apiHandlers.Notifications != nil {
 			authGroup.GET("/notification-preferences", apiHandlers.Notifications.GetPreferences)
 			authGroup.PUT("/notification-preferences", apiHandlers.Notifications.UpdatePreferences)
+			authGroup.GET("/notification-preferences/daily-summary-token", apiHandlers.Notifications.GetDailySummaryToken)
+			authGroup.POST("/notification-preferences/daily-summary-token/rotate", apiHandlers.Notifications.RotateDailySummaryToken)
 			authGroup.GET("/notifications", apiHandlers.Notifications.ListNotifications)
 			authGroup.POST("/notifications/test", apiHandlers.Notifications.SendTestNotification)
 			authGroup.PATCH("/notifications/:id/read", apiHandlers.Notifications.MarkAsRead)

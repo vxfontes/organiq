@@ -9,6 +9,7 @@ import 'package:inbota/presentation/screens/settings_module/components/settings_
 import 'package:inbota/presentation/screens/settings_module/components/settings_notifications_module_content.dart';
 import 'package:inbota/presentation/screens/settings_module/components/settings_notifications_quiet_hours_content.dart';
 import 'package:inbota/presentation/screens/settings_module/components/settings_notifications_daily_digest_content.dart';
+import 'package:inbota/presentation/screens/settings_module/components/settings_notifications_daily_summary_token_content.dart';
 import 'package:inbota/presentation/screens/settings_module/controller/settings_notifications_controller.dart';
 import 'package:inbota/shared/components/ib_lib/index.dart';
 import 'package:inbota/shared/state/ib_state.dart';
@@ -28,6 +29,7 @@ class _SettingsNotificationsPageState extends IBState<SettingsNotificationsPage,
   void initState() {
     super.initState();
     controller.fetchPreferences();
+    controller.fetchDailySummaryToken();
     controller.error.addListener(_onErrorChanged);
   }
 
@@ -110,6 +112,7 @@ class _SettingsNotificationsPageState extends IBState<SettingsNotificationsPage,
                   ..._buildModuleSections(prefs),
                   _buildQuietHoursSection(prefs),
                   _buildDailyDigestSection(prefs),
+                  _buildDailySummaryTokenSection(),
                   _buildDeviceSection(),
                   const SizedBox(height: 24),
                   // ValueListenableBuilder<bool>(
@@ -238,6 +241,33 @@ class _SettingsNotificationsPageState extends IBState<SettingsNotificationsPage,
               }
             },
             sendingTest: sending,
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildDailySummaryTokenSection() {
+    return SettingsAccordionSection(
+      title: 'Daily Summary (endpoint público)',
+      subtitle: 'Token de acesso para seu resumo diário via API.',
+      collapsedSummary: 'Copiar/rotacionar token',
+      icon: IBIcon.keyRounded,
+      isExpanded: _isExpanded(SettingsNotificationsSection.dailySummaryToken),
+      onTap: () => _toggleSection(SettingsNotificationsSection.dailySummaryToken),
+      child: AnimatedBuilder(
+        animation: Listenable.merge([
+          controller.dailySummaryToken,
+          controller.dailySummaryUrl,
+          controller.loadingDailySummaryToken,
+        ]),
+        builder: (context, _) {
+          return SettingsNotificationsDailySummaryTokenContent(
+            token: controller.dailySummaryToken.value,
+            url: controller.dailySummaryUrl.value,
+            loading: controller.loadingDailySummaryToken.value,
+            onRefresh: () => unawaited(controller.fetchDailySummaryToken()),
+            onRotate: controller.rotateDailySummaryToken,
           );
         },
       ),
