@@ -247,6 +247,80 @@ func (r *RoutineRepositoryImpl) ListByWeekday(ctx context.Context, userID string
 	return items, nil
 }
 
+func (r *RoutineRepositoryImpl) ListDailyStatus(ctx context.Context, userID string, weekday int) ([]repository.RoutineDailyStatus, error) {
+	rows, err := r.db.QueryContext(ctx, `
+		SELECT id, user_id, title, description, recurrence_type, weekdays,
+			to_char(start_time, 'HH24:MI') as start_time,
+			to_char(end_time, 'HH24:MI') as end_time,
+			week_of_month, starts_on, ends_on, color, is_active, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at,
+			completed_at, is_completed, exception_action
+		FROM inbota.view_routine_daily_status
+		WHERE user_id = $1 AND is_active = true AND $2 = ANY(weekdays)
+		ORDER BY start_time, created_at
+	`, userID, weekday)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	items := make([]repository.RoutineDailyStatus, 0)
+	for rows.Next() {
+		var item repository.RoutineDailyStatus
+		var description, endTime, endsOn, color, flagID, subflagID, sourceInboxItemID sql.NullString
+		var weekOfMonth sql.NullInt64
+		var weekdays pq.Int64Array
+		var completedAt, exceptionAction sql.NullString
+
+		if err := rows.Scan(
+			&item.ID, &item.UserID, &item.Title, &description, &item.RecurrenceType, &weekdays, &item.StartTime, &endTime, &weekOfMonth, &item.StartsOn, &endsOn, &color, &item.IsActive, &flagID, &subflagID, &sourceInboxItemID, &item.CreatedAt, &item.UpdatedAt,
+			&completedAt, &item.IsCompleted, &exceptionAction,
+		); err != nil {
+			return nil, err
+		}
+
+		item.Description = stringPtrFromNull(description)
+		if endTime.Valid {
+			item.EndTime = endTime.String
+		} else {
+			item.EndTime = item.StartTime
+		}
+		if weekOfMonth.Valid {
+			v := int(weekOfMonth.Int64)
+			item.WeekOfMonth = &v
+		}
+		item.EndsOn = stringPtrFromNull(endsOn)
+		item.Color = stringPtrFromNull(color)
+		item.FlagID = stringPtrFromNull(flagID)
+		item.SubflagID = stringPtrFromNull(subflagID)
+		item.SourceInboxItemID = stringPtrFromNull(sourceInboxItemID)
+		item.CompletedAt = stringPtrFromNull(completedAt)
+		item.ExceptionAction = stringPtrFromNull(exceptionAction)
+
+		if len(weekdays) > 0 {
+			item.Weekdays = make([]int, len(weekdays))
+			for i, v := range weekdays {
+				item.Weekdays[i] = int(v)
+			}
+		}
+
+		items = append(items, item)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return items, nil
+}
+
+func (r *RoutineRepositoryImpl) CheckOverlap(ctx context.Context, userID string, weekdays []int, startTime, endTime string, excludeID *string) (bool, error) {
+	var overlap bool
+	err := r.db.QueryRowContext(ctx, `
+		SELECT inbota.fnc_check_routine_overlap($1, $2, $3::TIME, $4::TIME, $5::UUID)
+	`, userID, pq.Array(weekdays), startTime, endTime, excludeID).Scan(&overlap)
+
+	return overlap, err
+}
+
 func (r *RoutineRepositoryImpl) Toggle(ctx context.Context, userID, id string, isActive bool) error {
 	result, err := r.db.ExecContext(ctx, `
 		UPDATE inbota.routines
@@ -482,17 +556,76 @@ func (r *RoutineCompletionRepositoryImpl) GetByDate(ctx context.Context, userID,
 
 func (r *RoutineCompletionRepositoryImpl) GetStreak(ctx context.Context, userID, routineID string) (int, int, error) {
 	row := r.db.QueryRowContext(ctx, `
-		SELECT 
-			COUNT(*) FILTER (WHERE completed_on >= CURRENT_DATE - INTERVAL '7 days') as current_streak,
-			COUNT(*) as total_completions
-		FROM inbota.routine_completions
-		WHERE routine_id = $1 AND EXISTS (SELECT 1 FROM inbota.routines WHERE id = $1 AND user_id = $2)
+		SELECT current_streak, total_completions
+		FROM inbota.fnc_get_routine_streak($1)
+		WHERE EXISTS (SELECT 1 FROM inbota.routines WHERE id = $1 AND user_id = $2)
 	`, routineID, userID)
 
 	var currentStreak, totalCompletions int
 	if err := row.Scan(&currentStreak, &totalCompletions); err != nil {
+		if err == sql.ErrNoRows {
+			return 0, 0, nil
+		}
 		return 0, 0, err
 	}
 
 	return currentStreak, totalCompletions, nil
+}
+
+func (r *RoutineRepositoryImpl) ListAllByWeekday(ctx context.Context, weekday int) ([]domain.Routine, error) {
+	rows, err := r.db.QueryContext(ctx, `
+		SELECT id, user_id, title, description, recurrence_type, weekdays,
+			to_char(start_time, 'HH24:MI') as start_time,
+			to_char(end_time, 'HH24:MI') as end_time,
+			week_of_month, starts_on, ends_on, color, is_active, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
+		FROM inbota.routines
+		WHERE is_active = true AND $1 = ANY(weekdays)
+		ORDER BY start_time, created_at
+	`, weekday)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	items := make([]domain.Routine, 0)
+	for rows.Next() {
+		var routine domain.Routine
+		var description, endTime, endsOn, color, flagID, subflagID, sourceInboxItemID sql.NullString
+		var weekOfMonth sql.NullInt64
+		var weekdays pq.Int64Array
+
+		if err := rows.Scan(&routine.ID, &routine.UserID, &routine.Title, &description, &routine.RecurrenceType, &weekdays, &routine.StartTime, &endTime, &weekOfMonth, &routine.StartsOn, &endsOn, &color, &routine.IsActive, &flagID, &subflagID, &sourceInboxItemID, &routine.CreatedAt, &routine.UpdatedAt); err != nil {
+			return nil, err
+		}
+
+		routine.Description = stringPtrFromNull(description)
+		if endTime.Valid {
+			routine.EndTime = endTime.String
+		} else {
+			routine.EndTime = routine.StartTime
+		}
+		if weekOfMonth.Valid {
+			v := int(weekOfMonth.Int64)
+			routine.WeekOfMonth = &v
+		}
+		routine.EndsOn = stringPtrFromNull(endsOn)
+		routine.Color = stringPtrFromNull(color)
+		routine.FlagID = stringPtrFromNull(flagID)
+		routine.SubflagID = stringPtrFromNull(subflagID)
+		routine.SourceInboxItemID = stringPtrFromNull(sourceInboxItemID)
+
+		if len(weekdays) > 0 {
+			routine.Weekdays = make([]int, len(weekdays))
+			for i, v := range weekdays {
+				routine.Weekdays[i] = int(v)
+			}
+		}
+
+		items = append(items, routine)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return items, nil
 }

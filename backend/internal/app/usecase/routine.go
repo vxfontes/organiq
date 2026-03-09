@@ -244,59 +244,21 @@ func (uc *RoutineUsecase) Validate(ctx context.Context, routine domain.Routine) 
 }
 
 func (uc *RoutineUsecase) checkOverlap(ctx context.Context, userID, excludeID string, weekdays []int, startTime string, endTime string) error {
-	// Fetch all routines for this user
-	// Using a large limit to avoid pagination complexity for now
-	opts := repository.ListOptions{Limit: 1000}
-	routines, _, err := uc.Routines.List(ctx, userID, opts)
+	if timeToMinutes(endTime) <= timeToMinutes(startTime) {
+		return ErrInvalidTimeRange
+	}
+
+	var excludeIDPtr *string
+	if excludeID != "" {
+		excludeIDPtr = &excludeID
+	}
+
+	overlap, err := uc.Routines.CheckOverlap(ctx, userID, weekdays, startTime, endTime, excludeIDPtr)
 	if err != nil {
 		return err
 	}
-
-	start := timeToMinutes(startTime)
-	var end int
-	if endTime != "" {
-		end = timeToMinutes(endTime)
-		if end <= start {
-			return ErrInvalidTimeRange
-		}
-	} else {
-		end = start + 1
-	}
-
-	weekdaySet := make(map[int]bool)
-	for _, d := range weekdays {
-		weekdaySet[d] = true
-	}
-
-	for _, r := range routines {
-		if r.ID == excludeID {
-			continue
-		}
-
-		// Check common weekdays
-		hasCommonWeekday := false
-		for _, rd := range r.Weekdays {
-			if weekdaySet[rd] {
-				hasCommonWeekday = true
-				break
-			}
-		}
-		if !hasCommonWeekday {
-			continue
-		}
-
-		rStart := timeToMinutes(r.StartTime)
-		var rEnd int
-		if r.EndTime != "" {
-			rEnd = timeToMinutes(r.EndTime)
-		} else {
-			rEnd = rStart + 1
-		}
-
-		// Overlap: (start < rEnd) && (rStart < end)
-		if start < rEnd && rStart < end {
-			return ErrRoutineOverlap
-		}
+	if overlap {
+		return ErrRoutineOverlap
 	}
 
 	return nil
@@ -338,6 +300,28 @@ func (uc *RoutineUsecase) ListByWeekday(ctx context.Context, userID string, week
 	if userID == "" {
 		return nil, ErrMissingRequiredFields
 	}
+
+	nowStr := time.Now().Format("2006-01-02")
+	isToday := date == "" || date == nowStr
+
+	if isToday {
+		routines, err := uc.Routines.ListDailyStatus(ctx, userID, weekday)
+		if err != nil {
+			return nil, err
+		}
+
+		targetDate := time.Now()
+		filtered := make([]domain.Routine, 0, len(routines))
+		for _, r := range routines {
+			if shouldShowRoutineForDate(r.Routine, targetDate) {
+				r.Routine.IsCompletedToday = r.IsCompleted
+				filtered = append(filtered, r.Routine)
+			}
+		}
+		return filtered, nil
+	}
+
+	// Fallback para datas que não sejam hoje
 	routines, err := uc.Routines.ListByWeekday(ctx, userID, weekday)
 	if err != nil {
 		return nil, err
@@ -522,31 +506,22 @@ func (uc *RoutineUsecase) GetTodaySummary(ctx context.Context, userID string) (i
 
 	now := time.Now()
 	weekday := int(now.Weekday())
-	date := now.Format("2006-01-02")
-	routines, err := uc.ListByWeekday(ctx, userID, weekday, date)
+	routines, err := uc.Routines.ListDailyStatus(ctx, userID, weekday)
 	if err != nil {
 		return 0, 0, err
-	}
-
-	completions, err := uc.Completions.GetByDate(ctx, userID, date)
-	if err != nil {
-		return 0, 0, err
-	}
-
-	completedMap := make(map[string]bool)
-	for _, c := range completions {
-		completedMap[c.RoutineID] = true
 	}
 
 	total := 0
 	completed := 0
 	for _, r := range routines {
-		exception, _ := uc.Exceptions.GetForDate(ctx, userID, r.ID, date)
-		if exception != nil && exception.Action == "skip" {
+		if !shouldShowRoutineForDate(r.Routine, now) {
+			continue
+		}
+		if r.ExceptionAction != nil && *r.ExceptionAction == "skip" {
 			continue
 		}
 		total++
-		if completedMap[r.ID] {
+		if r.IsCompleted {
 			completed++
 		}
 	}

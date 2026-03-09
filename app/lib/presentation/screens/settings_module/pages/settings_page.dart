@@ -52,12 +52,12 @@ class _SettingsPageState extends IBState<SettingsPage, SettingsController> {
                     icon: IBIcon.personOutline,
                     onTap: () => AppNavigation.push(AppRoutes.settingsAccount),
                   ),
-                  // IBMenuItem(
-                  //   title: 'Notificações',
-                  //   subtitle: 'Lembretes e alertas',
-                  //   icon: IBIcon.notificationsNoneOutlined,
-                  //   onTap: () {},
-                  // ),
+                  IBMenuItem(
+                    title: 'Notificações',
+                    subtitle: 'Lembretes e alertas',
+                    icon: IBIcon.notificationsNoneOutlined,
+                    onTap: () => AppNavigation.push(AppRoutes.settingsNotifications),
+                  ),
                   // IBMenuItem(
                   //   title: 'Preferências',
                   //   subtitle: 'Idioma e aparência',

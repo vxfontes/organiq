@@ -26,6 +26,10 @@ type Config struct {
 	AITimeout               time.Duration
 	AIMaxRetries            int
 
+	ResendAPIKey      string
+	ResendFrom        string
+	DigestJobInterval time.Duration
+
 	ReadTimeout  time.Duration
 	WriteTimeout time.Duration
 	IdleTimeout  time.Duration
@@ -48,13 +52,21 @@ func Load() (Config, error) {
 		AIFallbackOnNeedsReview: getEnvBool("AI_FALLBACK_ON_NEEDS_REVIEW", false),
 		AITimeout:               getEnvDuration("AI_TIMEOUT", 15*time.Second),
 		AIMaxRetries:            getEnvInt("AI_MAX_RETRIES", 2),
-		ReadTimeout:             getEnvDuration("READ_TIMEOUT", 5*time.Second),
-		WriteTimeout:            getEnvDuration("WRITE_TIMEOUT", 10*time.Second),
-		IdleTimeout:             getEnvDuration("IDLE_TIMEOUT", 60*time.Second),
+
+		ResendAPIKey:      getEnv("RESEND_API_KEY", ""),
+		ResendFrom:        getEnv("RESEND_FROM", "Inbota <noreply@resend.dev>"),
+		DigestJobInterval: getEnvDuration("DIGEST_JOB_INTERVAL", 30*time.Minute),
+
+		ReadTimeout:  getEnvDuration("READ_TIMEOUT", 5*time.Second),
+		WriteTimeout: getEnvDuration("WRITE_TIMEOUT", 10*time.Second),
+		IdleTimeout:  getEnvDuration("IDLE_TIMEOUT", 60*time.Second),
 	}
 
 	if cfg.Port <= 0 {
 		return Config{}, errors.New("PORT must be > 0")
+	}
+	if cfg.DigestJobInterval <= 0 {
+		return Config{}, errors.New("DIGEST_JOB_INTERVAL must be > 0")
 	}
 
 	return cfg, nil

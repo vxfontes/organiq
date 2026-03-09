@@ -1,0 +1,153 @@
+-- Enum para plataforma do dispositivo
+CREATE TYPE inbota.device_platform AS ENUM ('ios', 'android');
+
+-- Enum para status da notificação
+CREATE TYPE inbota.notification_status AS ENUM ('pending', 'sent', 'failed', 'delivered', 'read');
+
+-- Enum para tipo de notificação
+CREATE TYPE inbota.notification_type AS ENUM ('reminder', 'event', 'task', 'routine');
+
+-- -----------------------------------------------------------------------------
+-- device_tokens: tokens/tópicos por dispositivo/usuário
+-- -----------------------------------------------------------------------------
+CREATE TABLE inbota.device_tokens (
+    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id       UUID NOT NULL REFERENCES inbota.users(id) ON DELETE CASCADE,
+    device_id     TEXT NOT NULL,
+    ntfy_topic    TEXT NOT NULL,
+    platform      inbota.device_platform NOT NULL,
+    device_name   TEXT,                          -- "iPhone de Vanessa", "Pixel 8"
+    app_version   TEXT,                          -- "0.0.5"
+    is_active     BOOLEAN NOT NULL DEFAULT true,
+    last_seen_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Um dispositivo é único
+CREATE UNIQUE INDEX idx_device_tokens_device_id ON inbota.device_tokens(device_id);
+-- Um tópico também deve ser único por segurança
+CREATE UNIQUE INDEX idx_device_tokens_topic ON inbota.device_tokens(ntfy_topic);
+-- Busca rápida por usuário ativo
+CREATE INDEX idx_device_tokens_user ON inbota.device_tokens(user_id, is_active);
+
+-- -----------------------------------------------------------------------------
+-- notification_preferences: configurações pessoais de push por usuário
+-- -----------------------------------------------------------------------------
+CREATE TABLE inbota.notification_preferences (
+    id                   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id              UUID NOT NULL UNIQUE REFERENCES inbota.users(id) ON DELETE CASCADE,
+
+    -- Reminders
+    reminders_enabled    BOOLEAN NOT NULL DEFAULT true,
+    reminder_at_time     BOOLEAN NOT NULL DEFAULT true,   -- alerta na hora exata
+    reminder_lead_mins   INT[] NOT NULL DEFAULT '{5,15}', -- minutos antes (ex: 5, 15, 30, 60)
+
+    -- Events
+    events_enabled       BOOLEAN NOT NULL DEFAULT true,
+    event_at_time        BOOLEAN NOT NULL DEFAULT true,
+    event_lead_mins      INT[] NOT NULL DEFAULT '{15,60,1440}', -- 15min, 1h, 1 dia
+
+    -- Tasks (alerta quando o due_at chegar)
+    tasks_enabled        BOOLEAN NOT NULL DEFAULT true,
+    task_at_time         BOOLEAN NOT NULL DEFAULT true,
+    task_lead_mins       INT[] NOT NULL DEFAULT '{60,1440,5,15,30}', -- 1h, 1 dia antes
+
+    -- Routines (alerta no start_time da rotina)
+    routines_enabled     BOOLEAN NOT NULL DEFAULT true,
+    routine_at_time      BOOLEAN NOT NULL DEFAULT true,
+    routine_lead_mins    INT[] NOT NULL DEFAULT '{15}',
+
+    -- Horário de silêncio (quiet hours) — formato HH:MM em UTC, aplicado com timezone do usuário
+    quiet_hours_enabled  BOOLEAN NOT NULL DEFAULT false,
+    quiet_start          TIME,                             -- ex: '22:00'
+    quiet_end            TIME,                             -- ex: '08:00'
+
+    -- Daily Digest
+    daily_digest_enabled BOOLEAN NOT NULL DEFAULT false,
+    daily_digest_hour    INT NOT NULL DEFAULT 4,           -- 0-23 (default 04:00)
+
+    -- Daily Summary (endpoint público com token longo prazo)
+    daily_summary_token  TEXT NOT NULL DEFAULT gen_random_uuid()::text,
+
+    created_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at           TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Token público precisa ser único
+CREATE UNIQUE INDEX idx_notification_prefs_daily_summary_token
+    ON inbota.notification_preferences(daily_summary_token);
+
+-- -----------------------------------------------------------------------------
+-- email_digests: controle de envio e idempotência de digests por e-mail
+-- -----------------------------------------------------------------------------
+CREATE TABLE inbota.email_digests (
+    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id       UUID NOT NULL REFERENCES inbota.users(id) ON DELETE CASCADE,
+    digest_date   DATE NOT NULL,           -- data local do usuário
+    type          TEXT NOT NULL DEFAULT 'daily_digest',
+    status        TEXT NOT NULL DEFAULT 'pending', -- 'pending', 'success', 'failed'
+    sent_at       TIMESTAMPTZ,
+    error_msg     TEXT,
+    provider_id   TEXT,                    -- id retornado pelo provedor (ex: Resend)
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE UNIQUE INDEX idx_email_digests_unique ON inbota.email_digests(user_id, digest_date, type);
+CREATE INDEX idx_email_digests_user_date ON inbota.email_digests(user_id, digest_date DESC);
+
+-- -----------------------------------------------------------------------------
+-- notification_log: histórico de notificações enviadas
+-- -----------------------------------------------------------------------------
+CREATE TABLE inbota.notification_log (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id         UUID NOT NULL REFERENCES inbota.users(id) ON DELETE CASCADE,
+    type            inbota.notification_type NOT NULL,
+    reference_id    UUID NOT NULL,    -- id do reminder, event, task ou routine
+    title           TEXT NOT NULL,
+    body            TEXT NOT NULL,
+    lead_mins       INT,              -- NULL = na hora exata; N = N minutos antes
+    status          inbota.notification_status NOT NULL DEFAULT 'pending',
+    scheduled_for   TIMESTAMPTZ NOT NULL,  -- quando deveria ser enviado
+    sent_at         TIMESTAMPTZ,
+    read_at         TIMESTAMPTZ,
+    error_msg       TEXT,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Evita enviar a mesma notificação duplicada
+CREATE UNIQUE INDEX idx_notification_log_unique
+    ON inbota.notification_log(reference_id, lead_mins)
+    WHERE status IN ('pending', 'sent', 'delivered');
+
+-- Busca de pendentes pelo scheduler
+CREATE INDEX idx_notification_log_pending
+    ON inbota.notification_log(scheduled_for, status)
+    WHERE status = 'pending';
+
+-- Histórico por usuário
+CREATE INDEX idx_notification_log_user
+    ON inbota.notification_log(user_id, created_at DESC);
+
+-- notification_templates: templates de mensagem configuráveis sem necessidade de redeploy
+CREATE TABLE inbota.notification_templates (
+       id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+       type           inbota.notification_type NOT NULL,
+       trigger_key    TEXT NOT NULL,  -- 'at_time', 'lead_time', 'lead_time_day'
+       title_template TEXT NOT NULL,  -- ex: '{{title}}'
+       body_template  TEXT NOT NULL,  -- ex: 'Lembrete em {{lead_mins}} minutos'
+       is_active      BOOLEAN NOT NULL DEFAULT true,
+       created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+       updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE UNIQUE INDEX idx_notification_templates_unique
+    ON inbota.notification_templates(type, trigger_key);
+
+-- app_config: configurações dinâmicas da aplicação (scheduler, notificações, etc.)
+CREATE TABLE inbota.app_config (
+       key         TEXT PRIMARY KEY,
+       value       TEXT NOT NULL,
+       description TEXT,
+       updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);

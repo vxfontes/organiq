@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
+import 'package:inbota/modules/notifications/domain/repositories/i_notifications_repository.dart';
 import 'package:inbota/presentation/routes/app_navigation.dart';
 import 'package:inbota/presentation/routes/app_routes.dart';
 import 'package:inbota/presentation/screens/auth_module/controller/signup_controller.dart';
 import 'package:inbota/presentation/screens/auth_module/components/auth_form_scaffold.dart';
 import 'package:inbota/shared/components/ib_lib/index.dart';
+import 'package:inbota/shared/services/push/push_notification_service.dart';
 import 'package:inbota/shared/state/ib_state.dart';
 import 'package:inbota/shared/theme/app_colors.dart';
 
@@ -39,6 +42,11 @@ class _SignupPageState extends IBState<SignupPage, SignupController> {
     final timezone = DateTime.now().timeZoneName;
     final success = await controller.submit(locale: locale, timezone: timezone);
     if (!success || !mounted) return;
+
+    final pushService = PushNotificationService.instance;
+    pushService.setRepository(Modular.get<INotificationsRepository>());
+    await pushService.initialize();
+
     AppNavigation.clearAndPush(AppRoutes.rootHome);
   }
 

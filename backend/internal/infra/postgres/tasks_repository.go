@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"inbota/backend/internal/app/domain"
 	"inbota/backend/internal/app/repository"
@@ -147,4 +148,41 @@ func (r *TaskRepository) List(ctx context.Context, userID string, opts repositor
 
 	next := nextOffsetCursor(offset, len(items), limit)
 	return items, next, nil
+}
+
+func (r *TaskRepository) ListUpcoming(ctx context.Context, start, end time.Time) ([]domain.Task, error) {
+	rows, err := r.db.QueryContext(ctx, `
+		SELECT id, user_id, title, description, status, due_at, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
+		FROM inbota.tasks
+		WHERE status = 'OPEN' AND due_at >= $1 AND due_at <= $2
+	`, start, end)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	items := make([]domain.Task, 0)
+	for rows.Next() {
+		var description sql.NullString
+		var dueAt sql.NullTime
+		var flagID sql.NullString
+		var subflagID sql.NullString
+		var sourceInboxID sql.NullString
+		var status string
+		var task domain.Task
+		if err := rows.Scan(&task.ID, &task.UserID, &task.Title, &description, &status, &dueAt, &flagID, &subflagID, &sourceInboxID, &task.CreatedAt, &task.UpdatedAt); err != nil {
+			return nil, err
+		}
+		task.Description = stringPtrFromNull(description)
+		task.Status = domain.TaskStatus(status)
+		task.DueAt = timePtrFromNull(dueAt)
+		task.FlagID = stringPtrFromNull(flagID)
+		task.SubflagID = stringPtrFromNull(subflagID)
+		task.SourceInboxItemID = stringPtrFromNull(sourceInboxID)
+		items = append(items, task)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

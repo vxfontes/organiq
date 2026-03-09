@@ -102,10 +102,12 @@ class IBLightAppBar extends StatelessWidget implements PreferredSizeWidget {
     super.key,
     required this.title,
     this.onBack,
+    this.actions,
   });
 
   final String title;
   final VoidCallback? onBack;
+  final List<Widget>? actions;
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight + 8);
@@ -118,6 +120,7 @@ class IBLightAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: 0,
       centerTitle: false,
       leadingWidth: 56,
+      actions: actions,
       flexibleSpace: ClipRRect(
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(24),

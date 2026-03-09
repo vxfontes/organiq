@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"inbota/backend/internal/app/domain"
 	"inbota/backend/internal/app/repository"
@@ -143,4 +144,41 @@ func (r *EventRepository) List(ctx context.Context, userID string, opts reposito
 
 	next := nextOffsetCursor(offset, len(items), limit)
 	return items, next, nil
+}
+
+func (r *EventRepository) ListUpcoming(ctx context.Context, start, end time.Time) ([]domain.Event, error) {
+	rows, err := r.db.QueryContext(ctx, `
+		SELECT id, user_id, title, start_at, end_at, all_day, location, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
+		FROM inbota.events
+		WHERE start_at >= $1 AND start_at <= $2
+	`, start, end)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	items := make([]domain.Event, 0)
+	for rows.Next() {
+		var startAt sql.NullTime
+		var endAt sql.NullTime
+		var location sql.NullString
+		var flagID sql.NullString
+		var subflagID sql.NullString
+		var sourceInboxID sql.NullString
+		var event domain.Event
+		if err := rows.Scan(&event.ID, &event.UserID, &event.Title, &startAt, &endAt, &event.AllDay, &location, &flagID, &subflagID, &sourceInboxID, &event.CreatedAt, &event.UpdatedAt); err != nil {
+			return nil, err
+		}
+		event.StartAt = timePtrFromNull(startAt)
+		event.EndAt = timePtrFromNull(endAt)
+		event.Location = stringPtrFromNull(location)
+		event.FlagID = stringPtrFromNull(flagID)
+		event.SubflagID = stringPtrFromNull(subflagID)
+		event.SourceInboxItemID = stringPtrFromNull(sourceInboxID)
+		items = append(items, event)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

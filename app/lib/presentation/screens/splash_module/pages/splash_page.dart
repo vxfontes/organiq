@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
+import 'package:inbota/modules/notifications/domain/repositories/i_notifications_repository.dart';
 import 'package:inbota/presentation/routes/app_navigation.dart';
 import 'package:inbota/presentation/routes/app_routes.dart';
 import 'package:inbota/presentation/screens/splash_module/controller/splash_controller.dart';
 import 'package:inbota/shared/components/ib_lib/ib_button.dart';
 import 'package:inbota/shared/components/ib_lib/ib_loader.dart';
 import 'package:inbota/shared/components/ib_lib/ib_text.dart';
+import 'package:inbota/shared/services/push/push_notification_service.dart';
 import 'package:inbota/shared/state/ib_state.dart';
 import 'package:inbota/shared/theme/app_colors.dart';
 
@@ -24,8 +27,15 @@ class _SplashPageState extends IBState<SplashPage, SplashController> {
 
   Future<void> _bootstrap() async {
     final shouldGoHome = await controller.check();
-    if (shouldGoHome == null || !mounted) return;
-    AppNavigation.replace(shouldGoHome ? AppRoutes.rootHome : AppRoutes.auth);
+    
+    if (shouldGoHome != null && shouldGoHome && mounted) {
+      final pushService = PushNotificationService.instance;
+      pushService.setRepository(Modular.get<INotificationsRepository>());
+      await pushService.initialize();
+    }
+
+    if (!mounted) return;
+    AppNavigation.replace(shouldGoHome == true ? AppRoutes.rootHome : AppRoutes.auth);
   }
 
   @override

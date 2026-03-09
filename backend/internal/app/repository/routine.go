@@ -6,6 +6,13 @@ import (
 	"inbota/backend/internal/app/domain"
 )
 
+type RoutineDailyStatus struct {
+	domain.Routine
+	CompletedAt     *string `db:"completed_at"`
+	IsCompleted     bool    `db:"is_completed"`
+	ExceptionAction *string `db:"exception_action"`
+}
+
 type RoutineRepository interface {
 	Create(ctx context.Context, routine domain.Routine) (domain.Routine, error)
 	Update(ctx context.Context, routine domain.Routine) (domain.Routine, error)
@@ -13,7 +20,10 @@ type RoutineRepository interface {
 	Get(ctx context.Context, userID, id string) (domain.Routine, error)
 	List(ctx context.Context, userID string, opts ListOptions) ([]domain.Routine, *string, error)
 	ListByWeekday(ctx context.Context, userID string, weekday int) ([]domain.Routine, error)
+	ListAllByWeekday(ctx context.Context, weekday int) ([]domain.Routine, error)
+	ListDailyStatus(ctx context.Context, userID string, weekday int) ([]RoutineDailyStatus, error)
 	Toggle(ctx context.Context, userID, id string, isActive bool) error
+	CheckOverlap(ctx context.Context, userID string, weekdays []int, startTime, endTime string, excludeID *string) (bool, error)
 }
 
 type RoutineExceptionRepository interface {

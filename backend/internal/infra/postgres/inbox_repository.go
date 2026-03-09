@@ -187,6 +187,154 @@ func (r *InboxRepository) List(ctx context.Context, userID string, filter reposi
 	return items, next, nil
 }
 
+func (r *InboxRepository) ListWithSuggestion(ctx context.Context, userID string, filter repository.InboxListFilter, opts repository.ListOptions) ([]repository.InboxWithSuggestion, *string, error) {
+	limit, offset, err := limitOffset(opts)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	clauses := []string{"user_id = $1"}
+	args := []any{userID}
+	argIndex := 2
+
+	if filter.Status != nil {
+		clauses = append(clauses, "status = $"+itoa(argIndex))
+		args = append(args, string(*filter.Status))
+		argIndex++
+	}
+	if filter.Source != nil {
+		clauses = append(clauses, "source = $"+itoa(argIndex))
+		args = append(args, string(*filter.Source))
+		argIndex++
+	}
+
+	args = append(args, limit, offset)
+	limitIndex := argIndex
+	offsetIndex := argIndex + 1
+
+	query := `
+		SELECT id, user_id, source, raw_text, raw_media_url, status, last_error, created_at, updated_at,
+		       suggestion_id, suggestion_type, suggestion_title, suggestion_confidence, payload_json,
+		       suggestion_needs_review, suggestion_created_at, suggestion_flag_id, suggestion_subflag_id
+		FROM inbota.view_inbox_with_latest_suggestion
+		WHERE ` + strings.Join(clauses, " AND ") + `
+		ORDER BY created_at DESC
+		LIMIT $` + itoa(limitIndex) + ` OFFSET $` + itoa(offsetIndex)
+
+	rows, err := r.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer rows.Close()
+
+	items := make([]repository.InboxWithSuggestion, 0)
+	for rows.Next() {
+		var item repository.InboxWithSuggestion
+		var source, status string
+		var rawMedia, lastError, suggID, suggType, suggTitle sql.NullString
+		var suggConf sql.NullFloat64
+		var payload []byte
+		var suggNeedsReview sql.NullBool
+		var suggCreatedAt sql.NullTime
+		var suggFlagID, suggSubflagID sql.NullString
+
+		if err := rows.Scan(
+			&item.ID, &item.UserID, &source, &item.RawText, &rawMedia, &status, &lastError, &item.CreatedAt, &item.UpdatedAt,
+			&suggID, &suggType, &suggTitle, &suggConf, &payload,
+			&suggNeedsReview, &suggCreatedAt, &suggFlagID, &suggSubflagID,
+		); err != nil {
+			return nil, nil, err
+		}
+
+		item.Source = domain.InboxSource(source)
+		item.Status = domain.InboxStatus(status)
+		item.RawMediaURL = stringPtrFromNull(rawMedia)
+		item.LastError = stringPtrFromNull(lastError)
+		item.SuggestionID = stringPtrFromNull(suggID)
+		item.SuggestionType = stringPtrFromNull(suggType)
+		item.SuggestionTitle = stringPtrFromNull(suggTitle)
+		if suggConf.Valid {
+			item.SuggestionConfidence = &suggConf.Float64
+		}
+		item.PayloadJSON = payload
+		if suggNeedsReview.Valid {
+			v := suggNeedsReview.Bool
+			item.SuggestionNeedsReview = &v
+		}
+		if suggCreatedAt.Valid {
+			v := suggCreatedAt.Time
+			item.SuggestionCreatedAt = &v
+		}
+		item.SuggestionFlagID = stringPtrFromNull(suggFlagID)
+		item.SuggestionSubflagID = stringPtrFromNull(suggSubflagID)
+
+		items = append(items, item)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, nil, err
+	}
+
+	next := nextOffsetCursor(offset, len(items), limit)
+	return items, next, nil
+}
+
+func (r *InboxRepository) GetWithSuggestion(ctx context.Context, userID, id string) (repository.InboxWithSuggestion, error) {
+	query := `
+		SELECT id, user_id, source, raw_text, raw_media_url, status, last_error, created_at, updated_at,
+		       suggestion_id, suggestion_type, suggestion_title, suggestion_confidence, payload_json,
+		       suggestion_needs_review, suggestion_created_at, suggestion_flag_id, suggestion_subflag_id
+		FROM inbota.view_inbox_with_latest_suggestion
+		WHERE id = $1 AND user_id = $2
+		LIMIT 1
+	`
+
+	row := r.db.QueryRowContext(ctx, query, id, userID)
+
+	var item repository.InboxWithSuggestion
+	var source, status string
+	var rawMedia, lastError, suggID, suggType, suggTitle sql.NullString
+	var suggConf sql.NullFloat64
+	var payload []byte
+	var suggNeedsReview sql.NullBool
+	var suggCreatedAt sql.NullTime
+	var suggFlagID, suggSubflagID sql.NullString
+
+	if err := row.Scan(
+		&item.ID, &item.UserID, &source, &item.RawText, &rawMedia, &status, &lastError, &item.CreatedAt, &item.UpdatedAt,
+		&suggID, &suggType, &suggTitle, &suggConf, &payload,
+		&suggNeedsReview, &suggCreatedAt, &suggFlagID, &suggSubflagID,
+	); err != nil {
+		if err == sql.ErrNoRows {
+			return repository.InboxWithSuggestion{}, ErrNotFound
+		}
+		return repository.InboxWithSuggestion{}, err
+	}
+
+	item.Source = domain.InboxSource(source)
+	item.Status = domain.InboxStatus(status)
+	item.RawMediaURL = stringPtrFromNull(rawMedia)
+	item.LastError = stringPtrFromNull(lastError)
+	item.SuggestionID = stringPtrFromNull(suggID)
+	item.SuggestionType = stringPtrFromNull(suggType)
+	item.SuggestionTitle = stringPtrFromNull(suggTitle)
+	if suggConf.Valid {
+		item.SuggestionConfidence = &suggConf.Float64
+	}
+	item.PayloadJSON = payload
+	if suggNeedsReview.Valid {
+		v := suggNeedsReview.Bool
+		item.SuggestionNeedsReview = &v
+	}
+	if suggCreatedAt.Valid {
+		v := suggCreatedAt.Time
+		item.SuggestionCreatedAt = &v
+	}
+	item.SuggestionFlagID = stringPtrFromNull(suggFlagID)
+	item.SuggestionSubflagID = stringPtrFromNull(suggSubflagID)
+
+	return item, nil
+}
+
 func itoa(value int) string {
 	return strconv.Itoa(value)
 }

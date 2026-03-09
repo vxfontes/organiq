@@ -63,4 +63,22 @@ class AppPath {
   static String routineExceptions(String id) => '$routines/$id/exceptions';
   static String routineExceptionByDate(String id, String date) =>
       '$routines/$id/exceptions/$date';
+
+  // Notifications
+  static const String notificationPreferences = '/notification-preferences';
+  static const String notifications = '/notifications';
+  static const String notificationTest = '$notifications/test';
+  static String notificationRead(String id) => '$notifications/$id/read';
+  static const String notificationsReadAll = '$notifications/read-all';
+
+  // Digest
+  static const String digestTest = '/digest/test';
+  static const String dailySummary = '/daily-summary'; // public (token)
+
+  // Notification prefs extra
+  static const String dailySummaryToken = '/notification-preferences/daily-summary-token';
+  static const String dailySummaryTokenRotate = '/notification-preferences/daily-summary-token/rotate';
+
+  // Devices
+  static const String deviceToken = '/devices/token';
 }

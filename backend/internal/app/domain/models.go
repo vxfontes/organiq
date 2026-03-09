@@ -227,3 +227,117 @@ type RoutineCompletion struct {
 	CompletedOn string
 	CompletedAt time.Time
 }
+
+type NotificationTemplate struct {
+	ID            string
+	Type          NotificationType
+	TriggerKey    string
+	TitleTemplate string
+	BodyTemplate  string
+	IsActive      bool
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+}
+
+type DevicePlatform string
+
+const (
+	DevicePlatformIOS     DevicePlatform = "ios"
+	DevicePlatformAndroid DevicePlatform = "android"
+)
+
+type NotificationStatus string
+
+const (
+	NotificationStatusPending   NotificationStatus = "pending"
+	NotificationStatusSent      NotificationStatus = "sent"
+	NotificationStatusFailed    NotificationStatus = "failed"
+	NotificationStatusDelivered NotificationStatus = "delivered"
+	NotificationStatusRead      NotificationStatus = "read"
+)
+
+type NotificationType string
+
+const (
+	NotificationTypeReminder NotificationType = "reminder"
+	NotificationTypeEvent    NotificationType = "event"
+	NotificationTypeTask     NotificationType = "task"
+	NotificationTypeRoutine  NotificationType = "routine"
+)
+
+type DeviceToken struct {
+	ID         string
+	UserID     string
+	DeviceID   string
+	Topic      string
+	Platform   DevicePlatform
+	DeviceName *string
+	AppVersion *string
+	IsActive   bool
+	LastSeenAt time.Time
+	CreatedAt  time.Time
+}
+
+type NotificationPreferences struct {
+	ID                string
+	UserID            string
+	RemindersEnabled  bool
+	ReminderAtTime    bool
+	ReminderLeadMins  []int
+	EventsEnabled     bool
+	EventAtTime       bool
+	EventLeadMins     []int
+	TasksEnabled      bool
+	TaskAtTime        bool
+	TaskLeadMins      []int
+	RoutinesEnabled   bool
+	RoutineAtTime     bool
+	RoutineLeadMins   []int
+	QuietHoursEnabled bool
+	QuietStart        *string // format HH:MM
+	QuietEnd          *string // format HH:MM
+
+	DailyDigestEnabled bool
+	DailyDigestHour    int
+	DailySummaryToken  string
+
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
+}
+
+type EmailDigestStatus string
+
+const (
+	EmailDigestStatusPending EmailDigestStatus = "pending"
+	EmailDigestStatusSuccess EmailDigestStatus = "success"
+	EmailDigestStatusFailed  EmailDigestStatus = "failed"
+)
+
+type EmailDigest struct {
+	ID         string
+	UserID     string
+	DigestDate time.Time
+	Type       string
+	Status     EmailDigestStatus
+	SentAt     *time.Time
+	ErrorMsg   *string
+	ProviderID *string
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+}
+
+type NotificationLog struct {
+	ID           string
+	UserID       string
+	Type         NotificationType
+	ReferenceID  string
+	Title        string
+	Body         string
+	LeadMins     *int
+	Status       NotificationStatus
+	ScheduledFor time.Time
+	SentAt       *time.Time
+	ReadAt       *time.Time
+	ErrorMsg     *string
+	CreatedAt    time.Time
+}
