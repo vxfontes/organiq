@@ -4,6 +4,7 @@ import 'package:inbota/modules/notifications/data/repositories/notifications_rep
 import 'package:inbota/modules/notifications/domain/repositories/i_notification_prefs_repository.dart';
 import 'package:inbota/modules/notifications/domain/repositories/i_notifications_repository.dart';
 import 'package:inbota/modules/notifications/domain/usecases/get_notification_prefs_usecase.dart';
+import 'package:inbota/modules/notifications/domain/usecases/send_test_email_digest_usecase.dart';
 import 'package:inbota/modules/notifications/domain/usecases/send_test_notification_usecase.dart';
 import 'package:inbota/modules/notifications/domain/usecases/update_notification_prefs_usecase.dart';
 
@@ -17,5 +18,6 @@ class NotificationsModule {
     i.addLazySingleton<GetNotificationPrefsUsecase>(GetNotificationPrefsUsecase.new);
     i.addLazySingleton<UpdateNotificationPrefsUsecase>(UpdateNotificationPrefsUsecase.new);
     i.addLazySingleton<SendTestNotificationUsecase>(SendTestNotificationUsecase.new);
+    i.addLazySingleton<SendTestEmailDigestUsecase>(SendTestEmailDigestUsecase.new);
   }
 }

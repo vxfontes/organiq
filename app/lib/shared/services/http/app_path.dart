@@ -71,6 +71,9 @@ class AppPath {
   static String notificationRead(String id) => '$notifications/$id/read';
   static const String notificationsReadAll = '$notifications/read-all';
 
+  // Digest
+  static const String digestTest = '/digest/test';
+
   // Devices
   static const String deviceToken = '/devices/token';
 }

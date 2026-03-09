@@ -1,3 +1,8 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'notification_log_model.g.dart';
+
+@JsonSerializable()
 class NotificationLogModel {
   final String id;
   final String type;
@@ -11,7 +16,7 @@ class NotificationLogModel {
   final DateTime? readAt;
   final DateTime createdAt;
 
-  NotificationLogModel({
+  const NotificationLogModel({
     required this.id,
     required this.type,
     required this.referenceId,
@@ -25,19 +30,13 @@ class NotificationLogModel {
     required this.createdAt,
   });
 
-  factory NotificationLogModel.fromMap(Map<String, dynamic> map) {
-    return NotificationLogModel(
-      id: map['id'],
-      type: map['type'],
-      referenceId: map['referenceId'],
-      title: map['title'],
-      body: map['body'],
-      leadMins: map['leadMins'],
-      status: map['status'],
-      scheduledFor: DateTime.parse(map['scheduledFor']),
-      sentAt: map['sentAt'] != null ? DateTime.parse(map['sentAt']) : null,
-      readAt: map['readAt'] != null ? DateTime.parse(map['readAt']) : null,
-      createdAt: DateTime.parse(map['createdAt']),
-    );
+  factory NotificationLogModel.fromJson(Map<String, dynamic> json) {
+    return _$NotificationLogModelFromJson(json);
   }
+
+  factory NotificationLogModel.fromMap(Map<String, dynamic> map) {
+    return NotificationLogModel.fromJson(map);
+  }
+
+  Map<String, dynamic> toJson() => _$NotificationLogModelToJson(this);
 }

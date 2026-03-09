@@ -60,6 +60,7 @@ class IBIcon extends StatelessWidget {
   static const IconData skipNextRounded = Icons.skip_next_rounded;
   static const IconData calendar = Icons.calendar_today_outlined;
   static const IconData fire = Icons.local_fire_department_outlined;
+  static const IconData mailOutlineRounded = Icons.mail_outline_rounded;
 
   @override
   Widget build(BuildContext context) {

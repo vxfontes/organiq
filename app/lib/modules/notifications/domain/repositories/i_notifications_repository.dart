@@ -9,4 +9,5 @@ abstract class INotificationsRepository {
   Future<Either<Failure, String>> registerDeviceToken(String deviceId, String platform, {String? deviceName, String? appVersion});
   Future<Either<Failure, Unit>> unregisterDeviceToken(String deviceId);
   Future<Either<Failure, Unit>> sendTestNotification();
+  Future<Either<Failure, Unit>> sendTestEmailDigest();
 }

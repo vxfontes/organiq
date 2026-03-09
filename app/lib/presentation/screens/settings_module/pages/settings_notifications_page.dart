@@ -8,6 +8,7 @@ import 'package:inbota/presentation/screens/settings_module/components/settings_
 import 'package:inbota/presentation/screens/settings_module/components/settings_notifications_module_definitions.dart';
 import 'package:inbota/presentation/screens/settings_module/components/settings_notifications_module_content.dart';
 import 'package:inbota/presentation/screens/settings_module/components/settings_notifications_quiet_hours_content.dart';
+import 'package:inbota/presentation/screens/settings_module/components/settings_notifications_daily_digest_content.dart';
 import 'package:inbota/presentation/screens/settings_module/controller/settings_notifications_controller.dart';
 import 'package:inbota/shared/components/ib_lib/index.dart';
 import 'package:inbota/shared/state/ib_state.dart';
@@ -108,28 +109,29 @@ class _SettingsNotificationsPageState extends IBState<SettingsNotificationsPage,
                   const SizedBox(height: 12),
                   ..._buildModuleSections(prefs),
                   _buildQuietHoursSection(prefs),
+                  _buildDailyDigestSection(prefs),
                   _buildDeviceSection(),
                   const SizedBox(height: 24),
-                  ValueListenableBuilder<bool>(
-                    valueListenable: controller.sendingTest,
-                    builder: (_, sending, _) {
-                      return IBButton(
-                        label: 'Enviar notificação de teste',
-                        loading: sending,
-                        onPressed: () async {
-                          final success = await controller
-                              .sendTestNotification();
-                          if (success && mounted) {
-                            IBSnackBar.success(
-                              this.context,
-                              'Notificação de teste enviada!',
-                            );
-                          }
-                        },
-                        variant: IBButtonVariant.secondary,
-                      );
-                    },
-                  ),
+                  // ValueListenableBuilder<bool>(
+                  //   valueListenable: controller.sendingTest,
+                  //   builder: (_, sending, _) {
+                  //     return IBButton(
+                  //       label: 'Enviar notificação de teste',
+                  //       loading: sending,
+                  //       onPressed: () async {
+                  //         final success = await controller
+                  //             .sendTestNotification();
+                  //         if (success && mounted) {
+                  //           IBSnackBar.success(
+                  //             this.context,
+                  //             'Notificação de teste enviada!',
+                  //           );
+                  //         }
+                  //       },
+                  //       variant: IBButtonVariant.secondary,
+                  //     );
+                  //   },
+                  // ),
                 ],
               ),
             );
@@ -206,6 +208,42 @@ class _SettingsNotificationsPageState extends IBState<SettingsNotificationsPage,
     );
   }
 
+  Widget _buildDailyDigestSection(NotificationPreferencesModel prefs) {
+    final digestSummary = prefs.dailyDigestEnabled
+        ? 'Ativado para às ${prefs.dailyDigestHour.toString().padLeft(2, '0')}:00'
+        : 'Desativado';
+
+    return SettingsAccordionSection(
+      title: 'Daily Digest',
+      subtitle: 'Resumo diário por e-mail com sua agenda.',
+      collapsedSummary: digestSummary,
+      icon: IBIcon.mailOutlineRounded,
+      isExpanded: _isExpanded(SettingsNotificationsSection.dailyDigest),
+      onTap: () => _toggleSection(SettingsNotificationsSection.dailyDigest),
+      child: ValueListenableBuilder<bool>(
+        valueListenable: controller.sendingEmailTest,
+        builder: (context, sending, _) {
+          return SettingsNotificationsDailyDigestContent(
+            prefs: prefs,
+            onEnabledChanged: (v) =>
+                _updatePrefs(prefs.copyWith(dailyDigestEnabled: v)),
+            onPickHour: () => _pickDigestHour(prefs),
+            onSendTest: () async {
+              final success = await controller.sendTestEmailDigest();
+              if (success && mounted) {
+                IBSnackBar.success(
+                  this.context,
+                  'E-mail de teste enviado!',
+                );
+              }
+            },
+            sendingTest: sending,
+          );
+        },
+      ),
+    );
+  }
+
   Widget _buildDeviceSection() {
     return SettingsAccordionSection(
       title: 'Dispositivo (ntfy.sh)',
@@ -238,6 +276,17 @@ class _SettingsNotificationsPageState extends IBState<SettingsNotificationsPage,
 
   void _updatePrefs(NotificationPreferencesModel newPrefs) {
     controller.updatePreferences(newPrefs);
+  }
+
+  Future<void> _pickDigestHour(NotificationPreferencesModel prefs) async {
+    final time = await IBTimeField.pickTime(
+      context,
+      initialTime: TimeOfDay(hour: prefs.dailyDigestHour, minute: 0),
+    );
+
+    if (time != null) {
+      _updatePrefs(prefs.copyWith(dailyDigestHour: time.hour));
+    }
   }
 
   Future<void> _pickQuietTime(

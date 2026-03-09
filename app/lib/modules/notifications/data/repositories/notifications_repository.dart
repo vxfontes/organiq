@@ -96,4 +96,15 @@ class NotificationsRepository implements INotificationsRepository {
       return Left(SaveFailure(message: e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, Unit>> sendTestEmailDigest() async {
+    try {
+      final response = await _httpClient.post(AppPath.digestTest);
+      if ((response.statusCode ?? 0) < 300) return const Right(unit);
+      return Left(SaveFailure(message: ApiErrorMapper.fromResponseData(response.data, fallbackMessage: 'Erro ao enviar e-mail de teste.')));
+    } catch (e) {
+      return Left(SaveFailure(message: e.toString()));
+    }
+  }
 }
