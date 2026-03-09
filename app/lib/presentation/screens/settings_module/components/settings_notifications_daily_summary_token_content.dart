@@ -87,7 +87,7 @@ class SettingsNotificationsDailySummaryTokenContent extends StatelessWidget {
         const SizedBox(height: 10),
         IBButton(
           label: 'Atualizar',
-          variant: IBButtonVariant.tertiary,
+          variant: IBButtonVariant.ghost,
           onPressed: loading ? null : onRefresh,
         ),
       ],

@@ -249,7 +249,7 @@ class _SettingsNotificationsPageState extends IBState<SettingsNotificationsPage,
 
   Widget _buildDailySummaryTokenSection() {
     return SettingsAccordionSection(
-      title: 'Daily Summary (endpoint público)',
+      title: 'Daily Summary',
       subtitle: 'Token de acesso para seu resumo diário via API.',
       collapsedSummary: 'Copiar/rotacionar token',
       icon: IBIcon.keyRounded,

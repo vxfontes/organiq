@@ -50,7 +50,7 @@ CREATE TABLE inbota.notification_preferences (
     -- Tasks (alerta quando o due_at chegar)
     tasks_enabled        BOOLEAN NOT NULL DEFAULT true,
     task_at_time         BOOLEAN NOT NULL DEFAULT true,
-    task_lead_mins       INT[] NOT NULL DEFAULT '{60,1440}', -- 1h, 1 dia antes
+    task_lead_mins       INT[] NOT NULL DEFAULT '{60,1440,5,15,30}', -- 1h, 1 dia antes
 
     -- Routines (alerta no start_time da rotina)
     routines_enabled     BOOLEAN NOT NULL DEFAULT true,
