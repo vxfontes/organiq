@@ -514,16 +514,21 @@ definitions:
     properties:
       appVersion:
         type: string
+      deviceId:
+        type: string
       deviceName:
         type: string
       platform:
         description: ios | android
         type: string
+    required:
+    - deviceId
+    - platform
+    type: object
+  dto.RegisterTokenResponse:
+    properties:
       topic:
         type: string
-    required:
-    - platform
-    - topic
     type: object
   dto.ReminderResponse:
     properties:
@@ -728,10 +733,10 @@ definitions:
     type: object
   dto.UnregisterTokenRequest:
     properties:
-      topic:
+      deviceId:
         type: string
     required:
-    - topic
+    - deviceId
     type: object
   dto.UpdateContextRuleRequest:
     properties:
@@ -1185,7 +1190,7 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: Unregister topic request
+      - description: Unregister device request
         in: body
         name: body
         required: true
@@ -1210,14 +1215,14 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
-      summary: Remover tópico de dispositivo
+      summary: Remover dispositivo
       tags:
       - Devices
     post:
       consumes:
       - application/json
       parameters:
-      - description: Register topic request
+      - description: Register device request
         in: body
         name: body
         required: true
@@ -1229,9 +1234,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/dto.RegisterTokenResponse'
         "400":
           description: Bad Request
           schema:
@@ -1242,7 +1245,7 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
-      summary: Registrar tópico de dispositivo
+      summary: Registrar dispositivo
       tags:
       - Devices
   /v1/events:
