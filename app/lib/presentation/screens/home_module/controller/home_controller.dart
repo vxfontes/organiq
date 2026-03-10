@@ -269,6 +269,21 @@ class HomeController implements IBController {
         .toList(growable: false);
   }
 
+  List<TimelineItem> get insightsTimelineToday {
+    final merged = <TimelineItem>[
+      ..._agendaTimelineItemsTodayForInsights,
+      ..._routineTimelineItemsTodayForInsights,
+    ];
+
+    merged.sort((a, b) {
+      final byTime = a.scheduledTime.compareTo(b.scheduledTime);
+      if (byTime != 0) return byTime;
+      return a.title.toLowerCase().compareTo(b.title.toLowerCase());
+    });
+
+    return merged;
+  }
+
   int get routinesDone {
     final summary = routineSummary.value;
     if (summary != null) return summary.completed;
@@ -289,19 +304,11 @@ class HomeController implements IBController {
     return _todayTasksForProgress.length;
   }
 
-  int get remindersDone {
-    return _todayRemindersForProgress.where((item) => item.isDone).length;
-  }
-
-  int get remindersTotal {
-    return _todayRemindersForProgress.length;
-  }
-
   double get dayProgressPercent {
-    final total = routinesTotal + tasksTotal + remindersTotal;
+    final total = routinesTotal + tasksTotal;
     if (total == 0) return 0;
 
-    final done = routinesDone + tasksDone + remindersDone;
+    final done = routinesDone + tasksDone;
     return (done / total).clamp(0, 1).toDouble();
   }
 
@@ -740,6 +747,96 @@ class HomeController implements IBController {
     return list;
   }
 
+  List<TimelineItem> get _agendaTimelineItemsTodayForInsights {
+    final now = DateTime.now();
+    final start = _startOfDay(now);
+    final end = start.add(const Duration(days: 1));
+    final items = <TimelineItem>[];
+
+    for (final event in agenda.value.events) {
+      final local = event.startAt?.toLocal();
+      if (local == null || !_isWithinRange(local, start, end)) continue;
+      if (!_hasDefinedTime(local)) continue;
+
+      final subtitle = TextUtils.normalize(event.location);
+      items.add(
+        TimelineItem(
+          id: event.id,
+          title: event.title,
+          subtitle: subtitle,
+          type: TimelineItemType.event,
+          scheduledTime: local,
+          endScheduledTime: _eventEndAtLocal(event, startAtLocal: local),
+          isCompleted: false,
+          isOverdue: local.isBefore(now),
+        ),
+      );
+    }
+
+    for (final task in agenda.value.tasks) {
+      final local = task.dueAt?.toLocal();
+      if (local == null || !_isWithinRange(local, start, end)) continue;
+      if (!_hasDefinedTime(local)) continue;
+
+      items.add(
+        TimelineItem(
+          id: task.id,
+          title: task.title,
+          subtitle: TextUtils.normalize(task.description),
+          type: TimelineItemType.task,
+          scheduledTime: local,
+          isCompleted: task.isDone,
+          isOverdue: local.isBefore(now) && !task.isDone,
+        ),
+      );
+    }
+
+    for (final reminder in agenda.value.reminders) {
+      final local = reminder.remindAt?.toLocal();
+      if (local == null || !_isWithinRange(local, start, end)) continue;
+      if (!_hasDefinedTime(local)) continue;
+
+      items.add(
+        TimelineItem(
+          id: reminder.id,
+          title: reminder.title,
+          type: TimelineItemType.reminder,
+          scheduledTime: local,
+          isCompleted: reminder.isDone,
+          isOverdue: local.isBefore(now) && !reminder.isDone,
+        ),
+      );
+    }
+
+    return items;
+  }
+
+  List<TimelineItem> get _routineTimelineItemsTodayForInsights {
+    final now = DateTime.now();
+    final list = <TimelineItem>[];
+
+    for (final routine in routines.value) {
+      final scheduled = _routineStartAtToday(routine);
+      if (scheduled == null) continue;
+      final endScheduled = _routineEndAtToday(routine, startAt: scheduled);
+
+      list.add(
+        TimelineItem(
+          id: routine.id,
+          title: routine.title,
+          subtitle: TextUtils.normalize(routine.weekdaysLabel),
+          type: TimelineItemType.routine,
+          scheduledTime: scheduled,
+          endScheduledTime: endScheduled,
+          isCompleted: routine.isCompletedToday,
+          isOverdue: scheduled.isBefore(now) && !routine.isCompletedToday,
+        ),
+      );
+    }
+
+    return list;
+  }
+
   List<TaskOutput> get _todayTasksForProgress {
     final now = DateTime.now();
     return agenda.value.tasks
@@ -747,17 +844,6 @@ class HomeController implements IBController {
           final due = task.dueAt?.toLocal();
           if (due == null) return false;
           return _isSameDay(due, now);
-        })
-        .toList(growable: false);
-  }
-
-  List<ReminderOutput> get _todayRemindersForProgress {
-    final now = DateTime.now();
-    return agenda.value.reminders
-        .where((item) {
-          final remindAt = item.remindAt?.toLocal();
-          if (remindAt == null) return false;
-          return _isSameDay(remindAt, now);
         })
         .toList(growable: false);
   }

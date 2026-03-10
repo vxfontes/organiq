@@ -15,8 +15,6 @@ class HomeBentoRow extends StatelessWidget {
     required this.routinesTotal,
     required this.tasksDone,
     required this.tasksTotal,
-    required this.remindersDone,
-    required this.remindersTotal,
     required this.shoppingListCount,
     required this.shoppingItemCount,
     required this.eventsTodayCount,
@@ -24,7 +22,7 @@ class HomeBentoRow extends StatelessWidget {
     required this.todayTimeline,
     required this.onShoppingTap,
     required this.onInsightsTap,
-    this.debugInsightLogs = true,
+    this.debugInsightLogs = false,
   });
 
   final double progressPercent;
@@ -32,8 +30,6 @@ class HomeBentoRow extends StatelessWidget {
   final int routinesTotal;
   final int tasksDone;
   final int tasksTotal;
-  final int remindersDone;
-  final int remindersTotal;
   final int shoppingListCount;
   final int shoppingItemCount;
   final int eventsTodayCount;
@@ -112,8 +108,6 @@ class HomeBentoRow extends StatelessWidget {
       routinesTotal: routinesTotal,
       tasksDone: tasksDone,
       tasksTotal: tasksTotal,
-      remindersDone: remindersDone,
-      remindersTotal: remindersTotal,
     );
   }
 
@@ -129,11 +123,6 @@ class HomeBentoRow extends StatelessWidget {
     final commitments =
         eventsTodayCount + remindersTodayCount + tasksTotal + routinesTotal;
     final slots = todayTimeline
-        .where(
-          (item) =>
-              item.type == TimelineItemType.event ||
-              item.type == TimelineItemType.reminder,
-        )
         .map(
           (item) => DayScheduleSlot(
             start: item.scheduledTime,
@@ -147,8 +136,10 @@ class HomeBentoRow extends StatelessWidget {
       debugPrint(
         '[Insights] commitments=$commitments events=$eventsTodayCount reminders=$remindersTodayCount tasks=$tasksTotal routines=$routinesTotal slots=${slots.length}',
       );
-      for (final slot in slots) {
-        debugPrint('[Insights] slot ${slot.start} -> ${slot.end}');
+      for (final item in todayTimeline) {
+        debugPrint(
+          '[Insights] item type=${item.type.name} completed=${item.isCompleted} ${item.scheduledTime} -> ${item.endScheduledTime}',
+        );
       }
     }
 

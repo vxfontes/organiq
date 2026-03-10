@@ -148,13 +148,11 @@ class _HomePageState extends IBState<HomePage, HomeController> {
                         routinesTotal: controller.routinesTotal,
                         tasksDone: controller.tasksDone,
                         tasksTotal: controller.tasksTotal,
-                        remindersDone: controller.remindersDone,
-                        remindersTotal: controller.remindersTotal,
                         shoppingListCount: controller.openShoppingLists,
                         shoppingItemCount: controller.totalPendingShoppingItems,
                         eventsTodayCount: controller.eventsTodayCount,
                         remindersTodayCount: controller.remindersTodayCount,
-                        todayTimeline: [...pastActions, ...nextActions],
+                        todayTimeline: controller.insightsTimelineToday,
                         onShoppingTap: () =>
                             AppNavigation.push(AppRoutes.rootShopping),
                         onInsightsTap: () =>

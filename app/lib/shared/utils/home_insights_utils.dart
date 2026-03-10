@@ -83,8 +83,7 @@ class HomeInsightsUtils {
     if (untimedCount > 0 && (!hasTimedSlots || untimedDominant)) {
       return DayInsight(
         title: 'Faltam horários',
-        summary:
-            '$untimedCount compromisso(s) ainda sem horario.',
+        summary: '$untimedCount compromisso(s) ainda sem horario.',
         footer: 'Defina os horários para organizar melhor.',
         isFocus: false,
       );
@@ -95,7 +94,7 @@ class HomeInsightsUtils {
       return DayInsight(
         title: 'Tempo livre',
         summary:
-        '${_time(best.start)}–${_time(best.end)} ($minutes min livres).',
+            '${_time(best.start)} – ${_time(best.end)} ($minutes min livres).',
         footer: 'Que tal adiantar algo às ${_time(best.start)}?',
         isFocus: true,
       );
@@ -105,7 +104,7 @@ class HomeInsightsUtils {
       return DayInsight(
         title: 'Melhor momento',
         summary:
-        '${_time(best.start)}–${_time(best.end)} para fazer algo em paz.',
+            '${_time(best.start)} – ${_time(best.end)} para fazer algo em paz.',
         footer: untimedCount > 0
             ? 'Aproveite e veja $untimedCount tarefa(s) sem horario.'
             : 'Aproveitar tempo com menos interrupções.',
@@ -116,8 +115,7 @@ class HomeInsightsUtils {
     if (best.duration.inMinutes >= 45) {
       return DayInsight(
         title: 'Bom tempo livre',
-        summary:
-        '${_time(best.start)}–${_time(best.end)} está disponível.',
+        summary: '${_time(best.start)} – ${_time(best.end)} está disponível.',
         footer: 'Dá para resolver algo importante.',
         isFocus: true,
       );
@@ -126,7 +124,7 @@ class HomeInsightsUtils {
     return DayInsight(
       title: 'Dia mais corrido',
       summary:
-      'Maior tempo livre hoje é ${_time(best.start)}–${_time(best.end)}.',
+          'Maior tempo livre hoje é ${_time(best.start)} – ${_time(best.end)}.',
       footer: 'Tente aproveitar pequenas pausas.',
       isFocus: false,
     );
@@ -192,9 +190,12 @@ class HomeInsightsUtils {
     required DateTime until,
   }) {
     var cursor = from;
-    var best = _Range(start: from, end: until);
+    // Start with an empty gap. Real gaps found below can replace it.
+    var best = _Range(start: from, end: from);
 
-    if (busyRanges.isEmpty) return best;
+    if (busyRanges.isEmpty) {
+      return _Range(start: from, end: until);
+    }
 
     for (final range in busyRanges) {
       if (range.start.isAfter(cursor)) {

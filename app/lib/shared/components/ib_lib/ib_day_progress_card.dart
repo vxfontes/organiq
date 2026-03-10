@@ -11,8 +11,6 @@ class IBDayProgressCard extends StatelessWidget {
     required this.routinesTotal,
     required this.tasksDone,
     required this.tasksTotal,
-    required this.remindersDone,
-    required this.remindersTotal,
   });
 
   final double progressPercent;
@@ -20,14 +18,12 @@ class IBDayProgressCard extends StatelessWidget {
   final int routinesTotal;
   final int tasksDone;
   final int tasksTotal;
-  final int remindersDone;
-  final int remindersTotal;
 
   @override
   Widget build(BuildContext context) {
     final safeProgress = progressPercent.clamp(0.0, 1.0).toDouble();
-    final overallDone = routinesDone + tasksDone + remindersDone;
-    final overallTotal = routinesTotal + tasksTotal + remindersTotal;
+    final overallDone = routinesDone + tasksDone;
+    final overallTotal = routinesTotal + tasksTotal;
     final progressColor = safeProgress >= 1 && overallTotal > 0
         ? AppColors.success600
         : AppColors.primary600;
@@ -83,13 +79,6 @@ class IBDayProgressCard extends StatelessWidget {
             done: tasksDone,
             total: tasksTotal,
             color: AppColors.warning500,
-          ),
-          const SizedBox(height: 8),
-          _CategoryProgressLine(
-            label: 'Lembretes',
-            done: remindersDone,
-            total: remindersTotal,
-            color: AppColors.success600,
           ),
           if (safeProgress >= 1 && overallTotal > 0) ...[
             const SizedBox(height: 10),
