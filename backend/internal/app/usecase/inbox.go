@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"regexp"
 	"strings"
 	"time"
 
@@ -517,6 +518,35 @@ func (uc *InboxUsecase) ConfirmInboxItem(ctx context.Context, userID, id string,
 			subflagID = rawSubflagID
 		}
 	}
+
+	// Get current time in user timezone for weekday guardrail.
+	now := time.Now()
+	if uc.Now != nil {
+		now = uc.Now()
+	}
+	fallbackLoc, err := time.LoadLocation("America/Sao_Paulo")
+	if err != nil {
+		fallbackLoc = now.Location()
+	}
+	if uc.Users != nil {
+		user, err := uc.Users.Get(ctx, userID)
+		if err == nil {
+			if tz := strings.TrimSpace(user.Timezone); tz != "" {
+				if loc, err := time.LoadLocation(tz); err == nil {
+					now = now.In(loc)
+				} else {
+					now = now.In(fallbackLoc)
+				}
+			} else {
+				now = now.In(fallbackLoc)
+			}
+		} else {
+			now = now.In(fallbackLoc)
+		}
+	} else {
+		now = now.In(fallbackLoc)
+	}
+
 	if uc.TxRunner != nil {
 		if err := uc.TxRunner.WithTx(ctx, func(tx repository.TxRepositories) error {
 			if tx.Inbox == nil {
@@ -552,6 +582,9 @@ func (uc *InboxUsecase) ConfirmInboxItem(ctx context.Context, userID, id string,
 				if !ok {
 					return ErrInvalidPayload
 				}
+
+				fixWeekdayMismatch(&reminderPayload.At, nil, item.RawText, now)
+
 				reminder := domain.Reminder{
 					UserID:            userID,
 					Title:             title,
@@ -573,6 +606,11 @@ func (uc *InboxUsecase) ConfirmInboxItem(ctx context.Context, userID, id string,
 				if !ok {
 					return ErrInvalidPayload
 				}
+
+				// Guardrail: if the user explicitly mentioned a weekday (e.g. "sexta") and the
+				// model returned a different weekday (e.g. sábado), fix it deterministically.
+				fixWeekdayMismatch(&eventPayload.Start, eventPayload.End, item.RawText, now)
+
 				event := domain.Event{
 					UserID:            userID,
 					Title:             title,
@@ -858,4 +896,96 @@ func (uc *InboxUsecase) failInboxProcessing(ctx context.Context, item domain.Inb
 		return InboxItemResult{}, err
 	}
 	return InboxItemResult{Item: updated}, nil
+}
+
+func fixWeekdayMismatch(start *time.Time, end *time.Time, rawText string, now time.Time) {
+	if start == nil {
+		return
+	}
+	if hasExplicitDate(rawText) {
+		return
+	}
+
+	weekday, ok := detectSingleWeekdayMention(rawText)
+	if !ok {
+		return
+	}
+
+	loc := now.Location()
+	startLocal := start.In(loc)
+	if startLocal.Weekday() == weekday {
+		return
+	}
+
+	// Build the next occurrence for the requested weekday.
+	nextDate := nextOccurrenceOfWeekday(now, weekday)
+
+	fixedStart := time.Date(
+		nextDate.Year(), nextDate.Month(), nextDate.Day(),
+		startLocal.Hour(), startLocal.Minute(), startLocal.Second(), startLocal.Nanosecond(),
+		loc,
+	)
+
+	// Preserve duration if we have an end.
+	if end != nil {
+		endLocal := end.In(loc)
+		dur := endLocal.Sub(startLocal)
+		fixedEnd := fixedStart.Add(dur)
+		*end = fixedEnd
+	}
+
+	*start = fixedStart
+}
+
+func hasExplicitDate(text string) bool {
+	lower := strings.ToLower(text)
+	// very lightweight checks
+	if regexp.MustCompile(`\b\d{4}-\d{2}-\d{2}\b`).FindStringIndex(lower) != nil {
+		return true
+	}
+	if regexp.MustCompile(`\b\d{1,2}/\d{1,2}(?:/\d{2,4})?\b`).FindStringIndex(lower) != nil {
+		return true
+	}
+	return false
+}
+
+func detectSingleWeekdayMention(text string) (time.Weekday, bool) {
+	lower := strings.ToLower(text)
+	// Map of portuguese weekday tokens.
+	tokens := map[time.Weekday][]string{
+		time.Sunday:    {"domingo"},
+		time.Monday:    {"segunda"},
+		time.Tuesday:   {"terça", "terca"},
+		time.Wednesday: {"quarta"},
+		time.Thursday:  {"quinta"},
+		time.Friday:    {"sexta"},
+		time.Saturday:  {"sábado", "sabado"},
+	}
+
+	found := []time.Weekday{}
+	for wd, list := range tokens {
+		for _, t := range list {
+			if regexp.MustCompile(`\b`+regexp.QuoteMeta(t)+`(\-feira)?\b`).FindStringIndex(lower) != nil {
+				found = append(found, wd)
+				break
+			}
+		}
+	}
+
+	if len(found) != 1 {
+		return time.Sunday, false
+	}
+	return found[0], true
+}
+
+func nextOccurrenceOfWeekday(now time.Time, target time.Weekday) time.Time {
+	start := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	nowWd := start.Weekday()
+	delta := (int(target) - int(nowWd) + 7) % 7
+	// If it's today, keep today only if the time hasn't passed. We'll handle this by
+	// allowing today and letting the fixedStart use the AI time.
+	if delta == 0 {
+		return start
+	}
+	return start.AddDate(0, 0, delta)
 }
