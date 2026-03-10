@@ -10,16 +10,20 @@
 - IBChip: Tag/label com cor configuravel.
 - IBChipGroup<T>: Grupo de chips selecionaveis (single/multi) com estilos IB.
 - IBColorPicker: Seletor visual de cor com paleta e opcao "sem cor".
+- IBDayProgressCard: Card de progresso diario com ring animado e mini-barras por categoria.
 - IBDateField: Campo visual de data com acao principal e limpar.
 - IBEmptyState: Estado vazio com icone e textos.
 - IBFlagsField: Campo de selecao de flags (single select) com chips.
 - IBLoader: Indicador de carregamento com label opcional.
+- IBNextActionCard: Card compacto para timeline horizontal (hora, tipo, titulo e acao de concluir).
 - IBScaffold: Scaffold base com padding e bottom bar.
+- IBShoppingBanner: Banner de atalho para Compras com contadores de listas/itens.
 - IBSnackBar: Helper para exibir feedbacks rápidos (erro/sucesso) de forma flutuante e não intrusiva.
 - IBText: Helper de texto com variacoes (titulo, subtitulo, body, muted, caption, label).
 - IBTextField: Input padronizado (suporta `minLines` e `maxLines`).
 - IBTimeField: Campo visual de horário com seletor nativo estilizado (estilo IBDateField).
 - IBToggle: Bloco com titulo/subtitulo e switch adaptativo, com estilo IB.
+- IBWeekStrip: Faixa semanal horizontal com selecao de dia e pontos de densidade.
 - IBHugeIcon: Enum helper para icones do HugeIcons.
 - IBIcon: Wrapper para icones do Material (padroniza tamanho/cor e opcionalmente fundo).
   - Variantes: use `IBIcon.<nome>` no lugar de `Icons.<nome>` (todos os icones usados no app estao mapeados aqui).
@@ -44,6 +48,8 @@
 - IBMenuItem: Modelo de item usado pelo `IBMenuCard`.
 - IBChipOption<T>: Modelo de opcao usado pelo `IBChipGroup`.
 - IBFlagsFieldOption: Modelo de opcao usado pelo `IBFlagsField`.
+- IBNextActionItem: Modelo usado pelo `IBNextActionCard`.
+- IBNextActionType: Enum de tipo para `IBNextActionCard` (`event`, `reminder`, `routine`, `task`).
 
 ## Notas de uso
 - IBTodoList e IBTodoItemData sao ideais para tarefas criticas no topo da Home.

@@ -2,7 +2,7 @@ name: inbota
 description: "Inbox App."
 publish_to: 'none'
 
-version: 0.0.4+0000004 # 1.2.3 vira -> 0102003 / 11.20.30 vira -> 1120030
+version: 0.1.0+0001000 # 1.2.3 vira -> 0102003 / 11.20.30 vira -> 1120030
 
 environment:
   sdk: ^3.9.2

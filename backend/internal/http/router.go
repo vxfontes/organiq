@@ -70,6 +70,9 @@ func NewRouter(cfg config.Config, log *slog.Logger, authHandler *handler.AuthHan
 		if apiHandlers.Agenda != nil {
 			authGroup.GET("/agenda", apiHandlers.Agenda.List)
 		}
+		if apiHandlers.Home != nil {
+			authGroup.GET("/home/dashboard", apiHandlers.Home.GetDashboard)
+		}
 		if apiHandlers.Tasks != nil {
 			authGroup.GET("/tasks", apiHandlers.Tasks.List)
 			authGroup.POST("/tasks", apiHandlers.Tasks.Create)

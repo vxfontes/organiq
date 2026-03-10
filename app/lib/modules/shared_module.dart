@@ -2,6 +2,7 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:inbota/modules/auth/auth_module.dart';
 import 'package:inbota/modules/events/events_module.dart';
 import 'package:inbota/modules/flags/flags_module.dart';
+import 'package:inbota/modules/home/home_module.dart';
 import 'package:inbota/modules/inbox/inbox_module.dart';
 import 'package:inbota/modules/notifications/notifications_module.dart';
 import 'package:inbota/modules/reminders/reminders_module.dart';
@@ -33,6 +34,7 @@ class SharedModule extends Module {
     AuthModule.binds(i);
     EventsModule.binds(i);
     FlagsModule.binds(i);
+    HomeApiModule.binds(i);
     InboxModule.binds(i);
     NotificationsModule.binds(i);
     RemindersModule.binds(i);

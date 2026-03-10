@@ -99,6 +99,7 @@ func main() {
 		routineExceptionRepo := postgres.NewRoutineExceptionRepository(db)
 		routineCompletionRepo := postgres.NewRoutineCompletionRepository(db)
 		agendaRepo := postgres.NewAgendaRepository(db)
+		homeRepo := postgres.NewHomeRepository(db)
 
 		flagUC := &usecase.FlagUsecase{Flags: flagRepo}
 		subflagUC := &usecase.SubflagUsecase{Subflags: subflagRepo, Flags: flagRepo}
@@ -120,10 +121,17 @@ func main() {
 			Routines:    routineRepo,
 			Exceptions:  routineExceptionRepo,
 			Completions: routineCompletionRepo,
+			Users:       userRepo,
 			Flags:       flagRepo,
 			Subflags:    subflagRepo,
 		}
 		agendaUC := usecase.NewAgendaUsecase(agendaRepo)
+		homeUC := &usecase.HomeUsecase{
+			Home:     homeRepo,
+			Agenda:   agendaRepo,
+			Routines: routineUC,
+			Users:    userRepo,
+		}
 		deviceTokenUC := &usecase.DeviceTokenUsecase{DeviceTokens: deviceTokenRepo}
 		txRunner := postgres.NewTxRunner(db)
 
@@ -242,6 +250,7 @@ func main() {
 			ContextRules:  handler.NewContextRulesHandler(ruleUC, flagUC, subflagUC),
 			Inbox:         handler.NewInboxHandler(inboxUC, flagUC, subflagUC),
 			Agenda:        handler.NewAgendaHandler(agendaUC),
+			Home:          handler.NewHomeHandler(homeUC),
 			Tasks:         handler.NewTasksHandler(taskUC, inboxUC, flagUC, subflagUC),
 			Reminders:     handler.NewRemindersHandler(reminderUC, inboxUC, flagUC, subflagUC),
 			Events:        handler.NewEventsHandler(eventUC, inboxUC, flagUC, subflagUC),

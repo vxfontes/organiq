@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:inbota/shared/components/ib_lib/index.dart';
 import 'package:inbota/shared/theme/app_colors.dart';
+import 'package:inbota/shared/utils/text_utils.dart';
 
 class SettingsContextsHeaderRow extends StatelessWidget {
   const SettingsContextsHeaderRow({
@@ -45,7 +46,7 @@ class SettingsContextsHeaderRow extends StatelessWidget {
                     ).subtitulo.build(),
                     const SizedBox(height: 2),
                     IBText(
-                      '$flagCount flag(s) • $subflagCount subflag(s)',
+                      '${TextUtils.countLabel(flagCount, 'flag', 'flags')} • ${TextUtils.countLabel(subflagCount, 'subflag', 'subflags')}',
                       context: context,
                     ).caption.build(),
                   ],

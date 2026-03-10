@@ -6,6 +6,7 @@ import 'package:inbota/presentation/screens/create_module/controller/create_cont
 import 'package:inbota/shared/components/ib_lib/index.dart';
 import 'package:inbota/shared/state/ib_state.dart';
 import 'package:inbota/shared/theme/app_colors.dart';
+import 'package:inbota/shared/utils/text_utils.dart';
 
 class CreatePage extends StatefulWidget {
   const CreatePage({super.key});
@@ -169,10 +170,16 @@ class _CreatePageState extends IBState<CreatePage, CreateController> {
   }
 
   Widget _buildSummary(BuildContext context, CreateBatchResult batchResult) {
+    final processedLabel = TextUtils.countLabel(
+      batchResult.totalInputs,
+      'linha processada',
+      'linhas processadas',
+    );
+
     return IBOverviewCard(
       title: 'Resumo',
       subtitle:
-          '${batchResult.successCount} de ${batchResult.totalInputs} linha(s) processadas. Revise abaixo.',
+          '${batchResult.successCount} de $processedLabel. Revise abaixo.',
       chips: [
         IBChip(
           label: 'Tarefas ${batchResult.tasksCount}',
@@ -223,9 +230,7 @@ class _CreatePageState extends IBState<CreatePage, CreateController> {
             context: context,
           ).caption.color(AppColors.primary700).build(),
           const SizedBox(width: 10),
-          const Expanded(
-            child: VoiceReactiveWave(color: AppColors.primary600),
-          ),
+          const Expanded(child: VoiceReactiveWave(color: AppColors.primary600)),
         ],
       ),
     );

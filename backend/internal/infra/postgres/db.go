@@ -50,18 +50,28 @@ func normalizeDSN(dsn string) string {
 	}
 
 	query := parsed.Query()
-	if query.Get("sslmode") != "" {
-		return dsn
+
+	// Force session timezone to Brazil default.
+	// Postgres stores timestamptz internally in UTC, but CURRENT_DATE/now() and casts
+	// depend on the session TimeZone. Setting it here prevents "day flipped" bugs.
+	opts := query.Get("options")
+	tzOption := "-c TimeZone=America/Sao_Paulo"
+	switch {
+	case opts == "":
+		query.Set("options", tzOption)
+	case !strings.Contains(opts, "TimeZone=America/Sao_Paulo"):
+		query.Set("options", opts+" "+tzOption)
 	}
 
 	host := parsed.Hostname()
 	if strings.HasSuffix(host, ".supabase.co") || strings.HasSuffix(host, ".supabase.net") || strings.HasSuffix(host, ".supabase.com") {
-		query.Set("sslmode", "require")
-		parsed.RawQuery = query.Encode()
-		return parsed.String()
+		if query.Get("sslmode") == "" {
+			query.Set("sslmode", "require")
+		}
 	}
 
-	return dsn
+	parsed.RawQuery = query.Encode()
+	return parsed.String()
 }
 
 // Check pings the database.

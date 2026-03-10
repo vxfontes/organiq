@@ -15,6 +15,7 @@ import 'package:inbota/modules/tasks/domain/usecases/delete_task_usecase.dart';
 import 'package:inbota/presentation/screens/events_module/components/event_feed_item.dart';
 import 'package:inbota/shared/errors/failures.dart';
 import 'package:inbota/shared/state/ib_state.dart';
+import 'package:inbota/shared/utils/text_utils.dart';
 
 class EventsController implements IBController {
   EventsController(
@@ -196,10 +197,10 @@ class EventsController implements IBController {
       date: event.startAt!.toLocal(),
       endDate: event.endAt?.toLocal(),
       secondary: event.location,
-      flagLabel: _normalizeText(event.flagName),
-      subflagLabel: _normalizeText(event.subflagName),
-      flagColor: _normalizeText(event.flagColor),
-      subflagColor: _normalizeText(event.subflagColor),
+      flagLabel: TextUtils.normalize(event.flagName),
+      subflagLabel: TextUtils.normalize(event.subflagName),
+      flagColor: TextUtils.normalize(event.flagColor),
+      subflagColor: TextUtils.normalize(event.subflagColor),
       allDay: event.allDay,
     );
   }
@@ -214,10 +215,10 @@ class EventsController implements IBController {
             title: task.title,
             date: task.dueAt!.toLocal(),
             secondary: task.description,
-            flagLabel: _normalizeText(task.flagName),
-            subflagLabel: _normalizeText(task.subflagName),
-            flagColor: _normalizeText(task.flagColor),
-            subflagColor: _normalizeText(task.subflagColor),
+            flagLabel: TextUtils.normalize(task.flagName),
+            subflagLabel: TextUtils.normalize(task.subflagName),
+            flagColor: TextUtils.normalize(task.flagColor),
+            subflagColor: TextUtils.normalize(task.subflagColor),
             done: task.isDone,
             allDay: task.dueAt!.hour == 0 && task.dueAt!.minute == 0,
           ),
@@ -239,10 +240,10 @@ class EventsController implements IBController {
             done: reminder.isDone,
             allDay:
                 reminder.remindAt!.hour == 0 && reminder.remindAt!.minute == 0,
-            flagLabel: _normalizeText(reminder.flagName),
-            subflagLabel: _normalizeText(reminder.subflagName),
-            flagColor: _normalizeText(reminder.flagColor),
-            subflagColor: _normalizeText(reminder.subflagColor),
+            flagLabel: TextUtils.normalize(reminder.flagName),
+            subflagLabel: TextUtils.normalize(reminder.subflagName),
+            flagColor: TextUtils.normalize(reminder.flagColor),
+            subflagColor: TextUtils.normalize(reminder.subflagColor),
           ),
         )
         .toList(growable: false);
@@ -380,8 +381,8 @@ class EventsController implements IBController {
   }
 
   void _setError(Failure failure, {required String fallback}) {
-    final message = failure.message?.trim();
-    if (message != null && message.isNotEmpty) {
+    final message = TextUtils.normalize(failure.message);
+    if (message != null) {
       error.value = message;
       return;
     }
@@ -397,12 +398,6 @@ class EventsController implements IBController {
 
   static bool _isSameDay(DateTime a, DateTime b) {
     return a.year == b.year && a.month == b.month && a.day == b.day;
-  }
-
-  String? _normalizeText(String? value) {
-    final cleaned = value?.trim();
-    if (cleaned == null || cleaned.isEmpty) return null;
-    return cleaned;
   }
 
   List<FlagOutput> _safeFlagItems(List<FlagOutput> items) {

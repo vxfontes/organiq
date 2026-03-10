@@ -39,6 +39,7 @@ class AppPath {
   static const String events = '/events';
   static String eventById(String id) => '$events/$id';
   static const String agenda = '/agenda';
+  static const String homeDashboard = '/home/dashboard';
 
   // Shopping
   static const String shoppingLists = '/shopping-lists';
@@ -76,8 +77,10 @@ class AppPath {
   static const String dailySummary = '/daily-summary'; // public (token)
 
   // Notification prefs extra
-  static const String dailySummaryToken = '/notification-preferences/daily-summary-token';
-  static const String dailySummaryTokenRotate = '/notification-preferences/daily-summary-token/rotate';
+  static const String dailySummaryToken =
+      '/notification-preferences/daily-summary-token';
+  static const String dailySummaryTokenRotate =
+      '/notification-preferences/daily-summary-token/rotate';
 
   // Devices
   static const String deviceToken = '/devices/token';

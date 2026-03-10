@@ -7,6 +7,8 @@ class AppColors {
   static const surface = Color(0xFFFFFFFF);
   static const surfaceSoft = Color(0xFFF8FAFC);
   static const surface2 = Color(0xFFF3F4F6);
+  static const surfaceWarning = Color(0xFFFFFBEB);
+  static const surfaceAi = Color(0xFFEEF2FF);
   static const border = Color(0xFFE5E7EB);
   static const borderStrong = Color(0xFFD1D5DB);
   static const text = Color(0xFF111827);
@@ -22,6 +24,7 @@ class AppColors {
   static const ai50 = Color(0xFFEEF2FF);
   static const ai100 = Color(0xFFE0E7FF);
   static const ai600 = Color(0xFF4F46E5);
+  static const ai500 = Color(0xFF6366F1);
   static const warning500 = Color(0xFFF59E0B);
   static const warning600 = Color(0xFFEA580C);
   static const danger600 = Color(0xFFDC2626);
@@ -29,4 +32,12 @@ class AppColors {
 
   static const transparent = Colors.transparent;
   static const dark = Color(0xFF111827);
+
+  // Greeting gradients
+  static const morningStart = Color(0xFFE6FAF8);
+  static const morningEnd = Color(0xFFF8FFFE);
+  static const afternoonStart = Color(0xFFFFF7ED);
+  static const afternoonEnd = Color(0xFFFFFBEB);
+  static const nightStart = Color(0xFFEEF2FF);
+  static const nightEnd = Color(0xFFF8FAFC);
 }

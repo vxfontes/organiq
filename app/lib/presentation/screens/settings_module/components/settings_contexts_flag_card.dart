@@ -3,6 +3,7 @@ import 'package:inbota/modules/flags/data/models/flag_output.dart';
 import 'package:inbota/modules/flags/data/models/subflag_output.dart';
 import 'package:inbota/shared/components/ib_lib/index.dart';
 import 'package:inbota/shared/theme/app_colors.dart';
+import 'package:inbota/shared/utils/text_utils.dart';
 
 class SettingsContextsFlagCard extends StatelessWidget {
   const SettingsContextsFlagCard({
@@ -76,7 +77,11 @@ class SettingsContextsFlagCard extends StatelessWidget {
                         border: Border.all(color: AppColors.border),
                       ),
                       child: IBText(
-                        '${subflags.length} subflag(s)',
+                        TextUtils.countLabel(
+                          subflags.length,
+                          'subflag',
+                          'subflags',
+                        ),
                         context: context,
                       ).caption.build(),
                     ),

@@ -8,6 +8,7 @@ type APIHandlers struct {
 	ContextRules  *ContextRulesHandler
 	Inbox         *InboxHandler
 	Agenda        *AgendaHandler
+	Home          *HomeHandler
 	Tasks         *TasksHandler
 	Reminders     *RemindersHandler
 	Events        *EventsHandler

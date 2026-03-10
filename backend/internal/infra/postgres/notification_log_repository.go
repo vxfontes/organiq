@@ -69,6 +69,7 @@ func (r *NotificationLogRepository) ListByUserID(ctx context.Context, userID str
 		SELECT id, user_id, type, reference_id, title, body, lead_mins, status, scheduled_for, sent_at, read_at, error_msg, created_at
 		FROM inbota.notification_log
 		WHERE user_id = $1
+		  AND status IN ('sent', 'delivered', 'read')
 		ORDER BY created_at DESC
 		LIMIT $2 OFFSET $3
 	`, userID, limit, offset)

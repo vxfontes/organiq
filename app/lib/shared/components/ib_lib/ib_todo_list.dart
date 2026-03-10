@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:inbota/shared/components/ib_lib/ib_icon.dart';
+import 'package:inbota/shared/components/ib_lib/ib_tag_chip.dart';
 import 'package:inbota/shared/components/ib_lib/ib_text.dart';
 import 'package:inbota/shared/theme/app_colors.dart';
 
@@ -10,12 +11,14 @@ class IBTodoItemData {
     required this.title,
     this.subtitle,
     this.done = false,
+    this.isOverdue = false,
   });
 
   final String? id;
   final String title;
   final String? subtitle;
   final bool done;
+  final bool isOverdue;
 }
 
 class IBTodoList extends StatefulWidget {
@@ -200,50 +203,77 @@ class _IBTodoRow extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              curve: Curves.easeOut,
-              width: 22,
-              height: 22,
-              margin: const EdgeInsets.only(top: 2),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: done ? AppColors.primary600 : AppColors.surface,
-                border: Border.all(
-                  color: done ? AppColors.primary600 : AppColors.borderStrong,
-                  width: 1.4,
-                ),
-                boxShadow: done
-                    ? [
-                        BoxShadow(
-                          color: AppColors.primary600.withAlpha(
-                            (0.25 * 255).round(),
-                          ),
-                          blurRadius: 10,
-                          offset: const Offset(0, 6),
-                        ),
-                      ]
-                    : [],
-              ),
-              child: done
-                  ? const IBIcon(
-                      IBIcon.checkRounded,
-                      size: 16,
-                      color: AppColors.surface,
-                    )
-                  : null,
-            ),
-            const SizedBox(width: 12),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(item.title, style: titleStyle),
-                  if (item.subtitle != null) ...[
-                    const SizedBox(height: 4),
-                    Text(item.subtitle!, style: subtitleStyle),
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    curve: Curves.easeOut,
+                    width: 22,
+                    height: 22,
+                    margin: const EdgeInsets.only(top: 2),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: done ? AppColors.primary600 : AppColors.surface,
+                      border: Border.all(
+                        color: done
+                            ? AppColors.primary600
+                            : AppColors.borderStrong,
+                        width: 1.4,
+                      ),
+                      boxShadow: done
+                          ? [
+                              BoxShadow(
+                                color: AppColors.primary600.withAlpha(
+                                  (0.25 * 255).round(),
+                                ),
+                                blurRadius: 10,
+                                offset: const Offset(0, 6),
+                              ),
+                            ]
+                          : [],
+                    ),
+                    child: done
+                        ? const IBIcon(
+                            IBIcon.checkRounded,
+                            size: 16,
+                            color: AppColors.surface,
+                          )
+                        : null,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          item.title,
+                          style: titleStyle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (item.subtitle != null) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            item.subtitle!,
+                            style: subtitleStyle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  if (item.isOverdue && !done) ...[
+                    const SizedBox(width: 8),
+                    const IBTagChip(
+                      label: 'Atrasada',
+                      color: AppColors.danger600,
+                    ),
                   ],
                 ],
               ),

@@ -414,6 +414,91 @@ definitions:
       updatedAt:
         type: string
     type: object
+  dto.HomeDashboardResponse:
+    properties:
+      day_progress:
+        $ref: '#/definitions/dto.HomeDayProgressResponse'
+      events_today_count:
+        type: integer
+      focus_tasks:
+        items:
+          $ref: '#/definitions/dto.TaskResponse'
+        type: array
+      insight:
+        $ref: '#/definitions/dto.HomeInsightResponse'
+      reminders_today_count:
+        type: integer
+      shopping_preview:
+        items:
+          $ref: '#/definitions/dto.HomeShoppingPreviewResponse'
+        type: array
+      timeline:
+        items:
+          $ref: '#/definitions/dto.HomeTimelineItemResponse'
+        type: array
+      week_density:
+        additionalProperties:
+          type: integer
+        type: object
+    type: object
+  dto.HomeDayProgressResponse:
+    properties:
+      progress_percent:
+        type: number
+      routines_done:
+        type: integer
+      routines_total:
+        type: integer
+      tasks_done:
+        type: integer
+      tasks_total:
+        type: integer
+    type: object
+  dto.HomeInsightResponse:
+    properties:
+      footer:
+        type: string
+      is_focus:
+        type: boolean
+      summary:
+        type: string
+      title:
+        type: string
+    type: object
+  dto.HomeShoppingPreviewResponse:
+    properties:
+      id:
+        type: string
+      pending_items:
+        type: integer
+      preview_items:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+      total_items:
+        type: integer
+    type: object
+  dto.HomeTimelineItemResponse:
+    properties:
+      end_scheduled_time:
+        type: string
+      id:
+        type: string
+      is_completed:
+        type: boolean
+      is_overdue:
+        type: boolean
+      item_type:
+        type: string
+      scheduled_time:
+        type: string
+      subtitle:
+        type: string
+      title:
+        type: string
+    type: object
   dto.InboxItemObject:
     properties:
       createdAt:
@@ -1724,6 +1809,28 @@ paths:
       summary: Criar subflag
       tags:
       - Subflags
+  /v1/home/dashboard:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.HomeDashboardResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Dashboard consolidado da Home
+      tags:
+      - Home
   /v1/inbox-items:
     get:
       parameters:

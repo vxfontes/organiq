@@ -3,6 +3,7 @@ import 'package:inbota/shared/components/ib_lib/ib_chip_group.dart';
 import 'package:inbota/shared/components/ib_lib/ib_toggle.dart';
 import 'package:inbota/shared/components/ib_lib/index.dart';
 import 'package:inbota/shared/theme/app_colors.dart';
+import 'package:inbota/shared/utils/text_utils.dart';
 
 class SettingsNotificationsModuleContent extends StatelessWidget {
   const SettingsNotificationsModuleContent({
@@ -101,7 +102,11 @@ class _LeadTimeSelector extends StatelessWidget {
               IBText(
                 selectedLabels.isEmpty
                     ? 'Nenhuma selecionada'
-                    : '${selectedLabels.length} selecionada(s)',
+                    : TextUtils.countLabel(
+                        selectedLabels.length,
+                        'selecionada',
+                        'selecionadas',
+                      ),
                 context: context,
               ).caption.build(),
             ],

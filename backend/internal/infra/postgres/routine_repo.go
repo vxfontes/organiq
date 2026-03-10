@@ -247,17 +247,14 @@ func (r *RoutineRepositoryImpl) ListByWeekday(ctx context.Context, userID string
 	return items, nil
 }
 
-func (r *RoutineRepositoryImpl) ListDailyStatus(ctx context.Context, userID string, weekday int) ([]repository.RoutineDailyStatus, error) {
+func (r *RoutineRepositoryImpl) ListDailyStatus(ctx context.Context, userID string, weekday int, date string) ([]repository.RoutineDailyStatus, error) {
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, user_id, title, description, recurrence_type, weekdays,
-			to_char(start_time, 'HH24:MI') as start_time,
-			to_char(end_time, 'HH24:MI') as end_time,
+			start_time, end_time,
 			week_of_month, starts_on, ends_on, color, is_active, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at,
 			completed_at, is_completed, exception_action
-		FROM inbota.view_routine_daily_status
-		WHERE user_id = $1 AND is_active = true AND $2 = ANY(weekdays)
-		ORDER BY start_time, created_at
-	`, userID, weekday)
+		FROM inbota.fnc_routine_daily_status($1, $2, $3::date)
+	`, userID, weekday, date)
 	if err != nil {
 		return nil, err
 	}

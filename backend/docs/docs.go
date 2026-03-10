@@ -1041,6 +1041,42 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/home/dashboard": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Home"
+                ],
+                "summary": "Dashboard consolidado da Home",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.HomeDashboardResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/inbox-items": {
             "get": {
                 "security": [
@@ -3907,6 +3943,136 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.HomeDashboardResponse": {
+            "type": "object",
+            "properties": {
+                "day_progress": {
+                    "$ref": "#/definitions/dto.HomeDayProgressResponse"
+                },
+                "events_today_count": {
+                    "type": "integer"
+                },
+                "focus_tasks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.TaskResponse"
+                    }
+                },
+                "insight": {
+                    "$ref": "#/definitions/dto.HomeInsightResponse"
+                },
+                "reminders_today_count": {
+                    "type": "integer"
+                },
+                "shopping_preview": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.HomeShoppingPreviewResponse"
+                    }
+                },
+                "timeline": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.HomeTimelineItemResponse"
+                    }
+                },
+                "week_density": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "dto.HomeDayProgressResponse": {
+            "type": "object",
+            "properties": {
+                "progress_percent": {
+                    "type": "number"
+                },
+                "routines_done": {
+                    "type": "integer"
+                },
+                "routines_total": {
+                    "type": "integer"
+                },
+                "tasks_done": {
+                    "type": "integer"
+                },
+                "tasks_total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.HomeInsightResponse": {
+            "type": "object",
+            "properties": {
+                "footer": {
+                    "type": "string"
+                },
+                "is_focus": {
+                    "type": "boolean"
+                },
+                "summary": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.HomeShoppingPreviewResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "pending_items": {
+                    "type": "integer"
+                },
+                "preview_items": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                },
+                "total_items": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.HomeTimelineItemResponse": {
+            "type": "object",
+            "properties": {
+                "end_scheduled_time": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_completed": {
+                    "type": "boolean"
+                },
+                "is_overdue": {
+                    "type": "boolean"
+                },
+                "item_type": {
+                    "type": "string"
+                },
+                "scheduled_time": {
+                    "type": "string"
+                },
+                "subtitle": {
+                    "type": "string"
+                },
+                "title": {
                     "type": "string"
                 }
             }

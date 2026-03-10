@@ -90,20 +90,20 @@ class _RootPageState extends State<RootPage> {
           IconButton(
             onPressed: () => AppNavigation.push(AppRoutes.notificationHistory),
             tooltip: 'Histórico de notificações',
-            icon: const HugeIcon(
-              icon: HugeIcons.strokeRoundedNotification03,
+            icon: const IBIcon(
+              IBIcon.notificationsNoneOutlined,
               color: AppColors.surface,
+              padding: EdgeInsets.all(0),
               size: 22,
-              strokeWidth: 1.8,
             ),
           ),
           IconButton(
             onPressed: () => AppNavigation.push(AppRoutes.settings),
-            icon: const HugeIcon(
-              icon: HugeIcons.strokeRoundedSettings01,
+            icon: const IBIcon(
+              IBIcon.settingsOutlined,
               color: AppColors.surface,
+              padding: EdgeInsets.all(0),
               size: 22,
-              strokeWidth: 1.8,
             ),
           ),
         ],

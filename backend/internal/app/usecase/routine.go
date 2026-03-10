@@ -16,6 +16,7 @@ type RoutineUsecase struct {
 	Routines    repository.RoutineRepository
 	Exceptions  repository.RoutineExceptionRepository
 	Completions repository.RoutineCompletionRepository
+	Users       repository.UserRepository
 	Flags       repository.FlagRepository
 	Subflags    repository.SubflagRepository
 }
@@ -301,16 +302,18 @@ func (uc *RoutineUsecase) ListByWeekday(ctx context.Context, userID string, week
 		return nil, ErrMissingRequiredFields
 	}
 
-	nowStr := time.Now().Format("2006-01-02")
+	now := uc.nowInUserTimezone(ctx, userID)
+	nowStr := now.Format("2006-01-02")
 	isToday := date == "" || date == nowStr
 
 	if isToday {
-		routines, err := uc.Routines.ListDailyStatus(ctx, userID, weekday)
+		weekday = int(now.Weekday())
+		routines, err := uc.Routines.ListDailyStatus(ctx, userID, weekday, nowStr)
 		if err != nil {
 			return nil, err
 		}
 
-		targetDate := time.Now()
+		targetDate := now
 		filtered := make([]domain.Routine, 0, len(routines))
 		for _, r := range routines {
 			if shouldShowRoutineForDate(r.Routine, targetDate) {
@@ -492,6 +495,25 @@ func (uc *RoutineUsecase) DeleteException(ctx context.Context, userID, routineID
 	return uc.Exceptions.Delete(ctx, userID, routineID, date)
 }
 
+func (uc *RoutineUsecase) nowInUserTimezone(ctx context.Context, userID string) time.Time {
+	now := time.Now()
+	if uc.Users == nil || userID == "" {
+		return now
+	}
+	user, err := uc.Users.Get(ctx, userID)
+	if err != nil {
+		return now
+	}
+	if user.Timezone == "" {
+		return now
+	}
+	loc, err := time.LoadLocation(user.Timezone)
+	if err != nil {
+		return now
+	}
+	return now.In(loc)
+}
+
 func (uc *RoutineUsecase) GetExceptions(ctx context.Context, userID, routineID string) ([]domain.RoutineException, error) {
 	if userID == "" || routineID == "" {
 		return nil, ErrMissingRequiredFields
@@ -504,9 +526,10 @@ func (uc *RoutineUsecase) GetTodaySummary(ctx context.Context, userID string) (i
 		return 0, 0, ErrMissingRequiredFields
 	}
 
-	now := time.Now()
+	now := uc.nowInUserTimezone(ctx, userID)
 	weekday := int(now.Weekday())
-	routines, err := uc.Routines.ListDailyStatus(ctx, userID, weekday)
+	date := now.Format("2006-01-02")
+	routines, err := uc.Routines.ListDailyStatus(ctx, userID, weekday, date)
 	if err != nil {
 		return 0, 0, err
 	}

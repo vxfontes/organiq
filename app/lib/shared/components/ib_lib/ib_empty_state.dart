@@ -30,7 +30,7 @@ class IBEmptyState extends StatelessWidget {
         const SizedBox(height: 12),
         IBText(title, context: context).subtitulo.build(),
         const SizedBox(height: 6),
-        IBText(subtitle, context: context).muted.build(),
+        IBText(subtitle, context: context).muted.align(TextAlign.center).build(),
       ],
     );
   }

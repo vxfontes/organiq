@@ -287,6 +287,53 @@ type AgendaResponse struct {
 	Reminders []ReminderResponse `json:"reminders"`
 }
 
+// Home
+
+type HomeDayProgressResponse struct {
+	RoutinesDone    int     `json:"routines_done"`
+	RoutinesTotal   int     `json:"routines_total"`
+	TasksDone       int     `json:"tasks_done"`
+	TasksTotal      int     `json:"tasks_total"`
+	ProgressPercent float64 `json:"progress_percent"`
+}
+
+type HomeInsightResponse struct {
+	Title   string `json:"title"`
+	Summary string `json:"summary"`
+	Footer  string `json:"footer"`
+	IsFocus bool   `json:"is_focus"`
+}
+
+type HomeTimelineItemResponse struct {
+	ID               string     `json:"id"`
+	ItemType         string     `json:"item_type"`
+	Title            string     `json:"title"`
+	Subtitle         *string    `json:"subtitle,omitempty"`
+	ScheduledTime    time.Time  `json:"scheduled_time"`
+	EndScheduledTime *time.Time `json:"end_scheduled_time,omitempty"`
+	IsCompleted      bool       `json:"is_completed"`
+	IsOverdue        bool       `json:"is_overdue"`
+}
+
+type HomeShoppingPreviewResponse struct {
+	ID           string   `json:"id"`
+	Title        string   `json:"title"`
+	TotalItems   int      `json:"total_items"`
+	PendingItems int      `json:"pending_items"`
+	PreviewItems []string `json:"preview_items"`
+}
+
+type HomeDashboardResponse struct {
+	DayProgress         HomeDayProgressResponse       `json:"day_progress"`
+	Insight             *HomeInsightResponse          `json:"insight,omitempty"`
+	Timeline            []HomeTimelineItemResponse    `json:"timeline"`
+	ShoppingPreview     []HomeShoppingPreviewResponse `json:"shopping_preview"`
+	WeekDensity         map[string]int                `json:"week_density"`
+	FocusTasks          []TaskResponse                `json:"focus_tasks,omitempty"`
+	EventsTodayCount    int                           `json:"events_today_count"`
+	RemindersTodayCount int                           `json:"reminders_today_count"`
+}
+
 type CreateEventRequest struct {
 	Title     string     `json:"title"`
 	StartAt   *time.Time `json:"startAt,omitempty"`
@@ -501,24 +548,24 @@ type UnregisterTokenRequest struct {
 // Notifications
 
 type NotificationPreferencesResponse struct {
-	RemindersEnabled  bool      `json:"remindersEnabled"`
-	ReminderAtTime    bool      `json:"reminderAtTime"`
-	ReminderLeadMins  []int     `json:"reminderLeadMins"`
-	EventsEnabled     bool      `json:"eventsEnabled"`
-	EventAtTime       bool      `json:"eventAtTime"`
-	EventLeadMins     []int     `json:"eventLeadMins"`
-	TasksEnabled      bool      `json:"tasksEnabled"`
-	TaskAtTime        bool      `json:"taskAtTime"`
-	TaskLeadMins      []int     `json:"taskLeadMins"`
-	RoutinesEnabled   bool      `json:"routinesEnabled"`
-	RoutineAtTime     bool      `json:"routineAtTime"`
-	RoutineLeadMins   []int     `json:"routineLeadMins"`
-	QuietHoursEnabled bool      `json:"quietHoursEnabled"`
-	QuietStart        *string   `json:"quietStart,omitempty"` // "HH:MM"
-	QuietEnd          *string   `json:"quietEnd,omitempty"`   // "HH:MM"
+	RemindersEnabled   bool      `json:"remindersEnabled"`
+	ReminderAtTime     bool      `json:"reminderAtTime"`
+	ReminderLeadMins   []int     `json:"reminderLeadMins"`
+	EventsEnabled      bool      `json:"eventsEnabled"`
+	EventAtTime        bool      `json:"eventAtTime"`
+	EventLeadMins      []int     `json:"eventLeadMins"`
+	TasksEnabled       bool      `json:"tasksEnabled"`
+	TaskAtTime         bool      `json:"taskAtTime"`
+	TaskLeadMins       []int     `json:"taskLeadMins"`
+	RoutinesEnabled    bool      `json:"routinesEnabled"`
+	RoutineAtTime      bool      `json:"routineAtTime"`
+	RoutineLeadMins    []int     `json:"routineLeadMins"`
+	QuietHoursEnabled  bool      `json:"quietHoursEnabled"`
+	QuietStart         *string   `json:"quietStart,omitempty"` // "HH:MM"
+	QuietEnd           *string   `json:"quietEnd,omitempty"`   // "HH:MM"
 	DailyDigestEnabled bool      `json:"dailyDigestEnabled"`
 	DailyDigestHour    int       `json:"dailyDigestHour"`
-	UpdatedAt         time.Time `json:"updatedAt"`
+	UpdatedAt          time.Time `json:"updatedAt"`
 }
 
 type DailySummaryTokenResponse struct {
@@ -527,21 +574,21 @@ type DailySummaryTokenResponse struct {
 }
 
 type UpdateNotificationPreferencesRequest struct {
-	RemindersEnabled  *bool   `json:"remindersEnabled,omitempty"`
-	ReminderAtTime    *bool   `json:"reminderAtTime,omitempty"`
-	ReminderLeadMins  *[]int  `json:"reminderLeadMins,omitempty"`
-	EventsEnabled     *bool   `json:"eventsEnabled,omitempty"`
-	EventAtTime       *bool   `json:"eventAtTime,omitempty"`
-	EventLeadMins     *[]int  `json:"eventLeadMins,omitempty"`
-	TasksEnabled      *bool   `json:"tasksEnabled,omitempty"`
-	TaskAtTime        *bool   `json:"taskAtTime,omitempty"`
-	TaskLeadMins      *[]int  `json:"taskLeadMins,omitempty"`
-	RoutinesEnabled   *bool   `json:"routinesEnabled,omitempty"`
-	RoutineAtTime     *bool   `json:"routineAtTime,omitempty"`
-	RoutineLeadMins   *[]int  `json:"routineLeadMins,omitempty"`
-	QuietHoursEnabled *bool   `json:"quietHoursEnabled,omitempty"`
-	QuietStart        *string `json:"quietStart,omitempty"`
-	QuietEnd          *string `json:"quietEnd,omitempty"`
+	RemindersEnabled   *bool   `json:"remindersEnabled,omitempty"`
+	ReminderAtTime     *bool   `json:"reminderAtTime,omitempty"`
+	ReminderLeadMins   *[]int  `json:"reminderLeadMins,omitempty"`
+	EventsEnabled      *bool   `json:"eventsEnabled,omitempty"`
+	EventAtTime        *bool   `json:"eventAtTime,omitempty"`
+	EventLeadMins      *[]int  `json:"eventLeadMins,omitempty"`
+	TasksEnabled       *bool   `json:"tasksEnabled,omitempty"`
+	TaskAtTime         *bool   `json:"taskAtTime,omitempty"`
+	TaskLeadMins       *[]int  `json:"taskLeadMins,omitempty"`
+	RoutinesEnabled    *bool   `json:"routinesEnabled,omitempty"`
+	RoutineAtTime      *bool   `json:"routineAtTime,omitempty"`
+	RoutineLeadMins    *[]int  `json:"routineLeadMins,omitempty"`
+	QuietHoursEnabled  *bool   `json:"quietHoursEnabled,omitempty"`
+	QuietStart         *string `json:"quietStart,omitempty"`
+	QuietEnd           *string `json:"quietEnd,omitempty"`
 	DailyDigestEnabled *bool   `json:"dailyDigestEnabled,omitempty"`
 	DailyDigestHour    *int    `json:"dailyDigestHour,omitempty"`
 }

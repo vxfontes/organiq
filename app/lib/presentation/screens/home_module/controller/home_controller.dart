@@ -1,58 +1,84 @@
-import 'package:flutter/material.dart';
 import 'package:dartz/dartz.dart';
+import 'package:flutter/material.dart';
 import 'package:inbota/modules/events/data/models/agenda_output.dart';
 import 'package:inbota/modules/events/data/models/event_output.dart';
-import 'package:inbota/modules/events/domain/usecases/get_agenda_usecase.dart';
+import 'package:inbota/modules/events/domain/usecases/delete_event_usecase.dart';
+import 'package:inbota/modules/home/data/models/home_dashboard_output.dart';
+import 'package:inbota/modules/home/domain/usecases/get_home_dashboard_usecase.dart';
+import 'package:inbota/modules/inbox/data/models/inbox_confirm_input.dart';
+import 'package:inbota/modules/inbox/data/models/inbox_create_input.dart';
+import 'package:inbota/modules/inbox/data/models/inbox_create_line_result.dart';
+import 'package:inbota/modules/inbox/data/models/inbox_item_output.dart';
+import 'package:inbota/modules/inbox/domain/usecases/confirm_inbox_item_usecase.dart';
+import 'package:inbota/modules/inbox/domain/usecases/create_inbox_item_usecase.dart';
+import 'package:inbota/modules/inbox/domain/usecases/reprocess_inbox_item_usecase.dart';
 import 'package:inbota/modules/reminders/data/models/reminder_output.dart';
-import 'package:inbota/modules/routines/data/models/routine_list_output.dart';
+import 'package:inbota/modules/reminders/data/models/reminder_update_input.dart';
+import 'package:inbota/modules/reminders/domain/usecases/delete_reminder_usecase.dart';
+import 'package:inbota/modules/reminders/domain/usecases/update_reminder_usecase.dart';
 import 'package:inbota/modules/routines/data/models/routine_output.dart';
 import 'package:inbota/modules/routines/data/models/routine_today_summary_output.dart';
 import 'package:inbota/modules/routines/domain/usecases/complete_routine_usecase.dart';
-import 'package:inbota/modules/routines/domain/usecases/get_routines_by_weekday_usecase.dart';
-import 'package:inbota/modules/routines/domain/usecases/get_today_summary_usecase.dart';
+import 'package:inbota/modules/routines/domain/usecases/delete_routine_usecase.dart';
 import 'package:inbota/modules/routines/domain/usecases/uncomplete_routine_usecase.dart';
 import 'package:inbota/modules/shopping/data/models/shopping_item_output.dart';
-import 'package:inbota/modules/shopping/data/models/shopping_list_list_output.dart';
 import 'package:inbota/modules/shopping/data/models/shopping_list_output.dart';
-import 'package:inbota/modules/shopping/domain/usecases/get_shopping_items_usecase.dart';
-import 'package:inbota/modules/shopping/domain/usecases/get_shopping_lists_usecase.dart';
+import 'package:inbota/modules/shopping/domain/usecases/delete_shopping_list_usecase.dart';
 import 'package:inbota/modules/tasks/data/models/task_output.dart';
 import 'package:inbota/modules/tasks/data/models/task_update_input.dart';
+import 'package:inbota/modules/tasks/domain/usecases/delete_task_usecase.dart';
 import 'package:inbota/modules/tasks/domain/usecases/update_task_usecase.dart';
+import 'package:inbota/presentation/screens/home_module/components/timeline_item.dart';
+import 'package:inbota/presentation/screens/home_module/utils/home_controller_utils.dart';
 import 'package:inbota/shared/errors/failures.dart';
 import 'package:inbota/shared/state/ib_state.dart';
+import 'package:inbota/shared/utils/date_time.dart';
+import 'package:inbota/shared/utils/text_utils.dart';
 
 class HomeController implements IBController {
   HomeController(
-    this._getAgendaUsecase,
-    this._getShoppingListsUsecase,
-    this._getShoppingItemsUsecase,
+    this._getHomeDashboardUsecase,
     this._updateTaskUsecase,
-    this._getRoutinesByWeekdayUsecase,
+    this._updateReminderUsecase,
     this._completeRoutineUsecase,
     this._uncompleteRoutineUsecase,
-    this._getTodaySummaryUsecase,
+    this._createInboxItemUsecase,
+    this._reprocessInboxItemUsecase,
+    this._confirmInboxItemUsecase,
+    this._deleteTaskUsecase,
+    this._deleteReminderUsecase,
+    this._deleteEventUsecase,
+    this._deleteShoppingListUsecase,
+    this._deleteRoutineUsecase,
   );
 
-  final GetAgendaUsecase _getAgendaUsecase;
-  final GetShoppingListsUsecase _getShoppingListsUsecase;
-  final GetShoppingItemsUsecase _getShoppingItemsUsecase;
+  final GetHomeDashboardUsecase _getHomeDashboardUsecase;
   final UpdateTaskUsecase _updateTaskUsecase;
-  final GetRoutinesByWeekdayUsecase _getRoutinesByWeekdayUsecase;
+  final UpdateReminderUsecase _updateReminderUsecase;
   final CompleteRoutineUsecase _completeRoutineUsecase;
   final UncompleteRoutineUsecase _uncompleteRoutineUsecase;
-  final GetTodaySummaryUsecase _getTodaySummaryUsecase;
+
+  final CreateInboxItemUsecase _createInboxItemUsecase;
+  final ReprocessInboxItemUsecase _reprocessInboxItemUsecase;
+  final ConfirmInboxItemUsecase _confirmInboxItemUsecase;
+  final DeleteTaskUsecase _deleteTaskUsecase;
+  final DeleteReminderUsecase _deleteReminderUsecase;
+  final DeleteEventUsecase _deleteEventUsecase;
+  final DeleteShoppingListUsecase _deleteShoppingListUsecase;
+  final DeleteRoutineUsecase _deleteRoutineUsecase;
 
   final ValueNotifier<bool> loading = ValueNotifier(false);
   final ValueNotifier<bool> refreshing = ValueNotifier(false);
   final ValueNotifier<String?> error = ValueNotifier(null);
-  
+  final ValueNotifier<HomeDashboardOutput?> dashboardData = ValueNotifier(null);
+
   final ValueNotifier<AgendaOutput> agenda = ValueNotifier(
     const AgendaOutput(events: [], tasks: [], reminders: []),
   );
   final ValueNotifier<List<RoutineOutput>> routines = ValueNotifier([]);
-  final ValueNotifier<RoutineTodaySummaryOutput?> routineSummary = ValueNotifier(null);
-  
+  final ValueNotifier<RoutineTodaySummaryOutput?> routineSummary =
+      ValueNotifier(null);
+
   final ValueNotifier<List<ShoppingListOutput>> shoppingLists = ValueNotifier(
     const [],
   );
@@ -60,14 +86,20 @@ class HomeController implements IBController {
   shoppingItemsByList = ValueNotifier(const {});
 
   final Set<String> _updatingTaskIds = <String>{};
+  final Set<String> _updatingReminderIds = <String>{};
   final Set<String> _updatingRoutineIds = <String>{};
 
   bool get hasContent {
-    return agenda.value.events.isNotEmpty ||
-        agenda.value.tasks.isNotEmpty ||
-        agenda.value.reminders.isNotEmpty ||
-        shoppingLists.value.isNotEmpty ||
-        routines.value.isNotEmpty;
+    final dashboard = dashboardData.value;
+    if (dashboard == null) return false;
+    return dashboard.timeline.isNotEmpty ||
+        dashboard.shoppingPreview.isNotEmpty ||
+        dashboard.focusTasks.isNotEmpty ||
+        dashboard.dayProgress.routinesTotal > 0 ||
+        dashboard.dayProgress.tasksTotal > 0 ||
+        dashboard.weekDensity.values.any((value) => value > 0) ||
+        (dashboard.eventsTodayCount ?? 0) > 0 ||
+        (dashboard.remindersTodayCount ?? 0) > 0;
   }
 
   List<TaskOutput> get openTasks {
@@ -83,32 +115,7 @@ class HomeController implements IBController {
         .toList();
   }
 
-  List<TaskOutput> get criticalTasks {
-    final now = DateTime.now();
-    final list = List<TaskOutput>.from(openTasks);
-    list.sort((a, b) {
-      final aDue = a.dueAt?.toLocal();
-      final bDue = b.dueAt?.toLocal();
-
-      final aPriority = aDue == null ? 2 : (aDue.isBefore(now) ? 0 : 1);
-      final bPriority = bDue == null ? 2 : (bDue.isBefore(now) ? 0 : 1);
-
-      final byPriority = aPriority.compareTo(bPriority);
-      if (byPriority != 0) return byPriority;
-
-      if (aDue != null && bDue != null) {
-        final byDate = aDue.compareTo(bDue);
-        if (byDate != 0) return byDate;
-      } else if (aDue != null) {
-        return -1;
-      } else if (bDue != null) {
-        return 1;
-      }
-
-      return a.title.toLowerCase().compareTo(b.title.toLowerCase());
-    });
-    return list.take(5).toList(growable: false);
-  }
+  List<TaskOutput> get criticalTasks => focusTasks;
 
   List<ReminderOutput> get openReminders {
     return agenda.value.reminders.where((item) => !item.isDone).toList();
@@ -179,14 +186,8 @@ class HomeController implements IBController {
   int get totalOverdueCount => overdueTasksCount + overdueRemindersCount;
 
   int get remindersTodayCount {
-    final now = DateTime.now();
-    final start = DateTime(now.year, now.month, now.day);
-    final end = start.add(const Duration(days: 1));
-    return openReminders.where((item) {
-      final date = item.remindAt?.toLocal();
-      if (date == null) return false;
-      return !date.isBefore(start) && date.isBefore(end);
-    }).length;
+    final dashboardCount = dashboardData.value?.remindersTodayCount;
+    return dashboardCount ?? 0;
   }
 
   int get remindersUpcomingCount {
@@ -204,14 +205,8 @@ class HomeController implements IBController {
   }
 
   int get eventsTodayCount {
-    final now = DateTime.now();
-    final start = DateTime(now.year, now.month, now.day);
-    final end = start.add(const Duration(days: 1));
-    return eventsWithDate.where((item) {
-      final date = item.startAt?.toLocal();
-      if (date == null) return false;
-      return !date.isBefore(start) && date.isBefore(end);
-    }).length;
+    final dashboardCount = dashboardData.value?.eventsTodayCount;
+    return dashboardCount ?? 0;
   }
 
   int get eventsThisWeekCount {
@@ -227,44 +222,188 @@ class HomeController implements IBController {
   }
 
   List<ShoppingListOutput> get activeShoppingLists {
-    return shoppingLists.value
-        .where((list) => !list.isArchived)
+    final dashboard = dashboardData.value;
+    if (dashboard == null) return const [];
+    return dashboard.shoppingPreview
+        .map(
+          (item) => ShoppingListOutput(
+            id: item.id,
+            title: item.title,
+            status: 'OPEN',
+          ),
+        )
         .toList(growable: false);
   }
 
   int get openShoppingListsCount {
-    return activeShoppingLists.where((list) => !list.isDone).length;
+    final dashboard = dashboardData.value;
+    if (dashboard == null) return 0;
+    return dashboard.shoppingPreview.length;
   }
 
+  int get openShoppingLists => openShoppingListsCount;
+
   int get pendingShoppingItemsCount {
+    final dashboard = dashboardData.value;
+    if (dashboard == null) return 0;
     var total = 0;
-    final byList = shoppingItemsByList.value;
-
-    for (final list in activeShoppingLists) {
-      if (list.isDone) continue;
-      final items = byList[list.id] ?? const <ShoppingItemOutput>[];
-      total += items.where((item) => !item.isDone).length;
+    for (final list in dashboard.shoppingPreview) {
+      total += list.pendingItems;
     }
-
     return total;
   }
 
+  int get totalPendingShoppingItems => pendingShoppingItemsCount;
+
   int pendingItemsForList(String listId) {
-    final items =
-        shoppingItemsByList.value[listId] ?? const <ShoppingItemOutput>[];
-    return items.where((item) => !item.isDone).length;
+    final dashboard = dashboardData.value;
+    if (dashboard == null) return 0;
+    for (final list in dashboard.shoppingPreview) {
+      if (list.id == listId) return list.pendingItems;
+    }
+    return 0;
   }
 
   List<ShoppingListOutput> get homeShoppingListsPreview {
-    final lists = activeShoppingLists.where((list) => !list.isDone).toList();
-    lists.sort((a, b) {
-      final byPending = pendingItemsForList(
-        b.id,
-      ).compareTo(pendingItemsForList(a.id));
-      if (byPending != 0) return byPending;
-      return a.title.toLowerCase().compareTo(b.title.toLowerCase());
+    final dashboard = dashboardData.value;
+    if (dashboard == null) return const [];
+    return dashboard.shoppingPreview
+        .map(
+          (item) => ShoppingListOutput(
+            id: item.id,
+            title: item.title,
+            status: 'OPEN',
+          ),
+        )
+        .toList(growable: false);
+  }
+
+  List<TimelineItem> get nextActionsTimeline {
+    final dashboardTimeline = _dashboardTimelineForNextActions;
+    if (dashboardTimeline.isEmpty) return const [];
+    final now = DateTime.now();
+    return dashboardTimeline
+        .where((item) => !item.scheduledTime.isBefore(now))
+        .take(10)
+        .toList(growable: false);
+  }
+
+  List<TimelineItem> get pastActionsToday {
+    final dashboardTimeline = _dashboardTimelineForInsights;
+    if (dashboardTimeline.isEmpty) return const [];
+    final now = DateTime.now();
+    return dashboardTimeline
+        .where((item) => item.scheduledTime.isBefore(now))
+        .toList(growable: false);
+  }
+
+  List<TimelineItem> get insightsTimelineToday {
+    final dashboardTimeline = _dashboardTimelineForInsights;
+    return dashboardTimeline;
+  }
+
+  int get routinesDone {
+    final dashboard = dashboardData.value;
+    if (dashboard == null) return 0;
+    return dashboard.dayProgress.routinesDone;
+  }
+
+  int get routinesTotal {
+    final dashboard = dashboardData.value;
+    if (dashboard == null) return 0;
+    return dashboard.dayProgress.routinesTotal;
+  }
+
+  int get tasksDone {
+    final dashboard = dashboardData.value;
+    if (dashboard == null) return 0;
+    return dashboard.dayProgress.tasksDone;
+  }
+
+  int get tasksTotal {
+    final dashboard = dashboardData.value;
+    if (dashboard == null) return 0;
+    return dashboard.dayProgress.tasksTotal;
+  }
+
+  int get remindersDoneToday {
+    final dashboard = dashboardData.value;
+    if (dashboard == null || dashboard.timeline.isEmpty) return 0;
+
+    var done = 0;
+    final today = DateTime.now();
+    for (final item in dashboard.timeline) {
+      if (item.itemType != 'reminder') continue;
+      if (!DateTimeUtils.isSameDay(item.scheduledTime.toLocal(), today)) {
+        continue;
+      }
+      if (item.isCompleted) done += 1;
+    }
+    return done;
+  }
+
+  int get remindersTotalToday {
+    final dashboard = dashboardData.value;
+    if (dashboard == null || dashboard.timeline.isEmpty) return 0;
+
+    var total = 0;
+    final today = DateTime.now();
+    for (final item in dashboard.timeline) {
+      if (item.itemType != 'reminder') continue;
+      if (!DateTimeUtils.isSameDay(item.scheduledTime.toLocal(), today)) {
+        continue;
+      }
+      total += 1;
+    }
+    return total;
+  }
+
+  double get dayProgressPercent {
+    final dashboard = dashboardData.value;
+    if (dashboard == null) return 0;
+    return dashboard.dayProgress.progressPercent.clamp(0, 1).toDouble();
+  }
+
+  List<TaskOutput> get focusTasks {
+    final dashboard = dashboardData.value;
+    if (dashboard == null) return const [];
+    return dashboard.focusTasks.take(5).toList(growable: false);
+  }
+
+  Map<DateTime, int> get weekDensityMap {
+    final dashboard = dashboardData.value;
+    if (dashboard == null || dashboard.weekDensity.isEmpty) {
+      return const <DateTime, int>{};
+    }
+    final density = <DateTime, int>{};
+    dashboard.weekDensity.forEach((key, value) {
+      final date = DateTimeUtils.parseDensityDay(key);
+      if (date == null) return;
+      density[date] = value;
     });
-    return lists.take(3).toList(growable: false);
+    return Map.unmodifiable(density);
+  }
+
+  String get insightTitle {
+    final insight = dashboardData.value?.insight;
+    if (insight == null) return '';
+    return insight.title;
+  }
+
+  String get insightSummary {
+    final insight = dashboardData.value?.insight;
+    if (insight == null) return '';
+    return insight.summary;
+  }
+
+  String get insightFooter {
+    final insight = dashboardData.value?.insight;
+    if (insight == null) return '';
+    return insight.footer;
+  }
+
+  bool get insightIsFocus {
+    return dashboardData.value?.insight?.isFocus == true;
   }
 
   Future<void> load() async {
@@ -295,18 +434,9 @@ class HomeController implements IBController {
           fallback: 'Não foi possível atualizar a tarefa pela Home.',
         );
       },
-      (updatedTask) {
-        final current = agenda.value;
-        final tasks = List<TaskOutput>.from(current.tasks);
-        final taskIndex = tasks.indexWhere((item) => item.id == updatedTask.id);
-        if (taskIndex == -1) return;
-
-        tasks[taskIndex] = updatedTask;
-        agenda.value = AgendaOutput(
-          events: current.events,
-          tasks: tasks,
-          reminders: current.reminders,
-        );
+      (task) {
+        _replaceTaskInAgenda(task);
+        _replaceTaskInDashboard(task);
       },
     );
   }
@@ -316,16 +446,17 @@ class HomeController implements IBController {
 
     _updatingRoutineIds.add(routine.id);
     final now = DateTime.now();
-    final dateStr = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+    final dateStr = DateTimeUtils.dateParamYmd(now);
 
-    final result = completed 
-      ? await _completeRoutineUsecase.call(routine.id, date: dateStr)
-      : await _uncompleteRoutineUsecase.call(routine.id, dateStr);
-    
+    final result = completed
+        ? await _completeRoutineUsecase.call(routine.id, date: dateStr)
+        : await _uncompleteRoutineUsecase.call(routine.id, dateStr);
+
     _updatingRoutineIds.remove(routine.id);
 
     result.fold(
-      (failure) => _setError(failure, fallback: 'Não foi possível atualizar a rotina.'),
+      (failure) =>
+          _setError(failure, fallback: 'Não foi possível atualizar a rotina.'),
       (_) {
         final list = List<RoutineOutput>.from(routines.value);
         final idx = list.indexWhere((r) => r.id == routine.id);
@@ -333,14 +464,109 @@ class HomeController implements IBController {
           list[idx] = list[idx].copyWith(isCompletedToday: completed);
           routines.value = list;
         }
+        _replaceRoutineInDashboard(routine.id, completed);
         _refreshRoutineSummary();
       },
     );
   }
 
+  Future<void> markTimelineItemDone(String id, TimelineItemType type) async {
+    final itemId = id.trim();
+    if (itemId.isEmpty) return;
+
+    switch (type) {
+      case TimelineItemType.event:
+        return;
+      case TimelineItemType.task:
+        await _markTaskDone(itemId);
+        return;
+      case TimelineItemType.reminder:
+        await _markReminderDone(itemId);
+        return;
+      case TimelineItemType.routine:
+        final routine = _findRoutineById(itemId);
+        if (routine != null) {
+          if (routine.isCompletedToday) return;
+          await toggleRoutine(routine, true);
+          return;
+        }
+        await _completeRoutineById(itemId);
+        return;
+    }
+  }
+
+  Future<void> _completeRoutineById(String routineId) async {
+    if (_updatingRoutineIds.contains(routineId)) return;
+
+    _updatingRoutineIds.add(routineId);
+    final now = DateTime.now();
+    final dateStr = DateTimeUtils.dateParamYmd(now);
+    final result = await _completeRoutineUsecase.call(routineId, date: dateStr);
+    _updatingRoutineIds.remove(routineId);
+
+    result.fold(
+      (failure) =>
+          _setError(failure, fallback: 'Não foi possível atualizar a rotina.'),
+      (_) {
+        _replaceRoutineInDashboard(routineId, true);
+        _refreshRoutineSummary();
+      },
+    );
+  }
+
+  Future<void> _markTaskDone(String taskId) async {
+    if (_updatingTaskIds.contains(taskId)) return;
+
+    _updatingTaskIds.add(taskId);
+    final result = await _updateTaskUsecase.call(
+      TaskUpdateInput(id: taskId, status: 'DONE'),
+    );
+    _updatingTaskIds.remove(taskId);
+
+    result.fold(
+      (failure) {
+        _setError(
+          failure,
+          fallback: 'Não foi possível concluir a tarefa na timeline.',
+        );
+      },
+      (task) {
+        _replaceTaskInAgenda(task);
+        _replaceTaskInDashboard(task);
+      },
+    );
+  }
+
+  Future<void> _markReminderDone(String reminderId) async {
+    if (_updatingReminderIds.contains(reminderId)) return;
+
+    _updatingReminderIds.add(reminderId);
+    final result = await _updateReminderUsecase.call(
+      ReminderUpdateInput(id: reminderId, status: 'DONE'),
+    );
+    _updatingReminderIds.remove(reminderId);
+
+    result.fold(
+      (failure) {
+        _setError(
+          failure,
+          fallback: 'Não foi possível concluir o lembrete na timeline.',
+        );
+      },
+      (reminder) {
+        _replaceReminderInAgenda(reminder);
+        _replaceReminderInDashboard(reminder);
+      },
+    );
+  }
+
   Future<void> _refreshRoutineSummary() async {
-    final result = await _getTodaySummaryUsecase.call();
-    result.fold((_) => null, (summary) => routineSummary.value = summary);
+    await _reloadDashboardAfterMutation();
+  }
+
+  Future<void> _reloadDashboardAfterMutation() async {
+    final result = await _getHomeDashboardUsecase.call();
+    result.fold((_) => null, _applyDashboard);
   }
 
   Future<void> _fetch({required bool initialLoad}) async {
@@ -353,90 +579,240 @@ class HomeController implements IBController {
     }
     error.value = null;
 
-    final agendaFuture = _getAgendaUsecase.call(limit: 200);
-    final listsFuture = _getShoppingListsUsecase.call(limit: 20);
-    
-    final now = DateTime.now();
-    final weekday = now.weekday % 7;
-    final dateStr = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
-    final routinesFuture = _getRoutinesByWeekdayUsecase.call(weekday, date: dateStr);
-    final summaryFuture = _getTodaySummaryUsecase.call();
-
-    final results = await Future.wait([
-      agendaFuture,
-      listsFuture,
-      routinesFuture,
-      summaryFuture,
-    ]);
-
-    final agendaResult = results[0] as Either<Failure, AgendaOutput>;
-    final listsResult = results[1] as Either<Failure, ShoppingListListOutput>;
-    final routinesResult = results[2] as Either<Failure, RoutineListOutput>;
-    final summaryResult = results[3] as Either<Failure, RoutineTodaySummaryOutput>;
-
-    agendaResult.fold(
-      (failure) =>
-          _setError(failure, fallback: 'Não foi possível carregar agenda.'),
-      (output) => agenda.value = output,
-    );
-
-    summaryResult.fold((_) => null, (summary) => routineSummary.value = summary);
-
-    routinesResult.fold(
-      (failure) => _setError(failure, fallback: 'Não foi possível carregar rotinas.'),
-      (data) {
-        routines.value = data.items;
-      },
-    );
-
-    final lists = listsResult.fold<List<ShoppingListOutput>>(
-      (failure) {
+    try {
+      final dashboardResult = await _getHomeDashboardUsecase.call();
+      dashboardResult.fold((failure) {
+        dashboardData.value = null;
         _setError(
           failure,
-          fallback: 'Não foi possível carregar listas de compras.',
+          fallback: 'Nao foi possivel carregar o dashboard da Home.',
         );
-        return const [];
-      },
-      (output) => output.items
-          .where((list) => !list.isArchived)
-          .toList(growable: false),
-    );
-    shoppingLists.value = lists;
+      }, _applyDashboard);
+    } catch (_) {
+      if (error.value == null || error.value!.isEmpty) {
+        error.value = 'Não foi possível carregar a Home.';
+      }
+    } finally {
+      loading.value = false;
+      refreshing.value = false;
+    }
+  }
 
-    final nextItemsByList = <String, List<ShoppingItemOutput>>{};
-    final itemsResults = await Future.wait(
-      lists.map((list) async {
-        final result = await _getShoppingItemsUsecase.call(
-          listId: list.id,
-          limit: 200,
-        );
-        return MapEntry(list.id, result);
-      }),
+  void _applyDashboard(HomeDashboardOutput data) {
+    dashboardData.value = data;
+    routineSummary.value = RoutineTodaySummaryOutput(
+      total: data.dayProgress.routinesTotal,
+      completed: data.dayProgress.routinesDone,
     );
 
-    for (final entry in itemsResults) {
-      entry.value.fold(
-        (failure) {
-          _setError(
-            failure,
-            fallback: 'Não foi possível carregar itens de compras da Home.',
-          );
-          nextItemsByList[entry.key] = const [];
-        },
-        (output) {
-          nextItemsByList[entry.key] = output.items;
-        },
+    agenda.value = const AgendaOutput(events: [], tasks: [], reminders: []);
+    routines.value = const [];
+
+    shoppingLists.value = data.shoppingPreview
+        .map(
+          (list) => ShoppingListOutput(
+            id: list.id,
+            title: list.title,
+            status: 'OPEN',
+          ),
+        )
+        .toList(growable: false);
+    shoppingItemsByList.value = {
+      for (final list in data.shoppingPreview)
+        list.id: List.generate(
+          list.pendingItems,
+          (index) => ShoppingItemOutput(
+            id: '${list.id}:$index',
+            title: index < list.previewItems.length
+                ? list.previewItems[index]
+                : 'Item pendente',
+            checked: false,
+            sortOrder: index,
+          ),
+          growable: false,
+        ),
+    };
+  }
+
+  List<TimelineItem> get _dashboardTimelineForInsights {
+    return _mapDashboardTimelineItems(includeCompleted: true);
+  }
+
+  List<TimelineItem> get _dashboardTimelineForNextActions {
+    return _mapDashboardTimelineItems(includeCompleted: false);
+  }
+
+  List<TimelineItem> _mapDashboardTimelineItems({
+    required bool includeCompleted,
+  }) {
+    final dashboard = dashboardData.value;
+    if (dashboard == null || dashboard.timeline.isEmpty) return const [];
+
+    final items = <TimelineItem>[];
+    for (final item in dashboard.timeline) {
+      final timelineType = HomeControllerUtils.timelineTypeFromRaw(
+        item.itemType,
+      );
+      if (timelineType == null) continue;
+      final localScheduled = item.scheduledTime.toLocal();
+      if (localScheduled.millisecondsSinceEpoch <= 0) continue;
+      if (!includeCompleted &&
+          (timelineType == TimelineItemType.task ||
+              timelineType == TimelineItemType.reminder ||
+              timelineType == TimelineItemType.routine) &&
+          item.isCompleted) {
+        continue;
+      }
+
+      items.add(
+        TimelineItem(
+          id: item.id,
+          title: item.title,
+          subtitle: TextUtils.normalize(item.subtitle),
+          type: timelineType,
+          scheduledTime: localScheduled,
+          endScheduledTime: item.endScheduledTime?.toLocal(),
+          isCompleted: item.isCompleted,
+          isOverdue: item.isOverdue,
+        ),
       );
     }
-    shoppingItemsByList.value = nextItemsByList;
 
-    loading.value = false;
-    refreshing.value = false;
+    items.sort((a, b) {
+      final byTime = a.scheduledTime.compareTo(b.scheduledTime);
+      if (byTime != 0) return byTime;
+      return a.title.toLowerCase().compareTo(b.title.toLowerCase());
+    });
+    return items;
+  }
+
+  void _replaceTaskInAgenda(TaskOutput updatedTask) {
+    final current = agenda.value;
+    final tasks = List<TaskOutput>.from(current.tasks);
+    final taskIndex = tasks.indexWhere((item) => item.id == updatedTask.id);
+    if (taskIndex == -1) return;
+
+    tasks[taskIndex] = updatedTask;
+    agenda.value = AgendaOutput(
+      events: current.events,
+      tasks: tasks,
+      reminders: current.reminders,
+    );
+  }
+
+  void _replaceReminderInAgenda(ReminderOutput updatedReminder) {
+    final current = agenda.value;
+    final reminders = List<ReminderOutput>.from(current.reminders);
+    final reminderIndex = reminders.indexWhere(
+      (item) => item.id == updatedReminder.id,
+    );
+    if (reminderIndex == -1) return;
+
+    reminders[reminderIndex] = updatedReminder;
+    agenda.value = AgendaOutput(
+      events: current.events,
+      tasks: current.tasks,
+      reminders: reminders,
+    );
+  }
+
+  void _replaceTaskInDashboard(TaskOutput updatedTask) {
+    final dashboard = dashboardData.value;
+    if (dashboard == null) return;
+
+    bool? previousDone;
+    final timeline = dashboard.timeline
+        .map((item) {
+          if (item.id != updatedTask.id || item.itemType != 'task') return item;
+          previousDone ??= item.isCompleted;
+          return item.copyWith(isCompleted: updatedTask.isDone);
+        })
+        .toList(growable: false);
+
+    final focus = List<TaskOutput>.from(dashboard.focusTasks);
+    final idx = focus.indexWhere((item) => item.id == updatedTask.id);
+    if (idx != -1) {
+      previousDone ??= focus[idx].isDone;
+      if (updatedTask.isDone) {
+        focus.removeAt(idx);
+      } else {
+        focus[idx] = updatedTask;
+      }
+    }
+
+    var dayProgress = dashboard.dayProgress;
+    final dueAt = updatedTask.dueAt?.toLocal();
+    final isTodayTask =
+        dueAt != null && DateTimeUtils.isSameDay(dueAt, DateTime.now());
+    if (isTodayTask &&
+        previousDone != null &&
+        previousDone != updatedTask.isDone) {
+      final nextDone = dayProgress.tasksDone + (updatedTask.isDone ? 1 : -1);
+      dayProgress = dayProgress.copyWith(
+        tasksDone: nextDone.clamp(0, dayProgress.tasksTotal),
+      );
+    }
+
+    dashboardData.value = dashboard.copyWith(
+      timeline: timeline,
+      focusTasks: focus,
+      dayProgress: dayProgress,
+    );
+  }
+
+  void _replaceReminderInDashboard(ReminderOutput updatedReminder) {
+    final dashboard = dashboardData.value;
+    if (dashboard == null) return;
+
+    final timeline = dashboard.timeline
+        .map((item) {
+          if (item.id != updatedReminder.id || item.itemType != 'reminder') {
+            return item;
+          }
+          return item.copyWith(isCompleted: updatedReminder.isDone);
+        })
+        .toList(growable: false);
+
+    dashboardData.value = dashboard.copyWith(timeline: timeline);
+  }
+
+  void _replaceRoutineInDashboard(String routineId, bool completed) {
+    final dashboard = dashboardData.value;
+    if (dashboard == null) return;
+
+    bool? previousDone;
+    final timeline = dashboard.timeline
+        .map((item) {
+          if (item.id != routineId || item.itemType != 'routine') return item;
+          previousDone ??= item.isCompleted;
+          return item.copyWith(isCompleted: completed);
+        })
+        .toList(growable: false);
+
+    var dayProgress = dashboard.dayProgress;
+    if (previousDone != null && previousDone != completed) {
+      final nextDone = dayProgress.routinesDone + (completed ? 1 : -1);
+      dayProgress = dayProgress.copyWith(
+        routinesDone: nextDone.clamp(0, dayProgress.routinesTotal),
+      );
+    }
+
+    dashboardData.value = dashboard.copyWith(
+      timeline: timeline,
+      dayProgress: dayProgress,
+    );
+  }
+
+  RoutineOutput? _findRoutineById(String routineId) {
+    for (final routine in routines.value) {
+      if (routine.id == routineId) return routine;
+    }
+    return null;
   }
 
   void _setError(Failure failure, {required String fallback}) {
-    final message = failure.message?.trim();
-    if (message != null && message.isNotEmpty) {
+    final message = TextUtils.normalize(failure.message);
+    if (message != null) {
       error.value = message;
       return;
     }
@@ -446,11 +822,121 @@ class HomeController implements IBController {
     }
   }
 
+  Future<Either<String, CreateLineResult>> quickAdd(String text) async {
+    final cleaned = text.trim();
+    if (cleaned.isEmpty) return const Left('Texto vazio.');
+
+    final createResult = await _createInboxItemUsecase.call(
+      InboxCreateInput(source: 'manual', rawText: cleaned),
+    );
+
+    final createdItem = createResult.fold<InboxItemOutput?>(
+      (failure) => null,
+      (item) => item,
+    );
+
+    if (createdItem == null) {
+      return Left(HomeControllerUtils.failureMessage(createResult));
+    }
+
+    final reprocessResult = await _reprocessInboxItemUsecase.call(
+      createdItem.id,
+    );
+    final processedItem = reprocessResult.fold<InboxItemOutput?>(
+      (failure) => null,
+      (item) => item,
+    );
+
+    if (processedItem == null) {
+      return Left(HomeControllerUtils.failureMessage(reprocessResult));
+    }
+
+    final confirmInput = InboxConfirmInput.fromSuggestion(
+      processedItem,
+      fallbackTitle: cleaned,
+    );
+
+    if (!confirmInput.isValidForConfirm) {
+      return const Left('A IA não retornou dados suficientes para confirmar.');
+    }
+
+    final confirmResult = await _confirmInboxItemUsecase.call(confirmInput);
+    return await confirmResult.fold<Future<Either<String, CreateLineResult>>>(
+      (failure) async {
+        return Left(
+          (failure.message?.trim().isNotEmpty ?? false)
+              ? failure.message!.trim()
+              : 'Falha ao confirmar item processado.',
+        );
+      },
+      (output) async {
+        await _reloadDashboardAfterMutation();
+        final (type, id) = HomeControllerUtils.resolveEntityRef(output);
+        return Right(
+          CreateLineResult(
+            sourceText: cleaned,
+            status: CreateLineStatus.success,
+            message: HomeControllerUtils.successMessage(type),
+            entityId: id,
+            entityType: type,
+          ),
+        );
+      },
+    );
+  }
+
+  Future<Either<Failure, Unit>> deleteQuickAddResult(
+    CreateLineResult result,
+  ) async {
+    if (!result.canDelete) {
+      return Left(
+        DeleteFailure(message: 'Item não pode ser excluído no estado atual.'),
+      );
+    }
+
+    final deleteResult = await _deleteByEntity(
+      result.entityType,
+      result.entityId!,
+    );
+    return await deleteResult.fold<Future<Either<Failure, Unit>>>(
+      (failure) async => Left(failure),
+      (_) async {
+        await _reloadDashboardAfterMutation();
+        return const Right(unit);
+      },
+    );
+  }
+
+  Future<Either<Failure, Unit>> _deleteByEntity(
+    CreateEntityType type,
+    String id,
+  ) {
+    switch (type) {
+      case CreateEntityType.task:
+        return _deleteTaskUsecase.call(id);
+      case CreateEntityType.reminder:
+        return _deleteReminderUsecase.call(id);
+      case CreateEntityType.event:
+        return _deleteEventUsecase.call(id);
+      case CreateEntityType.shoppingList:
+        return _deleteShoppingListUsecase.call(id);
+      case CreateEntityType.routine:
+        return _deleteRoutineUsecase.call(id);
+      case CreateEntityType.unknown:
+        return Future.value(
+          Left(
+            DeleteFailure(message: 'Tipo de item não suportado para exclusao.'),
+          ),
+        );
+    }
+  }
+
   @override
   void dispose() {
     loading.dispose();
     refreshing.dispose();
     error.dispose();
+    dashboardData.dispose();
     agenda.dispose();
     routines.dispose();
     routineSummary.dispose();
