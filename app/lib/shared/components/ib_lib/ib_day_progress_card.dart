@@ -24,9 +24,7 @@ class IBDayProgressCard extends StatelessWidget {
     final safeProgress = progressPercent.clamp(0.0, 1.0).toDouble();
     final overallDone = routinesDone + tasksDone;
     final overallTotal = routinesTotal + tasksTotal;
-    final progressColor = safeProgress >= 1 && overallTotal > 0
-        ? AppColors.success600
-        : AppColors.primary600;
+    const progressColor = AppColors.primary600;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -78,14 +76,14 @@ class IBDayProgressCard extends StatelessWidget {
             label: 'Tarefas',
             done: tasksDone,
             total: tasksTotal,
-            color: AppColors.warning500,
+            color: AppColors.ai500,
           ),
           if (safeProgress >= 1 && overallTotal > 0) ...[
             const SizedBox(height: 10),
             IBText(
-              'Tudo concluido!',
+              'Tudo concluído!',
               context: context,
-            ).caption.color(AppColors.success600).build(),
+            ).caption.color(AppColors.primary600).build(),
           ],
         ],
       ),

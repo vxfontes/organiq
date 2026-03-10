@@ -305,12 +305,6 @@ class HomeController implements IBController {
     return dashboard.focusTasks.take(5).toList(growable: false);
   }
 
-  String get executiveSummary {
-    final dashboard = dashboardData.value;
-    if (dashboard == null) return '';
-    return dashboard.executiveSummary;
-  }
-
   Map<DateTime, int> get weekDensityMap {
     final dashboard = dashboardData.value;
     if (dashboard == null || dashboard.weekDensity.isEmpty) {

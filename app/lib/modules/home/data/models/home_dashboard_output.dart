@@ -2,7 +2,6 @@ import 'package:inbota/modules/tasks/data/models/task_output.dart';
 
 class HomeDashboardOutput {
   const HomeDashboardOutput({
-    required this.executiveSummary,
     required this.dayProgress,
     this.insight,
     required this.timeline,
@@ -13,7 +12,6 @@ class HomeDashboardOutput {
     this.remindersTodayCount,
   });
 
-  final String executiveSummary;
   final HomeDayProgressOutput dayProgress;
   final HomeInsightOutput? insight;
   final List<HomeTimelineItemOutput> timeline;
@@ -34,9 +32,6 @@ class HomeDashboardOutput {
     final focusTasksRaw = _first(map, const ['focus_tasks', 'focusTasks']);
 
     return HomeDashboardOutput(
-      executiveSummary: _readString(
-        _first(map, const ['executive_summary', 'executiveSummary']),
-      ),
       dayProgress: HomeDayProgressOutput.fromDynamic(
         _first(map, const ['day_progress', 'dayProgress']),
       ),
@@ -63,7 +58,6 @@ class HomeDashboardOutput {
   }
 
   HomeDashboardOutput copyWith({
-    String? executiveSummary,
     HomeDayProgressOutput? dayProgress,
     HomeInsightOutput? insight,
     bool clearInsight = false,
@@ -77,7 +71,6 @@ class HomeDashboardOutput {
     bool clearRemindersTodayCount = false,
   }) {
     return HomeDashboardOutput(
-      executiveSummary: executiveSummary ?? this.executiveSummary,
       dayProgress: dayProgress ?? this.dayProgress,
       insight: clearInsight ? null : (insight ?? this.insight),
       timeline: timeline ?? this.timeline,

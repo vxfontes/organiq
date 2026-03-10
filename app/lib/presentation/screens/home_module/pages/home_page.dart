@@ -109,7 +109,6 @@ class _HomePageState extends IBState<HomePage, HomeController> {
                   padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
                   children: [
                     HomeDynamicHeader(
-                      executiveSummary: controller.executiveSummary,
                       onSettingsTap: () =>
                           AppNavigation.push(AppRoutes.settings),
                       onNotificationsTap: () =>

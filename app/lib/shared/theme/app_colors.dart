@@ -32,4 +32,12 @@ class AppColors {
 
   static const transparent = Colors.transparent;
   static const dark = Color(0xFF111827);
+
+  // Greeting gradients
+  static const morningStart = Color(0xFFE6FAF8);
+  static const morningEnd = Color(0xFFF8FFFE);
+  static const afternoonStart = Color(0xFFFFF7ED);
+  static const afternoonEnd = Color(0xFFFFFBEB);
+  static const nightStart = Color(0xFFEEF2FF);
+  static const nightEnd = Color(0xFFF8FAFC);
 }
