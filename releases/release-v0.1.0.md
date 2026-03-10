@@ -23,3 +23,4 @@ Esta versão foca na consistência temporal e precisão dos dados, especialmente
 - **Centralização do Status Diário:** Refatoração da lógica de consulta de status de rotinas para a função SQL.
 - **Ajustes de UI:** Refinamento no `expanded` das listas de to-do e ajustes finos nos componentes de lembretes.
 - **Ajustes nas compras:** Troca do botão de concluir
+- **Ajustes nas notificações:** Notificações filtradas para exibir apenas os itens relevantes para o dia atual e passadas.

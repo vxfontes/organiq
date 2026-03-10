@@ -84,7 +84,7 @@ class _NotificationsPageState extends IBState<NotificationsPage, NotificationsCo
                   physics: const AlwaysScrollableScrollPhysics(),
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
                   itemCount: notifications.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  separatorBuilder: (_, __) => const SizedBox(height: 8),
                   itemBuilder: (context, index) {
                     final notification = notifications[index];
                     return NotificationCard(
