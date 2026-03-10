@@ -46,6 +46,18 @@ func (f *fakePrefsRepo) ListEnabled(ctx context.Context) ([]domain.NotificationP
 	return f.prefs, nil
 }
 
+func (f *fakePrefsRepo) GetDailySummaryTokenByUserID(ctx context.Context, userID string) (string, error) {
+	return "", fmt.Errorf("not implemented")
+}
+
+func (f *fakePrefsRepo) RotateDailySummaryToken(ctx context.Context, userID string) (string, error) {
+	return "", fmt.Errorf("not implemented")
+}
+
+func (f *fakePrefsRepo) FindUserIDByDailySummaryToken(ctx context.Context, token string) (string, error) {
+	return "", fmt.Errorf("not implemented")
+}
+
 type fakeEmailDigestRepo struct {
 	createResult bool
 	createCalls  int

@@ -120,6 +120,7 @@ func main() {
 			Routines:    routineRepo,
 			Exceptions:  routineExceptionRepo,
 			Completions: routineCompletionRepo,
+			Users:       userRepo,
 			Flags:       flagRepo,
 			Subflags:    subflagRepo,
 		}

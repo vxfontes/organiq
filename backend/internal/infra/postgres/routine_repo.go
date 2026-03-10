@@ -247,17 +247,25 @@ func (r *RoutineRepositoryImpl) ListByWeekday(ctx context.Context, userID string
 	return items, nil
 }
 
-func (r *RoutineRepositoryImpl) ListDailyStatus(ctx context.Context, userID string, weekday int) ([]repository.RoutineDailyStatus, error) {
+func (r *RoutineRepositoryImpl) ListDailyStatus(ctx context.Context, userID string, weekday int, date string) ([]repository.RoutineDailyStatus, error) {
 	rows, err := r.db.QueryContext(ctx, `
-		SELECT id, user_id, title, description, recurrence_type, weekdays,
-			to_char(start_time, 'HH24:MI') as start_time,
-			to_char(end_time, 'HH24:MI') as end_time,
-			week_of_month, starts_on, ends_on, color, is_active, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at,
-			completed_at, is_completed, exception_action
-		FROM inbota.view_routine_daily_status
-		WHERE user_id = $1 AND is_active = true AND $2 = ANY(weekdays)
-		ORDER BY start_time, created_at
-	`, userID, weekday)
+		SELECT r.id, r.user_id, r.title, r.description, r.recurrence_type, r.weekdays,
+			to_char(r.start_time, 'HH24:MI') as start_time,
+			to_char(r.end_time, 'HH24:MI') as end_time,
+			r.week_of_month, r.starts_on, r.ends_on, r.color, r.is_active, r.flag_id, r.subflag_id, r.source_inbox_item_id, r.created_at, r.updated_at,
+			c.completed_at,
+			(c.id IS NOT NULL) as is_completed,
+			e.action as exception_action
+		FROM inbota.routines r
+		LEFT JOIN inbota.routine_completions c
+			ON r.id = c.routine_id
+			AND c.completed_on = $3::date
+		LEFT JOIN inbota.routine_exceptions e
+			ON r.id = e.routine_id
+			AND e.exception_date = $3::date
+		WHERE r.user_id = $1 AND r.is_active = true AND $2 = ANY(r.weekdays)
+		ORDER BY r.start_time, r.created_at
+	`, userID, weekday, date)
 	if err != nil {
 		return nil, err
 	}

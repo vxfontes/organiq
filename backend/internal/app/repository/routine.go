@@ -21,7 +21,7 @@ type RoutineRepository interface {
 	List(ctx context.Context, userID string, opts ListOptions) ([]domain.Routine, *string, error)
 	ListByWeekday(ctx context.Context, userID string, weekday int) ([]domain.Routine, error)
 	ListAllByWeekday(ctx context.Context, weekday int) ([]domain.Routine, error)
-	ListDailyStatus(ctx context.Context, userID string, weekday int) ([]RoutineDailyStatus, error)
+	ListDailyStatus(ctx context.Context, userID string, weekday int, date string) ([]RoutineDailyStatus, error)
 	Toggle(ctx context.Context, userID, id string, isActive bool) error
 	CheckOverlap(ctx context.Context, userID string, weekdays []int, startTime, endTime string, excludeID *string) (bool, error)
 }
