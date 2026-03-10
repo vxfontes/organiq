@@ -1,19 +1,33 @@
+import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:inbota/modules/events/data/models/agenda_output.dart';
 import 'package:inbota/modules/events/data/models/event_output.dart';
+import 'package:inbota/modules/events/domain/usecases/delete_event_usecase.dart';
 import 'package:inbota/modules/home/data/models/home_dashboard_output.dart';
 import 'package:inbota/modules/home/domain/usecases/get_home_dashboard_usecase.dart';
+import 'package:inbota/modules/inbox/data/models/inbox_confirm_input.dart';
+import 'package:inbota/modules/inbox/data/models/inbox_confirm_output.dart';
+import 'package:inbota/modules/inbox/data/models/inbox_create_input.dart';
+import 'package:inbota/modules/inbox/data/models/inbox_create_line_result.dart';
+import 'package:inbota/modules/inbox/data/models/inbox_item_output.dart';
+import 'package:inbota/modules/inbox/domain/usecases/confirm_inbox_item_usecase.dart';
+import 'package:inbota/modules/inbox/domain/usecases/create_inbox_item_usecase.dart';
+import 'package:inbota/modules/inbox/domain/usecases/reprocess_inbox_item_usecase.dart';
 import 'package:inbota/modules/reminders/data/models/reminder_output.dart';
 import 'package:inbota/modules/reminders/data/models/reminder_update_input.dart';
+import 'package:inbota/modules/reminders/domain/usecases/delete_reminder_usecase.dart';
 import 'package:inbota/modules/reminders/domain/usecases/update_reminder_usecase.dart';
 import 'package:inbota/modules/routines/data/models/routine_output.dart';
 import 'package:inbota/modules/routines/data/models/routine_today_summary_output.dart';
 import 'package:inbota/modules/routines/domain/usecases/complete_routine_usecase.dart';
+import 'package:inbota/modules/routines/domain/usecases/delete_routine_usecase.dart';
 import 'package:inbota/modules/routines/domain/usecases/uncomplete_routine_usecase.dart';
 import 'package:inbota/modules/shopping/data/models/shopping_item_output.dart';
 import 'package:inbota/modules/shopping/data/models/shopping_list_output.dart';
+import 'package:inbota/modules/shopping/domain/usecases/delete_shopping_list_usecase.dart';
 import 'package:inbota/modules/tasks/data/models/task_output.dart';
 import 'package:inbota/modules/tasks/data/models/task_update_input.dart';
+import 'package:inbota/modules/tasks/domain/usecases/delete_task_usecase.dart';
 import 'package:inbota/modules/tasks/domain/usecases/update_task_usecase.dart';
 import 'package:inbota/presentation/screens/home_module/components/timeline_item.dart';
 import 'package:inbota/shared/errors/failures.dart';
@@ -27,6 +41,14 @@ class HomeController implements IBController {
     this._updateReminderUsecase,
     this._completeRoutineUsecase,
     this._uncompleteRoutineUsecase,
+    this._createInboxItemUsecase,
+    this._reprocessInboxItemUsecase,
+    this._confirmInboxItemUsecase,
+    this._deleteTaskUsecase,
+    this._deleteReminderUsecase,
+    this._deleteEventUsecase,
+    this._deleteShoppingListUsecase,
+    this._deleteRoutineUsecase,
   );
 
   final GetHomeDashboardUsecase _getHomeDashboardUsecase;
@@ -34,6 +56,15 @@ class HomeController implements IBController {
   final UpdateReminderUsecase _updateReminderUsecase;
   final CompleteRoutineUsecase _completeRoutineUsecase;
   final UncompleteRoutineUsecase _uncompleteRoutineUsecase;
+
+  final CreateInboxItemUsecase _createInboxItemUsecase;
+  final ReprocessInboxItemUsecase _reprocessInboxItemUsecase;
+  final ConfirmInboxItemUsecase _confirmInboxItemUsecase;
+  final DeleteTaskUsecase _deleteTaskUsecase;
+  final DeleteReminderUsecase _deleteReminderUsecase;
+  final DeleteEventUsecase _deleteEventUsecase;
+  final DeleteShoppingListUsecase _deleteShoppingListUsecase;
+  final DeleteRoutineUsecase _deleteRoutineUsecase;
 
   final ValueNotifier<bool> loading = ValueNotifier(false);
   final ValueNotifier<bool> refreshing = ValueNotifier(false);
@@ -777,6 +808,146 @@ class HomeController implements IBController {
 
     if (error.value == null || error.value!.isEmpty) {
       error.value = fallback;
+    }
+  }
+
+  Future<Either<String, CreateLineResult>> quickAdd(String text) async {
+    final cleaned = text.trim();
+    if (cleaned.isEmpty) return const Left('Texto vazio.');
+
+    final createResult = await _createInboxItemUsecase.call(
+      InboxCreateInput(source: 'manual', rawText: cleaned),
+    );
+
+    final createdItem = createResult.fold<InboxItemOutput?>(
+      (failure) => null,
+      (item) => item,
+    );
+
+    if (createdItem == null) {
+      return Left(_failureMessage(createResult));
+    }
+
+    final reprocessResult = await _reprocessInboxItemUsecase.call(
+      createdItem.id,
+    );
+    final processedItem = reprocessResult.fold<InboxItemOutput?>(
+      (failure) => null,
+      (item) => item,
+    );
+
+    if (processedItem == null) {
+      return Left(_failureMessage(reprocessResult));
+    }
+
+    final confirmInput = InboxConfirmInput.fromSuggestion(
+      processedItem,
+      fallbackTitle: cleaned,
+    );
+
+    if (!confirmInput.isValidForConfirm) {
+      return const Left('A IA não retornou dados suficientes para confirmar.');
+    }
+
+    final confirmResult = await _confirmInboxItemUsecase.call(confirmInput);
+    return confirmResult.fold(
+      (failure) => Left(
+        (failure.message?.trim().isNotEmpty ?? false)
+            ? failure.message!.trim()
+            : 'Falha ao confirmar item processado.',
+      ),
+      (output) {
+        final (type, id) = _resolveEntityRef(output);
+        return Right(
+          CreateLineResult(
+            sourceText: cleaned,
+            status: CreateLineStatus.success,
+            message: _successMessage(type),
+            entityId: id,
+            entityType: type,
+          ),
+        );
+      },
+    );
+  }
+
+  Future<Either<Failure, Unit>> deleteQuickAddResult(
+    CreateLineResult result,
+  ) async {
+    if (!result.canDelete) {
+      return Left(
+        DeleteFailure(message: 'Item não pode ser excluído no estado atual.'),
+      );
+    }
+
+    return _deleteByEntity(result.entityType, result.entityId!);
+  }
+
+  Future<Either<Failure, Unit>> _deleteByEntity(
+    CreateEntityType type,
+    String id,
+  ) {
+    switch (type) {
+      case CreateEntityType.task:
+        return _deleteTaskUsecase.call(id);
+      case CreateEntityType.reminder:
+        return _deleteReminderUsecase.call(id);
+      case CreateEntityType.event:
+        return _deleteEventUsecase.call(id);
+      case CreateEntityType.shoppingList:
+        return _deleteShoppingListUsecase.call(id);
+      case CreateEntityType.routine:
+        return _deleteRoutineUsecase.call(id);
+      case CreateEntityType.unknown:
+        return Future.value(
+          Left(
+            DeleteFailure(message: 'Tipo de item não suportado para exclusao.'),
+          ),
+        );
+    }
+  }
+
+  (CreateEntityType, String?) _resolveEntityRef(InboxConfirmOutput output) {
+    final type = output.type.trim().toLowerCase();
+
+    switch (type) {
+      case 'task':
+        return (CreateEntityType.task, output.task?.id);
+      case 'reminder':
+        return (CreateEntityType.reminder, output.reminder?.id);
+      case 'event':
+        return (CreateEntityType.event, output.event?.id);
+      case 'shopping':
+        return (CreateEntityType.shoppingList, output.shoppingList?.id);
+      case 'routine':
+        return (CreateEntityType.routine, output.routine?.id);
+      default:
+        return (CreateEntityType.unknown, null);
+    }
+  }
+
+  String _failureMessage(Either<Failure, dynamic> either) {
+    return either.fold((failure) {
+      final message = failure.message?.trim();
+      if (message != null && message.isNotEmpty) return message;
+      return 'Falha no processamento.';
+    }, (_) => 'Falha no processamento.');
+  }
+
+  String _successMessage(CreateEntityType type) {
+    switch (type) {
+      case CreateEntityType.task:
+        return 'To-do criado com sucesso!';
+      case CreateEntityType.reminder:
+        return 'Lembrete criado com sucesso!';
+      case CreateEntityType.event:
+        return 'Evento criado com sucesso!';
+      case CreateEntityType.shoppingList:
+        return 'Lista de compras criada com sucesso!';
+      case CreateEntityType.routine:
+        return 'Item de cronograma criado!';
+      default:
+        return 'Item criado com sucesso!';
     }
   }
 

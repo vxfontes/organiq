@@ -116,7 +116,7 @@ class _HomePageState extends IBState<HomePage, HomeController> {
                     ),
                     const SizedBox(height: 12),
                     HomeQuickAddBar(
-                      onTap: () => AppNavigation.push(AppRoutes.rootCreate),
+                      controller: controller,
                     ),
                     const SizedBox(height: 12),
                     HomeWeekStripSection(

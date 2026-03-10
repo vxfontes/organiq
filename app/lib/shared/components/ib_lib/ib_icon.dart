@@ -25,6 +25,7 @@ class IBIcon extends StatelessWidget {
   static const IconData alarmOutlined = Icons.alarm_outlined;
   static const IconData addRounded = Icons.add_rounded;
   static const IconData arrowBackRounded = Icons.arrow_back_rounded;
+  static const IconData arrowForwardRounded = Icons.arrow_forward_rounded;
   static const IconData autoAwesomeRounded = Icons.auto_awesome_rounded;
   static const IconData checkRounded = Icons.check_rounded;
   static const IconData chevronRight = Icons.chevron_right;
