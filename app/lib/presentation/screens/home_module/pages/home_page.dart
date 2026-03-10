@@ -154,12 +154,13 @@ class _HomePageState extends IBState<HomePage, HomeController> {
                         shoppingItemCount: controller.totalPendingShoppingItems,
                         eventsTodayCount: controller.eventsTodayCount,
                         remindersTodayCount: controller.remindersTodayCount,
+                        todayTimeline: [...pastActions, ...nextActions],
                         onShoppingTap: () =>
                             AppNavigation.push(AppRoutes.rootShopping),
-                        onAgendaTap: () =>
+                        onInsightsTap: () =>
                             AppNavigation.push(AppRoutes.rootEvents),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 12),
                       HomeFocusList(
                         tasks: focusTasks,
                         onToggleTask: controller.toggleCriticalTaskAt,
