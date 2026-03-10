@@ -10,13 +10,9 @@ class HomeDynamicHeader extends StatelessWidget {
   const HomeDynamicHeader({
     super.key,
     this.userName,
-    required this.onSettingsTap,
-    required this.onNotificationsTap,
   });
 
   final String? userName;
-  final VoidCallback onSettingsTap;
-  final VoidCallback onNotificationsTap;
 
   @override
   Widget build(BuildContext context) {

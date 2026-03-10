@@ -96,12 +96,7 @@ class _HomePageState extends IBState<HomePage, HomeController> {
                   physics: const AlwaysScrollableScrollPhysics(),
                   padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
                   children: [
-                    HomeDynamicHeader(
-                      onSettingsTap: () =>
-                          AppNavigation.push(AppRoutes.settings),
-                      onNotificationsTap: () =>
-                          AppNavigation.push(AppRoutes.notificationHistory),
-                    ),
+                    const HomeDynamicHeader(),
                     const SizedBox(height: 12),
                     HomeQuickAddBar(controller: controller),
                     const SizedBox(height: 12),
