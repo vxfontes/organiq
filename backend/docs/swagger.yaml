@@ -420,8 +420,6 @@ definitions:
         $ref: '#/definitions/dto.HomeDayProgressResponse'
       events_today_count:
         type: integer
-      executive_summary:
-        type: string
       focus_tasks:
         items:
           $ref: '#/definitions/dto.TaskResponse'

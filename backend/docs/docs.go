@@ -3956,9 +3956,6 @@ const docTemplate = `{
                 "events_today_count": {
                     "type": "integer"
                 },
-                "executive_summary": {
-                    "type": "string"
-                },
                 "focus_tasks": {
                     "type": "array",
                     "items": {

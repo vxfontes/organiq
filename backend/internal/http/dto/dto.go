@@ -324,7 +324,6 @@ type HomeShoppingPreviewResponse struct {
 }
 
 type HomeDashboardResponse struct {
-	ExecutiveSummary    string                        `json:"executive_summary"`
 	DayProgress         HomeDayProgressResponse       `json:"day_progress"`
 	Insight             *HomeInsightResponse          `json:"insight,omitempty"`
 	Timeline            []HomeTimelineItemResponse    `json:"timeline"`

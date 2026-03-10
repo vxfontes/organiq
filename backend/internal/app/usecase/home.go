@@ -20,7 +20,6 @@ type HomeUsecase struct {
 }
 
 type HomeDashboard struct {
-	ExecutiveSummary    string
 	DayProgress         HomeDayProgress
 	Insight             *HomeInsight
 	Timeline            []HomeTimelineItem
@@ -114,11 +113,6 @@ func (uc *HomeUsecase) GetDashboard(ctx context.Context, userID string) (HomeDas
 		return HomeDashboard{}, err
 	}
 
-	overdueTasks, overdueReminders, err := uc.Home.CountOverdue(ctx, userID, now.UTC())
-	if err != nil {
-		return HomeDashboard{}, err
-	}
-
 	templates, err := uc.Home.ListInsightTemplates(ctx)
 	if err != nil {
 		return HomeDashboard{}, err
@@ -158,14 +152,7 @@ func (uc *HomeUsecase) GetDashboard(ctx context.Context, userID string) (HomeDas
 		dayProgress.ProgressPercent = clamp01(float64(routinesDone+tasksTodayDone) / float64(total))
 	}
 
-	executiveSummary := buildExecutiveSummary(
-		overdueTasks+overdueReminders,
-		eventsTodayCount+remindersTodayCount+routinesTotal+tasksTodayTotal,
-		len(focusTasks),
-	)
-
 	return HomeDashboard{
-		ExecutiveSummary:    executiveSummary,
 		DayProgress:         dayProgress,
 		Insight:             insight,
 		Timeline:            timeline,
@@ -673,37 +660,6 @@ func findLargestGap(busyRanges []timeRange, from, until time.Time) timeRange {
 	}
 
 	return best
-}
-
-func buildExecutiveSummary(totalOverdueCount, commitmentsToday, criticalOpen int) string {
-	if totalOverdueCount > 0 {
-		return fmt.Sprintf("%s. Bom momento para colocar o dia em dia.", countLabel(totalOverdueCount, "item atrasado", "itens atrasados"))
-	}
-
-	if commitmentsToday == 0 && criticalOpen == 0 {
-		return "Dia livre! Sem compromissos agendados."
-	}
-
-	if commitmentsToday == 0 {
-		return fmt.Sprintf("Sem compromissos hoje, mas voce tem %s.", countLabel(criticalOpen, "tarefa critica aberta", "tarefas criticas abertas"))
-	}
-
-	if criticalOpen == 0 {
-		return fmt.Sprintf("Voce tem %s hoje.", countLabel(commitmentsToday, "compromisso", "compromissos"))
-	}
-
-	return fmt.Sprintf(
-		"Voce tem %s hoje e %s.",
-		countLabel(commitmentsToday, "compromisso", "compromissos"),
-		countLabel(criticalOpen, "tarefa critica aberta", "tarefas criticas abertas"),
-	)
-}
-
-func countLabel(value int, singular, plural string) string {
-	if value == 1 {
-		return fmt.Sprintf("1 %s", singular)
-	}
-	return fmt.Sprintf("%d %s", value, plural)
 }
 
 func (uc *HomeUsecase) buildWeekDensity(ctx context.Context, userID string, now time.Time, loc *time.Location) (map[string]int, error) {

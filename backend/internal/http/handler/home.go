@@ -73,7 +73,6 @@ func (h *HomeHandler) GetDashboard(c *gin.Context) {
 	}
 
 	resp := dto.HomeDashboardResponse{
-		ExecutiveSummary: dashboard.ExecutiveSummary,
 		DayProgress: dto.HomeDayProgressResponse{
 			RoutinesDone:    dashboard.DayProgress.RoutinesDone,
 			RoutinesTotal:   dashboard.DayProgress.RoutinesTotal,
