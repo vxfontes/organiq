@@ -5,6 +5,8 @@ import 'package:inbota/shared/theme/app_colors.dart';
 import 'package:inbota/shared/utils/text_utils.dart';
 
 class HomeBentoRow extends StatelessWidget {
+  static const double _sideCardHeight = 160;
+
   const HomeBentoRow({
     super.key,
     required this.progressPercent,
@@ -50,9 +52,21 @@ class HomeBentoRow extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(flex: 6, child: _buildShoppingBanner()),
+                  Expanded(
+                    flex: 6,
+                    child: SizedBox(
+                      height: _sideCardHeight,
+                      child: _buildShoppingBanner(),
+                    ),
+                  ),
                   const SizedBox(width: 12),
-                  Expanded(flex: 5, child: _buildAgendaTodayCard(context)),
+                  Expanded(
+                    flex: 5,
+                    child: SizedBox(
+                      height: _sideCardHeight,
+                      child: _buildAgendaTodayCard(context),
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -68,9 +82,15 @@ class HomeBentoRow extends StatelessWidget {
               flex: 5,
               child: Column(
                 children: [
-                  _buildShoppingBanner(),
+                  SizedBox(
+                    height: _sideCardHeight,
+                    child: _buildShoppingBanner(),
+                  ),
                   const SizedBox(height: 12),
-                  _buildAgendaTodayCard(context),
+                  SizedBox(
+                    height: _sideCardHeight,
+                    child: _buildAgendaTodayCard(context),
+                  ),
                 ],
               ),
             ),
