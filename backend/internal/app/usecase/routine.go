@@ -497,19 +497,25 @@ func (uc *RoutineUsecase) DeleteException(ctx context.Context, userID, routineID
 
 func (uc *RoutineUsecase) nowInUserTimezone(ctx context.Context, userID string) time.Time {
 	now := time.Now()
+
+	fallbackLoc, err := time.LoadLocation("America/Sao_Paulo")
+	if err != nil {
+		fallbackLoc = now.Location()
+	}
+
 	if uc.Users == nil || userID == "" {
-		return now
+		return now.In(fallbackLoc)
 	}
 	user, err := uc.Users.Get(ctx, userID)
 	if err != nil {
-		return now
+		return now.In(fallbackLoc)
 	}
 	if user.Timezone == "" {
-		return now
+		return now.In(fallbackLoc)
 	}
 	loc, err := time.LoadLocation(user.Timezone)
 	if err != nil {
-		return now
+		return now.In(fallbackLoc)
 	}
 	return now.In(loc)
 }

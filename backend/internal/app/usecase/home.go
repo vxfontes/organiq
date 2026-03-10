@@ -697,21 +697,28 @@ func (uc *HomeUsecase) buildWeekDensity(ctx context.Context, userID string, now 
 
 func (uc *HomeUsecase) nowInUserTimezone(ctx context.Context, userID string) (time.Time, *time.Location) {
 	now := time.Now()
+
+	// Default fallback for the app: Brazil timezone.
+	fallbackLoc, err := time.LoadLocation("America/Sao_Paulo")
+	if err != nil {
+		fallbackLoc = now.Location()
+	}
+
 	if uc.Users == nil || userID == "" {
-		return now, now.Location()
+		return now.In(fallbackLoc), fallbackLoc
 	}
 
 	user, err := uc.Users.Get(ctx, userID)
 	if err != nil {
-		return now, now.Location()
+		return now.In(fallbackLoc), fallbackLoc
 	}
 	if user.Timezone == "" {
-		return now, now.Location()
+		return now.In(fallbackLoc), fallbackLoc
 	}
 
 	loc, err := time.LoadLocation(user.Timezone)
 	if err != nil {
-		return now, now.Location()
+		return now.In(fallbackLoc), fallbackLoc
 	}
 
 	return now.In(loc), loc

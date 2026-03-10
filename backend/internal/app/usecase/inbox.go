@@ -228,10 +228,21 @@ func (uc *InboxUsecase) ReprocessInboxItem(ctx context.Context, userID, id strin
 	if uc.Now != nil {
 		now = uc.Now()
 	}
+
+	// Default fallback: Brazil timezone.
+	fallbackLoc, err := time.LoadLocation("America/Sao_Paulo")
+	if err != nil {
+		fallbackLoc = now.Location()
+	}
+
 	if tz := strings.TrimSpace(user.Timezone); tz != "" {
 		if loc, err := time.LoadLocation(tz); err == nil {
 			now = now.In(loc)
+		} else {
+			now = now.In(fallbackLoc)
 		}
+	} else {
+		now = now.In(fallbackLoc)
 	}
 
 	flags, err := listAllFlags(ctx, uc.Flags, userID)
