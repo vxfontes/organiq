@@ -6,7 +6,6 @@ import 'package:inbota/modules/events/domain/usecases/delete_event_usecase.dart'
 import 'package:inbota/modules/home/data/models/home_dashboard_output.dart';
 import 'package:inbota/modules/home/domain/usecases/get_home_dashboard_usecase.dart';
 import 'package:inbota/modules/inbox/data/models/inbox_confirm_input.dart';
-import 'package:inbota/modules/inbox/data/models/inbox_confirm_output.dart';
 import 'package:inbota/modules/inbox/data/models/inbox_create_input.dart';
 import 'package:inbota/modules/inbox/data/models/inbox_create_line_result.dart';
 import 'package:inbota/modules/inbox/data/models/inbox_item_output.dart';
@@ -30,8 +29,10 @@ import 'package:inbota/modules/tasks/data/models/task_update_input.dart';
 import 'package:inbota/modules/tasks/domain/usecases/delete_task_usecase.dart';
 import 'package:inbota/modules/tasks/domain/usecases/update_task_usecase.dart';
 import 'package:inbota/presentation/screens/home_module/components/timeline_item.dart';
+import 'package:inbota/presentation/screens/home_module/utils/home_controller_utils.dart';
 import 'package:inbota/shared/errors/failures.dart';
 import 'package:inbota/shared/state/ib_state.dart';
+import 'package:inbota/shared/utils/date_time.dart';
 import 'package:inbota/shared/utils/text_utils.dart';
 
 class HomeController implements IBController {
@@ -333,7 +334,9 @@ class HomeController implements IBController {
     final today = DateTime.now();
     for (final item in dashboard.timeline) {
       if (item.itemType != 'reminder') continue;
-      if (!_isSameDay(item.scheduledTime.toLocal(), today)) continue;
+      if (!DateTimeUtils.isSameDay(item.scheduledTime.toLocal(), today)) {
+        continue;
+      }
       if (item.isCompleted) done += 1;
     }
     return done;
@@ -347,7 +350,9 @@ class HomeController implements IBController {
     final today = DateTime.now();
     for (final item in dashboard.timeline) {
       if (item.itemType != 'reminder') continue;
-      if (!_isSameDay(item.scheduledTime.toLocal(), today)) continue;
+      if (!DateTimeUtils.isSameDay(item.scheduledTime.toLocal(), today)) {
+        continue;
+      }
       total += 1;
     }
     return total;
@@ -372,7 +377,7 @@ class HomeController implements IBController {
     }
     final density = <DateTime, int>{};
     dashboard.weekDensity.forEach((key, value) {
-      final date = _parseDensityDay(key);
+      final date = DateTimeUtils.parseDensityDay(key);
       if (date == null) return;
       density[date] = value;
     });
@@ -441,8 +446,7 @@ class HomeController implements IBController {
 
     _updatingRoutineIds.add(routine.id);
     final now = DateTime.now();
-    final dateStr =
-        '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+    final dateStr = DateTimeUtils.dateParamYmd(now);
 
     final result = completed
         ? await _completeRoutineUsecase.call(routine.id, date: dateStr)
@@ -496,8 +500,7 @@ class HomeController implements IBController {
 
     _updatingRoutineIds.add(routineId);
     final now = DateTime.now();
-    final dateStr =
-        '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+    final dateStr = DateTimeUtils.dateParamYmd(now);
     final result = await _completeRoutineUsecase.call(routineId, date: dateStr);
     _updatingRoutineIds.remove(routineId);
 
@@ -647,7 +650,9 @@ class HomeController implements IBController {
 
     final items = <TimelineItem>[];
     for (final item in dashboard.timeline) {
-      final timelineType = _timelineTypeFromRaw(item.itemType);
+      final timelineType = HomeControllerUtils.timelineTypeFromRaw(
+        item.itemType,
+      );
       if (timelineType == null) continue;
       final localScheduled = item.scheduledTime.toLocal();
       if (localScheduled.millisecondsSinceEpoch <= 0) continue;
@@ -679,21 +684,6 @@ class HomeController implements IBController {
       return a.title.toLowerCase().compareTo(b.title.toLowerCase());
     });
     return items;
-  }
-
-  TimelineItemType? _timelineTypeFromRaw(String raw) {
-    switch (raw.trim().toLowerCase()) {
-      case 'event':
-        return TimelineItemType.event;
-      case 'task':
-        return TimelineItemType.task;
-      case 'reminder':
-        return TimelineItemType.reminder;
-      case 'routine':
-        return TimelineItemType.routine;
-      default:
-        return null;
-    }
   }
 
   void _replaceTaskInAgenda(TaskOutput updatedTask) {
@@ -752,7 +742,8 @@ class HomeController implements IBController {
 
     var dayProgress = dashboard.dayProgress;
     final dueAt = updatedTask.dueAt?.toLocal();
-    final isTodayTask = dueAt != null && _isSameDay(dueAt, DateTime.now());
+    final isTodayTask =
+        dueAt != null && DateTimeUtils.isSameDay(dueAt, DateTime.now());
     if (isTodayTask &&
         previousDone != null &&
         previousDone != updatedTask.isDone) {
@@ -819,31 +810,6 @@ class HomeController implements IBController {
     return null;
   }
 
-  bool _isSameDay(DateTime a, DateTime b) {
-    return a.year == b.year && a.month == b.month && a.day == b.day;
-  }
-
-  DateTime _startOfDay(DateTime value) {
-    return DateTime(value.year, value.month, value.day);
-  }
-
-  DateTime? _parseDensityDay(String raw) {
-    final normalized = raw.trim();
-    final simpleDate = RegExp(
-      r'^(\d{4})-(\d{2})-(\d{2})$',
-    ).firstMatch(normalized);
-    if (simpleDate != null) {
-      final year = int.parse(simpleDate.group(1)!);
-      final month = int.parse(simpleDate.group(2)!);
-      final day = int.parse(simpleDate.group(3)!);
-      return DateTime(year, month, day);
-    }
-
-    final parsed = DateTime.tryParse(normalized);
-    if (parsed == null) return null;
-    return _startOfDay(parsed.toLocal());
-  }
-
   void _setError(Failure failure, {required String fallback}) {
     final message = TextUtils.normalize(failure.message);
     if (message != null) {
@@ -870,7 +836,7 @@ class HomeController implements IBController {
     );
 
     if (createdItem == null) {
-      return Left(_failureMessage(createResult));
+      return Left(HomeControllerUtils.failureMessage(createResult));
     }
 
     final reprocessResult = await _reprocessInboxItemUsecase.call(
@@ -882,7 +848,7 @@ class HomeController implements IBController {
     );
 
     if (processedItem == null) {
-      return Left(_failureMessage(reprocessResult));
+      return Left(HomeControllerUtils.failureMessage(reprocessResult));
     }
 
     final confirmInput = InboxConfirmInput.fromSuggestion(
@@ -905,12 +871,12 @@ class HomeController implements IBController {
       },
       (output) async {
         await _reloadDashboardAfterMutation();
-        final (type, id) = _resolveEntityRef(output);
+        final (type, id) = HomeControllerUtils.resolveEntityRef(output);
         return Right(
           CreateLineResult(
             sourceText: cleaned,
             status: CreateLineStatus.success,
-            message: _successMessage(type),
+            message: HomeControllerUtils.successMessage(type),
             entityId: id,
             entityType: type,
           ),
@@ -962,50 +928,6 @@ class HomeController implements IBController {
             DeleteFailure(message: 'Tipo de item não suportado para exclusao.'),
           ),
         );
-    }
-  }
-
-  (CreateEntityType, String?) _resolveEntityRef(InboxConfirmOutput output) {
-    final type = output.type.trim().toLowerCase();
-
-    switch (type) {
-      case 'task':
-        return (CreateEntityType.task, output.task?.id);
-      case 'reminder':
-        return (CreateEntityType.reminder, output.reminder?.id);
-      case 'event':
-        return (CreateEntityType.event, output.event?.id);
-      case 'shopping':
-        return (CreateEntityType.shoppingList, output.shoppingList?.id);
-      case 'routine':
-        return (CreateEntityType.routine, output.routine?.id);
-      default:
-        return (CreateEntityType.unknown, null);
-    }
-  }
-
-  String _failureMessage(Either<Failure, dynamic> either) {
-    return either.fold((failure) {
-      final message = failure.message?.trim();
-      if (message != null && message.isNotEmpty) return message;
-      return 'Falha no processamento.';
-    }, (_) => 'Falha no processamento.');
-  }
-
-  String _successMessage(CreateEntityType type) {
-    switch (type) {
-      case CreateEntityType.task:
-        return 'To-do criado com sucesso!';
-      case CreateEntityType.reminder:
-        return 'Lembrete criado com sucesso!';
-      case CreateEntityType.event:
-        return 'Evento criado com sucesso!';
-      case CreateEntityType.shoppingList:
-        return 'Lista de compras criada com sucesso!';
-      case CreateEntityType.routine:
-        return 'Item de cronograma criado!';
-      default:
-        return 'Item criado com sucesso!';
     }
   }
 
