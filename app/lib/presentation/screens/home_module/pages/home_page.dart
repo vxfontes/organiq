@@ -152,8 +152,12 @@ class _HomePageState extends IBState<HomePage, HomeController> {
                         remindersTotal: controller.remindersTotal,
                         shoppingListCount: controller.openShoppingLists,
                         shoppingItemCount: controller.totalPendingShoppingItems,
+                        eventsTodayCount: controller.eventsTodayCount,
+                        remindersTodayCount: controller.remindersTodayCount,
                         onShoppingTap: () =>
                             AppNavigation.push(AppRoutes.rootShopping),
+                        onAgendaTap: () =>
+                            AppNavigation.push(AppRoutes.rootEvents),
                       ),
                       const SizedBox(height: 20),
                       HomeFocusList(

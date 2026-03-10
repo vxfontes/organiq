@@ -4,6 +4,7 @@ import 'package:inbota/shared/components/ib_lib/ib_chip.dart';
 import 'package:inbota/shared/components/ib_lib/ib_icon.dart';
 import 'package:inbota/shared/components/ib_lib/ib_text.dart';
 import 'package:inbota/shared/theme/app_colors.dart';
+import 'package:inbota/shared/utils/text_utils.dart';
 
 class IBNextActionItem {
   const IBNextActionItem({
@@ -151,20 +152,8 @@ class IBNextActionCard extends StatelessWidget {
     );
   }
 
-  String _formatTime(DateTime date) {
-    final local = date.toLocal();
-    final hh = local.hour.toString().padLeft(2, '0');
-    final mm = local.minute.toString().padLeft(2, '0');
-    return '$hh:$mm';
-  }
-
   String _formatTimeLabel(DateTime start, {DateTime? end}) {
-    final startLabel = _formatTime(start);
-    final endLocal = end?.toLocal();
-    if (endLocal == null || !endLocal.isAfter(start.toLocal())) {
-      return startLabel;
-    }
-    return '$startLabel-${_formatTime(endLocal)}';
+    return TextUtils.formatHourRange(start, end: end);
   }
 
   _ActionPalette _paletteFor(IBNextActionType type) {

@@ -112,34 +112,46 @@ class _AnimatedProgressRing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 86,
-      height: 86,
-      child: TweenAnimationBuilder<double>(
-        tween: Tween<double>(begin: 0, end: progress),
-        duration: const Duration(milliseconds: 420),
-        curve: Curves.easeOutCubic,
-        builder: (_, value, __) {
-          return Stack(
-            alignment: Alignment.center,
-            children: [
-              const CircularProgressIndicator(
-                value: 1,
-                strokeWidth: 8,
-                color: AppColors.border,
-              ),
-              CircularProgressIndicator(
-                value: value,
-                strokeWidth: 8,
-                color: color,
-              ),
-              IBText(
-                '${(value * 100).round()}%',
-                context: context,
-              ).label.weight(FontWeight.w700).color(AppColors.text).build(),
-            ],
-          );
-        },
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: SizedBox(
+        width: 60,
+        height: 60,
+        child: TweenAnimationBuilder<double>(
+          tween: Tween<double>(begin: 0, end: progress),
+          duration: const Duration(milliseconds: 420),
+          curve: Curves.easeOutCubic,
+          builder: (_, value, __) {
+            return Stack(
+              alignment: Alignment.center,
+              children: [
+                const Positioned.fill(
+                  child: CircularProgressIndicator(
+                    value: 1,
+                    strokeWidth: 8,
+                    color: AppColors.border,
+                  ),
+                ),
+                Positioned.fill(
+                  child: CircularProgressIndicator(
+                    value: value,
+                    strokeWidth: 8,
+                    color: color,
+                  ),
+                ),
+                SizedBox(
+                  width: 56,
+                  child: Center(
+                    child: IBText(
+                      '${(value * 100).round()}%',
+                      context: context,
+                    ).label.weight(FontWeight.w700).color(AppColors.text).build(),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }

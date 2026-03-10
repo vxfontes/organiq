@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:inbota/modules/events/data/models/event_output.dart';
 import 'package:inbota/modules/tasks/data/models/task_output.dart';
 import 'package:inbota/shared/theme/app_colors.dart';
+import 'package:inbota/shared/utils/text_utils.dart';
 
 class HomeFormat {
   HomeFormat._();
@@ -81,8 +82,6 @@ class HomeFormat {
   }
 
   static String formatHourMinute(DateTime date) {
-    final hour = date.hour.toString().padLeft(2, '0');
-    final minute = date.minute.toString().padLeft(2, '0');
-    return '$hour:$minute';
+    return TextUtils.formatHourMinute(date);
   }
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:inbota/shared/components/ib_lib/index.dart';
+import 'package:inbota/shared/theme/app_colors.dart';
+import 'package:inbota/shared/utils/text_utils.dart';
 
 class HomeBentoRow extends StatelessWidget {
   const HomeBentoRow({
@@ -14,7 +16,10 @@ class HomeBentoRow extends StatelessWidget {
     required this.remindersTotal,
     required this.shoppingListCount,
     required this.shoppingItemCount,
+    required this.eventsTodayCount,
+    required this.remindersTodayCount,
     required this.onShoppingTap,
+    required this.onAgendaTap,
   });
 
   final double progressPercent;
@@ -26,7 +31,10 @@ class HomeBentoRow extends StatelessWidget {
   final int remindersTotal;
   final int shoppingListCount;
   final int shoppingItemCount;
+  final int eventsTodayCount;
+  final int remindersTodayCount;
   final VoidCallback onShoppingTap;
+  final VoidCallback onAgendaTap;
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +47,14 @@ class HomeBentoRow extends StatelessWidget {
             children: [
               _buildProgressCard(),
               const SizedBox(height: 12),
-              _buildShoppingBanner(),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(flex: 6, child: _buildShoppingBanner()),
+                  const SizedBox(width: 12),
+                  Expanded(flex: 5, child: _buildAgendaTodayCard(context)),
+                ],
+              ),
             ],
           );
         }
@@ -49,7 +64,16 @@ class HomeBentoRow extends StatelessWidget {
           children: [
             Expanded(flex: 6, child: _buildProgressCard()),
             const SizedBox(width: 12),
-            Expanded(flex: 5, child: _buildShoppingBanner()),
+            Expanded(
+              flex: 5,
+              child: Column(
+                children: [
+                  _buildShoppingBanner(),
+                  const SizedBox(height: 12),
+                  _buildAgendaTodayCard(context),
+                ],
+              ),
+            ),
           ],
         );
       },
@@ -73,6 +97,49 @@ class HomeBentoRow extends StatelessWidget {
       listCount: shoppingListCount,
       itemCount: shoppingItemCount,
       onTap: onShoppingTap,
+    );
+  }
+
+  Widget _buildAgendaTodayCard(BuildContext context) {
+    final commitments = eventsTodayCount + remindersTodayCount;
+    final summary = commitments == 0
+        ? 'Dia livre'
+        : TextUtils.countLabel(commitments, 'compromisso', 'compromissos');
+
+    return Material(
+      color: AppColors.transparent,
+      child: InkWell(
+        onTap: onAgendaTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Ink(
+          width: double.infinity,
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const IBIcon(
+                IBIcon.calendar,
+                size: 18,
+                color: AppColors.success600,
+              ),
+              const SizedBox(height: 8),
+              IBText('Agenda hoje', context: context).subtitulo.build(),
+              const SizedBox(height: 4),
+              IBText(summary, context: context).muted.maxLines(2).build(),
+              const SizedBox(height: 10),
+              IBText(
+                '$eventsTodayCount evento(s) • $remindersTodayCount lembrete(s)',
+                context: context,
+              ).caption.build(),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
