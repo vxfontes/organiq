@@ -145,7 +145,8 @@ class _ShoppingPageState extends IBState<ShoppingPage, ShoppingController> {
   }) {
     final doneCount = items.where((item) => item.isDone).length;
     final pendingCount = items.length - doneCount;
-    final canConclude = controller.canConcludeList(shoppingList.id);
+    final canConclude =
+        !shoppingList.isDone && items.isNotEmpty && pendingCount == 0;
     final subtitle =
         '${TextUtils.countLabel(pendingCount, 'pendente', 'pendentes')} de ${TextUtils.countLabel(items.length, 'item', 'itens')}';
 
@@ -155,7 +156,7 @@ class _ShoppingPageState extends IBState<ShoppingPage, ShoppingController> {
       action: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          IconButton(
+          _buildCompactActionButton(
             tooltip: 'Adicionar item',
             onPressed: () => _openCreateShoppingItemSheet(shoppingList),
             icon: const IBIcon(
@@ -165,10 +166,14 @@ class _ShoppingPageState extends IBState<ShoppingPage, ShoppingController> {
             ),
           ),
           if (canConclude)
-            IBButton(
-              label: 'Concluir',
-              variant: IBButtonVariant.ghost,
+            _buildCompactActionButton(
+              tooltip: 'Concluir',
               onPressed: () => controller.concludeList(shoppingList.id),
+              icon: const IBIcon(
+                IBIcon.checkRounded,
+                color: AppColors.primary700,
+                size: 18,
+              ),
             ),
         ],
       ),
@@ -194,6 +199,22 @@ class _ShoppingPageState extends IBState<ShoppingPage, ShoppingController> {
     final quantity = item.quantity?.trim();
     if (quantity == null || quantity.isEmpty) return null;
     return 'Adicional: $quantity';
+  }
+
+  Widget _buildCompactActionButton({
+    required String tooltip,
+    required VoidCallback onPressed,
+    required Widget icon,
+  }) {
+    return IconButton(
+      tooltip: tooltip,
+      onPressed: onPressed,
+      icon: icon,
+      padding: EdgeInsets.zero,
+      visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
+      constraints: const BoxConstraints.tightFor(width: 30, height: 30),
+      splashRadius: 18,
+    );
   }
 
   Future<void> _openCreateShoppingListSheet() async {

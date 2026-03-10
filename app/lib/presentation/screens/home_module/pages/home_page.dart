@@ -94,7 +94,7 @@ class _HomePageState extends IBState<HomePage, HomeController> {
                 onRefresh: controller.refresh,
                 child: ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
                   children: [
                     HomeDynamicHeader(
                       onSettingsTap: () =>
