@@ -11,6 +11,7 @@ class IBNextActionItem {
     required this.title,
     required this.type,
     required this.scheduledTime,
+    this.endScheduledTime,
     this.subtitle,
     this.isCompleted = false,
     this.isOverdue = false,
@@ -21,6 +22,7 @@ class IBNextActionItem {
   final String? subtitle;
   final IBNextActionType type;
   final DateTime scheduledTime;
+  final DateTime? endScheduledTime;
   final bool isCompleted;
   final bool isOverdue;
 }
@@ -79,12 +81,20 @@ class IBNextActionCard extends StatelessWidget {
                   children: [
                     IBIcon(palette.icon, size: 16, color: palette.accent),
                     const SizedBox(width: 6),
-                    IBText(_formatTime(item.scheduledTime), context: context)
-                        .label
-                        .weight(FontWeight.w700)
-                        .color(AppColors.text)
-                        .build(),
-                    const Spacer(),
+                    Expanded(
+                      child:
+                          IBText(
+                                _formatTimeLabel(
+                                  item.scheduledTime,
+                                  end: item.endScheduledTime,
+                                ),
+                                context: context,
+                              ).label
+                              .weight(FontWeight.w700)
+                              .color(AppColors.text)
+                              .maxLines(1)
+                              .build(),
+                    ),
                     if (showOverdueBadge) const _OverdueBadge(),
                   ],
                 ),
@@ -146,6 +156,15 @@ class IBNextActionCard extends StatelessWidget {
     final hh = local.hour.toString().padLeft(2, '0');
     final mm = local.minute.toString().padLeft(2, '0');
     return '$hh:$mm';
+  }
+
+  String _formatTimeLabel(DateTime start, {DateTime? end}) {
+    final startLabel = _formatTime(start);
+    final endLocal = end?.toLocal();
+    if (endLocal == null || !endLocal.isAfter(start.toLocal())) {
+      return startLabel;
+    }
+    return '$startLabel-${_formatTime(endLocal)}';
   }
 
   _ActionPalette _paletteFor(IBNextActionType type) {

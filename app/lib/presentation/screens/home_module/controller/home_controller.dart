@@ -853,13 +853,7 @@ class HomeController implements IBController {
     if (hour == null || minute == null) return null;
     if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return null;
 
-    return DateTime(
-      baseDate.year,
-      baseDate.month,
-      baseDate.day,
-      hour,
-      minute,
-    );
+    return DateTime(baseDate.year, baseDate.month, baseDate.day, hour, minute);
   }
 
   DateTime? _eventEndAtLocal(
