@@ -24,6 +24,7 @@ class HomeBentoRow extends StatelessWidget {
     required this.todayTimeline,
     required this.onShoppingTap,
     required this.onInsightsTap,
+    this.debugInsightLogs = true,
   });
 
   final double progressPercent;
@@ -40,6 +41,7 @@ class HomeBentoRow extends StatelessWidget {
   final List<TimelineItem> todayTimeline;
   final VoidCallback onShoppingTap;
   final VoidCallback onInsightsTap;
+  final bool debugInsightLogs;
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +126,8 @@ class HomeBentoRow extends StatelessWidget {
   }
 
   Widget _buildInsightsCard(BuildContext context) {
-    final commitments = eventsTodayCount + remindersTodayCount + tasksTotal + routinesTotal;
+    final commitments =
+        eventsTodayCount + remindersTodayCount + tasksTotal + routinesTotal;
     final slots = todayTimeline
         .where(
           (item) =>
@@ -138,10 +141,22 @@ class HomeBentoRow extends StatelessWidget {
           ),
         )
         .toList(growable: false);
+    final untimedCount = (commitments - slots.length).clamp(0, 9999).toInt();
+
+    if (debugInsightLogs) {
+      debugPrint(
+        '[Insights] commitments=$commitments events=$eventsTodayCount reminders=$remindersTodayCount tasks=$tasksTotal routines=$routinesTotal slots=${slots.length}',
+      );
+      for (final slot in slots) {
+        debugPrint('[Insights] slot ${slot.start} -> ${slot.end}');
+      }
+    }
 
     final insight = HomeInsightsUtils.buildDailyInsight(
       slots: slots,
       commitmentsCount: commitments,
+      untimedCount: untimedCount,
+      debugLogs: debugInsightLogs,
     );
     final highlightColor = insight.isFocus
         ? AppColors.primary600

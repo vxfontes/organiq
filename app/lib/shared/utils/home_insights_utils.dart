@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:inbota/shared/utils/text_utils.dart';
 
 class DayScheduleSlot {
@@ -27,12 +28,24 @@ class HomeInsightsUtils {
   static DayInsight buildDailyInsight({
     required List<DayScheduleSlot> slots,
     required int commitmentsCount,
+    required int untimedCount,
+    bool debugLogs = false,
     DateTime? now,
   }) {
     final base = (now ?? DateTime.now()).toLocal();
     final dayStart = DateTime(base.year, base.month, base.day, 8);
-    final dayEnd = DateTime(base.year, base.month, base.day, 22);
+    var dayEnd = DateTime(base.year, base.month, base.day, 22);
+    final latestSlotEnd = _latestSlotEnd(slots);
+    if (latestSlotEnd != null && latestSlotEnd.isAfter(dayEnd)) {
+      dayEnd = latestSlotEnd;
+    }
     final from = base.isAfter(dayStart) ? base : dayStart;
+
+    if (debugLogs && kDebugMode) {
+      debugPrint(
+        '[Insights] now=$base dayStart=$dayStart dayEnd=$dayEnd from=$from commitments=$commitmentsCount untimed=$untimedCount slots=${slots.length}',
+      );
+    }
 
     if (!from.isBefore(dayEnd)) {
       return const DayInsight(
@@ -43,8 +56,26 @@ class HomeInsightsUtils {
       );
     }
 
+    if (untimedCount > 0 && slots.isEmpty) {
+      return DayInsight(
+        title: 'Horários pendentes',
+        summary: '$untimedCount ainda sem horario.',
+        footer: 'Defina os horários para se organizar melhor',
+        isFocus: false,
+      );
+    }
+
     final ranges = _buildRanges(slots, from: from, until: dayEnd);
+    if (debugLogs && kDebugMode) {
+      for (final range in ranges) {
+        debugPrint('[Insights] busy ${range.start} -> ${range.end}');
+      }
+    }
+
     final best = _findLargestGap(ranges, from: from, until: dayEnd);
+    if (debugLogs && kDebugMode) {
+      debugPrint('[Insights] best ${best.start} -> ${best.end}');
+    }
     final hasAgenda = commitmentsCount > 0;
 
     if (!hasAgenda) {
@@ -63,7 +94,9 @@ class HomeInsightsUtils {
         title: 'Melhor momento',
         summary:
         '${_time(best.start)}–${_time(best.end)} para fazer algo em paz.',
-        footer: 'Aproveitar tempo com menos interrupções.',
+        footer: untimedCount > 0
+            ? 'Aproveite e veja $untimedCount tarefa(s) sem horario.'
+            : 'Aproveitar tempo com menos interrupções.',
         isFocus: true,
       );
     }
@@ -88,6 +121,20 @@ class HomeInsightsUtils {
   }
 
   static String _time(DateTime date) => TextUtils.formatHourMinute(date);
+
+  static DateTime? _latestSlotEnd(List<DayScheduleSlot> slots) {
+    if (slots.isEmpty) return null;
+    DateTime? latest;
+    for (final slot in slots) {
+      final start = slot.start.toLocal();
+      final end = (slot.end ?? start.add(const Duration(minutes: 45)))
+          .toLocal();
+      if (latest == null || end.isAfter(latest)) {
+        latest = end;
+      }
+    }
+    return latest;
+  }
 
   static List<_Range> _buildRanges(
     List<DayScheduleSlot> slots, {
