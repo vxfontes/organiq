@@ -54,8 +54,13 @@ func normalizeDSN(dsn string) string {
 	// Force session timezone to Brazil default.
 	// Postgres stores timestamptz internally in UTC, but CURRENT_DATE/now() and casts
 	// depend on the session TimeZone. Setting it here prevents "day flipped" bugs.
-	if query.Get("options") == "" {
-		query.Set("options", "-c TimeZone=America/Sao_Paulo")
+	opts := query.Get("options")
+	tzOption := "-c TimeZone=America/Sao_Paulo"
+	switch {
+	case opts == "":
+		query.Set("options", tzOption)
+	case !strings.Contains(opts, "TimeZone=America/Sao_Paulo"):
+		query.Set("options", opts+" "+tzOption)
 	}
 
 	host := parsed.Hostname()
