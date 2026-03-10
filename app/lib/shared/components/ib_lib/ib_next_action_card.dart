@@ -49,6 +49,12 @@ class IBNextActionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = _paletteFor(item.type);
+    final completionColor = item.type == IBNextActionType.reminder
+        ? AppColors.warning600
+        : AppColors.primary700;
+    final doneColor = item.type == IBNextActionType.reminder
+        ? AppColors.warning600
+        : AppColors.success600;
     final showCompleteButton =
         onComplete != null &&
         item.type != IBNextActionType.event &&
@@ -138,10 +144,12 @@ class IBNextActionCard extends StatelessWidget {
                       ? _CompleteButton(
                           key: ValueKey('complete-${item.id}'),
                           onPressed: onComplete,
+                          color: completionColor,
                         )
                       : _DoneState(
                           key: ValueKey('done-${item.id}'),
                           isDone: item.isCompleted,
+                          color: doneColor,
                         ),
                 ),
               ],
@@ -191,9 +199,10 @@ class IBNextActionCard extends StatelessWidget {
 }
 
 class _CompleteButton extends StatelessWidget {
-  const _CompleteButton({super.key, this.onPressed});
+  const _CompleteButton({super.key, this.onPressed, required this.color});
 
   final VoidCallback? onPressed;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -207,25 +216,19 @@ class _CompleteButton extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: AppColors.primary600.withValues(alpha: 0.35),
-            ),
-            color: AppColors.primary600.withValues(alpha: 0.08),
+            border: Border.all(color: color.withValues(alpha: 0.35)),
+            color: color.withValues(alpha: 0.1),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const IBIcon(
-                IBIcon.checkRounded,
-                size: 12,
-                color: AppColors.primary700,
-              ),
+              IBIcon(IBIcon.checkRounded, size: 12, color: color),
               const SizedBox(width: 4),
               Flexible(
                 child: IBText(
                   'Concluir',
                   context: context,
-                ).label.color(AppColors.primary700).maxLines(1).build(),
+                ).label.color(color).maxLines(1).build(),
               ),
             ],
           ),
@@ -236,9 +239,10 @@ class _CompleteButton extends StatelessWidget {
 }
 
 class _DoneState extends StatelessWidget {
-  const _DoneState({super.key, required this.isDone});
+  const _DoneState({super.key, required this.isDone, required this.color});
 
   final bool isDone;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -251,22 +255,18 @@ class _DoneState extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        color: AppColors.success600.withValues(alpha: 0.1),
+        color: color.withValues(alpha: 0.12),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const IBIcon(
-            IBIcon.checkCircleOutlineRounded,
-            size: 12,
-            color: AppColors.success600,
-          ),
+          IBIcon(IBIcon.checkCircleOutlineRounded, size: 12, color: color),
           const SizedBox(width: 4),
           Flexible(
             child: IBText(
               'Concluido',
               context: context,
-            ).label.color(AppColors.success600).maxLines(1).build(),
+            ).label.color(color).maxLines(1).build(),
           ),
         ],
       ),

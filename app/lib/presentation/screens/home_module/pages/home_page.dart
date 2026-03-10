@@ -133,6 +133,8 @@ class _HomePageState extends IBState<HomePage, HomeController> {
                         routinesTotal: controller.routinesTotal,
                         tasksDone: controller.tasksDone,
                         tasksTotal: controller.tasksTotal,
+                        remindersDone: controller.remindersDoneToday,
+                        remindersTotal: controller.remindersTotalToday,
                         shoppingListCount: controller.openShoppingLists,
                         shoppingItemCount: controller.totalPendingShoppingItems,
                         insightTitle: controller.insightTitle,

@@ -9,23 +9,35 @@ part of 'home_timeline_item_output.dart';
 HomeTimelineItemOutput _$HomeTimelineItemOutputFromJson(
   Map<String, dynamic> json,
 ) => HomeTimelineItemOutput(
-  id: json['id'] as String,
-  itemType: HomeTimelineItemOutput._itemTypeFromJson(json['itemType']),
-  title: json['title'] as String,
+  id: json['id'] == null
+      ? ''
+      : HomeTimelineItemOutput._stringFromJson(json['id']),
+  itemType: json['item_type'] == null
+      ? ''
+      : HomeTimelineItemOutput._itemTypeFromJson(json['item_type']),
+  title: json['title'] == null
+      ? ''
+      : HomeTimelineItemOutput._stringFromJson(json['title']),
   subtitle: HomeTimelineItemOutput._subtitleFromJson(json['subtitle']),
-  scheduledTime: DateTime.parse(json['scheduled_time'] as String),
-  endScheduledTime: json['end_scheduled_time'] == null
-      ? null
-      : DateTime.parse(json['end_scheduled_time'] as String),
-  isCompleted: json['is_completed'] as bool,
-  isOverdue: json['is_overdue'] as bool,
+  scheduledTime: HomeTimelineItemOutput._scheduledTimeFromJson(
+    json['scheduled_time'],
+  ),
+  endScheduledTime: HomeTimelineItemOutput._nullableDateTimeFromJson(
+    json['end_scheduled_time'],
+  ),
+  isCompleted: json['is_completed'] == null
+      ? false
+      : HomeTimelineItemOutput._boolFromJson(json['is_completed']),
+  isOverdue: json['is_overdue'] == null
+      ? false
+      : HomeTimelineItemOutput._boolFromJson(json['is_overdue']),
 );
 
 Map<String, dynamic> _$HomeTimelineItemOutputToJson(
   HomeTimelineItemOutput instance,
 ) => <String, dynamic>{
   'id': instance.id,
-  'itemType': instance.itemType,
+  'item_type': instance.itemType,
   'title': instance.title,
   'subtitle': instance.subtitle,
   'scheduled_time': instance.scheduledTime.toIso8601String(),

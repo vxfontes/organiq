@@ -28,7 +28,7 @@ class _HomeNextActionsCarouselState extends State<HomeNextActionsCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    final allItems = <TimelineItem>[...widget.pastItems, ...widget.nextItems];
+    final allItems = <TimelineItem>[...widget.nextItems, ...widget.pastItems];
 
     if (allItems.isEmpty) {
       return const SizedBox.shrink();
@@ -60,7 +60,7 @@ class _HomeNextActionsCarouselState extends State<HomeNextActionsCarousel> {
               separatorBuilder: (_, __) => const SizedBox(width: 10),
               itemBuilder: (_, index) {
                 final item = allItems[index];
-                final isPast = index < widget.pastItems.length;
+                final isPast = index >= widget.nextItems.length;
                 final isCompleting = _completingIds.contains(item.stableKey);
 
                 return AnimatedSize(

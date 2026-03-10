@@ -15,19 +15,21 @@ class HomeTimelineItemOutput {
     required this.isOverdue,
   });
 
+  @JsonKey(fromJson: _stringFromJson, defaultValue: '')
   final String id;
-  @JsonKey(fromJson: _itemTypeFromJson)
+  @JsonKey(name: 'item_type', fromJson: _itemTypeFromJson, defaultValue: '')
   final String itemType;
+  @JsonKey(fromJson: _stringFromJson, defaultValue: '')
   final String title;
-  @JsonKey(fromJson: _subtitleFromJson)
+  @JsonKey(name: 'subtitle', fromJson: _subtitleFromJson)
   final String? subtitle;
-  @JsonKey(name: 'scheduled_time')
+  @JsonKey(name: 'scheduled_time', fromJson: _scheduledTimeFromJson)
   final DateTime scheduledTime;
-  @JsonKey(name: 'end_scheduled_time')
+  @JsonKey(name: 'end_scheduled_time', fromJson: _nullableDateTimeFromJson)
   final DateTime? endScheduledTime;
-  @JsonKey(name: 'is_completed')
+  @JsonKey(name: 'is_completed', fromJson: _boolFromJson, defaultValue: false)
   final bool isCompleted;
-  @JsonKey(name: 'is_overdue')
+  @JsonKey(name: 'is_overdue', fromJson: _boolFromJson, defaultValue: false)
   final bool isOverdue;
 
   factory HomeTimelineItemOutput.fromJson(Map<String, dynamic> json) {
@@ -74,11 +76,38 @@ class HomeTimelineItemOutput {
     return value.toString().toLowerCase();
   }
 
+  static String _stringFromJson(dynamic value) {
+    if (value == null) return '';
+    return value.toString();
+  }
+
   static String? _subtitleFromJson(dynamic value) {
     if (value == null) return null;
     final text = value.toString().trim();
     if (text.isEmpty) return null;
     return text;
+  }
+
+  static DateTime _scheduledTimeFromJson(dynamic value) {
+    final parsed = _nullableDateTimeFromJson(value);
+    return parsed ?? DateTime.fromMillisecondsSinceEpoch(0);
+  }
+
+  static DateTime? _nullableDateTimeFromJson(dynamic value) {
+    if (value == null) return null;
+    if (value is DateTime) return value;
+    if (value is String) return DateTime.tryParse(value);
+    return null;
+  }
+
+  static bool _boolFromJson(dynamic value) {
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    if (value is String) {
+      final normalized = value.trim().toLowerCase();
+      return normalized == 'true' || normalized == '1';
+    }
+    return false;
   }
 
   static Map<String, dynamic> _asMap(dynamic value) {

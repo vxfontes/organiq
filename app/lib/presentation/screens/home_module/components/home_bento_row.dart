@@ -13,6 +13,8 @@ class HomeBentoRow extends StatelessWidget {
     required this.routinesTotal,
     required this.tasksDone,
     required this.tasksTotal,
+    required this.remindersDone,
+    required this.remindersTotal,
     required this.shoppingListCount,
     required this.shoppingItemCount,
     required this.insightTitle,
@@ -28,6 +30,8 @@ class HomeBentoRow extends StatelessWidget {
   final int routinesTotal;
   final int tasksDone;
   final int tasksTotal;
+  final int remindersDone;
+  final int remindersTotal;
   final int shoppingListCount;
   final int shoppingItemCount;
   final String insightTitle;
@@ -106,6 +110,8 @@ class HomeBentoRow extends StatelessWidget {
       routinesTotal: routinesTotal,
       tasksDone: tasksDone,
       tasksTotal: tasksTotal,
+      remindersDone: remindersDone,
+      remindersTotal: remindersTotal,
     );
   }
 

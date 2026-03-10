@@ -325,6 +325,34 @@ class HomeController implements IBController {
     return dashboard.dayProgress.tasksTotal;
   }
 
+  int get remindersDoneToday {
+    final dashboard = dashboardData.value;
+    if (dashboard == null || dashboard.timeline.isEmpty) return 0;
+
+    var done = 0;
+    final today = DateTime.now();
+    for (final item in dashboard.timeline) {
+      if (item.itemType != 'reminder') continue;
+      if (!_isSameDay(item.scheduledTime.toLocal(), today)) continue;
+      if (item.isCompleted) done += 1;
+    }
+    return done;
+  }
+
+  int get remindersTotalToday {
+    final dashboard = dashboardData.value;
+    if (dashboard == null || dashboard.timeline.isEmpty) return 0;
+
+    var total = 0;
+    final today = DateTime.now();
+    for (final item in dashboard.timeline) {
+      if (item.itemType != 'reminder') continue;
+      if (!_isSameDay(item.scheduledTime.toLocal(), today)) continue;
+      total += 1;
+    }
+    return total;
+  }
+
   double get dayProgressPercent {
     final dashboard = dashboardData.value;
     if (dashboard == null) return 0;
@@ -344,10 +372,9 @@ class HomeController implements IBController {
     }
     final density = <DateTime, int>{};
     dashboard.weekDensity.forEach((key, value) {
-      final date = DateTime.tryParse(key);
+      final date = _parseDensityDay(key);
       if (date == null) return;
-      final localDay = _startOfDay(date.toLocal());
-      density[localDay] = value;
+      density[date] = value;
     });
     return Map.unmodifiable(density);
   }
@@ -626,7 +653,6 @@ class HomeController implements IBController {
       if (localScheduled.millisecondsSinceEpoch <= 0) continue;
       if (!includeCompleted &&
           (timelineType == TimelineItemType.task ||
-              timelineType == TimelineItemType.reminder ||
               timelineType == TimelineItemType.routine) &&
           item.isCompleted) {
         continue;
@@ -798,6 +824,23 @@ class HomeController implements IBController {
 
   DateTime _startOfDay(DateTime value) {
     return DateTime(value.year, value.month, value.day);
+  }
+
+  DateTime? _parseDensityDay(String raw) {
+    final normalized = raw.trim();
+    final simpleDate = RegExp(
+      r'^(\d{4})-(\d{2})-(\d{2})$',
+    ).firstMatch(normalized);
+    if (simpleDate != null) {
+      final year = int.parse(simpleDate.group(1)!);
+      final month = int.parse(simpleDate.group(2)!);
+      final day = int.parse(simpleDate.group(3)!);
+      return DateTime(year, month, day);
+    }
+
+    final parsed = DateTime.tryParse(normalized);
+    if (parsed == null) return null;
+    return _startOfDay(parsed.toLocal());
   }
 
   void _setError(Failure failure, {required String fallback}) {
