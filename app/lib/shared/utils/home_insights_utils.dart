@@ -77,6 +77,18 @@ class HomeInsightsUtils {
       debugPrint('[Insights] best ${best.start} -> ${best.end}');
     }
     final hasAgenda = commitmentsCount > 0;
+    final hasTimedSlots = slots.isNotEmpty;
+    final untimedDominant = untimedCount >= (slots.length + 1);
+
+    if (untimedCount > 0 && (!hasTimedSlots || untimedDominant)) {
+      return DayInsight(
+        title: 'Faltam horários',
+        summary:
+            '$untimedCount compromisso(s) ainda sem horario.',
+        footer: 'Defina os horários para organizar melhor.',
+        isFocus: false,
+      );
+    }
 
     if (!hasAgenda) {
       final minutes = best.duration.inMinutes;
