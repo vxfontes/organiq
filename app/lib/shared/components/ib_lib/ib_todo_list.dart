@@ -203,63 +203,77 @@ class _IBTodoRow extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Expanded(
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Row(
-                    children: [
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 180),
-                        curve: Curves.easeOut,
-                        width: 22,
-                        height: 22,
-                        margin: const EdgeInsets.only(top: 2),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: done ? AppColors.primary600 : AppColors.surface,
-                          border: Border.all(
-                            color: done ? AppColors.primary600 : AppColors.borderStrong,
-                            width: 1.4,
-                          ),
-                          boxShadow: done
-                              ? [
-                            BoxShadow(
-                              color: AppColors.primary600.withAlpha(
-                                (0.25 * 255).round(),
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    curve: Curves.easeOut,
+                    width: 22,
+                    height: 22,
+                    margin: const EdgeInsets.only(top: 2),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: done ? AppColors.primary600 : AppColors.surface,
+                      border: Border.all(
+                        color: done
+                            ? AppColors.primary600
+                            : AppColors.borderStrong,
+                        width: 1.4,
+                      ),
+                      boxShadow: done
+                          ? [
+                              BoxShadow(
+                                color: AppColors.primary600.withAlpha(
+                                  (0.25 * 255).round(),
+                                ),
+                                blurRadius: 10,
+                                offset: const Offset(0, 6),
                               ),
-                              blurRadius: 10,
-                              offset: const Offset(0, 6),
-                            ),
-                          ]
-                              : [],
+                            ]
+                          : [],
+                    ),
+                    child: done
+                        ? const IBIcon(
+                            IBIcon.checkRounded,
+                            size: 16,
+                            color: AppColors.surface,
+                          )
+                        : null,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          item.title,
+                          style: titleStyle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        child: done
-                            ? const IBIcon(
-                          IBIcon.checkRounded,
-                          size: 16,
-                          color: AppColors.surface,
-                        )
-                            : null,
-                      ),
-                      const SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(item.title, style: titleStyle),
-                          if (item.subtitle != null) ...[
-                            const SizedBox(height: 4),
-                            Text(item.subtitle!, style: subtitleStyle),
-                          ],
+                        if (item.subtitle != null) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            item.subtitle!,
+                            style: subtitleStyle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ],
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                   if (item.isOverdue && !done) ...[
-                    const IBTagChip(label: 'Atrasada', color: AppColors.danger600),
+                    const SizedBox(width: 8),
+                    const IBTagChip(
+                      label: 'Atrasada',
+                      color: AppColors.danger600,
+                    ),
                   ],
                 ],
               ),
