@@ -1,3 +1,5 @@
+ALTER DATABASE inbota SET TimeZone TO 'America/Sao_Paulo';
+
 -- Seed base templates for home insights
 
 WITH seed(category, title_template, summary_template, footer_template, is_focus, min_gap_minutes, priority) AS (
