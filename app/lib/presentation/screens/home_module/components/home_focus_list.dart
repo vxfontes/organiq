@@ -34,9 +34,10 @@ class HomeFocusList extends StatelessWidget {
               .map(
                 (task) => IBTodoItemData(
                   id: task.id,
-                  title: _titleFor(task),
+                  title: task.title,
                   subtitle: _subtitleFor(task),
                   done: task.isDone,
+                  isOverdue: _isOverdue(task),
                 ),
               )
               .toList(growable: false),
@@ -71,16 +72,12 @@ class HomeFocusList extends StatelessWidget {
     );
   }
 
-  String _titleFor(TaskOutput task) {
+  bool _isOverdue(TaskOutput task) {
     final due = task.dueAt?.toLocal();
-    if (due == null) return task.title;
+    if (due == null) return false;
 
     final todayStart = _startOfDay(DateTime.now());
-    if (due.isBefore(todayStart)) {
-      return 'ATRASADA - ${task.title}';
-    }
-
-    return task.title;
+    return due.isBefore(todayStart);
   }
 
   String _subtitleFor(TaskOutput task) {
