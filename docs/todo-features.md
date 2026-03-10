@@ -7,7 +7,11 @@
 - [x] permissões de wifi para android e iOS
 - [ ] projetos e to-dos para os projetos específicos (não sei se só a flag supre) 
 - [x] cronograma
-- [ ] versão nativa pra mac
 - [ ] possível site em react ou next
 - [x] widget pra mac e iphone
+  - [ ] re/criação de widgets uteis
 - [x] login persistente
+
+# Depois do MVP (ou se der pro MVP)
+- [ ] refatoração da página de IA pra algo mais clean e organizado
+- [ ] versão nativa pra mac
