@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import 'package:inbota/presentation/screens/home_module/models/timeline_item.dart';
+import 'package:inbota/presentation/screens/home_module/components/timeline_item.dart';
 import 'package:inbota/shared/components/ib_lib/index.dart';
 import 'package:inbota/shared/theme/app_colors.dart';
 
@@ -59,7 +59,7 @@ class _HomeNextActionsCarouselState extends State<HomeNextActionsCarousel> {
           )
         else
           SizedBox(
-            height: 168,
+            height: 122,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: allItems.length,
@@ -67,7 +67,7 @@ class _HomeNextActionsCarouselState extends State<HomeNextActionsCarousel> {
               itemBuilder: (_, index) {
                 final item = allItems[index];
                 final isPast = index < widget.pastItems.length;
-                final isCompleting = _completingIds.contains(item.id);
+                final isCompleting = _completingIds.contains(item.stableKey);
 
                 return AnimatedSize(
                   duration: const Duration(milliseconds: 220),
@@ -79,7 +79,7 @@ class _HomeNextActionsCarouselState extends State<HomeNextActionsCarousel> {
                     child: isCompleting
                         ? const SizedBox.shrink()
                         : IBNextActionCard(
-                            key: ValueKey(item.id),
+                            key: ValueKey(item.stableKey),
                             item: _toIBItem(item),
                             isPast: isPast,
                             onComplete: widget.onComplete == null || isPast
@@ -96,15 +96,16 @@ class _HomeNextActionsCarouselState extends State<HomeNextActionsCarousel> {
   }
 
   Future<void> _handleComplete(TimelineItem item) async {
-    if (_completingIds.contains(item.id)) return;
+    final stableKey = item.stableKey;
+    if (_completingIds.contains(stableKey)) return;
 
-    setState(() => _completingIds.add(item.id));
+    setState(() => _completingIds.add(stableKey));
 
     await Future<void>.delayed(const Duration(milliseconds: 220));
     widget.onComplete?.call(item);
 
     if (!mounted) return;
-    setState(() => _completingIds.remove(item.id));
+    setState(() => _completingIds.remove(stableKey));
   }
 
   IBNextActionItem _toIBItem(TimelineItem item) {
@@ -114,6 +115,7 @@ class _HomeNextActionsCarouselState extends State<HomeNextActionsCarousel> {
       subtitle: item.subtitle,
       type: _mapType(item.type),
       scheduledTime: item.scheduledTime,
+      endScheduledTime: item.endScheduledTime,
       isCompleted: item.isCompleted,
       isOverdue: item.isOverdue,
     );

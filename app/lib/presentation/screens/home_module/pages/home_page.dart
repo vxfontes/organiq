@@ -53,7 +53,22 @@ class _HomePageState extends IBState<HomePage, HomeController> {
       builder: (context, _) {
         final loading = controller.loading.value;
         final showLoadingSkeleton = loading && !controller.hasContent;
-        final dayCompletelyEmpty = _isDayCompletelyEmpty();
+        final nextActions = controller.nextActionsTimeline;
+        final pastActions = controller.pastActionsToday;
+        final focusTasks = controller.focusTasks;
+        final openShoppingLists = controller.openShoppingLists;
+        final eventsTodayCount = controller.eventsTodayCount;
+        final remindersTodayCount = controller.remindersTodayCount;
+        final routinesTotal = controller.routinesTotal;
+        final dayCompletelyEmpty = _isDayCompletelyEmpty(
+          nextActionsCount: nextActions.length,
+          pastActionsCount: pastActions.length,
+          focusTasksCount: focusTasks.length,
+          openShoppingLists: openShoppingLists,
+          eventsTodayCount: eventsTodayCount,
+          remindersTodayCount: remindersTodayCount,
+          routinesTotal: routinesTotal,
+        );
 
         return ColoredBox(
           color: AppColors.background,
@@ -93,7 +108,6 @@ class _HomePageState extends IBState<HomePage, HomeController> {
                   padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
                   children: [
                     HomeDynamicHeader(
-                      userName: 'Vanessa',
                       executiveSummary: controller.executiveSummary,
                       onSettingsTap: () =>
                           AppNavigation.push(AppRoutes.settings),
@@ -121,8 +135,8 @@ class _HomePageState extends IBState<HomePage, HomeController> {
                     ] else ...[
                       const SizedBox(height: 20),
                       HomeNextActionsCarousel(
-                        pastItems: controller.pastActionsToday,
-                        nextItems: controller.nextActionsTimeline,
+                        pastItems: pastActions,
+                        nextItems: nextActions,
                         onComplete: (item) {
                           controller.markTimelineItemDone(item.id, item.type);
                         },
@@ -134,6 +148,8 @@ class _HomePageState extends IBState<HomePage, HomeController> {
                         routinesTotal: controller.routinesTotal,
                         tasksDone: controller.tasksDone,
                         tasksTotal: controller.tasksTotal,
+                        remindersDone: controller.remindersDone,
+                        remindersTotal: controller.remindersTotal,
                         shoppingListCount: controller.openShoppingLists,
                         shoppingItemCount: controller.totalPendingShoppingItems,
                         onShoppingTap: () =>
@@ -141,13 +157,12 @@ class _HomePageState extends IBState<HomePage, HomeController> {
                       ),
                       const SizedBox(height: 20),
                       HomeFocusList(
-                        tasks: controller.focusTasks,
+                        tasks: focusTasks,
                         onToggleTask: controller.toggleCriticalTaskAt,
                         onSeeAllTap: () =>
                             AppNavigation.push(AppRoutes.rootReminders),
                       ),
                     ],
-                    const SizedBox(height: 100),
                   ],
                 ),
               ),
@@ -158,13 +173,21 @@ class _HomePageState extends IBState<HomePage, HomeController> {
     );
   }
 
-  bool _isDayCompletelyEmpty() {
-    return controller.nextActionsTimeline.isEmpty &&
-        controller.pastActionsToday.isEmpty &&
-        controller.focusTasks.isEmpty &&
-        controller.openShoppingLists == 0 &&
-        controller.eventsTodayCount == 0 &&
-        controller.remindersTodayCount == 0 &&
-        controller.routinesTotal == 0;
+  bool _isDayCompletelyEmpty({
+    required int nextActionsCount,
+    required int pastActionsCount,
+    required int focusTasksCount,
+    required int openShoppingLists,
+    required int eventsTodayCount,
+    required int remindersTodayCount,
+    required int routinesTotal,
+  }) {
+    return nextActionsCount == 0 &&
+        pastActionsCount == 0 &&
+        focusTasksCount == 0 &&
+        openShoppingLists == 0 &&
+        eventsTodayCount == 0 &&
+        remindersTodayCount == 0 &&
+        routinesTotal == 0;
   }
 }

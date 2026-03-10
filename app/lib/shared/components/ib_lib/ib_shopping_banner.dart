@@ -21,7 +21,7 @@ class IBShoppingBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasLists = listCount > 0;
     final backgroundColor = hasLists
-        ? const Color(0xFFFFFBEB)
+        ? AppColors.surfaceAi
         : AppColors.surface2;
     final summary = hasLists
         ? '${TextUtils.countLabel(listCount, 'lista', 'listas')} - ${TextUtils.countLabel(itemCount, 'item pendente', 'itens pendentes')}'
@@ -39,7 +39,7 @@ class IBShoppingBanner extends StatelessWidget {
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
               color: hasLists
-                  ? AppColors.warning500.withValues(alpha: 0.26)
+                  ? AppColors.ai500.withValues(alpha: 0.26)
                   : AppColors.border,
             ),
           ),
@@ -49,7 +49,7 @@ class IBShoppingBanner extends StatelessWidget {
             children: [
               const IBIcon(
                 IBIcon.shoppingBagOutlined,
-                color: AppColors.warning500,
+                color: AppColors.ai500,
                 size: 20,
               ),
               const SizedBox(height: 8),
@@ -62,12 +62,12 @@ class IBShoppingBanner extends StatelessWidget {
                   IBText(
                     hasLists ? 'Ver listas' : 'Abrir compras',
                     context: context,
-                  ).label.color(AppColors.warning500).build(),
+                  ).label.color(AppColors.ai500).build(),
                   const SizedBox(width: 6),
                   const IBIcon(
                     IBIcon.chevronRight,
                     size: 16,
-                    color: AppColors.warning500,
+                    color: AppColors.ai500,
                   ),
                 ],
               ),

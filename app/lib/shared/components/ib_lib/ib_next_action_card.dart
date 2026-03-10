@@ -33,11 +33,15 @@ class IBNextActionCard extends StatelessWidget {
     required this.item,
     required this.onComplete,
     this.isPast = false,
+    this.width = 150,
+    this.height = 138,
   });
 
   final IBNextActionItem item;
   final VoidCallback? onComplete;
   final bool isPast;
+  final double width;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
@@ -51,58 +55,87 @@ class IBNextActionCard extends StatelessWidget {
     return Opacity(
       opacity: isPast ? 0.5 : 1,
       child: Container(
-        width: 164,
-        padding: const EdgeInsets.all(12),
+        width: width,
+        height: height,
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: palette.background,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: palette.accent.withValues(alpha: 0.22)),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final compact = constraints.maxHeight <= 150;
+            final subtitle = item.subtitle?.trim();
+            final showSubtitle =
+                subtitle != null && subtitle.isNotEmpty && !compact;
+            final showOverdueBadge =
+                item.isOverdue && !item.isCompleted && !compact;
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                IBIcon(palette.icon, size: 16, color: palette.accent),
-                const SizedBox(width: 6),
-                IBText(
-                  _formatTime(item.scheduledTime),
-                  context: context,
-                ).label.weight(FontWeight.w700).color(AppColors.text).build(),
-                const Spacer(),
-                if (item.isOverdue && !item.isCompleted) const _OverdueBadge(),
-              ],
-            ),
-            const SizedBox(height: 8),
-            IBChip(label: palette.label, color: palette.accent),
-            const SizedBox(height: 6),
-            IBText(
-              item.title,
-              context: context,
-            ).body.weight(FontWeight.w700).maxLines(1).build(),
-            if (item.subtitle != null && item.subtitle!.trim().isNotEmpty) ...[
-              const SizedBox(height: 2),
-              IBText(
-                item.subtitle!,
-                context: context,
-              ).caption.maxLines(1).build(),
-            ],
-            const SizedBox(height: 8),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 220),
-              switchInCurve: Curves.easeOut,
-              switchOutCurve: Curves.easeIn,
-              child: showCompleteButton
-                  ? _CompleteButton(
-                      key: ValueKey('complete-${item.id}'),
-                      onPressed: onComplete,
-                    )
-                  : _DoneState(
-                      key: ValueKey('done-${item.id}'),
-                      isDone: item.isCompleted,
+                Row(
+                  children: [
+                    IBIcon(palette.icon, size: 16, color: palette.accent),
+                    const SizedBox(width: 6),
+                    IBText(_formatTime(item.scheduledTime), context: context)
+                        .label
+                        .weight(FontWeight.w700)
+                        .color(AppColors.text)
+                        .build(),
+                    const Spacer(),
+                    if (showOverdueBadge) const _OverdueBadge(),
+                  ],
+                ),
+                if (compact) ...[
+                  const SizedBox(height: 6),
+                  IBText(
+                    item.title,
+                    context: context,
+                  ).body.weight(FontWeight.w700).maxLines(2).build(),
+                  const Spacer(),
+                ] else ...[
+                  const SizedBox(height: 8),
+                  IBChip(label: palette.label, color: palette.accent),
+                  const SizedBox(height: 6),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        IBText(
+                          item.title,
+                          context: context,
+                        ).body.weight(FontWeight.w700).maxLines(1).build(),
+                        if (showSubtitle) ...[
+                          const SizedBox(height: 2),
+                          IBText(
+                            subtitle,
+                            context: context,
+                          ).caption.maxLines(1).build(),
+                        ],
+                      ],
                     ),
-            ),
-          ],
+                  ),
+                ],
+                SizedBox(height: compact ? 6 : 8),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 220),
+                  switchInCurve: Curves.easeOut,
+                  switchOutCurve: Curves.easeIn,
+                  child: showCompleteButton
+                      ? _CompleteButton(
+                          key: ValueKey('complete-${item.id}'),
+                          onPressed: onComplete,
+                        )
+                      : _DoneState(
+                          key: ValueKey('done-${item.id}'),
+                          isDone: item.isCompleted,
+                        ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -180,10 +213,12 @@ class _CompleteButton extends StatelessWidget {
                 color: AppColors.primary700,
               ),
               const SizedBox(width: 4),
-              IBText(
-                'Concluir',
-                context: context,
-              ).label.color(AppColors.primary700).build(),
+              Flexible(
+                child: IBText(
+                  'Concluir',
+                  context: context,
+                ).label.color(AppColors.primary700).maxLines(1).build(),
+              ),
             ],
           ),
         ),
@@ -219,10 +254,12 @@ class _DoneState extends StatelessWidget {
             color: AppColors.success600,
           ),
           const SizedBox(width: 4),
-          IBText(
-            'Concluido',
-            context: context,
-          ).label.color(AppColors.success600).build(),
+          Flexible(
+            child: IBText(
+              'Concluido',
+              context: context,
+            ).label.color(AppColors.success600).maxLines(1).build(),
+          ),
         ],
       ),
     );

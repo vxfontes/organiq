@@ -21,9 +21,10 @@ import 'package:inbota/modules/shopping/domain/usecases/get_shopping_lists_useca
 import 'package:inbota/modules/tasks/data/models/task_output.dart';
 import 'package:inbota/modules/tasks/data/models/task_update_input.dart';
 import 'package:inbota/modules/tasks/domain/usecases/update_task_usecase.dart';
-import 'package:inbota/presentation/screens/home_module/models/timeline_item.dart';
+import 'package:inbota/presentation/screens/home_module/components/timeline_item.dart';
 import 'package:inbota/shared/errors/failures.dart';
 import 'package:inbota/shared/state/ib_state.dart';
+import 'package:inbota/shared/utils/text_utils.dart';
 
 class HomeController implements IBController {
   HomeController(
@@ -352,7 +353,7 @@ class HomeController implements IBController {
 
   String get executiveSummary {
     if (totalOverdueCount > 0) {
-      return '${_countLabel(totalOverdueCount, 'item atrasado', 'itens atrasados')}. Bom momento para colocar o dia em dia.';
+      return '${TextUtils.countLabel(totalOverdueCount, 'item atrasado', 'itens atrasados')}. Bom momento para colocar o dia em dia.';
     }
 
     final commitmentsToday =
@@ -364,14 +365,14 @@ class HomeController implements IBController {
     }
 
     if (commitmentsToday == 0) {
-      return 'Sem compromissos hoje, mas você tem ${_countLabel(criticalOpen, 'tarefa crítica aberta', 'tarefas críticas abertas')}.';
+      return 'Sem compromissos hoje, mas você tem ${TextUtils.countLabel(criticalOpen, 'tarefa crítica aberta', 'tarefas críticas abertas')}.';
     }
 
     if (criticalOpen == 0) {
-      return 'Você tem ${_countLabel(commitmentsToday, 'compromisso', 'compromissos')} hoje.';
+      return 'Você tem ${TextUtils.countLabel(commitmentsToday, 'compromisso', 'compromissos')} hoje.';
     }
 
-    return 'Você tem ${_countLabel(commitmentsToday, 'compromisso', 'compromissos')} hoje e ${_countLabel(criticalOpen, 'tarefa crítica aberta', 'tarefas críticas abertas')}.';
+    return 'Você tem ${TextUtils.countLabel(commitmentsToday, 'compromisso', 'compromissos')} hoje e ${TextUtils.countLabel(criticalOpen, 'tarefa crítica aberta', 'tarefas críticas abertas')}.';
   }
 
   Map<DateTime, int> get weekDensityMap {
@@ -538,94 +539,100 @@ class HomeController implements IBController {
     }
     error.value = null;
 
-    final agendaFuture = _getAgendaUsecase.call(limit: 200);
-    final listsFuture = _getShoppingListsUsecase.call(limit: 20);
+    try {
+      final agendaFuture = _getAgendaUsecase.call(limit: 200);
+      final listsFuture = _getShoppingListsUsecase.call(limit: 20);
 
-    final now = DateTime.now();
-    final weekday = now.weekday % 7;
-    final dateStr =
-        '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
-    final routinesFuture = _getRoutinesByWeekdayUsecase.call(
-      weekday,
-      date: dateStr,
-    );
-    final summaryFuture = _getTodaySummaryUsecase.call();
+      final now = DateTime.now();
+      final weekday = now.weekday % 7;
+      final dateStr =
+          '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+      final routinesFuture = _getRoutinesByWeekdayUsecase.call(
+        weekday,
+        date: dateStr,
+      );
+      final summaryFuture = _getTodaySummaryUsecase.call();
 
-    final results = await Future.wait([
-      agendaFuture,
-      listsFuture,
-      routinesFuture,
-      summaryFuture,
-    ]);
+      final results = await Future.wait([
+        agendaFuture,
+        listsFuture,
+        routinesFuture,
+        summaryFuture,
+      ]);
 
-    final agendaResult = results[0] as Either<Failure, AgendaOutput>;
-    final listsResult = results[1] as Either<Failure, ShoppingListListOutput>;
-    final routinesResult = results[2] as Either<Failure, RoutineListOutput>;
-    final summaryResult =
-        results[3] as Either<Failure, RoutineTodaySummaryOutput>;
+      final agendaResult = results[0] as Either<Failure, AgendaOutput>;
+      final listsResult = results[1] as Either<Failure, ShoppingListListOutput>;
+      final routinesResult = results[2] as Either<Failure, RoutineListOutput>;
+      final summaryResult =
+          results[3] as Either<Failure, RoutineTodaySummaryOutput>;
 
-    agendaResult.fold(
-      (failure) =>
-          _setError(failure, fallback: 'Não foi possível carregar agenda.'),
-      (output) => agenda.value = output,
-    );
+      agendaResult.fold(
+        (failure) =>
+            _setError(failure, fallback: 'Não foi possível carregar agenda.'),
+        (output) => agenda.value = output,
+      );
 
-    summaryResult.fold(
-      (_) => null,
-      (summary) => routineSummary.value = summary,
-    );
+      summaryResult.fold(
+        (_) => null,
+        (summary) => routineSummary.value = summary,
+      );
 
-    routinesResult.fold(
-      (failure) =>
-          _setError(failure, fallback: 'Não foi possível carregar rotinas.'),
-      (data) {
-        routines.value = data.items;
-      },
-    );
+      routinesResult.fold(
+        (failure) =>
+            _setError(failure, fallback: 'Não foi possível carregar rotinas.'),
+        (data) {
+          routines.value = data.items;
+        },
+      );
 
-    final lists = listsResult.fold<List<ShoppingListOutput>>(
-      (failure) {
-        _setError(
-          failure,
-          fallback: 'Não foi possível carregar listas de compras.',
-        );
-        return const [];
-      },
-      (output) => output.items
-          .where((list) => !list.isArchived)
-          .toList(growable: false),
-    );
-    shoppingLists.value = lists;
-
-    final nextItemsByList = <String, List<ShoppingItemOutput>>{};
-    final itemsResults = await Future.wait(
-      lists.map((list) async {
-        final result = await _getShoppingItemsUsecase.call(
-          listId: list.id,
-          limit: 200,
-        );
-        return MapEntry(list.id, result);
-      }),
-    );
-
-    for (final entry in itemsResults) {
-      entry.value.fold(
+      final lists = listsResult.fold<List<ShoppingListOutput>>(
         (failure) {
           _setError(
             failure,
-            fallback: 'Não foi possível carregar itens de compras da Home.',
+            fallback: 'Não foi possível carregar listas de compras.',
           );
-          nextItemsByList[entry.key] = const [];
+          return const [];
         },
-        (output) {
-          nextItemsByList[entry.key] = output.items;
-        },
+        (output) => output.items
+            .where((list) => !list.isArchived)
+            .toList(growable: false),
       );
-    }
-    shoppingItemsByList.value = nextItemsByList;
+      shoppingLists.value = lists;
 
-    loading.value = false;
-    refreshing.value = false;
+      final nextItemsByList = <String, List<ShoppingItemOutput>>{};
+      final itemsResults = await Future.wait(
+        lists.map((list) async {
+          final result = await _getShoppingItemsUsecase.call(
+            listId: list.id,
+            limit: 200,
+          );
+          return MapEntry(list.id, result);
+        }),
+      );
+
+      for (final entry in itemsResults) {
+        entry.value.fold(
+          (failure) {
+            _setError(
+              failure,
+              fallback: 'Não foi possível carregar itens de compras da Home.',
+            );
+            nextItemsByList[entry.key] = const [];
+          },
+          (output) {
+            nextItemsByList[entry.key] = output.items;
+          },
+        );
+      }
+      shoppingItemsByList.value = nextItemsByList;
+    } catch (_) {
+      if (error.value == null || error.value!.isEmpty) {
+        error.value = 'Não foi possível carregar a Home.';
+      }
+    } finally {
+      loading.value = false;
+      refreshing.value = false;
+    }
   }
 
   List<TimelineItem> get _timelineItemsToday {
@@ -654,7 +661,7 @@ class HomeController implements IBController {
       if (local == null || !_isWithinRange(local, start, end)) continue;
       if (!_hasDefinedTime(local)) continue;
 
-      final subtitle = _normalizeText(event.location);
+      final subtitle = TextUtils.normalize(event.location);
       items.add(
         TimelineItem(
           id: event.id,
@@ -662,6 +669,7 @@ class HomeController implements IBController {
           subtitle: subtitle,
           type: TimelineItemType.event,
           scheduledTime: local,
+          endScheduledTime: _eventEndAtLocal(event, startAtLocal: local),
           isCompleted: false,
           isOverdue: local.isBefore(now),
         ),
@@ -677,7 +685,7 @@ class HomeController implements IBController {
         TimelineItem(
           id: task.id,
           title: task.title,
-          subtitle: _normalizeText(task.description),
+          subtitle: TextUtils.normalize(task.description),
           type: TimelineItemType.task,
           scheduledTime: local,
           isCompleted: task.isDone,
@@ -713,14 +721,16 @@ class HomeController implements IBController {
     for (final routine in routines.value) {
       final scheduled = _routineStartAtToday(routine);
       if (scheduled == null || routine.isCompletedToday) continue;
+      final endScheduled = _routineEndAtToday(routine, startAt: scheduled);
 
       list.add(
         TimelineItem(
           id: routine.id,
           title: routine.title,
-          subtitle: _normalizeText(routine.weekdaysLabel),
+          subtitle: TextUtils.normalize(routine.weekdaysLabel),
           type: TimelineItemType.routine,
           scheduledTime: scheduled,
+          endScheduledTime: endScheduled,
           isCompleted: routine.isCompletedToday,
           isOverdue: scheduled.isBefore(now) && !routine.isCompletedToday,
         ),
@@ -817,10 +827,25 @@ class HomeController implements IBController {
   }
 
   DateTime? _routineStartAtToday(RoutineOutput routine) {
-    final raw = routine.startTime.trim();
-    if (raw.isEmpty) return null;
+    final now = DateTime.now();
+    return _parseRoutineTimeForDay(routine.startTime, now);
+  }
 
-    final match = RegExp(r'(\d{1,2}):(\d{1,2})').firstMatch(raw);
+  DateTime? _routineEndAtToday(
+    RoutineOutput routine, {
+    required DateTime startAt,
+  }) {
+    final parsed = _parseRoutineTimeForDay(routine.endTime, startAt);
+    if (parsed == null) return null;
+    if (!parsed.isAfter(startAt)) return null;
+    return parsed;
+  }
+
+  DateTime? _parseRoutineTimeForDay(String raw, DateTime baseDate) {
+    final value = raw.trim();
+    if (value.isEmpty) return null;
+
+    final match = RegExp(r'(\d{1,2}):(\d{1,2})').firstMatch(value);
     if (match == null) return null;
 
     final hour = int.tryParse(match.group(1)!);
@@ -828,25 +853,28 @@ class HomeController implements IBController {
     if (hour == null || minute == null) return null;
     if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return null;
 
-    final now = DateTime.now();
-    return DateTime(now.year, now.month, now.day, hour, minute);
+    return DateTime(
+      baseDate.year,
+      baseDate.month,
+      baseDate.day,
+      hour,
+      minute,
+    );
   }
 
-  String? _normalizeText(String? value) {
-    if (value == null) return null;
-    final trimmed = value.trim();
-    if (trimmed.isEmpty) return null;
-    return trimmed;
-  }
-
-  String _countLabel(int count, String singular, String plural) {
-    final label = count == 1 ? singular : plural;
-    return '$count $label';
+  DateTime? _eventEndAtLocal(
+    EventOutput event, {
+    required DateTime startAtLocal,
+  }) {
+    final end = event.endAt?.toLocal();
+    if (end == null) return null;
+    if (!end.isAfter(startAtLocal)) return null;
+    return end;
   }
 
   void _setError(Failure failure, {required String fallback}) {
-    final message = failure.message?.trim();
-    if (message != null && message.isNotEmpty) {
+    final message = TextUtils.normalize(failure.message);
+    if (message != null) {
       error.value = message;
       return;
     }
