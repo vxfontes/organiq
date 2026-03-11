@@ -460,19 +460,25 @@ func routineHasWeekday(weekdays []int, weekday int) bool {
 }
 
 func shouldShowRoutineForDate(r domain.Routine, targetDate time.Time) bool {
-	if r.RecurrenceType == "weekly" || r.RecurrenceType == "" {
-		return true
-	}
-
+	// Always respect StartsOn: never show routines on dates prior to their start.
 	startsOnStr := r.StartsOn
 	if len(startsOnStr) > 10 {
 		startsOnStr = startsOnStr[:10]
 	}
 	startsOn, err := time.Parse("2006-01-02", startsOnStr)
-	if err != nil {
+	if err == nil {
+		startsOnDate := time.Date(startsOn.Year(), startsOn.Month(), startsOn.Day(), 0, 0, 0, 0, time.UTC)
+		targetDateOnly := time.Date(targetDate.Year(), targetDate.Month(), targetDate.Day(), 0, 0, 0, 0, time.UTC)
+		if targetDateOnly.Before(startsOnDate) {
+			return false
+		}
+	}
+
+	if r.RecurrenceType == "weekly" || r.RecurrenceType == "" {
 		return true
 	}
 
+	// For multi-week recurrences we anchor the cadence to the start week.
 	startsOnMonday := mondayOf(startsOn)
 	targetMonday := mondayOf(targetDate)
 

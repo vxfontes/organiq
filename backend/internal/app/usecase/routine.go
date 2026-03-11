@@ -85,9 +85,15 @@ func (uc *RoutineUsecase) Create(ctx context.Context, userID string, input Routi
 		return domain.Routine{}, err
 	}
 
-	startsOn := time.Now().Format("2006-01-02")
+	startsOn := uc.nowInUserTimezone(ctx, userID).Format("2006-01-02")
 	if input.StartsOn != nil {
 		startsOn = *input.StartsOn
+	} else {
+		// Default rule: a routine starts on the next occurrence of any selected weekday,
+		// counting from the creation day (in the user's timezone).
+		now := uc.nowInUserTimezone(ctx, userID)
+		next := nextOccurrenceDate(now, input.Weekdays)
+		startsOn = next.Format("2006-01-02")
 	}
 
 	routine := domain.Routine{
@@ -358,19 +364,26 @@ func (uc *RoutineUsecase) ListByWeekday(ctx context.Context, userID string, week
 }
 
 func shouldShowRoutineForDate(r domain.Routine, targetDate time.Time) bool {
-	if r.RecurrenceType == "weekly" || r.RecurrenceType == "" {
-		return true
-	}
-
+	// Always respect StartsOn: never show routines on dates prior to their start.
 	startsOnStr := r.StartsOn
 	if len(startsOnStr) > 10 {
 		startsOnStr = startsOnStr[:10]
 	}
 	startsOn, err := time.Parse("2006-01-02", startsOnStr)
-	if err != nil {
+	if err == nil {
+		// Compare using date-only semantics (ignore time-of-day).
+		startsOnDate := time.Date(startsOn.Year(), startsOn.Month(), startsOn.Day(), 0, 0, 0, 0, time.UTC)
+		targetDateOnly := time.Date(targetDate.Year(), targetDate.Month(), targetDate.Day(), 0, 0, 0, 0, time.UTC)
+		if targetDateOnly.Before(startsOnDate) {
+			return false
+		}
+	}
+
+	if r.RecurrenceType == "weekly" || r.RecurrenceType == "" {
 		return true
 	}
 
+	// For multi-week recurrences we anchor the cadence to the start week.
 	startsOnMonday := mondayOf(startsOn)
 	targetMonday := mondayOf(targetDate)
 
@@ -405,6 +418,25 @@ func mondayOf(t time.Time) time.Time {
 	}
 	monday := t.AddDate(0, 0, -(weekday - 1))
 	return time.Date(monday.Year(), monday.Month(), monday.Day(), 0, 0, 0, 0, time.UTC)
+}
+
+func nextOccurrenceDate(from time.Time, weekdays []int) time.Time {
+	// Normalize to date-only in the same location.
+	start := time.Date(from.Year(), from.Month(), from.Day(), 0, 0, 0, 0, from.Location())
+
+	// Look ahead up to 2 weeks to find the earliest matching weekday.
+	for i := 0; i < 14; i++ {
+		candidate := start.AddDate(0, 0, i)
+		w := int(candidate.Weekday())
+		for _, allowed := range weekdays {
+			if allowed == w {
+				return candidate
+			}
+		}
+	}
+
+	// Fallback: if something is off with weekdays, just start today.
+	return start
 }
 
 func (uc *RoutineUsecase) Toggle(ctx context.Context, userID, id string, isActive bool) error {
