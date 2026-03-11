@@ -23,10 +23,25 @@ class RoutineDetailBottomSheet extends StatefulWidget {
 }
 
 class _RoutineDetailBottomSheetState extends State<RoutineDetailBottomSheet> {
+  final ScrollController _activityScrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
     widget.controller.loadRoutineDetails(widget.routine.id);
+    
+    // scroll começa no final (dia de hoje)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_activityScrollController.hasClients) {
+        _activityScrollController.jumpTo(_activityScrollController.position.maxScrollExtent);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _activityScrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -118,9 +133,9 @@ class _RoutineDetailBottomSheetState extends State<RoutineDetailBottomSheet> {
         child: Row(
           children: [
             Expanded(child: _buildCompactInfo(context, 'Horário', widget.routine.timeLabel, IBIcon.alarmOutlined)),
-            VerticalDivider(color: AppColors.border, indent: 4, endIndent: 4),
+            const VerticalDivider(color: AppColors.border, indent: 4, endIndent: 4),
             Expanded(child: _buildCompactInfo(context, 'Dias', widget.routine.weekdaysLabel, IBIcon.calendar)),
-            VerticalDivider(color: AppColors.border, indent: 4, endIndent: 4),
+            const VerticalDivider(color: AppColors.border, indent: 4, endIndent: 4),
             Expanded(child: _buildCompactInfo(context, 'Frequência', widget.routine.recurrenceTypeLabel, IBIcon.repeatRounded)),
           ],
         ),
@@ -176,44 +191,61 @@ class _RoutineDetailBottomSheetState extends State<RoutineDetailBottomSheet> {
   }
 
   Widget _buildActivityStrip(BuildContext context, List<RoutineActivityDayOutput> activity) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: activity.map<Widget>((day) {
-        final isCompleted = day.isCompleted;
-        final isScheduled = day.isScheduled;
-        final isToday = day.isToday;
-        final isSkipped = day.isSkipped;
-
-        Color color = AppColors.border.withValues(alpha: 0.3);
-        if (isCompleted) {
-          color = AppColors.primary600;
-        } else if (isSkipped) {
-          color = AppColors.warning500.withValues(alpha: 0.4);
-        } else if (isScheduled && !isToday) {
-          color = AppColors.danger600.withValues(alpha: 0.2);
-        } else if (isScheduled) {
-          color = AppColors.primary600.withValues(alpha: 0.1);
-        }
-
-        return Column(
-          children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
-                border: isToday ? Border.all(color: AppColors.primary600, width: 2) : null,
-              ),
-              child: isCompleted 
-                ? const IBIcon(IBIcon.checkRounded, size: 16, color: Colors.white)
-                : (isSkipped ? const IBIcon(IBIcon.forwardRounded, size: 16, color: Colors.white) : null),
-            ),
-            const SizedBox(height: 6),
-            IBText(day.weekdayLabel, context: context).caption.color(isToday ? AppColors.text : AppColors.textMuted).weight(isToday ? FontWeight.w800 : FontWeight.w400).build(),
-          ],
+    // scroll vá para o final
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_activityScrollController.hasClients) {
+        _activityScrollController.animateTo(
+          _activityScrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
         );
-      }).toList(),
+      }
+    });
+
+    return SingleChildScrollView(
+      controller: _activityScrollController,
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: activity.map<Widget>((day) {
+          final isCompleted = day.isCompleted;
+          final isScheduled = day.isScheduled;
+          final isToday = day.isToday;
+          final isSkipped = day.isSkipped;
+
+          Color color = AppColors.border.withValues(alpha: 0.3);
+          if (isCompleted) {
+            color = AppColors.primary600;
+          } else if (isSkipped) {
+            color = AppColors.warning500.withValues(alpha: 0.4);
+          } else if (isScheduled && !isToday) {
+            color = AppColors.danger600.withValues(alpha: 0.2);
+          } else if (isScheduled) {
+            color = AppColors.primary600.withValues(alpha: 0.1);
+          }
+
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            child: Column(
+              children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                    border: isToday ? Border.all(color: AppColors.primary600, width: 2) : null,
+                  ),
+                  child: isCompleted 
+                    ? const IBIcon(IBIcon.checkRounded, size: 16, color: Colors.white)
+                    : (isSkipped ? const IBIcon(IBIcon.forwardRounded, size: 16, color: Colors.white) : null),
+                ),
+                const SizedBox(height: 6),
+                IBText(day.weekdayLabel, context: context).caption.color(isToday ? AppColors.text : AppColors.textMuted).weight(isToday ? FontWeight.w800 : FontWeight.w400).build(),
+              ],
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
 

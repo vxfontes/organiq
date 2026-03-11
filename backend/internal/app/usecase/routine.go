@@ -510,10 +510,26 @@ func (uc *RoutineUsecase) GetStreak(ctx context.Context, userID, routineID strin
 		checkDate = checkDate.AddDate(0, 0, -1)
 	}
 
-	activity := make([]domain.RoutineActivityDay, 0, 7)
+	startsOn, err := time.Parse("2006-01-02", routine.StartsOn)
+	if err != nil {
+		startsOn = now.AddDate(0, 0, -6) // Fallback de 7 dias
+	}
+
+	sDay := time.Date(startsOn.Year(), startsOn.Month(), startsOn.Day(), 0, 0, 0, 0, now.Location())
+	nDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	
+	daysSinceStart := int(nDay.Sub(sDay).Hours() / 24)
+	if daysSinceStart < 6 {
+		daysSinceStart = 6
+	}
+	if daysSinceStart > 365 {
+		daysSinceStart = 365 // Safety limit of 1 year
+	}
+
+	activity := make([]domain.RoutineActivityDay, 0, daysSinceStart+1)
 	weekdayNames := []string{"D", "S", "T", "Q", "Q", "S", "S"}
 
-	for i := 6; i >= 0; i-- {
+	for i := daysSinceStart; i >= 0; i-- {
 		d := now.AddDate(0, 0, -i)
 		dStr := d.Format("2006-01-02")
 		activity = append(activity, domain.RoutineActivityDay{
