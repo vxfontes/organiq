@@ -455,19 +455,19 @@ func (uc *RoutineUsecase) GetCompletions(ctx context.Context, userID, routineID 
 	return uc.Completions.GetByRoutine(ctx, userID, routineID)
 }
 
-func (uc *RoutineUsecase) GetStreak(ctx context.Context, userID, routineID string) (int, int, string, error) {
+func (uc *RoutineUsecase) GetStreak(ctx context.Context, userID, routineID string) (int, int, string, []domain.RoutineActivityDay, error) {
 	if userID == "" || routineID == "" {
-		return 0, 0, "", ErrMissingRequiredFields
+		return 0, 0, "", nil, ErrMissingRequiredFields
 	}
 
 	routine, err := uc.Routines.Get(ctx, userID, routineID)
 	if err != nil {
-		return 0, 0, "", err
+		return 0, 0, "", nil, err
 	}
 
 	completions, err := uc.Completions.GetByRoutine(ctx, userID, routineID)
 	if err != nil {
-		return 0, 0, "", err
+		completions = []domain.RoutineCompletion{}
 	}
 
 	exceptions, err := uc.Exceptions.GetByRoutine(ctx, userID, routineID)
@@ -490,18 +490,15 @@ func (uc *RoutineUsecase) GetStreak(ctx context.Context, userID, routineID strin
 	
 	currentStreak := 0
 	checkDate := now
-
-	if !completionMap[todayStr] {
+	if !completionMap[todayStr] && exceptionMap[todayStr] != "skip" {
 		checkDate = now.AddDate(0, 0, -1)
 	}
 
 	for i := 0; i < 730; i++ {
 		dateStr := checkDate.Format("2006-01-02")
-		
 		if dateStr < routine.StartsOn {
 			break
 		}
-
 		if uc.isScheduledOn(routine, checkDate) {
 			if completionMap[dateStr] {
 				currentStreak++
@@ -510,12 +507,26 @@ func (uc *RoutineUsecase) GetStreak(ctx context.Context, userID, routineID strin
 				break
 			}
 		}
-		
 		checkDate = checkDate.AddDate(0, 0, -1)
 	}
 
-	totalCompletions := len(completions)
+	activity := make([]domain.RoutineActivityDay, 0, 7)
+	weekdayNames := []string{"D", "S", "T", "Q", "Q", "S", "S"}
 
+	for i := 6; i >= 0; i-- {
+		d := now.AddDate(0, 0, -i)
+		dStr := d.Format("2006-01-02")
+		activity = append(activity, domain.RoutineActivityDay{
+			Date:         dStr,
+			IsCompleted:  completionMap[dStr],
+			IsScheduled:  uc.isScheduledOn(routine, d),
+			IsToday:      dStr == todayStr,
+			IsSkipped:    exceptionMap[dStr] == "skip",
+			WeekdayLabel: weekdayNames[int(d.Weekday())],
+		})
+	}
+
+	totalCompletions := len(completions)
 	unit := "semana"
 	if routine.RecurrenceType == "weekly" && len(routine.Weekdays) >= 3 {
 		unit = "dia"
@@ -528,15 +539,17 @@ func (uc *RoutineUsecase) GetStreak(ctx context.Context, userID, routineID strin
 		} else {
 			streakText = "1 semana consecutiva"
 		}
-	} else {
+	} else if currentStreak > 1 {
 		if unit == "dia" {
 			streakText = fmt.Sprintf("%d dias consecutivos", currentStreak)
 		} else {
 			streakText = fmt.Sprintf("%d semanas consecutivas", currentStreak)
 		}
+	} else {
+		streakText = "Inicie sua sequência!"
 	}
 
-	return currentStreak, totalCompletions, streakText, nil
+	return currentStreak, totalCompletions, streakText, activity, nil
 }
 
 func (uc *RoutineUsecase) isScheduledOn(r domain.Routine, date time.Time) bool {

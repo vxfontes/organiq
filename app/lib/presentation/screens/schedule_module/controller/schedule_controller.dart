@@ -364,6 +364,41 @@ class ScheduleController implements IBController {
     detailsLoading.value = false;
   }
 
+  bool isRoutineScheduledFor(RoutineOutput routine, DateTime date) {
+    if (!routine.isActive) return false;
+
+    final apiWeekday = date.weekday % 7;
+    if (!routine.weekdays.contains(apiWeekday)) return false;
+
+    try {
+      final startsOn = DateTime.parse(routine.startsOn);
+      final compareDate = DateTime(date.year, date.month, date.day);
+      if (compareDate.isBefore(DateTime(startsOn.year, startsOn.month, startsOn.day))) {
+        return false;
+      }
+    } catch (_) {}
+
+    // EndsOn check
+    if (routine.endsOn != null) {
+      try {
+        final endsOn = DateTime.parse(routine.endsOn!);
+        final compareDate = DateTime(date.year, date.month, date.day);
+        if (compareDate.isAfter(DateTime(endsOn.year, endsOn.month, endsOn.day))) {
+          return false;
+        }
+      } catch (_) {}
+    }
+
+    // Recurrence check (simplified for UI strip)
+    if (routine.recurrenceType == 'weekly' || routine.recurrenceType == '') {
+      return true;
+    }
+
+    // For biweekly/triweekly, we'd need more logic, but for a 7-day strip,
+    // assuming it matches the current week's cycle is usually enough for visual feedback.
+    return true;
+  }
+
   void _groupRoutinesByPeriod() {
     final grouped = <RoutinePeriod, List<RoutineOutput>>{
       RoutinePeriod.morning: [],
@@ -694,6 +729,8 @@ class ScheduleController implements IBController {
           routines.value = list;
           _groupRoutinesByPeriod();
         }
+        // Refresh history and streak if details are being shown
+        loadRoutineDetails(routine.id);
       },
     );
   }

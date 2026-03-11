@@ -527,16 +527,29 @@ func (h *RoutinesHandler) GetStreak(c *gin.Context) {
 	}
 	id := c.Param("id")
 
-	currentStreak, totalCompletions, streakText, err := h.Usecase.GetStreak(c.Request.Context(), userID, id)
+	currentStreak, totalCompletions, streakText, activity, err := h.Usecase.GetStreak(c.Request.Context(), userID, id)
 	if err != nil {
 		writeUsecaseError(c, err)
 		return
+	}
+
+	activityDTO := make([]dto.RoutineActivityDay, 0, len(activity))
+	for _, a := range activity {
+		activityDTO = append(activityDTO, dto.RoutineActivityDay{
+			Date:         a.Date,
+			IsCompleted:  a.IsCompleted,
+			IsScheduled:  a.IsScheduled,
+			IsToday:      a.IsToday,
+			IsSkipped:    a.IsSkipped,
+			WeekdayLabel: a.WeekdayLabel,
+		})
 	}
 
 	c.JSON(http.StatusOK, dto.RoutineStreakResponse{
 		CurrentStreak:    currentStreak,
 		TotalCompletions: totalCompletions,
 		StreakText:       streakText,
+		Activity:         activityDTO,
 	})
 }
 

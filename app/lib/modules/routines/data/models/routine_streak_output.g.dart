@@ -11,6 +11,11 @@ RoutineStreakOutput _$RoutineStreakOutputFromJson(Map<String, dynamic> json) =>
       currentStreak: (json['currentStreak'] as num).toInt(),
       totalCompletions: (json['totalCompletions'] as num).toInt(),
       streakText: json['streakText'] as String,
+      activity: (json['activity'] as List<dynamic>)
+          .map(
+            (e) => RoutineActivityDayOutput.fromJson(e as Map<String, dynamic>),
+          )
+          .toList(),
     );
 
 Map<String, dynamic> _$RoutineStreakOutputToJson(
@@ -19,4 +24,5 @@ Map<String, dynamic> _$RoutineStreakOutputToJson(
   'currentStreak': instance.currentStreak,
   'totalCompletions': instance.totalCompletions,
   'streakText': instance.streakText,
+  'activity': instance.activity,
 };

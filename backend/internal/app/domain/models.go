@@ -246,6 +246,15 @@ const (
 	DevicePlatformAndroid DevicePlatform = "android"
 )
 
+type RoutineActivityDay struct {
+	Date         string
+	IsCompleted  bool
+	IsScheduled  bool
+	IsToday      bool
+	IsSkipped    bool
+	WeekdayLabel string
+}
+
 type NotificationStatus string
 
 const (

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:inbota/modules/routines/data/models/routine_activity_day_output.dart';
 import 'package:inbota/modules/routines/data/models/routine_output.dart';
+import 'package:inbota/modules/routines/data/models/routine_streak_output.dart';
 import 'package:inbota/presentation/routes/app_navigation.dart';
 import 'package:inbota/presentation/screens/schedule_module/components/create_routine_bottom_sheet.dart';
 import 'package:inbota/presentation/screens/schedule_module/controller/schedule_controller.dart';
 import 'package:inbota/shared/components/ib_lib/index.dart';
 import 'package:inbota/shared/theme/app_colors.dart';
-import 'package:inbota/shared/utils/reminders_format.dart';
 
 class RoutineDetailBottomSheet extends StatefulWidget {
   const RoutineDetailBottomSheet({
@@ -62,11 +63,7 @@ class _RoutineDetailBottomSheetState extends State<RoutineDetailBottomSheet> {
               const SizedBox(height: 16),
               _buildInfoGrid(context),
               const SizedBox(height: 16),
-              _buildContextSection(context),
-              const SizedBox(height: 16),
-              _buildHistorySection(context, history, isLoading),
-              const SizedBox(height: 12),
-              _buildStreakSection(context, streak, isLoading),
+              _buildProgressSection(context, history, streak, isLoading),
               const SizedBox(height: 24),
               _buildActions(context),
             ],
@@ -77,14 +74,34 @@ class _RoutineDetailBottomSheetState extends State<RoutineDetailBottomSheet> {
   }
 
   Widget _buildHeader(BuildContext context) {
+    final color = widget.controller.routineTagColor(widget.routine);
+    final hasFlag = widget.routine.flagName != null;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        IBText(widget.routine.title, context: context).titulo.build(),
-        if (widget.routine.description != null && widget.routine.description!.isNotEmpty) ...[
-          const SizedBox(height: 4),
-          IBText(widget.routine.description!, context: context).body.color(AppColors.textMuted).build(),
-        ],
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  IBText(widget.routine.title, context: context).titulo.build(),
+                  if (widget.routine.description != null && widget.routine.description!.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    IBText(widget.routine.description!, context: context).body.color(AppColors.textMuted).build(),
+                  ],
+                ],
+              ),
+            ),
+            if (hasFlag)
+              IBChip(
+                label: widget.routine.subflagName ?? widget.routine.flagName!,
+                color: color,
+              ),
+          ],
+        ),
       ],
     );
   }
@@ -97,112 +114,106 @@ class _RoutineDetailBottomSheetState extends State<RoutineDetailBottomSheet> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
       ),
-      child: Column(
-        children: [
-          _buildInfoRow(context, 'Horário', widget.routine.timeLabel, IBIcon.alarmOutlined),
-          const Divider(height: 24),
-          _buildInfoRow(context, 'Dias', widget.routine.weekdaysLabel, IBIcon.calendar),
-          const Divider(height: 24),
-          _buildInfoRow(context, 'Frequência', widget.routine.recurrenceTypeLabel, IBIcon.repeatRounded),
-        ],
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            Expanded(child: _buildCompactInfo(context, 'Horário', widget.routine.timeLabel, IBIcon.alarmOutlined)),
+            VerticalDivider(color: AppColors.border, indent: 4, endIndent: 4),
+            Expanded(child: _buildCompactInfo(context, 'Dias', widget.routine.weekdaysLabel, IBIcon.calendar)),
+            VerticalDivider(color: AppColors.border, indent: 4, endIndent: 4),
+            Expanded(child: _buildCompactInfo(context, 'Frequência', widget.routine.recurrenceTypeLabel, IBIcon.repeatRounded)),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildInfoRow(BuildContext context, String label, String value, IconData icon) {
-    return Row(
-      children: [
-        IBIcon(icon, size: 18, color: AppColors.primary600),
-        const SizedBox(width: 12),
-        IBText(label, context: context).label.build(),
-        const Spacer(),
-        IBText(value, context: context).body.weight(FontWeight.w600).build(),
-      ],
-    );
-  }
-
-  Widget _buildContextSection(BuildContext context) {
-    final color = widget.controller.routineTagColor(widget.routine);
-    final hasFlag = widget.routine.flagName != null;
-    final hasSubflag = widget.routine.subflagName != null;
-
-    if (!hasFlag) return const SizedBox.shrink();
-
+  Widget _buildCompactInfo(BuildContext context, String label, String value, IconData icon) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        IBText('Contexto', context: context).subtitulo.build(),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            IBChip(
-              label: widget.routine.flagName!,
-              color: color,
-            ),
-            if (hasSubflag)
-              IBChip(
-                label: widget.routine.subflagName!,
-                color: color.withValues(alpha: 0.8),
-              ),
-          ],
-        ),
+        IBIcon(icon, size: 16, color: AppColors.primary600),
+        const SizedBox(height: 4),
+        IBText(label, context: context).caption.color(AppColors.textMuted).build(),
+        const SizedBox(height: 2),
+        IBText(value, context: context).label.weight(FontWeight.w600).maxLines(1).build(),
       ],
     );
   }
 
-  Widget _buildHistorySection(BuildContext context, List<dynamic> history, bool isLoading) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        IBText('Histórico recente', context: context).subtitulo.build(),
-        const SizedBox(height: 12),
-        if (isLoading)
-          const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator()))
-        else if (history.isEmpty)
-          IBText('Nenhuma conclusão registrada ainda.', context: context).body.color(AppColors.textMuted).build()
-        else
-          ...history.take(5).map((h) => Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Row(
-              children: [
-                const IBIcon(IBIcon.checkCircleOutlineRounded, color: AppColors.primary600, size: 18),
-                const SizedBox(width: 8),
-                IBText(_formatHistoryDate(h.completedOn), context: context).body.build(),
-              ],
-            ),
-          )),
-      ],
-    );
-  }
+  Widget _buildProgressSection(BuildContext context, List<dynamic> history, RoutineStreakOutput? streak, bool isLoading) {
+    if (isLoading) return const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator()));
 
-  Widget _buildStreakSection(BuildContext context, dynamic streak, bool isLoading) {
-    if (isLoading) return const SizedBox.shrink();
-    if (streak == null || streak.currentStreak == 0) return const SizedBox.shrink();
-
+    final hasStreak = streak != null && streak.currentStreak > 0;
+    
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.warning500.withValues(alpha: 0.1),
+        color: hasStreak ? AppColors.warning500.withValues(alpha: 0.05) : AppColors.surfaceSoft,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.warning500.withValues(alpha: 0.2)),
+        border: Border.all(color: hasStreak ? AppColors.warning500.withValues(alpha: 0.2) : AppColors.border),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const IBIcon(Icons.local_fire_department_rounded, size: 32, color: AppColors.warning500),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                IBText(streak.streakText, context: context).label.weight(FontWeight.w700).build(),
-                IBText('Mandou bem! Continue firme.', context: context).caption.build(),
+          Row(
+            children: [
+              IBText('Progresso', context: context).label.weight(FontWeight.w700).build(),
+              const Spacer(),
+              if (hasStreak) ...[
+                const IBIcon(Icons.local_fire_department_rounded, size: 16, color: AppColors.warning500),
+                const SizedBox(width: 4),
+                IBText(streak.streakText, context: context).label.weight(FontWeight.w700).color(AppColors.warning600).build(),
               ],
-            ),
+            ],
           ),
+          const SizedBox(height: 16),
+          if (streak != null)
+            _buildActivityStrip(context, streak.activity),
         ],
       ),
+    );
+  }
+
+  Widget _buildActivityStrip(BuildContext context, List<RoutineActivityDayOutput> activity) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: activity.map<Widget>((day) {
+        final isCompleted = day.isCompleted;
+        final isScheduled = day.isScheduled;
+        final isToday = day.isToday;
+        final isSkipped = day.isSkipped;
+
+        Color color = AppColors.border.withValues(alpha: 0.3);
+        if (isCompleted) {
+          color = AppColors.success600;
+        } else if (isSkipped) {
+          color = AppColors.warning500.withValues(alpha: 0.4);
+        } else if (isScheduled && !isToday) {
+          color = AppColors.danger600.withValues(alpha: 0.2);
+        } else if (isScheduled) {
+          color = AppColors.primary600.withValues(alpha: 0.1);
+        }
+
+        return Column(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: color,
+                shape: BoxShape.circle,
+                border: isToday ? Border.all(color: AppColors.primary600, width: 2) : null,
+              ),
+              child: isCompleted 
+                ? const Icon(Icons.check, size: 16, color: Colors.white)
+                : (isSkipped ? const Icon(Icons.forward_rounded, size: 16, color: Colors.white) : null),
+            ),
+            const SizedBox(height: 6),
+            IBText(day.weekdayLabel, context: context).caption.color(isToday ? AppColors.text : AppColors.textMuted).weight(isToday ? FontWeight.w800 : FontWeight.w400).build(),
+          ],
+        );
+      }).toList(),
     );
   }
 
@@ -225,7 +236,6 @@ class _RoutineDetailBottomSheetState extends State<RoutineDetailBottomSheet> {
           child: IBButton(
             label: widget.routine.isActive ? 'Desativar' : 'Ativar',
             variant: IBButtonVariant.ghost,
-            // color: widget.routine.isActive ? AppColors.danger600 : AppColors.success600,
             onPressed: () {
               widget.controller.toggleRoutineActive(widget.routine, !widget.routine.isActive);
               AppNavigation.pop(null, context);
@@ -242,14 +252,5 @@ class _RoutineDetailBottomSheetState extends State<RoutineDetailBottomSheet> {
       smallBottomSheet: false,
       child: CreateRoutineBottomSheet(controller: widget.controller),
     );
-  }
-
-  String _formatHistoryDate(String dateStr) {
-    try {
-      final date = DateTime.parse(dateStr);
-      return RemindersFormat.formatDate(date);
-    } catch (_) {
-      return dateStr;
-    }
   }
 }
