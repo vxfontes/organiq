@@ -527,7 +527,7 @@ func (h *RoutinesHandler) GetStreak(c *gin.Context) {
 	}
 	id := c.Param("id")
 
-	currentStreak, totalCompletions, err := h.Usecase.GetStreak(c.Request.Context(), userID, id)
+	currentStreak, totalCompletions, streakText, err := h.Usecase.GetStreak(c.Request.Context(), userID, id)
 	if err != nil {
 		writeUsecaseError(c, err)
 		return
@@ -536,6 +536,7 @@ func (h *RoutinesHandler) GetStreak(c *gin.Context) {
 	c.JSON(http.StatusOK, dto.RoutineStreakResponse{
 		CurrentStreak:    currentStreak,
 		TotalCompletions: totalCompletions,
+		StreakText:       streakText,
 	})
 }
 

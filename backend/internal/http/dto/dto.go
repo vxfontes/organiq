@@ -511,8 +511,9 @@ type CreateRoutineExceptionRequest struct {
 }
 
 type RoutineStreakResponse struct {
-	CurrentStreak    int `json:"currentStreak"`
-	TotalCompletions int `json:"totalCompletions"`
+	CurrentStreak    int    `json:"currentStreak"`
+	TotalCompletions int    `json:"totalCompletions"`
+	StreakText       string `json:"streakText"`
 }
 
 type RoutineTodaySummaryResponse struct {

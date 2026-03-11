@@ -455,11 +455,139 @@ func (uc *RoutineUsecase) GetCompletions(ctx context.Context, userID, routineID 
 	return uc.Completions.GetByRoutine(ctx, userID, routineID)
 }
 
-func (uc *RoutineUsecase) GetStreak(ctx context.Context, userID, routineID string) (int, int, error) {
+func (uc *RoutineUsecase) GetStreak(ctx context.Context, userID, routineID string) (int, int, string, error) {
 	if userID == "" || routineID == "" {
-		return 0, 0, ErrMissingRequiredFields
+		return 0, 0, "", ErrMissingRequiredFields
 	}
-	return uc.Completions.GetStreak(ctx, userID, routineID)
+
+	routine, err := uc.Routines.Get(ctx, userID, routineID)
+	if err != nil {
+		return 0, 0, "", err
+	}
+
+	completions, err := uc.Completions.GetByRoutine(ctx, userID, routineID)
+	if err != nil {
+		return 0, 0, "", err
+	}
+
+	exceptions, err := uc.Exceptions.GetByRoutine(ctx, userID, routineID)
+	if err != nil {
+		exceptions = []domain.RoutineException{}
+	}
+
+	completionMap := make(map[string]bool)
+	for _, c := range completions {
+		completionMap[c.CompletedOn] = true
+	}
+
+	exceptionMap := make(map[string]string)
+	for _, e := range exceptions {
+		exceptionMap[e.ExceptionDate] = e.Action
+	}
+
+	now := uc.nowInUserTimezone(ctx, userID)
+	todayStr := now.Format("2006-01-02")
+	
+	currentStreak := 0
+	checkDate := now
+
+	if !completionMap[todayStr] {
+		checkDate = now.AddDate(0, 0, -1)
+	}
+
+	for i := 0; i < 730; i++ {
+		dateStr := checkDate.Format("2006-01-02")
+		
+		if dateStr < routine.StartsOn {
+			break
+		}
+
+		if uc.isScheduledOn(routine, checkDate) {
+			if completionMap[dateStr] {
+				currentStreak++
+			//} else if exceptionMap[dateStr] == "skip" { -> não pula, quebra o streak
+			} else {
+				break
+			}
+		}
+		
+		checkDate = checkDate.AddDate(0, 0, -1)
+	}
+
+	totalCompletions := len(completions)
+
+	unit := "semana"
+	if routine.RecurrenceType == "weekly" && len(routine.Weekdays) >= 3 {
+		unit = "dia"
+	}
+	
+	streakText := ""
+	if currentStreak == 1 {
+		if unit == "dia" {
+			streakText = "1 dia consecutivo"
+		} else {
+			streakText = "1 semana consecutiva"
+		}
+	} else {
+		if unit == "dia" {
+			streakText = fmt.Sprintf("%d dias consecutivos", currentStreak)
+		} else {
+			streakText = fmt.Sprintf("%d semanas consecutivas", currentStreak)
+		}
+	}
+
+	return currentStreak, totalCompletions, streakText, nil
+}
+
+func (uc *RoutineUsecase) isScheduledOn(r domain.Routine, date time.Time) bool {
+	if !r.IsActive {
+		return false
+	}
+
+	weekday := int(date.Weekday())
+	found := false
+	for _, wd := range r.Weekdays {
+		if wd == weekday {
+			found = true
+			break
+		}
+	}
+	if !found {
+		return false
+	}
+
+	startsOnStr := r.StartsOn
+	if len(startsOnStr) > 10 {
+		startsOnStr = startsOnStr[:10]
+	}
+	startsOn, err := time.Parse("2006-01-02", startsOnStr)
+	if err != nil {
+		return true
+	}
+
+	startsOnMonday := mondayOf(startsOn)
+	targetMonday := mondayOf(date)
+
+	if targetMonday.Before(startsOnMonday) {
+		return false
+	}
+
+	weeksDiff := int(targetMonday.Sub(startsOnMonday).Hours()) / (24 * 7)
+
+	switch r.RecurrenceType {
+	case "biweekly":
+		return weeksDiff%2 == 0
+	case "triweekly":
+		return weeksDiff%3 == 0
+	case "monthly_week":
+		if r.WeekOfMonth == nil {
+			return true
+		}
+		targetWeek := (date.Day()-1)/7 + 1
+		return targetWeek == *r.WeekOfMonth
+	default:
+		return true
+	}
 }
 
 func (uc *RoutineUsecase) CreateException(ctx context.Context, userID, routineID, date, action string, newStartTime, newEndTime, reason *string) (domain.RoutineException, error) {

@@ -7,10 +7,12 @@ class RoutineStreakOutput {
   const RoutineStreakOutput({
     required this.currentStreak,
     required this.totalCompletions,
+    required this.streakText,
   });
 
   final int currentStreak;
   final int totalCompletions;
+  final String streakText;
 
   factory RoutineStreakOutput.fromJson(Map<String, dynamic> json) {
     return _$RoutineStreakOutputFromJson(json);

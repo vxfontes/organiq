@@ -196,7 +196,7 @@ class _RoutineDetailBottomSheetState extends State<RoutineDetailBottomSheet> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                IBText('${streak.currentStreak} semanas consecutivas', context: context).label.weight(FontWeight.w700).build(),
+                IBText(streak.streakText, context: context).label.weight(FontWeight.w700).build(),
                 IBText('Mandou bem! Continue firme.', context: context).caption.build(),
               ],
             ),
