@@ -9,6 +9,8 @@ import 'package:inbota/modules/inbox/data/models/inbox_create_batch_result.dart'
 import 'package:inbota/modules/inbox/data/models/inbox_create_input.dart';
 import 'package:inbota/modules/inbox/data/models/inbox_create_line_result.dart';
 import 'package:inbota/modules/inbox/data/models/inbox_item_output.dart';
+import 'package:inbota/modules/inbox/data/models/inbox_line_process_success.dart';
+import 'package:inbota/modules/inbox/data/models/inbox_suggestion_output.dart';
 import 'package:inbota/modules/inbox/domain/usecases/confirm_inbox_item_usecase.dart';
 import 'package:inbota/modules/inbox/domain/usecases/create_inbox_item_usecase.dart';
 import 'package:inbota/modules/inbox/domain/usecases/reprocess_inbox_item_usecase.dart';
@@ -283,42 +285,17 @@ class CreateController implements IBController {
             ),
           );
         },
-        (output) {
+        (result) {
           success++;
 
-          final type = output.type.trim().toLowerCase();
-          switch (type) {
-            case 'task':
-              tasks++;
-              break;
-            case 'reminder':
-              reminders++;
-              break;
-            case 'event':
-              events++;
-              break;
-            case 'routine':
-              routines++;
-              break;
-            case 'shopping':
-              if (output.shoppingList != null) {
-                shoppingLists++;
-              }
-              shoppingItems += output.shoppingItems.length;
-              break;
-          }
+          tasks += result.tasksCount;
+          reminders += result.remindersCount;
+          events += result.eventsCount;
+          routines += result.routinesCount;
+          shoppingLists += result.shoppingListsCount;
+          shoppingItems += result.shoppingItemsCount;
 
-          final entityLabel = _entityLabel(type);
-          final entityRef = _resolveEntityRef(output);
-          lineResults.add(
-            CreateLineResult(
-              sourceText: line,
-              status: CreateLineStatus.success,
-              message: '$entityLabel criado com sucesso.',
-              entityType: entityRef.$1,
-              entityId: entityRef.$2,
-            ),
-          );
+          lineResults.addAll(result.lineResults);
         },
       );
     }
@@ -346,7 +323,7 @@ class CreateController implements IBController {
     return true;
   }
 
-  Future<Either<String, InboxConfirmOutput>> _processSingleLine(
+  Future<Either<String, LineProcessSuccess>> _processSingleLine(
     String line,
   ) async {
     final createResult = await _createInboxItemUsecase.call(
@@ -382,6 +359,10 @@ class CreateController implements IBController {
       return Left(_failureMessage(reprocessResult));
     }
 
+    if (processedItem.status.trim().toUpperCase() == 'CONFIRMED') {
+      return Right(_buildAutoConfirmedSuccess(processedItem, sourceText: line));
+    }
+
     final confirmInput = InboxConfirmInput.fromSuggestion(
       processedItem,
       fallbackTitle: line,
@@ -398,8 +379,234 @@ class CreateController implements IBController {
             ? failure.message!.trim()
             : 'Falha ao confirmar item processado.',
       ),
-      Right.new,
+      (output) => Right(_buildManualConfirmedSuccess(output, sourceText: line)),
     );
+  }
+
+  LineProcessSuccess _buildAutoConfirmedSuccess(
+    InboxItemOutput item, {
+    required String sourceText,
+  }) {
+    if (item.confirmed.isNotEmpty) {
+      var tasks = 0;
+      var reminders = 0;
+      var events = 0;
+      var routines = 0;
+      var shoppingLists = 0;
+      var shoppingItems = 0;
+
+      final lineItems = item.confirmed.map((confirmed) {
+        final type = confirmed.type.trim().toLowerCase();
+        switch (type) {
+          case 'task':
+            tasks++;
+            break;
+          case 'reminder':
+            reminders++;
+            break;
+          case 'event':
+            events++;
+            break;
+          case 'routine':
+            routines++;
+            break;
+          case 'shopping':
+            if (confirmed.shoppingList != null) {
+              shoppingLists++;
+            }
+            shoppingItems += confirmed.shoppingItems.length;
+            break;
+        }
+
+        final title = _titleFromConfirmedOutput(confirmed);
+        final label = _entityLabel(type);
+        final message = title.isEmpty
+            ? '$label criado automaticamente.'
+            : '$label: $title';
+        final entityRef = _resolveEntityRef(confirmed);
+
+        return CreateLineResult(
+          sourceText: sourceText,
+          status: CreateLineStatus.success,
+          message: message,
+          entityType: entityRef.$1,
+          entityId: entityRef.$2,
+        );
+      }).toList();
+
+      return LineProcessSuccess(
+        lineResults: lineItems,
+        tasksCount: tasks,
+        remindersCount: reminders,
+        eventsCount: events,
+        routinesCount: routines,
+        shoppingListsCount: shoppingLists,
+        shoppingItemsCount: shoppingItems,
+      );
+    }
+
+    final suggestions = _resolvedSuggestions(item);
+    if (suggestions.isEmpty) {
+      return LineProcessSuccess(
+        lineResults: <CreateLineResult>[
+          CreateLineResult(
+            sourceText: sourceText,
+            status: CreateLineStatus.success,
+            message: 'Item criado automaticamente pela IA.',
+          ),
+        ],
+      );
+    }
+
+    var tasks = 0;
+    var reminders = 0;
+    var events = 0;
+    var routines = 0;
+    var shoppingLists = 0;
+    var shoppingItems = 0;
+
+    for (final suggestion in suggestions) {
+      final type = suggestion.type.trim().toLowerCase();
+      switch (type) {
+        case 'task':
+          tasks++;
+          break;
+        case 'reminder':
+          reminders++;
+          break;
+        case 'event':
+          events++;
+          break;
+        case 'routine':
+          routines++;
+          break;
+        case 'shopping':
+          shoppingLists++;
+          shoppingItems += _shoppingItemsFromSuggestion(suggestion);
+          break;
+      }
+    }
+
+    final lineItems = suggestions.map((suggestion) {
+      final type = suggestion.type.trim().toLowerCase();
+      final title = suggestion.title.trim();
+      final label = _entityLabel(type);
+      final message = title.isEmpty
+          ? '$label criado automaticamente.'
+          : '$label: $title';
+
+      return CreateLineResult(
+        sourceText: sourceText,
+        status: CreateLineStatus.success,
+        message: message,
+      );
+    }).toList();
+
+    return LineProcessSuccess(
+      lineResults: lineItems,
+      tasksCount: tasks,
+      remindersCount: reminders,
+      eventsCount: events,
+      routinesCount: routines,
+      shoppingListsCount: shoppingLists,
+      shoppingItemsCount: shoppingItems,
+    );
+  }
+
+  LineProcessSuccess _buildManualConfirmedSuccess(
+    InboxConfirmOutput output, {
+    required String sourceText,
+  }) {
+    var tasks = 0;
+    var reminders = 0;
+    var events = 0;
+    var routines = 0;
+    var shoppingLists = 0;
+    var shoppingItems = 0;
+
+    final type = output.type.trim().toLowerCase();
+    switch (type) {
+      case 'task':
+        tasks = 1;
+        break;
+      case 'reminder':
+        reminders = 1;
+        break;
+      case 'event':
+        events = 1;
+        break;
+      case 'routine':
+        routines = 1;
+        break;
+      case 'shopping':
+        if (output.shoppingList != null) {
+          shoppingLists = 1;
+        }
+        shoppingItems = output.shoppingItems.length;
+        break;
+    }
+
+    final entityRef = _resolveEntityRef(output);
+    return LineProcessSuccess(
+      lineResults: <CreateLineResult>[
+        CreateLineResult(
+          sourceText: sourceText,
+          status: CreateLineStatus.success,
+          message: '${_entityLabel(type)} criado com sucesso.',
+          entityType: entityRef.$1,
+          entityId: entityRef.$2,
+        ),
+      ],
+      tasksCount: tasks,
+      remindersCount: reminders,
+      eventsCount: events,
+      routinesCount: routines,
+      shoppingListsCount: shoppingLists,
+      shoppingItemsCount: shoppingItems,
+    );
+  }
+
+  List<InboxSuggestionOutput> _resolvedSuggestions(InboxItemOutput item) {
+    if (item.suggestions.isNotEmpty) {
+      return item.suggestions;
+    }
+    if (item.suggestion != null) {
+      return <InboxSuggestionOutput>[item.suggestion!];
+    }
+    return const <InboxSuggestionOutput>[];
+  }
+
+  int _shoppingItemsFromSuggestion(InboxSuggestionOutput suggestion) {
+    final payload = suggestion.payload;
+    if (payload is Map<String, dynamic>) {
+      final items = payload['items'];
+      if (items is List) return items.length;
+      return 0;
+    }
+    if (payload is Map) {
+      final items = payload['items'];
+      if (items is List) return items.length;
+      return 0;
+    }
+    return 0;
+  }
+
+  String _titleFromConfirmedOutput(InboxConfirmOutput output) {
+    final type = output.type.trim().toLowerCase();
+    switch (type) {
+      case 'task':
+        return output.task?.title.trim() ?? '';
+      case 'reminder':
+        return output.reminder?.title.trim() ?? '';
+      case 'event':
+        return output.event?.title.trim() ?? '';
+      case 'routine':
+        return output.routine?.title.trim() ?? '';
+      case 'shopping':
+        return output.shoppingList?.title.trim() ?? '';
+      default:
+        return '';
+    }
   }
 
   Future<bool> deleteLineResult(CreateLineResult line) async {
@@ -521,87 +728,13 @@ class CreateController implements IBController {
     final normalized = rawText.replaceAll('\r\n', '\n').trim();
     if (normalized.isEmpty) return const [];
 
-    final candidateLines = normalized.split('\n');
-    final lines = <String>[];
-
-    for (final candidate in candidateLines) {
-      final cleaned = _normalizeLine(candidate);
-      if (cleaned.isNotEmpty) {
-        lines.addAll(_splitIntoAtomicInputs(cleaned));
-      }
-    }
-
-    if (lines.isNotEmpty) return lines;
-
-    final fallback = _normalizeLine(normalized);
-    if (fallback.isEmpty) return const [];
-    return _splitIntoAtomicInputs(fallback);
-  }
-
-  String _normalizeLine(String value) {
-    final trimmed = value.trim();
-    if (trimmed.isEmpty) return '';
-
-    final withoutBullet = trimmed.replaceFirst(RegExp(r'^[-*•\d\.)\s]+'), '');
-    final withoutConnector = withoutBullet.replaceFirst(
-      RegExp(r'^(e|tambem|também)\s+', caseSensitive: false),
-      '',
-    );
-    final withoutPunctuation = withoutConnector.replaceAll(
-      RegExp(r'^[,;:\s]+|[,;:\s]+$'),
-      '',
-    );
-
-    return withoutPunctuation.trim();
-  }
-
-  List<String> _splitIntoAtomicInputs(String text) {
-    if (text.trim().isEmpty) return const [];
-
-    final firstPass = text
-        .split(RegExp(r'[;\n]+'))
-        .expand(_splitCommaClauses)
-        .toList();
-
-    final secondPass = firstPass
-        .expand(_splitByActionConnector)
-        .map(_normalizeLine)
+    final lines = normalized
+        .split('\n')
+        .map((line) => line.trim())
         .where((line) => line.isNotEmpty)
         .toList();
 
-    final unique = <String>{};
-    final ordered = <String>[];
-    for (final value in secondPass) {
-      final key = value.toLowerCase();
-      if (unique.add(key)) {
-        ordered.add(value);
-      }
-    }
-
-    return ordered;
-  }
-
-  List<String> _splitCommaClauses(String text) {
-    final parts = text.split(',');
-    final output = <String>[];
-    for (final part in parts) {
-      final cleaned = _normalizeLine(part);
-      if (cleaned.isNotEmpty) {
-        output.add(cleaned);
-      }
-    }
-    return output;
-  }
-
-  List<String> _splitByActionConnector(String text) {
-    final pieces = text.split(
-      RegExp(
-        r'\s+e\s+(?=(?:me\s+l[eê]mbre|preciso|tenho|quero|devo|comprar|pagar|agendar|marcar|fazer|ligar|enviar|trocar|resolver|buscar|ir|reuni[aã]o|consulta|evento)\b)',
-        caseSensitive: false,
-      ),
-    );
-    if (pieces.length <= 1) return [text];
-    return pieces;
+    return lines.isEmpty ? <String>[normalized] : lines;
   }
 
   String _entityLabel(String type) {

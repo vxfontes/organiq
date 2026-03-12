@@ -9,6 +9,7 @@ import 'package:inbota/modules/inbox/data/models/inbox_confirm_input.dart';
 import 'package:inbota/modules/inbox/data/models/inbox_create_input.dart';
 import 'package:inbota/modules/inbox/data/models/inbox_create_line_result.dart';
 import 'package:inbota/modules/inbox/data/models/inbox_item_output.dart';
+import 'package:inbota/modules/inbox/data/models/inbox_suggestion_output.dart';
 import 'package:inbota/modules/inbox/domain/usecases/confirm_inbox_item_usecase.dart';
 import 'package:inbota/modules/inbox/domain/usecases/create_inbox_item_usecase.dart';
 import 'package:inbota/modules/inbox/domain/usecases/reprocess_inbox_item_usecase.dart';
@@ -826,6 +827,15 @@ class HomeController implements IBController {
   Future<Either<String, CreateLineResult>> quickAdd(String text) async {
     final cleaned = text.trim();
     if (cleaned.isEmpty) return const Left('Texto vazio.');
+    return _quickAddAtomic(cleaned, reloadAfterMutation: true);
+  }
+
+  Future<Either<String, CreateLineResult>> _quickAddAtomic(
+    String input, {
+    required bool reloadAfterMutation,
+  }) async {
+    final cleaned = input.trim();
+    if (cleaned.isEmpty) return const Left('Texto vazio.');
 
     final createResult = await _createInboxItemUsecase.call(
       InboxCreateInput(source: 'manual', rawText: cleaned),
@@ -852,6 +862,20 @@ class HomeController implements IBController {
       return Left(HomeControllerUtils.failureMessage(reprocessResult));
     }
 
+    if (processedItem.status.trim().toUpperCase() == 'CONFIRMED') {
+      if (reloadAfterMutation) {
+        await _reloadDashboardAfterMutation();
+      }
+      return Right(
+        CreateLineResult(
+          sourceText: cleaned,
+          status: CreateLineStatus.success,
+          message: _autoConfirmedSummary(processedItem),
+          entityType: CreateEntityType.unknown,
+        ),
+      );
+    }
+
     final confirmInput = InboxConfirmInput.fromSuggestion(
       processedItem,
       fallbackTitle: cleaned,
@@ -871,7 +895,9 @@ class HomeController implements IBController {
         );
       },
       (output) async {
-        await _reloadDashboardAfterMutation();
+        if (reloadAfterMutation) {
+          await _reloadDashboardAfterMutation();
+        }
         final (type, id) = HomeControllerUtils.resolveEntityRef(output);
         return Right(
           CreateLineResult(
@@ -884,6 +910,49 @@ class HomeController implements IBController {
         );
       },
     );
+  }
+
+  String _autoConfirmedSummary(InboxItemOutput item) {
+    final suggestions = _resolvedSuggestions(item);
+    if (suggestions.isEmpty) {
+      return 'Itens criados automaticamente pela IA.';
+    }
+
+    final parts = suggestions.map((suggestion) {
+      final label = _suggestionTypeLabel(suggestion.type);
+      final title = suggestion.title.trim();
+      if (title.isEmpty) return label;
+      return '$label: $title';
+    }).toList();
+
+    return 'Criado automaticamente: ${parts.join(' | ')}';
+  }
+
+  List<InboxSuggestionOutput> _resolvedSuggestions(InboxItemOutput item) {
+    if (item.suggestions.isNotEmpty) {
+      return item.suggestions;
+    }
+    if (item.suggestion != null) {
+      return <InboxSuggestionOutput>[item.suggestion!];
+    }
+    return const <InboxSuggestionOutput>[];
+  }
+
+  String _suggestionTypeLabel(String type) {
+    switch (type.trim().toLowerCase()) {
+      case 'task':
+        return 'To-do';
+      case 'reminder':
+        return 'Lembrete';
+      case 'event':
+        return 'Evento';
+      case 'shopping':
+        return 'Lista';
+      case 'routine':
+        return 'Cronograma';
+      default:
+        return 'Item';
+    }
   }
 
   Future<Either<Failure, Unit>> deleteQuickAddResult(

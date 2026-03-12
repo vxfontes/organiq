@@ -28,10 +28,10 @@ type InboxUsecase struct {
 
 	// Usecases (preferred): used to unify business rules. When running inside a tx,
 	// we inject the tx-bound repositories into a copied usecase instance.
-	TasksUsecase    *TaskUsecase
+	TasksUsecase     *TaskUsecase
 	RemindersUsecase *ReminderUsecase
-	EventsUsecase   *EventUsecase
-	RoutinesUsecase *RoutineUsecase
+	EventsUsecase    *EventUsecase
+	RoutinesUsecase  *RoutineUsecase
 
 	PromptBuilder   *service.PromptBuilder
 	AIClient        service.AIClient
@@ -47,8 +47,10 @@ type InboxListInput struct {
 }
 
 type InboxItemResult struct {
-	Item       domain.InboxItem
-	Suggestion *domain.AiSuggestion
+	Item        domain.InboxItem
+	Suggestion  *domain.AiSuggestion
+	Suggestions []domain.AiSuggestion
+	Confirmed   []ConfirmResult
 }
 
 type ConfirmInboxInput struct {
@@ -177,7 +179,22 @@ func (uc *InboxUsecase) GetInboxItem(ctx context.Context, userID, id string) (In
 		}
 	}
 
-	return InboxItemResult{Item: item.InboxItem, Suggestion: suggestion}, nil
+	result := InboxItemResult{Item: item.InboxItem, Suggestion: suggestion}
+	if uc.Suggestions != nil {
+		suggestions, _, err := uc.Suggestions.ListByInboxItem(ctx, userID, id, repository.ListOptions{})
+		if err != nil {
+			return InboxItemResult{}, err
+		}
+		if len(suggestions) > 0 {
+			result.Suggestions = suggestions
+			if result.Suggestion == nil {
+				latest := suggestions[0]
+				result.Suggestion = &latest
+			}
+		}
+	}
+
+	return result, nil
 }
 
 func (uc *InboxUsecase) GetInboxItemsByIDs(ctx context.Context, userID string, ids []string) (map[string]domain.InboxItem, error) {
@@ -311,7 +328,7 @@ func (uc *InboxUsecase) ReprocessInboxItem(ctx context.Context, userID, id strin
 		}
 	}
 
-	prompt := uc.PromptBuilder.Build(service.PromptInput{
+	promptInput := service.PromptInput{
 		RawText:  item.RawText,
 		Locale:   strings.TrimSpace(user.Locale),
 		Timezone: strings.TrimSpace(user.Timezone),
@@ -319,7 +336,8 @@ func (uc *InboxUsecase) ReprocessInboxItem(ctx context.Context, userID, id strin
 		Contexts: contexts,
 		Rules:    ruleItems,
 		Hint:     hint,
-	})
+	}
+	prompt := uc.PromptBuilder.Build(promptInput)
 
 	completion, err := uc.AIClient.Complete(ctx, prompt)
 	if err != nil {
@@ -378,13 +396,13 @@ func (uc *InboxUsecase) ReprocessInboxItem(ctx context.Context, userID, id strin
 	}
 
 validatedOutputReady:
-	anyNeedsReview := false
-	for _, vout := range validatedMany {
-		if vout.Output.NeedsReview {
-			anyNeedsReview = true
-			break
+	if !usedHardFallback && len(validatedMany) == 1 {
+		if expanded, expandErr := uc.expandValidatedOutputsByClauses(ctx, promptInput); expandErr == nil && len(expanded) > 1 {
+			validatedMany = expanded
 		}
 	}
+
+	anyNeedsReview := outputsNeedReview(validatedMany)
 	if !usedHardFallback && anyNeedsReview {
 		if fallbackClient, ok := uc.AIClient.(service.AIClientWithFallback); ok && fallbackClient.FallbackOnNeedsReview() {
 			fallbackModel := strings.TrimSpace(fallbackClient.FallbackModel())
@@ -399,19 +417,19 @@ validatedOutputReady:
 			}
 		}
 	}
-
-	// Persist suggestions (one or many). When multiple suggestions are returned and none
-	// need review, we auto-confirm by creating all entities and marking the inbox item confirmed.
-	autoConfirm := len(validatedMany) > 1
-	for _, vout := range validatedMany {
-		if vout.Output.NeedsReview {
-			autoConfirm = false
-			break
-		}
+	for idx := range validatedMany {
+		normalizeValidatedOutput(&validatedMany[idx], item.RawText)
 	}
+	anyNeedsReview = outputsNeedReview(validatedMany)
+
+	// Persist suggestions (one or many). When multiple suggestions are returned,
+	// we auto-confirm all entities to keep quick-add deterministic.
+	autoConfirm := len(validatedMany) > 1
 
 	// We'll return the last created suggestion (if any) for backward compatibility.
 	var suggestion domain.AiSuggestion
+	createdSuggestions := make([]domain.AiSuggestion, 0, len(validatedMany))
+	confirmedResults := make([]ConfirmResult, 0, len(validatedMany))
 
 	if uc.TxRunner != nil {
 		if err := uc.TxRunner.WithTx(ctx, func(tx repository.TxRepositories) error {
@@ -438,11 +456,14 @@ validatedOutputReady:
 				if err != nil {
 					return err
 				}
+				createdSuggestions = append(createdSuggestions, suggestion)
 
 				if autoConfirm {
-					if err := uc.applyValidatedSuggestionTx(ctx, tx, userID, item, vout); err != nil {
+					confirmed, err := uc.applyValidatedSuggestionTx(ctx, tx, userID, item, vout)
+					if err != nil {
 						return err
 					}
+					confirmedResults = append(confirmedResults, confirmed)
 				}
 			}
 
@@ -485,12 +506,15 @@ validatedOutputReady:
 			if err != nil {
 				return InboxItemResult{}, err
 			}
+			createdSuggestions = append(createdSuggestions, suggestion)
 			if autoConfirm {
 				// No-tx mode: best effort creation without a wrapping transaction.
 				// Prefer running with TxRunner in production.
-				if err := uc.applyValidatedSuggestionNoTx(ctx, userID, item, vout); err != nil {
+				confirmed, err := uc.applyValidatedSuggestionNoTx(ctx, userID, item, vout)
+				if err != nil {
 					return InboxItemResult{}, err
 				}
+				confirmedResults = append(confirmedResults, confirmed)
 			}
 		}
 
@@ -510,9 +534,19 @@ validatedOutputReady:
 
 	// If no suggestions were persisted (shouldn't happen), return nil suggestion.
 	if suggestion.ID == "" {
-		return InboxItemResult{Item: item, Suggestion: nil}, nil
+		return InboxItemResult{
+			Item:        item,
+			Suggestion:  nil,
+			Suggestions: createdSuggestions,
+			Confirmed:   confirmedResults,
+		}, nil
 	}
-	return InboxItemResult{Item: item, Suggestion: &suggestion}, nil
+	return InboxItemResult{
+		Item:        item,
+		Suggestion:  &suggestion,
+		Suggestions: createdSuggestions,
+		Confirmed:   confirmedResults,
+	}, nil
 }
 
 func (uc *InboxUsecase) ConfirmInboxItem(ctx context.Context, userID, id string, input ConfirmInboxInput) (ConfirmResult, error) {
@@ -565,6 +599,9 @@ func (uc *InboxUsecase) ConfirmInboxItem(ctx context.Context, userID, id string,
 	validated, err := uc.SchemaValidator.Validate(raw)
 	if err != nil {
 		return ConfirmResult{}, err
+	}
+	if typ == domain.AiSuggestionTypeShopping {
+		title = normalizeShoppingListTitle(title, item.RawText, validated.Payload)
 	}
 
 	result := ConfirmResult{Type: typ}
@@ -909,6 +946,182 @@ func (uc *InboxUsecase) failInboxProcessing(ctx context.Context, item domain.Inb
 		return InboxItemResult{}, err
 	}
 	return InboxItemResult{Item: updated}, nil
+}
+
+func normalizeValidatedOutput(vout *service.ValidatedOutput, rawText string) {
+	if vout == nil {
+		return
+	}
+	vout.Output.Title = normalizeString(vout.Output.Title)
+	if strings.EqualFold(strings.TrimSpace(vout.Output.Type), string(domain.AiSuggestionTypeShopping)) {
+		vout.Output.Title = normalizeShoppingListTitle(vout.Output.Title, rawText, vout.Payload)
+	}
+}
+
+func normalizeShoppingListTitle(title, rawText string, payload any) string {
+	base := normalizeString(title)
+	lowerTitle := strings.ToLower(base)
+	lowerRaw := strings.ToLower(rawText)
+
+	shouldUseGeneric := false
+	if strings.Contains(lowerRaw, "lista de compras") || strings.Contains(lowerRaw, "lista compras") {
+		shouldUseGeneric = true
+	}
+	if strings.HasPrefix(lowerTitle, "comprar ") || strings.HasPrefix(lowerTitle, "buy ") {
+		shouldUseGeneric = true
+	}
+
+	if p, ok := payload.(service.ShoppingPayload); ok && len(p.Items) > 0 {
+		if len(p.Items) == 1 {
+			itemTitle := strings.ToLower(strings.TrimSpace(p.Items[0].Title))
+			if itemTitle != "" && (lowerTitle == itemTitle || lowerTitle == "comprar "+itemTitle) {
+				shouldUseGeneric = true
+			}
+		}
+	}
+
+	if shouldUseGeneric || base == "" {
+		return "Lista de compras"
+	}
+	return base
+}
+
+func outputsNeedReview(outputs []service.ValidatedOutput) bool {
+	for _, vout := range outputs {
+		if vout.Output.NeedsReview {
+			return true
+		}
+	}
+	return false
+}
+
+func (uc *InboxUsecase) expandValidatedOutputsByClauses(ctx context.Context, input service.PromptInput) ([]service.ValidatedOutput, error) {
+	if uc.AIClient == nil || uc.PromptBuilder == nil || uc.SchemaValidator == nil {
+		return nil, ErrDependencyMissing
+	}
+
+	clauses := splitAtomicActionClauses(input.RawText)
+	if len(clauses) <= 1 {
+		return nil, nil
+	}
+
+	expanded := make([]service.ValidatedOutput, 0, len(clauses))
+	for _, clause := range clauses {
+		clauseInput := input
+		clauseInput.RawText = clause
+		prompt := uc.PromptBuilder.Build(clauseInput)
+		completion, err := uc.AIClient.Complete(ctx, prompt)
+		if err != nil {
+			continue
+		}
+		validated, err := uc.SchemaValidator.ValidateMany([]byte(completion.Content))
+		if err != nil || len(validated) == 0 {
+			continue
+		}
+		expanded = append(expanded, validated[0])
+	}
+
+	expanded = dedupeValidatedOutputs(expanded)
+	if len(expanded) <= 1 {
+		return nil, nil
+	}
+	return expanded, nil
+}
+
+func splitAtomicActionClauses(rawText string) []string {
+	clean := strings.Join(strings.Fields(strings.TrimSpace(rawText)), " ")
+	if clean == "" {
+		return nil
+	}
+
+	markers := []string{
+		" e também ",
+		" e tambem ",
+		" e adicione ",
+		" e adicionar ",
+		" e inclua ",
+		" e incluir ",
+		" e me lembre ",
+		" e lembre ",
+		" e tenho ",
+		" e preciso ",
+		" e quero ",
+		" e agende ",
+		" e marque ",
+	}
+
+	clauses := []string{clean}
+	for {
+		changed := false
+		next := make([]string, 0, len(clauses)+1)
+
+		for _, clause := range clauses {
+			lower := strings.ToLower(clause)
+			markerIdx := -1
+			for _, marker := range markers {
+				if idx := strings.Index(lower, marker); idx > 0 && (markerIdx == -1 || idx < markerIdx) {
+					markerIdx = idx
+				}
+			}
+			if markerIdx < 0 {
+				next = append(next, strings.TrimSpace(clause))
+				continue
+			}
+
+			left := strings.TrimSpace(clause[:markerIdx])
+			rightStart := markerIdx + len(" e ")
+			right := strings.TrimSpace(clause[rightStart:])
+			if left != "" {
+				next = append(next, left)
+			}
+			if right != "" {
+				next = append(next, right)
+			}
+			changed = true
+		}
+
+		clauses = next
+		if !changed {
+			break
+		}
+	}
+
+	seen := make(map[string]struct{}, len(clauses))
+	out := make([]string, 0, len(clauses))
+	for _, clause := range clauses {
+		normalized := strings.TrimSpace(clause)
+		if normalized == "" {
+			continue
+		}
+		key := strings.ToLower(normalized)
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+		out = append(out, normalized)
+	}
+
+	return out
+}
+
+func dedupeValidatedOutputs(outputs []service.ValidatedOutput) []service.ValidatedOutput {
+	if len(outputs) <= 1 {
+		return outputs
+	}
+	seen := make(map[string]struct{}, len(outputs))
+	deduped := make([]service.ValidatedOutput, 0, len(outputs))
+
+	for _, vout := range outputs {
+		key := strings.ToLower(strings.TrimSpace(vout.Output.Type)) + "|" +
+			strings.ToLower(strings.TrimSpace(vout.Output.Title)) + "|" +
+			strings.TrimSpace(string(vout.Output.Payload))
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+		deduped = append(deduped, vout)
+	}
+	return deduped
 }
 
 func fixWeekdayMismatch(start *time.Time, end *time.Time, rawText string, now time.Time) {

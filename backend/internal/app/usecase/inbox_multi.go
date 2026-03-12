@@ -8,20 +8,20 @@ import (
 	"inbota/backend/internal/app/service"
 )
 
-func (uc *InboxUsecase) applyValidatedSuggestionTx(ctx context.Context, tx repository.TxRepositories, userID string, item domain.InboxItem, vout service.ValidatedOutput) error {
+func (uc *InboxUsecase) applyValidatedSuggestionTx(ctx context.Context, tx repository.TxRepositories, userID string, item domain.InboxItem, vout service.ValidatedOutput) (ConfirmResult, error) {
 	typ, ok := parseSuggestionType(vout.Output.Type)
 	if !ok || typ == domain.AiSuggestionTypeNote {
-		return ErrInvalidType
+		return ConfirmResult{}, ErrInvalidType
 	}
 
 	switch typ {
 	case domain.AiSuggestionTypeTask:
 		if tx.Tasks == nil || uc.TasksUsecase == nil {
-			return ErrDependencyMissing
+			return ConfirmResult{}, ErrDependencyMissing
 		}
 		p, ok := vout.Payload.(service.TaskPayload)
 		if !ok {
-			return ErrInvalidPayload
+			return ConfirmResult{}, ErrInvalidPayload
 		}
 		taskUC := *uc.TasksUsecase
 		taskUC.Tasks = tx.Tasks
@@ -30,16 +30,19 @@ func (uc *InboxUsecase) applyValidatedSuggestionTx(ctx context.Context, tx repos
 			fID = normalizeOptionalString(vout.Output.Context.FlagID)
 			sfID = normalizeOptionalString(vout.Output.Context.SubflagID)
 		}
-		_, err := taskUC.Create(ctx, userID, vout.Output.Title, nil, nil, p.DueAt, fID, sfID, &item.ID)
-		return err
+		task, err := taskUC.Create(ctx, userID, vout.Output.Title, nil, nil, p.DueAt, fID, sfID, &item.ID)
+		if err != nil {
+			return ConfirmResult{}, err
+		}
+		return ConfirmResult{Type: typ, Task: &task}, nil
 
 	case domain.AiSuggestionTypeReminder:
 		if tx.Reminders == nil || uc.RemindersUsecase == nil {
-			return ErrDependencyMissing
+			return ConfirmResult{}, ErrDependencyMissing
 		}
 		p, ok := vout.Payload.(service.ReminderPayload)
 		if !ok {
-			return ErrInvalidPayload
+			return ConfirmResult{}, ErrInvalidPayload
 		}
 		remUC := *uc.RemindersUsecase
 		remUC.Reminders = tx.Reminders
@@ -48,16 +51,19 @@ func (uc *InboxUsecase) applyValidatedSuggestionTx(ctx context.Context, tx repos
 			fID = normalizeOptionalString(vout.Output.Context.FlagID)
 			sfID = normalizeOptionalString(vout.Output.Context.SubflagID)
 		}
-		_, err := remUC.Create(ctx, userID, vout.Output.Title, nil, &p.At, fID, sfID, &item.ID)
-		return err
+		reminder, err := remUC.Create(ctx, userID, vout.Output.Title, nil, &p.At, fID, sfID, &item.ID)
+		if err != nil {
+			return ConfirmResult{}, err
+		}
+		return ConfirmResult{Type: typ, Reminder: &reminder}, nil
 
 	case domain.AiSuggestionTypeEvent:
 		if tx.Events == nil || uc.EventsUsecase == nil {
-			return ErrDependencyMissing
+			return ConfirmResult{}, ErrDependencyMissing
 		}
 		p, ok := vout.Payload.(service.EventPayload)
 		if !ok {
-			return ErrInvalidPayload
+			return ConfirmResult{}, ErrInvalidPayload
 		}
 		eventUC := *uc.EventsUsecase
 		eventUC.Events = tx.Events
@@ -66,16 +72,19 @@ func (uc *InboxUsecase) applyValidatedSuggestionTx(ctx context.Context, tx repos
 			fID = normalizeOptionalString(vout.Output.Context.FlagID)
 			sfID = normalizeOptionalString(vout.Output.Context.SubflagID)
 		}
-		_, err := eventUC.Create(ctx, userID, vout.Output.Title, &p.Start, p.End, &p.AllDay, nil, fID, sfID, &item.ID)
-		return err
+		event, err := eventUC.Create(ctx, userID, vout.Output.Title, &p.Start, p.End, &p.AllDay, nil, fID, sfID, &item.ID)
+		if err != nil {
+			return ConfirmResult{}, err
+		}
+		return ConfirmResult{Type: typ, Event: &event}, nil
 
 	case domain.AiSuggestionTypeRoutine:
 		if uc.RoutinesUsecase == nil {
-			return ErrDependencyMissing
+			return ConfirmResult{}, ErrDependencyMissing
 		}
 		p, ok := vout.Payload.(service.RoutinePayload)
 		if !ok {
-			return ErrInvalidPayload
+			return ConfirmResult{}, ErrInvalidPayload
 		}
 		routineUC := *uc.RoutinesUsecase
 		routineUC.Routines = tx.Routines
@@ -84,7 +93,7 @@ func (uc *InboxUsecase) applyValidatedSuggestionTx(ctx context.Context, tx repos
 			fID = normalizeOptionalString(vout.Output.Context.FlagID)
 			sfID = normalizeOptionalString(vout.Output.Context.SubflagID)
 		}
-		_, err := routineUC.Create(ctx, userID, RoutineInput{
+		routine, err := routineUC.Create(ctx, userID, RoutineInput{
 			Title:             vout.Output.Title,
 			RecurrenceType:    p.RecurrenceType,
 			Weekdays:          p.Weekdays,
@@ -97,101 +106,116 @@ func (uc *InboxUsecase) applyValidatedSuggestionTx(ctx context.Context, tx repos
 			SubflagID:         sfID,
 			SourceInboxItemID: &item.ID,
 		})
-		return err
+		if err != nil {
+			return ConfirmResult{}, err
+		}
+		return ConfirmResult{Type: typ, Routine: &routine}, nil
 
 	case domain.AiSuggestionTypeShopping:
 		// Shopping stays repo-level.
 		if tx.ShoppingLists == nil || tx.ShoppingItems == nil {
-			return ErrDependencyMissing
+			return ConfirmResult{}, ErrDependencyMissing
 		}
 		p, ok := vout.Payload.(service.ShoppingPayload)
 		if !ok {
-			return ErrInvalidPayload
+			return ConfirmResult{}, ErrInvalidPayload
 		}
 		list := domain.ShoppingList{UserID: userID, Title: vout.Output.Title, SourceInboxItemID: &item.ID}
 		createdList, err := tx.ShoppingLists.Create(ctx, list)
 		if err != nil {
-			return err
+			return ConfirmResult{}, err
 		}
+		createdItems := make([]domain.ShoppingItem, 0, len(p.Items))
 		for idx, shopItem := range p.Items {
 			si := domain.ShoppingItem{UserID: userID, ListID: createdList.ID, Title: shopItem.Title, Quantity: shopItem.Quantity, Checked: false, SortOrder: idx}
-			if _, err := tx.ShoppingItems.Create(ctx, si); err != nil {
-				return err
+			createdItem, err := tx.ShoppingItems.Create(ctx, si)
+			if err != nil {
+				return ConfirmResult{}, err
 			}
+			createdItems = append(createdItems, createdItem)
 		}
-		return nil
+		return ConfirmResult{Type: typ, ShoppingList: &createdList, ShoppingItems: createdItems}, nil
 	default:
-		return ErrInvalidType
+		return ConfirmResult{}, ErrInvalidType
 	}
 }
 
-func (uc *InboxUsecase) applyValidatedSuggestionNoTx(ctx context.Context, userID string, item domain.InboxItem, vout service.ValidatedOutput) error {
+func (uc *InboxUsecase) applyValidatedSuggestionNoTx(ctx context.Context, userID string, item domain.InboxItem, vout service.ValidatedOutput) (ConfirmResult, error) {
 	// Best-effort fallback. In production, TxRunner should be configured.
 	typ, ok := parseSuggestionType(vout.Output.Type)
 	if !ok || typ == domain.AiSuggestionTypeNote {
-		return ErrInvalidType
+		return ConfirmResult{}, ErrInvalidType
 	}
 
 	switch typ {
 	case domain.AiSuggestionTypeTask:
 		if uc.TasksUsecase == nil {
-			return ErrDependencyMissing
+			return ConfirmResult{}, ErrDependencyMissing
 		}
 		p, ok := vout.Payload.(service.TaskPayload)
 		if !ok {
-			return ErrInvalidPayload
+			return ConfirmResult{}, ErrInvalidPayload
 		}
 		var fID, sfID *string
 		if vout.Output.Context != nil {
 			fID = normalizeOptionalString(vout.Output.Context.FlagID)
 			sfID = normalizeOptionalString(vout.Output.Context.SubflagID)
 		}
-		_, err := uc.TasksUsecase.Create(ctx, userID, vout.Output.Title, nil, nil, p.DueAt, fID, sfID, &item.ID)
-		return err
+		task, err := uc.TasksUsecase.Create(ctx, userID, vout.Output.Title, nil, nil, p.DueAt, fID, sfID, &item.ID)
+		if err != nil {
+			return ConfirmResult{}, err
+		}
+		return ConfirmResult{Type: typ, Task: &task}, nil
 	case domain.AiSuggestionTypeReminder:
 		if uc.RemindersUsecase == nil {
-			return ErrDependencyMissing
+			return ConfirmResult{}, ErrDependencyMissing
 		}
 		p, ok := vout.Payload.(service.ReminderPayload)
 		if !ok {
-			return ErrInvalidPayload
+			return ConfirmResult{}, ErrInvalidPayload
 		}
 		var fID, sfID *string
 		if vout.Output.Context != nil {
 			fID = normalizeOptionalString(vout.Output.Context.FlagID)
 			sfID = normalizeOptionalString(vout.Output.Context.SubflagID)
 		}
-		_, err := uc.RemindersUsecase.Create(ctx, userID, vout.Output.Title, nil, &p.At, fID, sfID, &item.ID)
-		return err
+		reminder, err := uc.RemindersUsecase.Create(ctx, userID, vout.Output.Title, nil, &p.At, fID, sfID, &item.ID)
+		if err != nil {
+			return ConfirmResult{}, err
+		}
+		return ConfirmResult{Type: typ, Reminder: &reminder}, nil
 	case domain.AiSuggestionTypeEvent:
 		if uc.EventsUsecase == nil {
-			return ErrDependencyMissing
+			return ConfirmResult{}, ErrDependencyMissing
 		}
 		p, ok := vout.Payload.(service.EventPayload)
 		if !ok {
-			return ErrInvalidPayload
+			return ConfirmResult{}, ErrInvalidPayload
 		}
 		var fID, sfID *string
 		if vout.Output.Context != nil {
 			fID = normalizeOptionalString(vout.Output.Context.FlagID)
 			sfID = normalizeOptionalString(vout.Output.Context.SubflagID)
 		}
-		_, err := uc.EventsUsecase.Create(ctx, userID, vout.Output.Title, &p.Start, p.End, &p.AllDay, nil, fID, sfID, &item.ID)
-		return err
+		event, err := uc.EventsUsecase.Create(ctx, userID, vout.Output.Title, &p.Start, p.End, &p.AllDay, nil, fID, sfID, &item.ID)
+		if err != nil {
+			return ConfirmResult{}, err
+		}
+		return ConfirmResult{Type: typ, Event: &event}, nil
 	case domain.AiSuggestionTypeRoutine:
 		if uc.RoutinesUsecase == nil {
-			return ErrDependencyMissing
+			return ConfirmResult{}, ErrDependencyMissing
 		}
 		p, ok := vout.Payload.(service.RoutinePayload)
 		if !ok {
-			return ErrInvalidPayload
+			return ConfirmResult{}, ErrInvalidPayload
 		}
 		var fID, sfID *string
 		if vout.Output.Context != nil {
 			fID = normalizeOptionalString(vout.Output.Context.FlagID)
 			sfID = normalizeOptionalString(vout.Output.Context.SubflagID)
 		}
-		_, err := uc.RoutinesUsecase.Create(ctx, userID, RoutineInput{
+		routine, err := uc.RoutinesUsecase.Create(ctx, userID, RoutineInput{
 			Title:             vout.Output.Title,
 			RecurrenceType:    p.RecurrenceType,
 			Weekdays:          p.Weekdays,
@@ -204,11 +228,14 @@ func (uc *InboxUsecase) applyValidatedSuggestionNoTx(ctx context.Context, userID
 			SubflagID:         sfID,
 			SourceInboxItemID: &item.ID,
 		})
-		return err
+		if err != nil {
+			return ConfirmResult{}, err
+		}
+		return ConfirmResult{Type: typ, Routine: &routine}, nil
 	case domain.AiSuggestionTypeShopping:
 		// Keep existing non-tx behavior.
-		return ErrDependencyMissing
+		return ConfirmResult{}, ErrDependencyMissing
 	default:
-		return ErrInvalidType
+		return ConfirmResult{}, ErrInvalidType
 	}
 }

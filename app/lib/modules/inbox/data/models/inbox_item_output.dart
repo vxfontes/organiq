@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
+import 'inbox_confirm_output.dart';
 import 'inbox_suggestion_output.dart';
 
 part 'inbox_item_output.g.dart';
@@ -16,6 +17,8 @@ class InboxItemOutput {
     this.createdAt,
     this.updatedAt,
     this.suggestion,
+    this.suggestions = const <InboxSuggestionOutput>[],
+    this.confirmed = const <InboxConfirmOutput>[],
   });
 
   final String id;
@@ -27,6 +30,8 @@ class InboxItemOutput {
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final InboxSuggestionOutput? suggestion;
+  final List<InboxSuggestionOutput> suggestions;
+  final List<InboxConfirmOutput> confirmed;
 
   factory InboxItemOutput.fromJson(Map<String, dynamic> json) {
     return _$InboxItemOutputFromJson(json);

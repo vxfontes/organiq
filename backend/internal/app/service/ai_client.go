@@ -113,7 +113,7 @@ func (c *HTTPAIClient) complete(ctx context.Context, prompt, model string) (AICo
 			{
 				Role: "system",
 				Content: "You are a strict JSON extractor. " +
-					"Reply with only one valid JSON object and no extra text.",
+					"Reply with only valid JSON (object or array) and no extra text.",
 			},
 			{Role: "user", Content: prompt},
 		},

@@ -116,6 +116,22 @@ func toInboxItemResponse(item domain.InboxItem, suggestion *dto.AiSuggestionResp
 	}
 }
 
+func toInboxItemResponseWithSuggestions(
+	item domain.InboxItem,
+	suggestion *dto.AiSuggestionResponse,
+	suggestions []dto.AiSuggestionResponse,
+	confirmed []dto.ConfirmInboxItemResponse,
+) dto.InboxItemResponse {
+	resp := toInboxItemResponse(item, suggestion)
+	if len(suggestions) > 0 {
+		resp.Suggestions = suggestions
+	}
+	if len(confirmed) > 0 {
+		resp.Confirmed = confirmed
+	}
+	return resp
+}
+
 func toInboxItemObject(item domain.InboxItem) dto.InboxItemObject {
 	return dto.InboxItemObject{
 		ID:          item.ID,
