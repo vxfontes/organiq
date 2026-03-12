@@ -327,7 +327,7 @@ func (uc *InboxUsecase) ReprocessInboxItem(ctx context.Context, userID, id strin
 	}
 
 	usedHardFallback := false
-	validated, err := uc.SchemaValidator.Validate([]byte(completion.Content))
+	validatedMany, err := uc.SchemaValidator.ValidateMany([]byte(completion.Content))
 	if err != nil {
 		if !errors.Is(err, service.ErrAISchemaInvalid) {
 			return uc.failInboxProcessing(ctx, item, err)
@@ -338,9 +338,9 @@ func (uc *InboxUsecase) ReprocessInboxItem(ctx context.Context, userID, id strin
 			if fallbackModel != "" && !strings.EqualFold(strings.TrimSpace(completion.Model), fallbackModel) {
 				fallbackCompletion, fallbackErr := fallbackClient.CompleteWithModel(ctx, prompt, fallbackModel)
 				if fallbackErr == nil {
-					if fallbackValidated, fallbackValErr := uc.SchemaValidator.Validate([]byte(fallbackCompletion.Content)); fallbackValErr == nil {
+					if fallbackValidated, fallbackValErr := uc.SchemaValidator.ValidateMany([]byte(fallbackCompletion.Content)); fallbackValErr == nil {
 						completion = fallbackCompletion
-						validated = fallbackValidated
+						validatedMany = fallbackValidated
 						err = nil
 					}
 				}
@@ -373,39 +373,45 @@ func (uc *InboxUsecase) ReprocessInboxItem(ctx context.Context, userID, id strin
 			}
 		}
 
-		validated = service.BuildFallbackTaskOutput(item.RawText, fallbackContext)
+		validatedMany = []service.ValidatedOutput{service.BuildFallbackTaskOutput(item.RawText, fallbackContext)}
 		usedHardFallback = true
 	}
 
 validatedOutputReady:
-	if !usedHardFallback && validated.Output.NeedsReview {
+	anyNeedsReview := false
+	for _, vout := range validatedMany {
+		if vout.Output.NeedsReview {
+			anyNeedsReview = true
+			break
+		}
+	}
+	if !usedHardFallback && anyNeedsReview {
 		if fallbackClient, ok := uc.AIClient.(service.AIClientWithFallback); ok && fallbackClient.FallbackOnNeedsReview() {
 			fallbackModel := strings.TrimSpace(fallbackClient.FallbackModel())
 			if fallbackModel != "" && !strings.EqualFold(strings.TrimSpace(completion.Model), fallbackModel) {
 				fallbackCompletion, fallbackErr := fallbackClient.CompleteWithModel(ctx, prompt, fallbackModel)
 				if fallbackErr == nil {
-					if fallbackValidated, fallbackValErr := uc.SchemaValidator.Validate([]byte(fallbackCompletion.Content)); fallbackValErr == nil {
+					if fallbackValidated, fallbackValErr := uc.SchemaValidator.ValidateMany([]byte(fallbackCompletion.Content)); fallbackValErr == nil {
 						completion = fallbackCompletion
-						validated = fallbackValidated
+						validatedMany = fallbackValidated
 					}
 				}
 			}
 		}
 	}
 
-	suggestion := domain.AiSuggestion{
-		UserID:      userID,
-		InboxItemID: item.ID,
-		Type:        domain.AiSuggestionType(validated.Output.Type),
-		Title:       validated.Output.Title,
-		Confidence:  validated.Output.Confidence,
-		NeedsReview: validated.Output.NeedsReview,
-		PayloadJSON: validated.Output.Payload,
+	// Persist suggestions (one or many). When multiple suggestions are returned and none
+	// need review, we auto-confirm by creating all entities and marking the inbox item confirmed.
+	autoConfirm := len(validatedMany) > 1
+	for _, vout := range validatedMany {
+		if vout.Output.NeedsReview {
+			autoConfirm = false
+			break
+		}
 	}
-	if validated.Output.Context != nil {
-		suggestion.FlagID = normalizeOptionalString(validated.Output.Context.FlagID)
-		suggestion.SubflagID = normalizeOptionalString(validated.Output.Context.SubflagID)
-	}
+
+	// We'll return the last created suggestion (if any) for backward compatibility.
+	var suggestion domain.AiSuggestion
 
 	if uc.TxRunner != nil {
 		if err := uc.TxRunner.WithTx(ctx, func(tx repository.TxRepositories) error {
@@ -413,11 +419,36 @@ validatedOutputReady:
 				return ErrDependencyMissing
 			}
 			var err error
-			suggestion, err = tx.Suggestions.Create(ctx, suggestion)
-			if err != nil {
-				return err
+
+			for _, vout := range validatedMany {
+				s := domain.AiSuggestion{
+					UserID:      userID,
+					InboxItemID: item.ID,
+					Type:        domain.AiSuggestionType(vout.Output.Type),
+					Title:       vout.Output.Title,
+					Confidence:  vout.Output.Confidence,
+					NeedsReview: vout.Output.NeedsReview,
+					PayloadJSON: vout.Output.Payload,
+				}
+				if vout.Output.Context != nil {
+					s.FlagID = normalizeOptionalString(vout.Output.Context.FlagID)
+					s.SubflagID = normalizeOptionalString(vout.Output.Context.SubflagID)
+				}
+				suggestion, err = tx.Suggestions.Create(ctx, s)
+				if err != nil {
+					return err
+				}
+
+				if autoConfirm {
+					if err := uc.applyValidatedSuggestionTx(ctx, tx, userID, item, vout); err != nil {
+						return err
+					}
+				}
 			}
-			if suggestion.NeedsReview {
+
+			if autoConfirm {
+				item.Status = domain.InboxStatusConfirmed
+			} else if anyNeedsReview {
 				item.Status = domain.InboxStatusNeedsReview
 			} else {
 				item.Status = domain.InboxStatusSuggested
@@ -435,12 +466,37 @@ validatedOutputReady:
 		if uc.Suggestions == nil {
 			return InboxItemResult{}, ErrDependencyMissing
 		}
-		suggestion, err = uc.Suggestions.Create(ctx, suggestion)
-		if err != nil {
-			return InboxItemResult{}, err
+
+		for _, vout := range validatedMany {
+			s := domain.AiSuggestion{
+				UserID:      userID,
+				InboxItemID: item.ID,
+				Type:        domain.AiSuggestionType(vout.Output.Type),
+				Title:       vout.Output.Title,
+				Confidence:  vout.Output.Confidence,
+				NeedsReview: vout.Output.NeedsReview,
+				PayloadJSON: vout.Output.Payload,
+			}
+			if vout.Output.Context != nil {
+				s.FlagID = normalizeOptionalString(vout.Output.Context.FlagID)
+				s.SubflagID = normalizeOptionalString(vout.Output.Context.SubflagID)
+			}
+			suggestion, err = uc.Suggestions.Create(ctx, s)
+			if err != nil {
+				return InboxItemResult{}, err
+			}
+			if autoConfirm {
+				// No-tx mode: best effort creation without a wrapping transaction.
+				// Prefer running with TxRunner in production.
+				if err := uc.applyValidatedSuggestionNoTx(ctx, userID, item, vout); err != nil {
+					return InboxItemResult{}, err
+				}
+			}
 		}
 
-		if suggestion.NeedsReview {
+		if autoConfirm {
+			item.Status = domain.InboxStatusConfirmed
+		} else if anyNeedsReview {
 			item.Status = domain.InboxStatusNeedsReview
 		} else {
 			item.Status = domain.InboxStatusSuggested
@@ -452,6 +508,10 @@ validatedOutputReady:
 		}
 	}
 
+	// If no suggestions were persisted (shouldn't happen), return nil suggestion.
+	if suggestion.ID == "" {
+		return InboxItemResult{Item: item, Suggestion: nil}, nil
+	}
 	return InboxItemResult{Item: item, Suggestion: &suggestion}, nil
 }
 

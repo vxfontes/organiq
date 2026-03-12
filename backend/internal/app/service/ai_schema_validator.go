@@ -74,27 +74,77 @@ func NewAiSchemaValidator() *AiSchemaValidator {
 	return &AiSchemaValidator{}
 }
 
+// Validate accepts either a single item object or an array of item objects.
+// For backward compatibility, it returns the first item when an array is provided.
 func (v *AiSchemaValidator) Validate(raw []byte) (ValidatedOutput, error) {
-	output, err := decodeStrictOutput(raw)
+	outs, err := v.ValidateMany(raw)
 	if err != nil {
 		return ValidatedOutput{}, err
 	}
-
-	if output.Title == "" {
-		return ValidatedOutput{}, fmt.Errorf("%w: title_required", ErrAISchemaInvalid)
+	if len(outs) == 0 {
+		return ValidatedOutput{}, fmt.Errorf("%w: empty_output", ErrAISchemaInvalid)
 	}
-	if output.Confidence != nil {
-		if *output.Confidence < 0 || *output.Confidence > 1 {
-			return ValidatedOutput{}, fmt.Errorf("%w: confidence_out_of_range", ErrAISchemaInvalid)
+	return outs[0], nil
+}
+
+func (v *AiSchemaValidator) ValidateMany(raw []byte) ([]ValidatedOutput, error) {
+	outputs, err := decodeStrictOutputs(raw)
+	if err != nil {
+		return nil, err
+	}
+
+	validated := make([]ValidatedOutput, 0, len(outputs))
+	for _, output := range outputs {
+		if output.Title == "" {
+			return nil, fmt.Errorf("%w: title_required", ErrAISchemaInvalid)
 		}
+		if output.Confidence != nil {
+			if *output.Confidence < 0 || *output.Confidence > 1 {
+				return nil, fmt.Errorf("%w: confidence_out_of_range", ErrAISchemaInvalid)
+			}
+		}
+
+		payload, err := v.validatePayload(output.Type, output.Payload)
+		if err != nil {
+			return nil, err
+		}
+		validated = append(validated, ValidatedOutput{Output: output, Payload: payload})
 	}
 
-	payload, err := v.validatePayload(output.Type, output.Payload)
+	return validated, nil
+}
+
+func decodeStrictOutputs(raw []byte) ([]AIOutput, error) {
+	normalized := normalizeJSONPayload(raw)
+	normalized = normalizeOutputAliases(normalized)
+
+	// Accept either an object or an array at root.
+	var anyRoot any
+	if err := json.Unmarshal(normalized, &anyRoot); err != nil {
+		return nil, fmt.Errorf("%w: %s", ErrAISchemaInvalid, err.Error())
+	}
+
+	if _, ok := anyRoot.([]any); ok {
+		var rawArr []json.RawMessage
+		if err := json.Unmarshal(normalized, &rawArr); err != nil {
+			return nil, fmt.Errorf("%w: %s", ErrAISchemaInvalid, err.Error())
+		}
+		outs := make([]AIOutput, 0, len(rawArr))
+		for _, elem := range rawArr {
+			out, err := decodeStrictOutput(elem)
+			if err != nil {
+				return nil, err
+			}
+			outs = append(outs, out)
+		}
+		return outs, nil
+	}
+
+	out, err := decodeStrictOutput(normalized)
 	if err != nil {
-		return ValidatedOutput{}, err
+		return nil, err
 	}
-
-	return ValidatedOutput{Output: output, Payload: payload}, nil
+	return []AIOutput{out}, nil
 }
 
 func decodeStrictOutput(raw []byte) (AIOutput, error) {
