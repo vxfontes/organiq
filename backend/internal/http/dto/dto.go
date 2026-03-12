@@ -147,15 +147,17 @@ type AiSuggestionResponse struct {
 }
 
 type InboxItemResponse struct {
-	ID          string                `json:"id"`
-	Source      string                `json:"source"`
-	RawText     string                `json:"rawText"`
-	RawMediaURL *string               `json:"rawMediaUrl,omitempty"`
-	Status      string                `json:"status"`
-	LastError   *string               `json:"lastError,omitempty"`
-	CreatedAt   time.Time             `json:"createdAt"`
-	UpdatedAt   time.Time             `json:"updatedAt"`
-	Suggestion  *AiSuggestionResponse `json:"suggestion,omitempty"`
+	ID          string                     `json:"id"`
+	Source      string                     `json:"source"`
+	RawText     string                     `json:"rawText"`
+	RawMediaURL *string                    `json:"rawMediaUrl,omitempty"`
+	Status      string                     `json:"status"`
+	LastError   *string                    `json:"lastError,omitempty"`
+	CreatedAt   time.Time                  `json:"createdAt"`
+	UpdatedAt   time.Time                  `json:"updatedAt"`
+	Suggestion  *AiSuggestionResponse      `json:"suggestion,omitempty"`
+	Suggestions []AiSuggestionResponse     `json:"suggestions,omitempty"`
+	Confirmed   []ConfirmInboxItemResponse `json:"confirmed,omitempty"`
 }
 
 type ListInboxItemsResponse struct {

@@ -175,11 +175,18 @@ class _CreatePageState extends IBState<CreatePage, CreateController> {
       'linha processada',
       'linhas processadas',
     );
+    final detectedItemsTotal =
+        batchResult.tasksCount +
+        batchResult.remindersCount +
+        batchResult.eventsCount +
+        batchResult.routinesCount +
+        batchResult.shoppingListsCount;
 
     return IBOverviewCard(
       title: 'Resumo',
       subtitle:
-          '${batchResult.successCount} de $processedLabel. Revise abaixo.',
+          '${batchResult.successCount} de $processedLabel. '
+          '$detectedItemsTotal itens detectados.',
       chips: [
         IBChip(
           label: 'Tarefas ${batchResult.tasksCount}',

@@ -247,12 +247,16 @@ func normalizeJSONPayload(raw []byte) []byte {
 		return trimmed
 	}
 
-	// Fast path for already valid object bodies.
-	if trimmed[0] == '{' && trimmed[len(trimmed)-1] == '}' {
+	// Fast path for already valid object/array bodies.
+	if (trimmed[0] == '{' && trimmed[len(trimmed)-1] == '}') ||
+		(trimmed[0] == '[' && trimmed[len(trimmed)-1] == ']') {
 		return trimmed
 	}
 
 	// LLMs can return prose/markdown around the JSON body.
+	if extracted, ok := extractFirstJSONArray(trimmed); ok {
+		return extracted
+	}
 	if extracted, ok := extractFirstJSONObject(trimmed); ok {
 		return extracted
 	}
@@ -291,6 +295,50 @@ func extractFirstJSONObject(raw []byte) ([]byte, bool) {
 			}
 			depth++
 		case '}':
+			if depth == 0 {
+				continue
+			}
+			depth--
+			if depth == 0 && start >= 0 {
+				return raw[start : i+1], true
+			}
+		}
+	}
+
+	return nil, false
+}
+
+func extractFirstJSONArray(raw []byte) ([]byte, bool) {
+	start := -1
+	depth := 0
+	inString := false
+	escaped := false
+
+	for i, ch := range raw {
+		if inString {
+			if escaped {
+				escaped = false
+				continue
+			}
+			if ch == '\\' {
+				escaped = true
+				continue
+			}
+			if ch == '"' {
+				inString = false
+			}
+			continue
+		}
+
+		switch ch {
+		case '"':
+			inString = true
+		case '[':
+			if depth == 0 {
+				start = i
+			}
+			depth++
+		case ']':
 			if depth == 0 {
 				continue
 			}

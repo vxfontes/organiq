@@ -44,8 +44,8 @@ func NewPromptBuilder() *PromptBuilder {
 func (b *PromptBuilder) Build(input PromptInput) string {
 	var sb strings.Builder
 	writeLine(&sb, "You are an information extraction engine.")
-	writeLine(&sb, "Return ONLY a valid JSON object. No markdown, no extra text.")
-	writeLine(&sb, "Each input must produce exactly ONE actionable item.")
+	writeLine(&sb, "Return ONLY valid JSON (object or array). No markdown, no extra text.")
+	writeLine(&sb, "Each input may produce one or more actionable items.")
 	writeLine(&sb, "Use RFC3339 timestamps.")
 	writeLine(&sb, fmt.Sprintf("Locale: %s", strings.TrimSpace(input.Locale)))
 	writeLine(&sb, fmt.Sprintf("Timezone: %s", strings.TrimSpace(input.Timezone)))
@@ -106,7 +106,8 @@ func (b *PromptBuilder) Build(input PromptInput) string {
 	writeLine(&sb, "Rules:")
 	writeLine(&sb, "- You may return a single item object OR an array of item objects at the root level.")
 	writeLine(&sb, "- Prefer returning an array when the text clearly contains multiple actionable items.")
-	writeLine(&sb, "- If the text has multiple actions, select the single most actionable one and set needs_review=true.")
+	writeLine(&sb, "- If the text has multiple actions, return one item per action in an array, preserving the original order.")
+	writeLine(&sb, "- Do not set needs_review=true only because there are multiple actions; set it only when an item is actually ambiguous.")
 	writeLine(&sb, "- Use needs_review=true when unsure.")
 	writeLine(&sb, "- Interpret relative dates (today, tomorrow, next week) using the provided Timezone and Now (local). Never use UTC for relative dates.")
 	writeLine(&sb, "- For weekday phrases (e.g., \"next Tuesday\", \"terca que vem\", \"proxima terca\"), resolve to the next occurrence of that weekday after Now (same week if upcoming, otherwise next week). Do not shift to the day after the weekday.")
