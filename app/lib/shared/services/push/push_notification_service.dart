@@ -34,6 +34,7 @@ class PushNotificationService {
   bool _permissionsRequested = false;
   bool _firebaseListenersAttached = false;
   Future<void>? _initializing;
+  final Map<String, DateTime> _recentForegroundMessages = {};
   String? _deviceName;
   String? _deviceId;
   String? _pendingClickUrl;
@@ -307,10 +308,23 @@ class PushNotificationService {
   }
 
   Future<void> _handleForegroundMessage(RemoteMessage message) async {
+    if (_shouldSuppressDuplicateForegroundMessage(message)) {
+      if (kDebugMode) {
+        print(
+          'PushNotificationService: duplicate foreground message suppressed.',
+        );
+      }
+      return;
+    }
+
     final title = message.notification?.title ?? message.data['title'];
     final body = message.notification?.body ?? message.data['body'];
 
     if ((title == null || title.isEmpty) && (body == null || body.isEmpty)) {
+      return;
+    }
+
+    if (Platform.isIOS) {
       return;
     }
 
@@ -319,6 +333,39 @@ class PushNotificationService {
       body ?? '',
       Map<String, dynamic>.from(message.data),
     );
+  }
+
+  bool _shouldSuppressDuplicateForegroundMessage(RemoteMessage message) {
+    final now = DateTime.now();
+    _recentForegroundMessages.removeWhere(
+      (_, seenAt) => now.difference(seenAt) > const Duration(seconds: 10),
+    );
+
+    final key = _foregroundMessageDedupKey(message);
+    final previous = _recentForegroundMessages[key];
+    if (previous != null) {
+      return true;
+    }
+
+    _recentForegroundMessages[key] = now;
+    return false;
+  }
+
+  String _foregroundMessageDedupKey(RemoteMessage message) {
+    final messageId = message.messageId;
+    if (messageId != null && messageId.isNotEmpty) {
+      return 'message_id:$messageId';
+    }
+
+    final notificationLogId = message.data['notification_log_id'];
+    if (notificationLogId is String && notificationLogId.isNotEmpty) {
+      return 'notification_log_id:$notificationLogId';
+    }
+
+    final title = message.notification?.title ?? message.data['title'] ?? '';
+    final body = message.notification?.body ?? message.data['body'] ?? '';
+    final clickUrl = message.data['click_url'] ?? '';
+    return 'fallback:$title|$body|$clickUrl';
   }
 
   void _handleMessageOpenedApp(RemoteMessage message) {
@@ -413,6 +460,7 @@ class PushNotificationService {
     _pendingClickUrl = null;
     _pushTokenLoadingNotifier.value = false;
     _pushTokenNotifier.value = null;
+    _recentForegroundMessages.clear();
   }
 
   Future<String> _createAndPersistDeviceId({required String seed}) async {

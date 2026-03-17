@@ -36,8 +36,8 @@ class FirebaseBootstrap {
       await FirebaseMessaging.instance
           .setForegroundNotificationPresentationOptions(
             alert: true,
-            badge: false,
-            sound: false,
+            badge: true,
+            sound: true,
           );
     }
   }
