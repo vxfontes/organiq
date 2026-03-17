@@ -95,16 +95,12 @@ class IBItemCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          Text(
-            title,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: done ? AppColors.textMuted : AppColors.text,
-              decoration: done
-                  ? TextDecoration.lineThrough
-                  : TextDecoration.none,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
+          IBText(title, context: context)
+              .body
+              .weight(FontWeight.w700)
+              .color(done ? AppColors.textMuted : AppColors.text)
+              .decoration(done ? TextDecoration.lineThrough : TextDecoration.none)
+              .build(),
           if (secondary != null && secondary!.trim().isNotEmpty) ...[
             const SizedBox(height: 4),
             IBText(secondary!, context: context).muted.maxLines(2).build(),

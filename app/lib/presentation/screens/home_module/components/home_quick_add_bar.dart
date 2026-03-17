@@ -19,16 +19,19 @@ class _HomeQuickAddBarState extends State<HomeQuickAddBar> {
   final FocusNode _focusNode = FocusNode();
   bool _isLoading = false;
   bool _hasText = false;
+  bool _isFocused = false;
 
   @override
   void initState() {
     super.initState();
     _textController.addListener(_onTextChanged);
+    _focusNode.addListener(_onFocusChanged);
   }
 
   @override
   void dispose() {
     _textController.removeListener(_onTextChanged);
+    _focusNode.removeListener(_onFocusChanged);
     _textController.dispose();
     _focusNode.dispose();
     super.dispose();
@@ -39,6 +42,10 @@ class _HomeQuickAddBarState extends State<HomeQuickAddBar> {
     if (hasText != _hasText) {
       setState(() => _hasText = hasText);
     }
+  }
+
+  void _onFocusChanged() {
+    setState(() => _isFocused = _focusNode.hasFocus);
   }
 
   Future<void> _submit() async {
@@ -78,12 +85,26 @@ class _HomeQuickAddBarState extends State<HomeQuickAddBar> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      curve: Curves.easeOut,
       width: double.infinity,
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: _isFocused ? AppColors.primary500 : AppColors.border,
+          width: _isFocused ? 1.5 : 1.0,
+        ),
+        boxShadow: _isFocused
+            ? [
+                BoxShadow(
+                  color: AppColors.primary500.withValues(alpha: 0.08),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : null,
       ),
       child: Row(
         children: [

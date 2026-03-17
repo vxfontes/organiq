@@ -59,44 +59,42 @@ class _NotificationsPageState extends IBState<NotificationsPage, NotificationsCo
           ),
         ],
       ),
-      body: ValueListenableBuilder<bool>(
-        valueListenable: controller.loading,
-        builder: (context, loading, _) {
-          return ValueListenableBuilder<List<NotificationLogModel>>(
-            valueListenable: controller.notifications,
-            builder: (context, notifications, _) {
-              if (loading && notifications.isEmpty) {
-                return const Center(child: IBLoader());
-              }
+      body: AnimatedBuilder(
+        animation: Listenable.merge([controller.loading, controller.notifications]),
+        builder: (context, _) {
+          final loading = controller.loading.value;
+          final notifications = controller.notifications.value;
 
-              if (notifications.isEmpty) {
-                return const Center(
-                  child: IBEmptyState(
-                    title: 'Nenhuma notificação',
-                    subtitle: 'Suas notificações aparecerão aqui.',
-                  ),
+          if (loading && notifications.isEmpty) {
+            return const Center(child: IBLoader());
+          }
+
+          if (notifications.isEmpty) {
+            return const Center(
+              child: IBEmptyState(
+                title: 'Nenhuma notificação',
+                subtitle: 'Suas notificações aparecerão aqui.',
+              ),
+            );
+          }
+
+          return RefreshIndicator(
+            onRefresh: controller.fetchNotifications,
+            child: ListView.separated(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+              itemCount: notifications.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 8),
+              itemBuilder: (context, index) {
+                final notification = notifications[index];
+                return NotificationCard(
+                  notification: notification,
+                  onTap: notification.readAt == null
+                      ? () => controller.markAsRead(notification.id)
+                      : null,
                 );
-              }
-
-              return RefreshIndicator(
-                onRefresh: controller.fetchNotifications,
-                child: ListView.separated(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-                  itemCount: notifications.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
-                  itemBuilder: (context, index) {
-                    final notification = notifications[index];
-                    return NotificationCard(
-                      notification: notification,
-                      onTap: notification.readAt == null
-                          ? () => controller.markAsRead(notification.id)
-                          : null,
-                    );
-                  },
-                ),
-              );
-            },
+              },
+            ),
           );
         },
       ),

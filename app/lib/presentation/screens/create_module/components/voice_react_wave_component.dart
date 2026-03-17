@@ -33,7 +33,7 @@ class VoiceReactiveWaveState extends State<VoiceReactiveWave>
           height: 26,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
-            children: List.generate(22, (index) {
+            children: List.generate(10, (index) {
               final phase = (_controller.value * 2 * math.pi) + (index * 0.55);
               final amplitude = math.sin(phase).abs();
               final baseFactor = index.isEven ? 1.0 : 0.65;

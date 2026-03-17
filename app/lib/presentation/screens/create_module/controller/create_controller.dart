@@ -609,6 +609,72 @@ class CreateController implements IBController {
     }
   }
 
+  void confirmLineResult(CreateLineResult line) {
+    _updateLine(line, (current) => current.copyWith(confirmed: true));
+  }
+
+  Future<void> editAndReprocessLine(
+    CreateLineResult line,
+    String newText,
+  ) async {
+    final text = newText.trim();
+    if (text.isEmpty) return;
+
+    if (line.canDelete) {
+      await _deleteByEntity(line.entityType, line.entityId!);
+    }
+
+    final currentBatch = batchResult.value;
+    if (currentBatch == null) return;
+
+    final oldLines = currentBatch.lines.where((l) {
+      return !(l.sourceText == line.sourceText &&
+          l.entityId == line.entityId &&
+          l.entityType == line.entityType);
+    }).toList();
+
+    batchResult.value = CreateBatchResult(
+      totalInputs: currentBatch.totalInputs,
+      successCount: currentBatch.successCount,
+      failedCount: currentBatch.failedCount,
+      tasksCount: currentBatch.tasksCount,
+      remindersCount: currentBatch.remindersCount,
+      eventsCount: currentBatch.eventsCount,
+      shoppingListsCount: currentBatch.shoppingListsCount,
+      shoppingItemsCount: currentBatch.shoppingItemsCount,
+      routinesCount: currentBatch.routinesCount,
+      lines: oldLines,
+    );
+
+    loading.value = true;
+    error.value = null;
+    final result = await _processSingleLine(text);
+    loading.value = false;
+
+    result.fold(
+      (failureMessage) {
+        error.value = failureMessage;
+      },
+      (success) {
+        final updated = batchResult.value!;
+        batchResult.value = CreateBatchResult(
+          totalInputs: updated.totalInputs,
+          successCount: updated.successCount + success.lineResults.length,
+          failedCount: updated.failedCount,
+          tasksCount: updated.tasksCount + success.tasksCount,
+          remindersCount: updated.remindersCount + success.remindersCount,
+          eventsCount: updated.eventsCount + success.eventsCount,
+          shoppingListsCount:
+              updated.shoppingListsCount + success.shoppingListsCount,
+          shoppingItemsCount:
+              updated.shoppingItemsCount + success.shoppingItemsCount,
+          routinesCount: updated.routinesCount + success.routinesCount,
+          lines: [...updated.lines, ...success.lineResults],
+        );
+      },
+    );
+  }
+
   Future<bool> deleteLineResult(CreateLineResult line) async {
     if (!line.canDelete || batchResult.value == null) return false;
 

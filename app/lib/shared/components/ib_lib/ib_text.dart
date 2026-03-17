@@ -22,6 +22,7 @@ class IBText {
 
   IBText color(Color color) => _with((_style ?? _bodyStyle()).copyWith(color: color));
   IBText weight(FontWeight weight) => _with((_style ?? _bodyStyle()).copyWith(fontWeight: weight));
+  IBText decoration(TextDecoration decoration) => _with((_style ?? _bodyStyle()).copyWith(decoration: decoration));
   IBText align(TextAlign align) {
     _align = align;
     return this;

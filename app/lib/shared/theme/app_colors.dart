@@ -23,7 +23,10 @@ class AppColors {
 
   static const ai50 = Color(0xFFEEF2FF);
   static const ai100 = Color(0xFFE0E7FF);
+  static const ai200 = Color(0xFFC7D2FE);
+  static const ai300 = Color(0xFFA5B4FC);
   static const ai600 = Color(0xFF4F46E5);
+  static const ai700 = Color(0xFF4338CA);
   static const ai500 = Color(0xFF6366F1);
   static const warning500 = Color(0xFFF59E0B);
   static const warning600 = Color(0xFFEA580C);
