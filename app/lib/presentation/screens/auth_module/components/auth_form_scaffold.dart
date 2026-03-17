@@ -13,6 +13,7 @@ class AuthFormScaffold extends StatelessWidget {
     required this.primaryAction,
     this.secondaryAction,
     this.header,
+    this.footer,
   });
 
   final String title;
@@ -21,6 +22,7 @@ class AuthFormScaffold extends StatelessWidget {
   final Widget primaryAction;
   final Widget? secondaryAction;
   final Widget? header;
+  final Widget? footer;
 
   @override
   Widget build(BuildContext context) {
@@ -92,7 +94,16 @@ class AuthFormScaffold extends StatelessWidget {
                               ),
                             );
                           },
-                          child: card,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              card,
+                              if (footer != null) ...[
+                                const SizedBox(height: 16),
+                                Center(child: footer!),
+                              ],
+                            ],
+                          ),
                         ),
                       ),
                     ),

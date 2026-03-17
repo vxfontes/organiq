@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:organiq/presentation/routes/app_navigation.dart';
 import 'package:organiq/presentation/routes/app_routes.dart';
 import 'package:organiq/presentation/screens/settings_module/controller/settings_controller.dart';
@@ -13,10 +14,13 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends OQState<SettingsPage, SettingsController> {
+  String? _versionLabel;
+
   @override
   void initState() {
     super.initState();
     controller.error.addListener(_onErrorChanged);
+    _loadVersionLabel();
   }
 
   @override
@@ -29,6 +33,22 @@ class _SettingsPageState extends OQState<SettingsPage, SettingsController> {
     final error = controller.error.value;
     if (error != null && error.isNotEmpty && mounted) {
       OQSnackBar.error(context, error);
+    }
+  }
+
+  Future<void> _loadVersionLabel() async {
+    try {
+      final packageInfo = await PackageInfo.fromPlatform();
+      if (!mounted) return;
+      setState(() {
+        _versionLabel =
+            'Versão ${packageInfo.version}';
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _versionLabel = null;
+      });
     }
   }
 
@@ -102,6 +122,15 @@ class _SettingsPageState extends OQState<SettingsPage, SettingsController> {
               //   ],
               // ),
               // const SizedBox(height: 24),
+              if (_versionLabel != null) ...[
+                Center(
+                  child: OQText(
+                    _versionLabel!,
+                    context: context,
+                  ).caption.build(),
+                ),
+                const SizedBox(height: 12),
+              ],
               ValueListenableBuilder<bool>(
                 valueListenable: controller.loading,
                 builder: (context, loading, _) {

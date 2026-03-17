@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:organiq/modules/notifications/domain/repositories/i_notifications_repository.dart';
 import 'package:organiq/presentation/routes/app_navigation.dart';
 import 'package:organiq/presentation/routes/app_routes.dart';
@@ -18,10 +19,13 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends OQState<LoginPage, LoginController> {
+  String? _versionLabel;
+
   @override
   void initState() {
     super.initState();
     controller.error.addListener(_onErrorChanged);
+    _loadVersionLabel();
   }
 
   @override
@@ -34,6 +38,22 @@ class _LoginPageState extends OQState<LoginPage, LoginController> {
     final error = controller.error.value;
     if (error != null && error.isNotEmpty && mounted) {
       OQSnackBar.error(context, error);
+    }
+  }
+
+  Future<void> _loadVersionLabel() async {
+    try {
+      final packageInfo = await PackageInfo.fromPlatform();
+      if (!mounted) return;
+      setState(() {
+        _versionLabel =
+            'Versão ${packageInfo.version}';
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _versionLabel = null;
+      });
     }
   }
 
@@ -94,6 +114,12 @@ class _LoginPageState extends OQState<LoginPage, LoginController> {
         variant: OQButtonVariant.ghost,
         onPressed: () => AppNavigation.push(AppRoutes.signup),
       ),
+      footer: _versionLabel == null
+          ? null
+          : OQText(
+              _versionLabel!,
+              context: context,
+            ).caption.color(AppColors.textMuted).build(),
     );
   }
 }
