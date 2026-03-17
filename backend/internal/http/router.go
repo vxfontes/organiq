@@ -7,9 +7,9 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	swaggerFiles "github.com/tylfin/gin-swagger-files"
 
-	"inbota/backend/internal/config"
-	"inbota/backend/internal/http/handler"
-	"inbota/backend/internal/http/middleware"
+	"organiq/backend/internal/config"
+	"organiq/backend/internal/http/handler"
+	"organiq/backend/internal/http/middleware"
 )
 
 // NewRouter wires handlers and middleware.

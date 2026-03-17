@@ -1,10 +1,10 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:inbota/modules/events/data/models/event_output.dart';
-import 'package:inbota/modules/reminders/data/models/reminder_output.dart';
-import 'package:inbota/modules/routines/data/models/routine_output.dart';
-import 'package:inbota/modules/shopping/data/models/shopping_item_output.dart';
-import 'package:inbota/modules/shopping/data/models/shopping_list_output.dart';
-import 'package:inbota/modules/tasks/data/models/task_output.dart';
+import 'package:organiq/modules/events/data/models/event_output.dart';
+import 'package:organiq/modules/reminders/data/models/reminder_output.dart';
+import 'package:organiq/modules/routines/data/models/routine_output.dart';
+import 'package:organiq/modules/shopping/data/models/shopping_item_output.dart';
+import 'package:organiq/modules/shopping/data/models/shopping_list_output.dart';
+import 'package:organiq/modules/tasks/data/models/task_output.dart';
 
 part 'inbox_confirm_output.g.dart';
 

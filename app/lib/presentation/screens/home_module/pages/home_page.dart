@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-import 'package:inbota/presentation/routes/app_navigation.dart';
-import 'package:inbota/presentation/routes/app_routes.dart';
-import 'package:inbota/presentation/screens/home_module/components/index.dart';
-import 'package:inbota/presentation/screens/home_module/controller/home_controller.dart';
-import 'package:inbota/shared/components/ib_lib/index.dart';
-import 'package:inbota/shared/state/ib_state.dart';
-import 'package:inbota/shared/theme/app_colors.dart';
-import 'package:inbota/shared/utils/date_time.dart';
+import 'package:organiq/presentation/routes/app_navigation.dart';
+import 'package:organiq/presentation/routes/app_routes.dart';
+import 'package:organiq/presentation/screens/home_module/components/index.dart';
+import 'package:organiq/presentation/screens/home_module/controller/home_controller.dart';
+import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/theme/app_colors.dart';
+import 'package:organiq/shared/utils/date_time.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

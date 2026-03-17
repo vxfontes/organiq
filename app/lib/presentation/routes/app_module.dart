@@ -1,5 +1,5 @@
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:inbota/modules/shared_module.dart';
+import 'package:organiq/modules/shared_module.dart';
 
 import '../screens/auth_module/auth_module.dart';
 import '../screens/notifications_module/notifications_module.dart';

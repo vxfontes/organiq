@@ -9,7 +9,7 @@ class AppWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'Inbota',
+      title: 'Organiq',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       routerConfig: Modular.routerConfig,

@@ -1,10 +1,10 @@
-# Inbota
+# Organiq
 
-<img src="app/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png" alt="Inbota App Icon" width="180" />
+<img src="app/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png" alt="Organiq App Icon" width="180" />
 
 Inbox com IA para transformar entradas brutas em itens organizados de produtividade.
 
-O Inbota recebe texto (e, no roadmap, compartilhamentos e imagens), gera sugestoes com IA e permite revisao antes de confirmar o item final como tarefa, lembrete, evento ou lista de compras.
+O Organiq recebe texto (e, no roadmap, compartilhamentos e imagens), gera sugestoes com IA e permite revisao antes de confirmar o item final como tarefa, lembrete, evento ou lista de compras.
 
 ## Status
 
@@ -29,7 +29,7 @@ Objetivo do MVP:
 ## Arquitetura do repositorio
 
 ```text
-inbota/
+organiq/
 ├── app/      # App Flutter
 ├── backend/  # API Go (Gin)
 ├── db/       # Scripts e versoes de schema

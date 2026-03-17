@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"inbota/backend/internal/app/domain"
-	"inbota/backend/internal/http/dto"
+	"organiq/backend/internal/app/domain"
+	"organiq/backend/internal/http/dto"
 )
 
 func toFlagResponse(flag domain.Flag) dto.FlagResponse {

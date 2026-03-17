@@ -1158,8 +1158,8 @@ definitions:
     type: object
 info:
   contact: {}
-  description: API do MVP Inbota.
-  title: Inbota API
+  description: API do MVP Organiq.
+  title: Organiq API
   version: "0.1"
 paths:
   /healthz:

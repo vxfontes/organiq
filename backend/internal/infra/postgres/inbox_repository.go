@@ -8,8 +8,8 @@ import (
 
 	"github.com/lib/pq"
 
-	"inbota/backend/internal/app/domain"
-	"inbota/backend/internal/app/repository"
+	"organiq/backend/internal/app/domain"
+	"organiq/backend/internal/app/repository"
 )
 
 type InboxRepository struct {
@@ -33,7 +33,7 @@ func (r *InboxRepository) Create(ctx context.Context, item domain.InboxItem) (do
 	}
 
 	row := r.db.QueryRowContext(ctx, `
-		INSERT INTO inbota.inbox_items (user_id, source, raw_text, raw_media_url, status, last_error)
+		INSERT INTO organiq.inbox_items (user_id, source, raw_text, raw_media_url, status, last_error)
 		VALUES ($1, $2, $3, $4, $5, $6)
 		RETURNING id, created_at, updated_at
 	`, item.UserID, string(item.Source), item.RawText, item.RawMediaURL, string(item.Status), item.LastError)
@@ -46,7 +46,7 @@ func (r *InboxRepository) Create(ctx context.Context, item domain.InboxItem) (do
 
 func (r *InboxRepository) Update(ctx context.Context, item domain.InboxItem) (domain.InboxItem, error) {
 	row := r.db.QueryRowContext(ctx, `
-		UPDATE inbota.inbox_items
+		UPDATE organiq.inbox_items
 		SET source = $1, raw_text = $2, raw_media_url = $3, status = $4, last_error = $5, updated_at = now()
 		WHERE id = $6 AND user_id = $7
 		RETURNING created_at, updated_at
@@ -64,7 +64,7 @@ func (r *InboxRepository) Update(ctx context.Context, item domain.InboxItem) (do
 func (r *InboxRepository) Get(ctx context.Context, userID, id string) (domain.InboxItem, error) {
 	row := r.db.QueryRowContext(ctx, `
 		SELECT id, user_id, source, raw_text, raw_media_url, status, last_error, created_at, updated_at
-		FROM inbota.inbox_items
+		FROM organiq.inbox_items
 		WHERE id = $1 AND user_id = $2
 		LIMIT 1
 	`, id, userID)
@@ -94,7 +94,7 @@ func (r *InboxRepository) GetByIDs(ctx context.Context, userID string, ids []str
 
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, user_id, source, raw_text, raw_media_url, status, last_error, created_at, updated_at
-		FROM inbota.inbox_items
+		FROM organiq.inbox_items
 		WHERE user_id = $1 AND id = ANY($2)
 	`, userID, pq.Array(ids))
 	if err != nil {
@@ -152,7 +152,7 @@ func (r *InboxRepository) List(ctx context.Context, userID string, filter reposi
 
 	query := `
 		SELECT id, user_id, source, raw_text, raw_media_url, status, last_error, created_at, updated_at
-		FROM inbota.inbox_items
+		FROM organiq.inbox_items
 		WHERE ` + strings.Join(clauses, " AND ") + `
 		ORDER BY created_at DESC
 		LIMIT $` + itoa(limitIndex) + ` OFFSET $` + itoa(offsetIndex)
@@ -216,7 +216,7 @@ func (r *InboxRepository) ListWithSuggestion(ctx context.Context, userID string,
 		SELECT id, user_id, source, raw_text, raw_media_url, status, last_error, created_at, updated_at,
 		       suggestion_id, suggestion_type, suggestion_title, suggestion_confidence, payload_json,
 		       suggestion_needs_review, suggestion_created_at, suggestion_flag_id, suggestion_subflag_id
-		FROM inbota.view_inbox_with_latest_suggestion
+		FROM organiq.view_inbox_with_latest_suggestion
 		WHERE ` + strings.Join(clauses, " AND ") + `
 		ORDER BY created_at DESC
 		LIMIT $` + itoa(limitIndex) + ` OFFSET $` + itoa(offsetIndex)
@@ -283,7 +283,7 @@ func (r *InboxRepository) GetWithSuggestion(ctx context.Context, userID, id stri
 		SELECT id, user_id, source, raw_text, raw_media_url, status, last_error, created_at, updated_at,
 		       suggestion_id, suggestion_type, suggestion_title, suggestion_confidence, payload_json,
 		       suggestion_needs_review, suggestion_created_at, suggestion_flag_id, suggestion_subflag_id
-		FROM inbota.view_inbox_with_latest_suggestion
+		FROM organiq.view_inbox_with_latest_suggestion
 		WHERE id = $1 AND user_id = $2
 		LIMIT 1
 	`

@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:inbota/modules/flags/data/models/flag_create_input.dart';
-import 'package:inbota/modules/flags/data/models/flag_output.dart';
-import 'package:inbota/modules/flags/data/models/flag_update_input.dart';
-import 'package:inbota/modules/flags/data/models/subflag_create_input.dart';
-import 'package:inbota/modules/flags/data/models/subflag_output.dart';
-import 'package:inbota/modules/flags/data/models/subflag_update_input.dart';
-import 'package:inbota/modules/flags/domain/usecases/create_flag_usecase.dart';
-import 'package:inbota/modules/flags/domain/usecases/create_subflag_usecase.dart';
-import 'package:inbota/modules/flags/domain/usecases/delete_flag_usecase.dart';
-import 'package:inbota/modules/flags/domain/usecases/delete_subflag_usecase.dart';
-import 'package:inbota/modules/flags/domain/usecases/get_flags_usecase.dart';
-import 'package:inbota/modules/flags/domain/usecases/get_subflags_by_flag_usecase.dart';
-import 'package:inbota/modules/flags/domain/usecases/update_flag_usecase.dart';
-import 'package:inbota/modules/flags/domain/usecases/update_subflag_usecase.dart';
-import 'package:inbota/shared/errors/failures.dart';
-import 'package:inbota/shared/state/ib_state.dart';
+import 'package:organiq/modules/flags/data/models/flag_create_input.dart';
+import 'package:organiq/modules/flags/data/models/flag_output.dart';
+import 'package:organiq/modules/flags/data/models/flag_update_input.dart';
+import 'package:organiq/modules/flags/data/models/subflag_create_input.dart';
+import 'package:organiq/modules/flags/data/models/subflag_output.dart';
+import 'package:organiq/modules/flags/data/models/subflag_update_input.dart';
+import 'package:organiq/modules/flags/domain/usecases/create_flag_usecase.dart';
+import 'package:organiq/modules/flags/domain/usecases/create_subflag_usecase.dart';
+import 'package:organiq/modules/flags/domain/usecases/delete_flag_usecase.dart';
+import 'package:organiq/modules/flags/domain/usecases/delete_subflag_usecase.dart';
+import 'package:organiq/modules/flags/domain/usecases/get_flags_usecase.dart';
+import 'package:organiq/modules/flags/domain/usecases/get_subflags_by_flag_usecase.dart';
+import 'package:organiq/modules/flags/domain/usecases/update_flag_usecase.dart';
+import 'package:organiq/modules/flags/domain/usecases/update_subflag_usecase.dart';
+import 'package:organiq/shared/errors/failures.dart';
+import 'package:organiq/shared/state/ib_state.dart';
 
 class SettingsContextsController implements IBController {
   SettingsContextsController(

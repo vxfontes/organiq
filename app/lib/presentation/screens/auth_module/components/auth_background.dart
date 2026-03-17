@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:inbota/shared/theme/app_colors.dart';
+import 'package:organiq/shared/theme/app_colors.dart';
 
 class AuthBackground extends StatelessWidget {
   const AuthBackground({super.key, required this.child});

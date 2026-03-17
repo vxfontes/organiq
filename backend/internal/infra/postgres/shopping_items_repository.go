@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 
-	"inbota/backend/internal/app/domain"
-	"inbota/backend/internal/app/repository"
+	"organiq/backend/internal/app/domain"
+	"organiq/backend/internal/app/repository"
 )
 
 type ShoppingItemRepository struct {
@@ -22,7 +22,7 @@ func NewShoppingItemRepositoryTx(tx *sql.Tx) *ShoppingItemRepository {
 
 func (r *ShoppingItemRepository) Create(ctx context.Context, item domain.ShoppingItem) (domain.ShoppingItem, error) {
 	row := r.db.QueryRowContext(ctx, `
-		INSERT INTO inbota.shopping_items (user_id, list_id, title, quantity, checked, sort_order)
+		INSERT INTO organiq.shopping_items (user_id, list_id, title, quantity, checked, sort_order)
 		VALUES ($1, $2, $3, $4, $5, $6)
 		RETURNING id, created_at, updated_at
 	`, item.UserID, item.ListID, item.Title, item.Quantity, item.Checked, item.SortOrder)
@@ -35,7 +35,7 @@ func (r *ShoppingItemRepository) Create(ctx context.Context, item domain.Shoppin
 
 func (r *ShoppingItemRepository) Update(ctx context.Context, item domain.ShoppingItem) (domain.ShoppingItem, error) {
 	row := r.db.QueryRowContext(ctx, `
-		UPDATE inbota.shopping_items
+		UPDATE organiq.shopping_items
 		SET title = $1, quantity = $2, checked = $3, sort_order = $4, updated_at = now()
 		WHERE id = $5 AND user_id = $6
 		RETURNING created_at, updated_at
@@ -52,7 +52,7 @@ func (r *ShoppingItemRepository) Update(ctx context.Context, item domain.Shoppin
 
 func (r *ShoppingItemRepository) Delete(ctx context.Context, userID, id string) error {
 	result, err := r.db.ExecContext(ctx, `
-		DELETE FROM inbota.shopping_items
+		DELETE FROM organiq.shopping_items
 		WHERE id = $1 AND user_id = $2
 	`, id, userID)
 	if err != nil {
@@ -72,7 +72,7 @@ func (r *ShoppingItemRepository) Delete(ctx context.Context, userID, id string) 
 func (r *ShoppingItemRepository) Get(ctx context.Context, userID, id string) (domain.ShoppingItem, error) {
 	row := r.db.QueryRowContext(ctx, `
 		SELECT id, user_id, list_id, title, quantity, checked, sort_order, created_at, updated_at
-		FROM inbota.shopping_items
+		FROM organiq.shopping_items
 		WHERE id = $1 AND user_id = $2
 		LIMIT 1
 	`, id, userID)
@@ -97,7 +97,7 @@ func (r *ShoppingItemRepository) ListByList(ctx context.Context, userID, listID 
 
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, user_id, list_id, title, quantity, checked, sort_order, created_at, updated_at
-		FROM inbota.shopping_items
+		FROM organiq.shopping_items
 		WHERE user_id = $1 AND list_id = $2
 		ORDER BY sort_order ASC, created_at ASC
 		LIMIT $3 OFFSET $4

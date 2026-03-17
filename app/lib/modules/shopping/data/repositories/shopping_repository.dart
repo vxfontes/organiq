@@ -1,18 +1,18 @@
 import 'package:dartz/dartz.dart';
 
-import 'package:inbota/modules/shopping/data/models/shopping_item_create_input.dart';
-import 'package:inbota/modules/shopping/data/models/shopping_item_list_output.dart';
-import 'package:inbota/modules/shopping/data/models/shopping_item_output.dart';
-import 'package:inbota/modules/shopping/data/models/shopping_item_update_input.dart';
-import 'package:inbota/modules/shopping/data/models/shopping_list_create_input.dart';
-import 'package:inbota/modules/shopping/data/models/shopping_list_list_output.dart';
-import 'package:inbota/modules/shopping/data/models/shopping_list_output.dart';
-import 'package:inbota/modules/shopping/data/models/shopping_list_update_input.dart';
-import 'package:inbota/modules/shopping/domain/repositories/i_shopping_repository.dart';
-import 'package:inbota/shared/errors/api_error_mapper.dart';
-import 'package:inbota/shared/errors/failures.dart';
-import 'package:inbota/shared/services/http/app_path.dart';
-import 'package:inbota/shared/services/http/http_client.dart';
+import 'package:organiq/modules/shopping/data/models/shopping_item_create_input.dart';
+import 'package:organiq/modules/shopping/data/models/shopping_item_list_output.dart';
+import 'package:organiq/modules/shopping/data/models/shopping_item_output.dart';
+import 'package:organiq/modules/shopping/data/models/shopping_item_update_input.dart';
+import 'package:organiq/modules/shopping/data/models/shopping_list_create_input.dart';
+import 'package:organiq/modules/shopping/data/models/shopping_list_list_output.dart';
+import 'package:organiq/modules/shopping/data/models/shopping_list_output.dart';
+import 'package:organiq/modules/shopping/data/models/shopping_list_update_input.dart';
+import 'package:organiq/modules/shopping/domain/repositories/i_shopping_repository.dart';
+import 'package:organiq/shared/errors/api_error_mapper.dart';
+import 'package:organiq/shared/errors/failures.dart';
+import 'package:organiq/shared/services/http/app_path.dart';
+import 'package:organiq/shared/services/http/http_client.dart';
 
 class ShoppingRepository implements IShoppingRepository {
   ShoppingRepository(this._httpClient);

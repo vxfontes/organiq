@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 
-	"inbota/backend/internal/app/domain"
-	"inbota/backend/internal/app/repository"
+	"organiq/backend/internal/app/domain"
+	"organiq/backend/internal/app/repository"
 )
 
 type AiSuggestionRepository struct {
@@ -22,7 +22,7 @@ func NewAiSuggestionRepositoryTx(tx *sql.Tx) *AiSuggestionRepository {
 
 func (r *AiSuggestionRepository) Create(ctx context.Context, suggestion domain.AiSuggestion) (domain.AiSuggestion, error) {
 	row := r.db.QueryRowContext(ctx, `
-		INSERT INTO inbota.ai_suggestions
+		INSERT INTO organiq.ai_suggestions
 		(user_id, inbox_item_id, type, title, confidence, flag_id, subflag_id, needs_review, payload_json)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 		RETURNING id, created_at
@@ -37,7 +37,7 @@ func (r *AiSuggestionRepository) Create(ctx context.Context, suggestion domain.A
 func (r *AiSuggestionRepository) GetLatestByInboxItem(ctx context.Context, userID, inboxItemID string) (domain.AiSuggestion, error) {
 	row := r.db.QueryRowContext(ctx, `
 		SELECT id, user_id, inbox_item_id, type, title, confidence, flag_id, subflag_id, needs_review, payload_json, created_at
-		FROM inbota.ai_suggestions
+		FROM organiq.ai_suggestions
 		WHERE user_id = $1 AND inbox_item_id = $2
 		ORDER BY created_at DESC
 		LIMIT 1
@@ -71,7 +71,7 @@ func (r *AiSuggestionRepository) ListByInboxItem(ctx context.Context, userID, in
 
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, user_id, inbox_item_id, type, title, confidence, flag_id, subflag_id, needs_review, payload_json, created_at
-		FROM inbota.ai_suggestions
+		FROM organiq.ai_suggestions
 		WHERE user_id = $1 AND inbox_item_id = $2
 		ORDER BY created_at DESC
 		LIMIT $3 OFFSET $4

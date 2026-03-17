@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import 'package:inbota/presentation/routes/app_navigation.dart';
-import 'package:inbota/presentation/routes/app_routes.dart';
-import 'package:inbota/presentation/screens/auth_module/components/auth_background.dart';
-import 'package:inbota/shared/components/ib_lib/ib_button.dart';
-import 'package:inbota/shared/components/ib_lib/ib_icon.dart';
-import 'package:inbota/shared/components/ib_lib/ib_text.dart';
-import 'package:inbota/shared/theme/app_colors.dart';
+import 'package:organiq/presentation/routes/app_navigation.dart';
+import 'package:organiq/presentation/routes/app_routes.dart';
+import 'package:organiq/presentation/screens/auth_module/components/auth_background.dart';
+import 'package:organiq/shared/components/ib_lib/ib_button.dart';
+import 'package:organiq/shared/components/ib_lib/ib_icon.dart';
+import 'package:organiq/shared/components/ib_lib/ib_text.dart';
+import 'package:organiq/shared/theme/app_colors.dart';
 
 class PreLoginPage extends StatelessWidget {
   const PreLoginPage({super.key});

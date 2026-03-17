@@ -1,4 +1,4 @@
-Seu dia no Inbota - {{.Date}}
+Seu dia no Organiq - {{.Date}}
 
 {{if .HasSchedule}}
 --- Cronograma do Dia ---
@@ -48,4 +48,4 @@ Seu dia no Inbota - {{.Date}}
 {{end}}
 
 ---
-Enviado com ❤️ pelo Inbota.
+Enviado com ❤️ pelo Organiq.

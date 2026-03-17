@@ -1,10 +1,10 @@
 import 'package:dartz/dartz.dart';
-import 'package:inbota/modules/notifications/data/models/notification_preferences_model.dart';
-import 'package:inbota/modules/notifications/domain/repositories/i_notification_prefs_repository.dart';
-import 'package:inbota/shared/errors/api_error_mapper.dart';
-import 'package:inbota/shared/errors/failures.dart';
-import 'package:inbota/shared/services/http/app_path.dart';
-import 'package:inbota/shared/services/http/http_client.dart';
+import 'package:organiq/modules/notifications/data/models/notification_preferences_model.dart';
+import 'package:organiq/modules/notifications/domain/repositories/i_notification_prefs_repository.dart';
+import 'package:organiq/shared/errors/api_error_mapper.dart';
+import 'package:organiq/shared/errors/failures.dart';
+import 'package:organiq/shared/services/http/app_path.dart';
+import 'package:organiq/shared/services/http/http_client.dart';
 
 class NotificationPrefsRepository implements INotificationPrefsRepository {
   NotificationPrefsRepository(this._httpClient);

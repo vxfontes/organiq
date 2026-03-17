@@ -12,12 +12,12 @@
 		34BBD00D23F84138CC6A9100 /* libPods-RunnerTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D26DAB140EAD6078A20B2B95 /* libPods-RunnerTests.a */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
-		895893E3F2E6141DA3C3010A /* InbotaWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D897E9C2193FB21BD029D6B /* InbotaWidgetBundle.swift */; };
+		895893E3F2E6141DA3C3010A /* OrganiqWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D897E9C2193FB21BD029D6B /* OrganiqWidgetBundle.swift */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
-		A7183889F2BA343845A2BABC /* InbotaWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 596CC8C837385B9B1A95B82B /* InbotaWidgetExtension.appex */; };
-		D9AD52B54B8554AD267C0E71 /* InbotaWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EB86AB0925912600F99FAB2 /* InbotaWidget.swift */; };
+		A7183889F2BA343845A2BABC /* OrganiqWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 596CC8C837385B9B1A95B82B /* OrganiqWidgetExtension.appex */; };
+		D9AD52B54B8554AD267C0E71 /* OrganiqWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EB86AB0925912600F99FAB2 /* OrganiqWidget.swift */; };
 		E75B2412A13581FC68BA868D /* libPods-Runner.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD843C2864E411B4E7099312 /* libPods-Runner.a */; };
 /* End PBXBuildFile section */
 
@@ -34,7 +34,7 @@
 			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 95BE3A7A3B69051080A36879;
-			remoteInfo = InbotaWidgetExtension;
+			remoteInfo = OrganiqWidgetExtension;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -45,7 +45,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				A7183889F2BA343845A2BABC /* InbotaWidgetExtension.appex in Embed Foundation Extensions */,
+				A7183889F2BA343845A2BABC /* OrganiqWidgetExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -63,15 +63,15 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		0EB86AB0925912600F99FAB2 /* InbotaWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InbotaWidget.swift; sourceTree = "<group>"; };
+		0EB86AB0925912600F99FAB2 /* OrganiqWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OrganiqWidget.swift; sourceTree = "<group>"; };
 		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
 		331C807B294A618700263BE5 /* RunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerTests.swift; sourceTree = "<group>"; };
 		331C8081294A63A400263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
 		4DB259C8C51466397A88EBBB /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
-		596CC8C837385B9B1A95B82B /* InbotaWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = InbotaWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		5D897E9C2193FB21BD029D6B /* InbotaWidgetBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InbotaWidgetBundle.swift; sourceTree = "<group>"; };
+		596CC8C837385B9B1A95B82B /* OrganiqWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = OrganiqWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		5D897E9C2193FB21BD029D6B /* OrganiqWidgetBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OrganiqWidgetBundle.swift; sourceTree = "<group>"; };
 		69489AA69188AFF30E650DCF /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -151,14 +151,14 @@
 			path = RunnerTests;
 			sourceTree = "<group>";
 		};
-		39500E3F66D7EFBF9515CFB2 /* InbotaWidget */ = {
+		39500E3F66D7EFBF9515CFB2 /* OrganiqWidget */ = {
 			isa = PBXGroup;
 			children = (
-				0EB86AB0925912600F99FAB2 /* InbotaWidget.swift */,
-				5D897E9C2193FB21BD029D6B /* InbotaWidgetBundle.swift */,
+				0EB86AB0925912600F99FAB2 /* OrganiqWidget.swift */,
+				5D897E9C2193FB21BD029D6B /* OrganiqWidgetBundle.swift */,
 				69489AA69188AFF30E650DCF /* Info.plist */,
 			);
-			path = InbotaWidget;
+			path = OrganiqWidget;
 			sourceTree = "<group>";
 		};
 		9740EEB11CF90186004384FC /* Flutter */ = {
@@ -183,7 +183,7 @@
 				331C8082294A63A400263BE5 /* RunnerTests */,
 				1628A172B1791359C91B97F2 /* Pods */,
 				2F60429E8B18B01E05B1FD26 /* Frameworks */,
-				39500E3F66D7EFBF9515CFB2 /* InbotaWidget */,
+				39500E3F66D7EFBF9515CFB2 /* OrganiqWidget */,
 			);
 			sourceTree = "<group>";
 		};
@@ -192,7 +192,7 @@
 			children = (
 				97C146EE1CF9000F007C117D /* Runner.app */,
 				331C8081294A63A400263BE5 /* RunnerTests.xctest */,
-				596CC8C837385B9B1A95B82B /* InbotaWidgetExtension.appex */,
+				596CC8C837385B9B1A95B82B /* OrganiqWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -234,9 +234,9 @@
 			productReference = 331C8081294A63A400263BE5 /* RunnerTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		95BE3A7A3B69051080A36879 /* InbotaWidgetExtension */ = {
+		95BE3A7A3B69051080A36879 /* OrganiqWidgetExtension */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = B2F4F992D1FAC7FAE907B76A /* Build configuration list for PBXNativeTarget "InbotaWidgetExtension" */;
+			buildConfigurationList = B2F4F992D1FAC7FAE907B76A /* Build configuration list for PBXNativeTarget "OrganiqWidgetExtension" */;
 			buildPhases = (
 				F961E22223120C11358D5E5F /* Sources */,
 				A762BE666F7EAC6A216AC4DC /* Frameworks */,
@@ -246,9 +246,9 @@
 			);
 			dependencies = (
 			);
-			name = InbotaWidgetExtension;
-			productName = InbotaWidgetExtension;
-			productReference = 596CC8C837385B9B1A95B82B /* InbotaWidgetExtension.appex */;
+			name = OrganiqWidgetExtension;
+			productName = OrganiqWidgetExtension;
+			productReference = 596CC8C837385B9B1A95B82B /* OrganiqWidgetExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 		97C146ED1CF9000F007C117D /* Runner */ = {
@@ -313,7 +313,7 @@
 			targets = (
 				97C146ED1CF9000F007C117D /* Runner */,
 				331C8080294A63A400263BE5 /* RunnerTests */,
-				95BE3A7A3B69051080A36879 /* InbotaWidgetExtension */,
+				95BE3A7A3B69051080A36879 /* OrganiqWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -371,9 +371,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -463,8 +467,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D9AD52B54B8554AD267C0E71 /* InbotaWidget.swift in Sources */,
-				895893E3F2E6141DA3C3010A /* InbotaWidgetBundle.swift in Sources */,
+				D9AD52B54B8554AD267C0E71 /* OrganiqWidget.swift in Sources */,
+				895893E3F2E6141DA3C3010A /* OrganiqWidgetBundle.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -478,8 +482,8 @@
 		};
 		35E9D8C13A74B8838FF954A3 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			name = InbotaWidgetExtension;
-			target = 95BE3A7A3B69051080A36879 /* InbotaWidgetExtension */;
+			name = OrganiqWidgetExtension;
+			target = 95BE3A7A3B69051080A36879 /* OrganiqWidgetExtension */;
 			targetProxy = E47E1470EDA39AE97718550F /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -565,7 +569,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				DEVELOPMENT_TEAM = W84WQLBX4R;
+				DEVELOPMENT_TEAM = 876958ZD28;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = InBota;
@@ -575,7 +579,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
-				PRODUCT_BUNDLE_IDENTIFIER = com.vxfontes.inbota;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vxfontes.organiq;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
@@ -590,9 +594,10 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 876958ZD28;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.vxfontes.inbota.RunnerTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vxfontes.organiq.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -608,9 +613,10 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 876958ZD28;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.vxfontes.inbota.RunnerTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vxfontes.organiq.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Runner.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Runner";
@@ -624,9 +630,10 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 876958ZD28;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.vxfontes.inbota.RunnerTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vxfontes.organiq.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Runner.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Runner";
@@ -639,12 +646,12 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_ENABLE_OBJC_WEAK = NO;
-				CODE_SIGN_ENTITLEMENTS = InbotaWidget/InbotaWidgetExtension.entitlements;
+				CODE_SIGN_ENTITLEMENTS = OrganiqWidget/OrganiqWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = W84WQLBX4R;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = InbotaWidget/Info.plist;
+				INFOPLIST_FILE = OrganiqWidget/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -652,7 +659,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
-				PRODUCT_BUNDLE_IDENTIFIER = com.vxfontes.inbota.InbotaWidget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vxfontes.organiq.OrganiqWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -668,12 +675,12 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_ENABLE_OBJC_WEAK = NO;
-				CODE_SIGN_ENTITLEMENTS = InbotaWidget/InbotaWidgetExtension.entitlements;
+				CODE_SIGN_ENTITLEMENTS = OrganiqWidget/OrganiqWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = W84WQLBX4R;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = InbotaWidget/Info.plist;
+				INFOPLIST_FILE = OrganiqWidget/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -681,7 +688,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
-				PRODUCT_BUNDLE_IDENTIFIER = com.vxfontes.inbota.InbotaWidget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vxfontes.organiq.OrganiqWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -811,7 +818,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				DEVELOPMENT_TEAM = W84WQLBX4R;
+				DEVELOPMENT_TEAM = 876958ZD28;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = InBota;
@@ -821,7 +828,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
-				PRODUCT_BUNDLE_IDENTIFIER = com.vxfontes.inbota;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vxfontes.organiq;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -838,7 +845,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				DEVELOPMENT_TEAM = W84WQLBX4R;
+				DEVELOPMENT_TEAM = 876958ZD28;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = InBota;
@@ -848,7 +855,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
-				PRODUCT_BUNDLE_IDENTIFIER = com.vxfontes.inbota;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vxfontes.organiq;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
@@ -862,12 +869,12 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_ENABLE_OBJC_WEAK = NO;
-				CODE_SIGN_ENTITLEMENTS = InbotaWidget/InbotaWidgetExtension.entitlements;
+				CODE_SIGN_ENTITLEMENTS = OrganiqWidget/OrganiqWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = W84WQLBX4R;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = InbotaWidget/Info.plist;
+				INFOPLIST_FILE = OrganiqWidget/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -875,7 +882,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
-				PRODUCT_BUNDLE_IDENTIFIER = com.vxfontes.inbota.InbotaWidget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vxfontes.organiq.OrganiqWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -918,7 +925,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		B2F4F992D1FAC7FAE907B76A /* Build configuration list for PBXNativeTarget "InbotaWidgetExtension" */ = {
+		B2F4F992D1FAC7FAE907B76A /* Build configuration list for PBXNativeTarget "OrganiqWidgetExtension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				FB8F2FE77DDD351C15618AD4 /* Release */,

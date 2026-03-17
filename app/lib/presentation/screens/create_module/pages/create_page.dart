@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:inbota/modules/inbox/data/models/inbox_create_batch_result.dart';
-import 'package:inbota/presentation/screens/create_module/components/create_result_line_tile.dart';
-import 'package:inbota/presentation/screens/create_module/components/voice_react_wave_component.dart';
-import 'package:inbota/presentation/screens/create_module/controller/create_controller.dart';
-import 'package:inbota/shared/components/ib_lib/index.dart';
-import 'package:inbota/shared/state/ib_state.dart';
-import 'package:inbota/shared/theme/app_colors.dart';
-import 'package:inbota/shared/utils/text_utils.dart';
+import 'package:organiq/modules/inbox/data/models/inbox_create_batch_result.dart';
+import 'package:organiq/presentation/screens/create_module/components/create_result_line_tile.dart';
+import 'package:organiq/presentation/screens/create_module/components/voice_react_wave_component.dart';
+import 'package:organiq/presentation/screens/create_module/controller/create_controller.dart';
+import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/theme/app_colors.dart';
+import 'package:organiq/shared/utils/text_utils.dart';
 
 class CreatePage extends StatefulWidget {
   const CreatePage({super.key});

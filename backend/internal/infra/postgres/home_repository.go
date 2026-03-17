@@ -7,7 +7,7 @@ import (
 
 	"github.com/lib/pq"
 
-	"inbota/backend/internal/app/repository"
+	"organiq/backend/internal/app/repository"
 )
 
 type HomeRepository struct {
@@ -22,7 +22,7 @@ func (r *HomeRepository) ListInsightTemplates(ctx context.Context) ([]repository
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, category, title_template, summary_template, footer_template,
 		       is_focus, min_gap_minutes, priority
-		FROM inbota.home_insight_templates
+		FROM organiq.home_insight_templates
 		ORDER BY priority DESC, COALESCE(min_gap_minutes, 0) DESC, created_at
 	`)
 	if err != nil {
@@ -78,8 +78,8 @@ func (r *HomeRepository) ListShoppingPreview(ctx context.Context, userID string,
 				FILTER (WHERE si.checked = false),
 				'{}'
 			) AS preview_items
-		FROM inbota.shopping_lists sl
-		LEFT JOIN inbota.shopping_items si
+		FROM organiq.shopping_lists sl
+		LEFT JOIN organiq.shopping_items si
 			ON sl.id = si.list_id
 			AND sl.user_id = si.user_id
 		WHERE sl.user_id = $1
@@ -127,7 +127,7 @@ func (r *HomeRepository) ListFocusTasks(ctx context.Context, userID string, limi
 
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, title, description, status, due_at, created_at, updated_at
-		FROM inbota.tasks
+		FROM organiq.tasks
 		WHERE user_id = $1
 		  AND status = 'OPEN'
 		ORDER BY due_at NULLS LAST, created_at DESC
@@ -170,11 +170,11 @@ func (r *HomeRepository) ListWeekOccurrences(ctx context.Context, userID string,
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT t.dt
 		FROM (
-			SELECT start_at AS dt FROM inbota.events WHERE user_id = $1
+			SELECT start_at AS dt FROM organiq.events WHERE user_id = $1
 			UNION ALL
-			SELECT due_at AS dt FROM inbota.tasks WHERE user_id = $1
+			SELECT due_at AS dt FROM organiq.tasks WHERE user_id = $1
 			UNION ALL
-			SELECT remind_at AS dt FROM inbota.reminders WHERE user_id = $1
+			SELECT remind_at AS dt FROM organiq.reminders WHERE user_id = $1
 		) t
 		WHERE t.dt IS NOT NULL
 		  AND t.dt >= $2
@@ -207,13 +207,13 @@ func (r *HomeRepository) CountOverdue(ctx context.Context, userID string, now ti
 	if err := r.db.QueryRowContext(ctx, `
 		SELECT
 			(SELECT COUNT(*)
-			 FROM inbota.tasks
+			 FROM organiq.tasks
 			 WHERE user_id = $1
 			   AND status = 'OPEN'
 			   AND due_at IS NOT NULL
 			   AND due_at < $2),
 			(SELECT COUNT(*)
-			 FROM inbota.reminders
+			 FROM organiq.reminders
 			 WHERE user_id = $1
 			   AND status = 'OPEN'
 			   AND remind_at IS NOT NULL

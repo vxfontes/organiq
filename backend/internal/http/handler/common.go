@@ -7,12 +7,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"inbota/backend/internal/app/repository"
-	"inbota/backend/internal/app/service"
-	"inbota/backend/internal/app/usecase"
-	"inbota/backend/internal/http/dto"
-	"inbota/backend/internal/http/middleware"
-	"inbota/backend/internal/infra/postgres"
+	"organiq/backend/internal/app/repository"
+	"organiq/backend/internal/app/service"
+	"organiq/backend/internal/app/usecase"
+	"organiq/backend/internal/http/dto"
+	"organiq/backend/internal/http/middleware"
+	"organiq/backend/internal/infra/postgres"
 )
 
 func getUserID(c *gin.Context) (string, bool) {

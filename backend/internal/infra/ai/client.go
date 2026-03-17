@@ -4,8 +4,8 @@ import (
 	"errors"
 	"strings"
 
-	"inbota/backend/internal/app/service"
-	"inbota/backend/internal/config"
+	"organiq/backend/internal/app/service"
+	"organiq/backend/internal/config"
 )
 
 const (

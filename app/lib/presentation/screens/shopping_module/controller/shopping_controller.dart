@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 
-import 'package:inbota/modules/shopping/data/models/shopping_item_create_input.dart';
-import 'package:inbota/modules/shopping/data/models/shopping_item_output.dart';
-import 'package:inbota/modules/shopping/data/models/shopping_item_update_input.dart';
-import 'package:inbota/modules/shopping/data/models/shopping_list_create_input.dart';
-import 'package:inbota/modules/shopping/data/models/shopping_list_output.dart';
-import 'package:inbota/modules/shopping/data/models/shopping_list_update_input.dart';
-import 'package:inbota/modules/shopping/domain/usecases/create_shopping_item_usecase.dart';
-import 'package:inbota/modules/shopping/domain/usecases/create_shopping_list_usecase.dart';
-import 'package:inbota/modules/shopping/domain/usecases/delete_shopping_item_usecase.dart';
-import 'package:inbota/modules/shopping/domain/usecases/delete_shopping_list_usecase.dart';
-import 'package:inbota/modules/shopping/domain/usecases/get_shopping_items_usecase.dart';
-import 'package:inbota/modules/shopping/domain/usecases/get_shopping_lists_usecase.dart';
-import 'package:inbota/modules/shopping/domain/usecases/update_shopping_item_usecase.dart';
-import 'package:inbota/modules/shopping/domain/usecases/update_shopping_list_usecase.dart';
-import 'package:inbota/shared/errors/failures.dart';
-import 'package:inbota/shared/state/ib_state.dart';
+import 'package:organiq/modules/shopping/data/models/shopping_item_create_input.dart';
+import 'package:organiq/modules/shopping/data/models/shopping_item_output.dart';
+import 'package:organiq/modules/shopping/data/models/shopping_item_update_input.dart';
+import 'package:organiq/modules/shopping/data/models/shopping_list_create_input.dart';
+import 'package:organiq/modules/shopping/data/models/shopping_list_output.dart';
+import 'package:organiq/modules/shopping/data/models/shopping_list_update_input.dart';
+import 'package:organiq/modules/shopping/domain/usecases/create_shopping_item_usecase.dart';
+import 'package:organiq/modules/shopping/domain/usecases/create_shopping_list_usecase.dart';
+import 'package:organiq/modules/shopping/domain/usecases/delete_shopping_item_usecase.dart';
+import 'package:organiq/modules/shopping/domain/usecases/delete_shopping_list_usecase.dart';
+import 'package:organiq/modules/shopping/domain/usecases/get_shopping_items_usecase.dart';
+import 'package:organiq/modules/shopping/domain/usecases/get_shopping_lists_usecase.dart';
+import 'package:organiq/modules/shopping/domain/usecases/update_shopping_item_usecase.dart';
+import 'package:organiq/modules/shopping/domain/usecases/update_shopping_list_usecase.dart';
+import 'package:organiq/shared/errors/failures.dart';
+import 'package:organiq/shared/state/ib_state.dart';
 
 class ShoppingController implements IBController {
   ShoppingController(

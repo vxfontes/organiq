@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:inbota/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/ib_lib/index.dart';
 
 class HomeEmptyState extends StatelessWidget {
   const HomeEmptyState({super.key, required this.onCreateTap});

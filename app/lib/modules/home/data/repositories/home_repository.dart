@@ -1,11 +1,11 @@
 import 'package:dartz/dartz.dart';
 
-import 'package:inbota/modules/home/data/models/home_dashboard_output.dart';
-import 'package:inbota/modules/home/domain/repositories/i_home_repository.dart';
-import 'package:inbota/shared/errors/api_error_mapper.dart';
-import 'package:inbota/shared/errors/failures.dart';
-import 'package:inbota/shared/services/http/app_path.dart';
-import 'package:inbota/shared/services/http/http_client.dart';
+import 'package:organiq/modules/home/data/models/home_dashboard_output.dart';
+import 'package:organiq/modules/home/domain/repositories/i_home_repository.dart';
+import 'package:organiq/shared/errors/api_error_mapper.dart';
+import 'package:organiq/shared/errors/failures.dart';
+import 'package:organiq/shared/services/http/app_path.dart';
+import 'package:organiq/shared/services/http/http_client.dart';
 
 class HomeRepository implements IHomeRepository {
   HomeRepository(this._httpClient);

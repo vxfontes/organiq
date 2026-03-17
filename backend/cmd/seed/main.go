@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"inbota/backend/internal/app/domain"
-	"inbota/backend/internal/app/service"
-	"inbota/backend/internal/infra/postgres"
+	"organiq/backend/internal/app/domain"
+	"organiq/backend/internal/app/service"
+	"organiq/backend/internal/infra/postgres"
 )
 
 type seedConfig struct {
@@ -114,7 +114,7 @@ func main() {
 
 func loadSeedConfig() seedConfig {
 	return seedConfig{
-		Email:       getEnv("SEED_EMAIL", "demo@inbota.dev"),
+		Email:       getEnv("SEED_EMAIL", "demo@organiq.dev"),
 		Password:    getEnv("SEED_PASSWORD", "abc123"),
 		DisplayName: getEnv("SEED_DISPLAY_NAME", "Demo"),
 		Locale:      getEnv("SEED_LOCALE", "pt-BR"),
@@ -132,7 +132,7 @@ func getEnv(key, def string) string {
 func ensureUser(ctx context.Context, db *postgres.DB, cfg seedConfig) (domain.User, bool, error) {
 	row := db.QueryRowContext(ctx, `
 		SELECT id, email, display_name, password, locale, timezone, created_at, updated_at
-		FROM inbota.users
+		FROM organiq.users
 		WHERE email = $1
 		LIMIT 1
 	`, cfg.Email)
@@ -159,7 +159,7 @@ func ensureUser(ctx context.Context, db *postgres.DB, cfg seedConfig) (domain.Us
 	}
 
 	row = db.QueryRowContext(ctx, `
-		INSERT INTO inbota.users (email, display_name, password, locale, timezone)
+		INSERT INTO organiq.users (email, display_name, password, locale, timezone)
 		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id, created_at, updated_at
 	`, user.Email, user.DisplayName, user.Password, user.Locale, user.Timezone)
@@ -204,7 +204,7 @@ func seedContexts(ctx context.Context, db *postgres.DB, userID string) (map[stri
 func ensureFlag(ctx context.Context, db *postgres.DB, userID string, flag seedFlag) (string, bool, error) {
 	var id string
 	row := db.QueryRowContext(ctx, `
-		SELECT id FROM inbota.flags
+		SELECT id FROM organiq.flags
 		WHERE user_id = $1 AND name = $2
 		LIMIT 1
 	`, userID, flag.Name)
@@ -215,7 +215,7 @@ func ensureFlag(ctx context.Context, db *postgres.DB, userID string, flag seedFl
 	}
 
 	row = db.QueryRowContext(ctx, `
-		INSERT INTO inbota.flags (user_id, name, color, sort_order)
+		INSERT INTO organiq.flags (user_id, name, color, sort_order)
 		VALUES ($1, $2, $3, $4)
 		RETURNING id
 	`, userID, flag.Name, flag.Color, flag.SortOrder)
@@ -228,7 +228,7 @@ func ensureFlag(ctx context.Context, db *postgres.DB, userID string, flag seedFl
 func ensureSubflag(ctx context.Context, db *postgres.DB, userID, flagID string, sub seedSubflag) (string, bool, error) {
 	var id string
 	row := db.QueryRowContext(ctx, `
-		SELECT id FROM inbota.subflags
+		SELECT id FROM organiq.subflags
 		WHERE user_id = $1 AND flag_id = $2 AND name = $3
 		LIMIT 1
 	`, userID, flagID, sub.Name)
@@ -239,7 +239,7 @@ func ensureSubflag(ctx context.Context, db *postgres.DB, userID, flagID string, 
 	}
 
 	row = db.QueryRowContext(ctx, `
-		INSERT INTO inbota.subflags (user_id, flag_id, name, sort_order)
+		INSERT INTO organiq.subflags (user_id, flag_id, name, sort_order)
 		VALUES ($1, $2, $3, $4)
 		RETURNING id
 	`, userID, flagID, sub.Name, sub.SortOrder)
@@ -252,13 +252,13 @@ func ensureSubflag(ctx context.Context, db *postgres.DB, userID, flagID string, 
 func ensureContextRule(ctx context.Context, db *postgres.DB, userID, keyword, flagID string, subflagID *string) (string, bool, error) {
 	var id string
 	row := db.QueryRowContext(ctx, `
-		SELECT id FROM inbota.context_rules
+		SELECT id FROM organiq.context_rules
 		WHERE user_id = $1 AND keyword = $2
 		LIMIT 1
 	`, userID, keyword)
 	if err := row.Scan(&id); err == nil {
 		_, err = db.ExecContext(ctx, `
-			UPDATE inbota.context_rules
+			UPDATE organiq.context_rules
 			SET flag_id = $1, subflag_id = $2, updated_at = now()
 			WHERE id = $3 AND user_id = $4
 		`, flagID, subflagID, id, userID)
@@ -271,7 +271,7 @@ func ensureContextRule(ctx context.Context, db *postgres.DB, userID, keyword, fl
 	}
 
 	row = db.QueryRowContext(ctx, `
-		INSERT INTO inbota.context_rules (user_id, keyword, flag_id, subflag_id)
+		INSERT INTO organiq.context_rules (user_id, keyword, flag_id, subflag_id)
 		VALUES ($1, $2, $3, $4)
 		RETURNING id
 	`, userID, keyword, flagID, subflagID)
@@ -451,7 +451,7 @@ func seedEntities(ctx context.Context, db *postgres.DB, userID string, flagIDs, 
 	inboxNote, _, err := ensureInboxItem(ctx, db, domain.InboxItem{
 		UserID:      userID,
 		Source:      domain.InboxSourceOCR,
-		RawText:     "[seed] Senha do wifi: inbota123",
+		RawText:     "[seed] Senha do wifi: organiq123",
 		RawMediaURL: &noteMediaURL,
 		Status:      domain.InboxStatusSuggested,
 	})
@@ -581,7 +581,7 @@ func seedEntities(ctx context.Context, db *postgres.DB, userID string, flagIDs, 
 	}
 
 	notePayload, err := jsonPayload(map[string]any{
-		"content": "Senha do wifi: inbota123",
+		"content": "Senha do wifi: organiq123",
 	})
 	if err != nil {
 		return err
@@ -743,14 +743,14 @@ func floatPtr(value float64) *float64 {
 func ensureInboxItem(ctx context.Context, db *postgres.DB, item domain.InboxItem) (domain.InboxItem, bool, error) {
 	row := db.QueryRowContext(ctx, `
 		SELECT id, created_at, updated_at
-		FROM inbota.inbox_items
+		FROM organiq.inbox_items
 		WHERE user_id = $1 AND raw_text = $2
 		LIMIT 1
 	`, item.UserID, item.RawText)
 
 	if err := row.Scan(&item.ID, &item.CreatedAt, &item.UpdatedAt); err == nil {
 		row = db.QueryRowContext(ctx, `
-			UPDATE inbota.inbox_items
+			UPDATE organiq.inbox_items
 			SET source = $1, raw_text = $2, raw_media_url = $3, status = $4, last_error = $5, updated_at = now()
 			WHERE id = $6 AND user_id = $7
 			RETURNING created_at, updated_at
@@ -764,7 +764,7 @@ func ensureInboxItem(ctx context.Context, db *postgres.DB, item domain.InboxItem
 	}
 
 	row = db.QueryRowContext(ctx, `
-		INSERT INTO inbota.inbox_items (user_id, source, raw_text, raw_media_url, status, last_error)
+		INSERT INTO organiq.inbox_items (user_id, source, raw_text, raw_media_url, status, last_error)
 		VALUES ($1, $2, $3, $4, $5, $6)
 		RETURNING id, created_at, updated_at
 	`, item.UserID, string(item.Source), item.RawText, item.RawMediaURL, string(item.Status), item.LastError)
@@ -777,7 +777,7 @@ func ensureInboxItem(ctx context.Context, db *postgres.DB, item domain.InboxItem
 func ensureAiSuggestion(ctx context.Context, db *postgres.DB, suggestion domain.AiSuggestion) (domain.AiSuggestion, bool, error) {
 	row := db.QueryRowContext(ctx, `
 		SELECT id, created_at
-		FROM inbota.ai_suggestions
+		FROM organiq.ai_suggestions
 		WHERE user_id = $1 AND inbox_item_id = $2 AND type = $3
 		ORDER BY created_at DESC
 		LIMIT 1
@@ -785,7 +785,7 @@ func ensureAiSuggestion(ctx context.Context, db *postgres.DB, suggestion domain.
 
 	if err := row.Scan(&suggestion.ID, &suggestion.CreatedAt); err == nil {
 		_, err := db.ExecContext(ctx, `
-			UPDATE inbota.ai_suggestions
+			UPDATE organiq.ai_suggestions
 			SET title = $1, confidence = $2, flag_id = $3, subflag_id = $4, needs_review = $5, payload_json = $6
 			WHERE id = $7 AND user_id = $8
 		`, suggestion.Title, suggestion.Confidence, suggestion.FlagID, suggestion.SubflagID, suggestion.NeedsReview, suggestion.PayloadJSON, suggestion.ID, suggestion.UserID)
@@ -798,7 +798,7 @@ func ensureAiSuggestion(ctx context.Context, db *postgres.DB, suggestion domain.
 	}
 
 	row = db.QueryRowContext(ctx, `
-		INSERT INTO inbota.ai_suggestions
+		INSERT INTO organiq.ai_suggestions
 		(user_id, inbox_item_id, type, title, confidence, flag_id, subflag_id, needs_review, payload_json)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 		RETURNING id, created_at
@@ -812,14 +812,14 @@ func ensureAiSuggestion(ctx context.Context, db *postgres.DB, suggestion domain.
 func ensureTask(ctx context.Context, db *postgres.DB, task domain.Task) (domain.Task, bool, error) {
 	row := db.QueryRowContext(ctx, `
 		SELECT id, created_at, updated_at
-		FROM inbota.tasks
+		FROM organiq.tasks
 		WHERE user_id = $1 AND title = $2
 		LIMIT 1
 	`, task.UserID, task.Title)
 
 	if err := row.Scan(&task.ID, &task.CreatedAt, &task.UpdatedAt); err == nil {
 		row = db.QueryRowContext(ctx, `
-			UPDATE inbota.tasks
+			UPDATE organiq.tasks
 			SET title = $1, description = $2, status = $3, due_at = $4, flag_id = $5, subflag_id = $6, source_inbox_item_id = $7, updated_at = now()
 			WHERE id = $8 AND user_id = $9
 			RETURNING created_at, updated_at
@@ -833,7 +833,7 @@ func ensureTask(ctx context.Context, db *postgres.DB, task domain.Task) (domain.
 	}
 
 	row = db.QueryRowContext(ctx, `
-		INSERT INTO inbota.tasks (user_id, title, description, status, due_at, flag_id, subflag_id, source_inbox_item_id)
+		INSERT INTO organiq.tasks (user_id, title, description, status, due_at, flag_id, subflag_id, source_inbox_item_id)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 		RETURNING id, created_at, updated_at
 	`, task.UserID, task.Title, task.Description, string(task.Status), task.DueAt, task.FlagID, task.SubflagID, task.SourceInboxItemID)
@@ -846,14 +846,14 @@ func ensureTask(ctx context.Context, db *postgres.DB, task domain.Task) (domain.
 func ensureReminder(ctx context.Context, db *postgres.DB, reminder domain.Reminder) (domain.Reminder, bool, error) {
 	row := db.QueryRowContext(ctx, `
 		SELECT id, created_at, updated_at
-		FROM inbota.reminders
+		FROM organiq.reminders
 		WHERE user_id = $1 AND title = $2
 		LIMIT 1
 	`, reminder.UserID, reminder.Title)
 
 	if err := row.Scan(&reminder.ID, &reminder.CreatedAt, &reminder.UpdatedAt); err == nil {
 		row = db.QueryRowContext(ctx, `
-			UPDATE inbota.reminders
+			UPDATE organiq.reminders
 			SET title = $1, status = $2, remind_at = $3, source_inbox_item_id = $4, updated_at = now()
 			WHERE id = $5 AND user_id = $6
 			RETURNING created_at, updated_at
@@ -867,7 +867,7 @@ func ensureReminder(ctx context.Context, db *postgres.DB, reminder domain.Remind
 	}
 
 	row = db.QueryRowContext(ctx, `
-		INSERT INTO inbota.reminders (user_id, title, status, remind_at, source_inbox_item_id)
+		INSERT INTO organiq.reminders (user_id, title, status, remind_at, source_inbox_item_id)
 		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id, created_at, updated_at
 	`, reminder.UserID, reminder.Title, string(reminder.Status), reminder.RemindAt, reminder.SourceInboxItemID)
@@ -880,14 +880,14 @@ func ensureReminder(ctx context.Context, db *postgres.DB, reminder domain.Remind
 func ensureEvent(ctx context.Context, db *postgres.DB, event domain.Event) (domain.Event, bool, error) {
 	row := db.QueryRowContext(ctx, `
 		SELECT id, created_at, updated_at
-		FROM inbota.events
+		FROM organiq.events
 		WHERE user_id = $1 AND title = $2
 		LIMIT 1
 	`, event.UserID, event.Title)
 
 	if err := row.Scan(&event.ID, &event.CreatedAt, &event.UpdatedAt); err == nil {
 		row = db.QueryRowContext(ctx, `
-			UPDATE inbota.events
+			UPDATE organiq.events
 			SET title = $1, start_at = $2, end_at = $3, all_day = $4, location = $5, source_inbox_item_id = $6, updated_at = now()
 			WHERE id = $7 AND user_id = $8
 			RETURNING created_at, updated_at
@@ -901,7 +901,7 @@ func ensureEvent(ctx context.Context, db *postgres.DB, event domain.Event) (doma
 	}
 
 	row = db.QueryRowContext(ctx, `
-		INSERT INTO inbota.events (user_id, title, start_at, end_at, all_day, location, source_inbox_item_id)
+		INSERT INTO organiq.events (user_id, title, start_at, end_at, all_day, location, source_inbox_item_id)
 		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		RETURNING id, created_at, updated_at
 	`, event.UserID, event.Title, event.StartAt, event.EndAt, event.AllDay, event.Location, event.SourceInboxItemID)
@@ -914,14 +914,14 @@ func ensureEvent(ctx context.Context, db *postgres.DB, event domain.Event) (doma
 func ensureShoppingList(ctx context.Context, db *postgres.DB, list domain.ShoppingList) (domain.ShoppingList, bool, error) {
 	row := db.QueryRowContext(ctx, `
 		SELECT id, created_at, updated_at
-		FROM inbota.shopping_lists
+		FROM organiq.shopping_lists
 		WHERE user_id = $1 AND title = $2
 		LIMIT 1
 	`, list.UserID, list.Title)
 
 	if err := row.Scan(&list.ID, &list.CreatedAt, &list.UpdatedAt); err == nil {
 		row = db.QueryRowContext(ctx, `
-			UPDATE inbota.shopping_lists
+			UPDATE organiq.shopping_lists
 			SET title = $1, status = $2, source_inbox_item_id = $3, updated_at = now()
 			WHERE id = $4 AND user_id = $5
 			RETURNING created_at, updated_at
@@ -935,7 +935,7 @@ func ensureShoppingList(ctx context.Context, db *postgres.DB, list domain.Shoppi
 	}
 
 	row = db.QueryRowContext(ctx, `
-		INSERT INTO inbota.shopping_lists (user_id, title, status, source_inbox_item_id)
+		INSERT INTO organiq.shopping_lists (user_id, title, status, source_inbox_item_id)
 		VALUES ($1, $2, $3, $4)
 		RETURNING id, created_at, updated_at
 	`, list.UserID, list.Title, string(list.Status), list.SourceInboxItemID)
@@ -948,14 +948,14 @@ func ensureShoppingList(ctx context.Context, db *postgres.DB, list domain.Shoppi
 func ensureShoppingItem(ctx context.Context, db *postgres.DB, item domain.ShoppingItem) (domain.ShoppingItem, bool, error) {
 	row := db.QueryRowContext(ctx, `
 		SELECT id, created_at, updated_at
-		FROM inbota.shopping_items
+		FROM organiq.shopping_items
 		WHERE user_id = $1 AND list_id = $2 AND title = $3
 		LIMIT 1
 	`, item.UserID, item.ListID, item.Title)
 
 	if err := row.Scan(&item.ID, &item.CreatedAt, &item.UpdatedAt); err == nil {
 		row = db.QueryRowContext(ctx, `
-			UPDATE inbota.shopping_items
+			UPDATE organiq.shopping_items
 			SET title = $1, quantity = $2, checked = $3, sort_order = $4, updated_at = now()
 			WHERE id = $5 AND user_id = $6
 			RETURNING created_at, updated_at
@@ -969,7 +969,7 @@ func ensureShoppingItem(ctx context.Context, db *postgres.DB, item domain.Shoppi
 	}
 
 	row = db.QueryRowContext(ctx, `
-		INSERT INTO inbota.shopping_items (user_id, list_id, title, quantity, checked, sort_order)
+		INSERT INTO organiq.shopping_items (user_id, list_id, title, quantity, checked, sort_order)
 		VALUES ($1, $2, $3, $4, $5, $6)
 		RETURNING id, created_at, updated_at
 	`, item.UserID, item.ListID, item.Title, item.Quantity, item.Checked, item.SortOrder)

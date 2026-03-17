@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:hugeicons/hugeicons.dart';
-import 'package:inbota/presentation/routes/app_navigation.dart';
-import 'package:inbota/presentation/routes/app_routes.dart';
-import 'package:inbota/shared/components/ib_lib/index.dart';
-import 'package:inbota/shared/theme/app_colors.dart';
+import 'package:organiq/presentation/routes/app_navigation.dart';
+import 'package:organiq/presentation/routes/app_routes.dart';
+import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/theme/app_colors.dart';
 
 class RootPage extends StatefulWidget {
   const RootPage({super.key});
@@ -84,7 +84,7 @@ class _RootPageState extends State<RootPage> {
   Widget build(BuildContext context) {
     return IBScaffold(
       appBar: IBAppBar(
-        title: 'Inbota',
+        title: 'Organiq',
         padding: const EdgeInsets.only(left: 12, right: 12),
         actions: [
           IconButton(

@@ -7,8 +7,8 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:inbota/modules/notifications/domain/repositories/i_notifications_repository.dart';
-import 'package:inbota/presentation/routes/app_navigation.dart';
+import 'package:organiq/modules/notifications/domain/repositories/i_notifications_repository.dart';
+import 'package:organiq/presentation/routes/app_navigation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -157,7 +157,7 @@ class PushNotificationService {
         const AndroidNotificationChannel(
           'high_importance_channel',
           'High Importance Notifications',
-          description: 'Notificações importantes do Inbota.',
+          description: 'Notificações importantes do Organiq.',
           importance: Importance.max,
         ),
       );
@@ -264,7 +264,7 @@ class PushNotificationService {
     try {
       final data = jsonDecode(message);
       if (data['event'] == 'message') {
-        final title = data['title'] ?? 'Inbota';
+        final title = data['title'] ?? 'Organiq';
         final body = data['message'] ?? '';
 
         // ntfy envia metadados no campo 'attachment' ou em campos customizados se configurado,
@@ -339,7 +339,7 @@ class PushNotificationService {
     final ts = DateTime.now().microsecondsSinceEpoch.toRadixString(16);
     final entropyA = random.nextInt(1 << 32).toRadixString(16);
     final entropyB = random.nextInt(1 << 32).toRadixString(16);
-    final deviceId = 'inbota_${seed}_$ts$entropyA$entropyB';
+    final deviceId = 'organiq_${seed}_$ts$entropyA$entropyB';
     await _secureStorage.write(key: _deviceIdStorageKey, value: deviceId);
     return deviceId;
   }

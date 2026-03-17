@@ -1,4 +1,4 @@
-import 'package:inbota/modules/routines/data/models/routine_activity_day_output.dart';
+import 'package:organiq/modules/routines/data/models/routine_activity_day_output.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'routine_streak_output.g.dart';

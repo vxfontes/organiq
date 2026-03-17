@@ -2,25 +2,25 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:dartz/dartz.dart';
-import 'package:inbota/modules/events/domain/usecases/delete_event_usecase.dart';
-import 'package:inbota/modules/inbox/data/models/inbox_confirm_input.dart';
-import 'package:inbota/modules/inbox/data/models/inbox_confirm_output.dart';
-import 'package:inbota/modules/inbox/data/models/inbox_create_batch_result.dart';
-import 'package:inbota/modules/inbox/data/models/inbox_create_input.dart';
-import 'package:inbota/modules/inbox/data/models/inbox_create_line_result.dart';
-import 'package:inbota/modules/inbox/data/models/inbox_item_output.dart';
-import 'package:inbota/modules/inbox/data/models/inbox_line_process_success.dart';
-import 'package:inbota/modules/inbox/data/models/inbox_suggestion_output.dart';
-import 'package:inbota/modules/inbox/domain/usecases/confirm_inbox_item_usecase.dart';
-import 'package:inbota/modules/inbox/domain/usecases/create_inbox_item_usecase.dart';
-import 'package:inbota/modules/inbox/domain/usecases/reprocess_inbox_item_usecase.dart';
-import 'package:inbota/modules/reminders/domain/usecases/delete_reminder_usecase.dart';
-import 'package:inbota/modules/routines/domain/usecases/delete_routine_usecase.dart';
-import 'package:inbota/modules/shopping/domain/usecases/delete_shopping_list_usecase.dart';
-import 'package:inbota/modules/tasks/domain/usecases/delete_task_usecase.dart';
-import 'package:inbota/shared/errors/failures.dart';
-import 'package:inbota/shared/services/speech/speech_transcription_service.dart';
-import 'package:inbota/shared/state/ib_state.dart';
+import 'package:organiq/modules/events/domain/usecases/delete_event_usecase.dart';
+import 'package:organiq/modules/inbox/data/models/inbox_confirm_input.dart';
+import 'package:organiq/modules/inbox/data/models/inbox_confirm_output.dart';
+import 'package:organiq/modules/inbox/data/models/inbox_create_batch_result.dart';
+import 'package:organiq/modules/inbox/data/models/inbox_create_input.dart';
+import 'package:organiq/modules/inbox/data/models/inbox_create_line_result.dart';
+import 'package:organiq/modules/inbox/data/models/inbox_item_output.dart';
+import 'package:organiq/modules/inbox/data/models/inbox_line_process_success.dart';
+import 'package:organiq/modules/inbox/data/models/inbox_suggestion_output.dart';
+import 'package:organiq/modules/inbox/domain/usecases/confirm_inbox_item_usecase.dart';
+import 'package:organiq/modules/inbox/domain/usecases/create_inbox_item_usecase.dart';
+import 'package:organiq/modules/inbox/domain/usecases/reprocess_inbox_item_usecase.dart';
+import 'package:organiq/modules/reminders/domain/usecases/delete_reminder_usecase.dart';
+import 'package:organiq/modules/routines/domain/usecases/delete_routine_usecase.dart';
+import 'package:organiq/modules/shopping/domain/usecases/delete_shopping_list_usecase.dart';
+import 'package:organiq/modules/tasks/domain/usecases/delete_task_usecase.dart';
+import 'package:organiq/shared/errors/failures.dart';
+import 'package:organiq/shared/services/speech/speech_transcription_service.dart';
+import 'package:organiq/shared/state/ib_state.dart';
 
 class CreateController implements IBController {
   CreateController(

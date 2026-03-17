@@ -1,4 +1,4 @@
-package com.vxfontes.inbota
+package com.vxfontes.organiq
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:inbota/modules/routines/data/models/routine_output.dart';
-import 'package:inbota/presentation/screens/schedule_module/components/routine_week_selector.dart';
-import 'package:inbota/presentation/screens/schedule_module/controller/schedule_controller.dart';
-import 'package:inbota/shared/components/ib_lib/index.dart';
-import 'package:inbota/shared/theme/app_colors.dart';
+import 'package:organiq/modules/routines/data/models/routine_output.dart';
+import 'package:organiq/presentation/screens/schedule_module/components/routine_week_selector.dart';
+import 'package:organiq/presentation/screens/schedule_module/controller/schedule_controller.dart';
+import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/theme/app_colors.dart';
 
 class WeekOverview extends StatelessWidget {
   const WeekOverview({

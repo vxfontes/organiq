@@ -1,4 +1,4 @@
-import 'package:inbota/modules/routines/data/models/routine_output.dart';
+import 'package:organiq/modules/routines/data/models/routine_output.dart';
 
 class RoutineSection {
   const RoutineSection({

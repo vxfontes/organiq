@@ -2,26 +2,26 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import 'package:inbota/modules/flags/data/models/flag_output.dart';
-import 'package:inbota/modules/flags/data/models/subflag_output.dart';
-import 'package:inbota/modules/flags/domain/usecases/get_flags_usecase.dart';
-import 'package:inbota/modules/flags/domain/usecases/get_subflags_by_flag_usecase.dart';
-import 'package:inbota/modules/reminders/data/models/reminder_list_output.dart';
-import 'package:inbota/modules/reminders/data/models/reminder_output.dart';
-import 'package:inbota/modules/reminders/domain/usecases/get_reminders_usecase.dart';
-import 'package:inbota/modules/reminders/data/models/reminder_create_input.dart';
-import 'package:inbota/modules/reminders/domain/usecases/create_reminder_usecase.dart';
-import 'package:inbota/modules/tasks/data/models/task_create_input.dart';
-import 'package:inbota/modules/tasks/data/models/task_list_output.dart';
-import 'package:inbota/modules/tasks/data/models/task_output.dart';
-import 'package:inbota/modules/tasks/data/models/task_update_input.dart';
-import 'package:inbota/modules/tasks/domain/usecases/create_task_usecase.dart';
-import 'package:inbota/modules/tasks/domain/usecases/delete_task_usecase.dart';
-import 'package:inbota/modules/tasks/domain/usecases/get_tasks_usecase.dart';
-import 'package:inbota/modules/tasks/domain/usecases/update_task_usecase.dart';
-import 'package:inbota/shared/errors/failures.dart';
-import 'package:inbota/shared/services/widget/widget_bridge_service.dart';
-import 'package:inbota/shared/state/ib_state.dart';
+import 'package:organiq/modules/flags/data/models/flag_output.dart';
+import 'package:organiq/modules/flags/data/models/subflag_output.dart';
+import 'package:organiq/modules/flags/domain/usecases/get_flags_usecase.dart';
+import 'package:organiq/modules/flags/domain/usecases/get_subflags_by_flag_usecase.dart';
+import 'package:organiq/modules/reminders/data/models/reminder_list_output.dart';
+import 'package:organiq/modules/reminders/data/models/reminder_output.dart';
+import 'package:organiq/modules/reminders/domain/usecases/get_reminders_usecase.dart';
+import 'package:organiq/modules/reminders/data/models/reminder_create_input.dart';
+import 'package:organiq/modules/reminders/domain/usecases/create_reminder_usecase.dart';
+import 'package:organiq/modules/tasks/data/models/task_create_input.dart';
+import 'package:organiq/modules/tasks/data/models/task_list_output.dart';
+import 'package:organiq/modules/tasks/data/models/task_output.dart';
+import 'package:organiq/modules/tasks/data/models/task_update_input.dart';
+import 'package:organiq/modules/tasks/domain/usecases/create_task_usecase.dart';
+import 'package:organiq/modules/tasks/domain/usecases/delete_task_usecase.dart';
+import 'package:organiq/modules/tasks/domain/usecases/get_tasks_usecase.dart';
+import 'package:organiq/modules/tasks/domain/usecases/update_task_usecase.dart';
+import 'package:organiq/shared/errors/failures.dart';
+import 'package:organiq/shared/services/widget/widget_bridge_service.dart';
+import 'package:organiq/shared/state/ib_state.dart';
 
 class RemindersController implements IBController {
   RemindersController(

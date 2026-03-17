@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'package:inbota/presentation/routes/app_navigation.dart';
-import 'package:inbota/presentation/routes/app_routes.dart';
-import 'package:inbota/presentation/screens/home_module/controller/home_controller.dart';
-import 'package:inbota/shared/components/ib_lib/index.dart';
+import 'package:organiq/presentation/routes/app_navigation.dart';
+import 'package:organiq/presentation/routes/app_routes.dart';
+import 'package:organiq/presentation/screens/home_module/controller/home_controller.dart';
+import 'package:organiq/shared/components/ib_lib/index.dart';
 
 class HomeWeekStripSection extends StatelessWidget {
   const HomeWeekStripSection({

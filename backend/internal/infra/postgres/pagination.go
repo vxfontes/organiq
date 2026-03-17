@@ -3,7 +3,7 @@ package postgres
 import (
 	"strconv"
 
-	"inbota/backend/internal/app/repository"
+	"organiq/backend/internal/app/repository"
 )
 
 const (

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:inbota/modules/flags/data/models/flag_output.dart';
-import 'package:inbota/modules/flags/data/models/subflag_output.dart';
-import 'package:inbota/presentation/screens/settings_module/components/settings_contexts_bottom_sheets.dart';
-import 'package:inbota/presentation/screens/settings_module/components/settings_contexts_empty_state_card.dart';
-import 'package:inbota/presentation/screens/settings_module/components/settings_contexts_flag_card.dart';
-import 'package:inbota/presentation/screens/settings_module/components/settings_contexts_header_row.dart';
-import 'package:inbota/presentation/screens/settings_module/controller/settings_contexts_controller.dart';
-import 'package:inbota/shared/components/ib_lib/index.dart';
-import 'package:inbota/shared/state/ib_state.dart';
-import 'package:inbota/shared/theme/app_colors.dart';
+import 'package:organiq/modules/flags/data/models/flag_output.dart';
+import 'package:organiq/modules/flags/data/models/subflag_output.dart';
+import 'package:organiq/presentation/screens/settings_module/components/settings_contexts_bottom_sheets.dart';
+import 'package:organiq/presentation/screens/settings_module/components/settings_contexts_empty_state_card.dart';
+import 'package:organiq/presentation/screens/settings_module/components/settings_contexts_flag_card.dart';
+import 'package:organiq/presentation/screens/settings_module/components/settings_contexts_header_row.dart';
+import 'package:organiq/presentation/screens/settings_module/controller/settings_contexts_controller.dart';
+import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/theme/app_colors.dart';
 
 class SettingsContextsPage extends StatefulWidget {
   const SettingsContextsPage({super.key});

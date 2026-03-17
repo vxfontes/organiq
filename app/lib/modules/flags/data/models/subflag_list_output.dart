@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:inbota/modules/flags/data/models/subflag_output.dart';
+import 'package:organiq/modules/flags/data/models/subflag_output.dart';
 
 part 'subflag_list_output.g.dart';
 

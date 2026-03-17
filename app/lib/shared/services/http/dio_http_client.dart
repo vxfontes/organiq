@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
-import 'package:inbota/shared/services/http/app_service.dart';
-import 'package:inbota/shared/services/http/http_client.dart';
-import 'package:inbota/shared/storage/auth_token_store.dart';
+import 'package:organiq/shared/services/http/app_service.dart';
+import 'package:organiq/shared/services/http/http_client.dart';
+import 'package:organiq/shared/storage/auth_token_store.dart';
 
 class DioHttpClient implements IHttpClient {
   DioHttpClient(this.profile, {AuthTokenStore? tokenStore})

@@ -4,7 +4,7 @@ import (
 	"net/mail"
 	"strings"
 
-	"inbota/backend/internal/app/domain"
+	"organiq/backend/internal/app/domain"
 )
 
 func normalizeString(value string) string {

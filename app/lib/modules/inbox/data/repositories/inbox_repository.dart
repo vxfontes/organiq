@@ -1,13 +1,13 @@
 import 'package:dartz/dartz.dart';
-import 'package:inbota/modules/inbox/data/models/inbox_confirm_input.dart';
-import 'package:inbota/modules/inbox/data/models/inbox_confirm_output.dart';
-import 'package:inbota/modules/inbox/data/models/inbox_create_input.dart';
-import 'package:inbota/modules/inbox/data/models/inbox_item_output.dart';
-import 'package:inbota/modules/inbox/domain/repositories/i_inbox_repository.dart';
-import 'package:inbota/shared/errors/api_error_mapper.dart';
-import 'package:inbota/shared/errors/failures.dart';
-import 'package:inbota/shared/services/http/app_path.dart';
-import 'package:inbota/shared/services/http/http_client.dart';
+import 'package:organiq/modules/inbox/data/models/inbox_confirm_input.dart';
+import 'package:organiq/modules/inbox/data/models/inbox_confirm_output.dart';
+import 'package:organiq/modules/inbox/data/models/inbox_create_input.dart';
+import 'package:organiq/modules/inbox/data/models/inbox_item_output.dart';
+import 'package:organiq/modules/inbox/domain/repositories/i_inbox_repository.dart';
+import 'package:organiq/shared/errors/api_error_mapper.dart';
+import 'package:organiq/shared/errors/failures.dart';
+import 'package:organiq/shared/services/http/app_path.dart';
+import 'package:organiq/shared/services/http/http_client.dart';
 
 class InboxRepository implements IInboxRepository {
   InboxRepository(this._httpClient);

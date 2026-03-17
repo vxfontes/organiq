@@ -1,15 +1,15 @@
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:inbota/modules/shared_module.dart';
-import 'package:inbota/presentation/routes/app_routes.dart';
-import 'package:inbota/presentation/screens/settings_module/controller/settings_account_controller.dart';
-import 'package:inbota/presentation/screens/settings_module/controller/settings_contexts_controller.dart';
-import 'package:inbota/presentation/screens/settings_module/controller/settings_controller.dart';
-import 'package:inbota/presentation/screens/settings_module/controller/settings_notifications_controller.dart';
-import 'package:inbota/presentation/screens/settings_module/pages/settings_account_page.dart';
-import 'package:inbota/presentation/screens/settings_module/pages/settings_components_page.dart';
-import 'package:inbota/presentation/screens/settings_module/pages/settings_contexts_page.dart';
-import 'package:inbota/presentation/screens/settings_module/pages/settings_notifications_page.dart';
-import 'package:inbota/presentation/screens/settings_module/pages/settings_page.dart';
+import 'package:organiq/modules/shared_module.dart';
+import 'package:organiq/presentation/routes/app_routes.dart';
+import 'package:organiq/presentation/screens/settings_module/controller/settings_account_controller.dart';
+import 'package:organiq/presentation/screens/settings_module/controller/settings_contexts_controller.dart';
+import 'package:organiq/presentation/screens/settings_module/controller/settings_controller.dart';
+import 'package:organiq/presentation/screens/settings_module/controller/settings_notifications_controller.dart';
+import 'package:organiq/presentation/screens/settings_module/pages/settings_account_page.dart';
+import 'package:organiq/presentation/screens/settings_module/pages/settings_components_page.dart';
+import 'package:organiq/presentation/screens/settings_module/pages/settings_contexts_page.dart';
+import 'package:organiq/presentation/screens/settings_module/pages/settings_notifications_page.dart';
+import 'package:organiq/presentation/screens/settings_module/pages/settings_page.dart';
 
 class SettingsModule extends Module {
   // core_modules

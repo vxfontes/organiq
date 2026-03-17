@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"inbota/backend/internal/app/domain"
+	"organiq/backend/internal/app/domain"
 )
 
 func TestShouldShowRoutineForDate_RespectsStartsOnForWeekly(t *testing.T) {

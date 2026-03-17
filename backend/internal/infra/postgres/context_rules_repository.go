@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 
-	"inbota/backend/internal/app/domain"
-	"inbota/backend/internal/app/repository"
+	"organiq/backend/internal/app/domain"
+	"organiq/backend/internal/app/repository"
 )
 
 type ContextRuleRepository struct {
@@ -22,7 +22,7 @@ func NewContextRuleRepositoryTx(tx *sql.Tx) *ContextRuleRepository {
 
 func (r *ContextRuleRepository) Create(ctx context.Context, rule domain.ContextRule) (domain.ContextRule, error) {
 	row := r.db.QueryRowContext(ctx, `
-		INSERT INTO inbota.context_rules (user_id, keyword, flag_id, subflag_id)
+		INSERT INTO organiq.context_rules (user_id, keyword, flag_id, subflag_id)
 		VALUES ($1, $2, $3, $4)
 		RETURNING id, created_at, updated_at
 	`, rule.UserID, rule.Keyword, rule.FlagID, rule.SubflagID)
@@ -35,7 +35,7 @@ func (r *ContextRuleRepository) Create(ctx context.Context, rule domain.ContextR
 
 func (r *ContextRuleRepository) Update(ctx context.Context, rule domain.ContextRule) (domain.ContextRule, error) {
 	row := r.db.QueryRowContext(ctx, `
-		UPDATE inbota.context_rules
+		UPDATE organiq.context_rules
 		SET keyword = $1, flag_id = $2, subflag_id = $3, updated_at = now()
 		WHERE id = $4 AND user_id = $5
 		RETURNING created_at, updated_at
@@ -52,7 +52,7 @@ func (r *ContextRuleRepository) Update(ctx context.Context, rule domain.ContextR
 
 func (r *ContextRuleRepository) Delete(ctx context.Context, userID, id string) error {
 	result, err := r.db.ExecContext(ctx, `
-		DELETE FROM inbota.context_rules
+		DELETE FROM organiq.context_rules
 		WHERE id = $1 AND user_id = $2
 	`, id, userID)
 	if err != nil {
@@ -72,7 +72,7 @@ func (r *ContextRuleRepository) Delete(ctx context.Context, userID, id string) e
 func (r *ContextRuleRepository) Get(ctx context.Context, userID, id string) (domain.ContextRule, error) {
 	row := r.db.QueryRowContext(ctx, `
 		SELECT id, user_id, keyword, flag_id, subflag_id, created_at, updated_at
-		FROM inbota.context_rules
+		FROM organiq.context_rules
 		WHERE id = $1 AND user_id = $2
 		LIMIT 1
 	`, id, userID)
@@ -97,7 +97,7 @@ func (r *ContextRuleRepository) List(ctx context.Context, userID string, opts re
 
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, user_id, keyword, flag_id, subflag_id, created_at, updated_at
-		FROM inbota.context_rules
+		FROM organiq.context_rules
 		WHERE user_id = $1
 		ORDER BY keyword ASC, created_at ASC
 		LIMIT $2 OFFSET $3

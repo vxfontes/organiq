@@ -2,35 +2,35 @@ import SwiftUI
 import WidgetKit
 import AppIntents
 
-struct InbotaWidgetEntry: TimelineEntry {
+struct OrganiqWidgetEntry: TimelineEntry {
     let date: Date
-    let tasks: [InbotaWidgetTask]
+    let tasks: [OrganiqWidgetTask]
 }
 
-struct InbotaWidgetTimelineProvider: TimelineProvider {
-    func placeholder(in context: Context) -> InbotaWidgetEntry {
-        InbotaWidgetEntry(
+struct OrganiqWidgetTimelineProvider: TimelineProvider {
+    func placeholder(in context: Context) -> OrganiqWidgetEntry {
+        OrganiqWidgetEntry(
             date: Date(),
             tasks: [
-                InbotaWidgetTask(id: "1", title: "Comprar pao", done: false),
-                InbotaWidgetTask(id: "2", title: "Pagar conta", done: false),
-                InbotaWidgetTask(id: "3", title: "Ligar para clinica", done: true),
+                OrganiqWidgetTask(id: "1", title: "Comprar pao", done: false),
+                OrganiqWidgetTask(id: "2", title: "Pagar conta", done: false),
+                OrganiqWidgetTask(id: "3", title: "Ligar para clinica", done: true),
             ]
         )
     }
 
-    func getSnapshot(in context: Context, completion: @escaping (InbotaWidgetEntry) -> Void) {
+    func getSnapshot(in context: Context, completion: @escaping (OrganiqWidgetEntry) -> Void) {
         completion(
-            InbotaWidgetEntry(
+            OrganiqWidgetEntry(
                 date: Date(),
-                tasks: InbotaWidgetSharedStore.loadTasks()
+                tasks: OrganiqWidgetSharedStore.loadTasks()
             )
         )
     }
 
-    func getTimeline(in context: Context, completion: @escaping (Timeline<InbotaWidgetEntry>) -> Void) {
-        let tasks = InbotaWidgetSharedStore.loadTasks()
-        let entry = InbotaWidgetEntry(date: Date(), tasks: tasks)
+    func getTimeline(in context: Context, completion: @escaping (Timeline<OrganiqWidgetEntry>) -> Void) {
+        let tasks = OrganiqWidgetSharedStore.loadTasks()
+        let entry = OrganiqWidgetEntry(date: Date(), tasks: tasks)
         let entries = [entry]
         let refreshDate = Calendar.current.date(byAdding: .minute, value: 15, to: Date()) ?? Date()
         let timeline = Timeline(entries: entries, policy: .after(refreshDate))
@@ -38,29 +38,29 @@ struct InbotaWidgetTimelineProvider: TimelineProvider {
     }
 }
 
-struct InbotaWidgetEntryView: View {
-    var entry: InbotaWidgetTimelineProvider.Entry
+struct OrganiqWidgetEntryView: View {
+    var entry: OrganiqWidgetTimelineProvider.Entry
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Inbota")
+            Text("Organiq")
                 .font(.system(size: 16, weight: .bold))
-                .foregroundColor(.inbotaText)
+                .foregroundColor(.organiqText)
 
             Text("Seu dia em ordem")
                 .font(.system(size: 12, weight: .medium))
-                .foregroundColor(.inbotaTextMuted)
+                .foregroundColor(.organiqTextMuted)
 
             if entry.tasks.isEmpty {
                 Spacer()
                 Text("Sem tarefas pendentes")
                     .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(.inbotaPrimary700)
+                    .foregroundColor(.organiqPrimary700)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 8)
                     .background(
                         RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(Color.inbotaPrimary200)
+                            .fill(Color.organiqPrimary200)
                     )
             } else {
                 ForEach(entry.tasks.prefix(4)) { task in
@@ -71,33 +71,33 @@ struct InbotaWidgetEntryView: View {
         .padding(14)
         .overlay(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .stroke(Color.inbotaBorder, lineWidth: 1)
+                .stroke(Color.organiqBorder, lineWidth: 1)
         )
         .widgetContainerBackground(
-            Color.inbotaBackground
+            Color.organiqBackground
         )
     }
 
     @ViewBuilder
-    private func taskRow(_ task: InbotaWidgetTask) -> some View {
+    private func taskRow(_ task: OrganiqWidgetTask) -> some View {
         HStack(spacing: 8) {
             if #available(iOS 17.0, *) {
                 Button(intent: CompleteTaskIntent(taskID: task.id)) {
                     Image(systemName: task.done ? "checkmark.circle.fill" : "circle")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(task.done ? .inbotaSuccess600 : .inbotaPrimary700)
+                        .foregroundColor(task.done ? .organiqSuccess600 : .organiqPrimary700)
                 }
                 .buttonStyle(.plain)
             } else {
                 Image(systemName: task.done ? "checkmark.circle.fill" : "circle")
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(task.done ? .inbotaSuccess600 : .inbotaPrimary700)
+                    .foregroundColor(task.done ? .organiqSuccess600 : .organiqPrimary700)
             }
 
             Text(task.title)
                 .font(.system(size: 13, weight: .medium))
-                .foregroundColor(task.done ? .inbotaTextMuted : .inbotaText)
-                .strikethrough(task.done, color: .inbotaTextMuted)
+                .foregroundColor(task.done ? .organiqTextMuted : .organiqText)
+                .strikethrough(task.done, color: .organiqTextMuted)
                 .lineLimit(1)
 
             Spacer(minLength: 0)
@@ -106,44 +106,44 @@ struct InbotaWidgetEntryView: View {
         .padding(.vertical, 8)
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(Color.inbotaSurface)
+                .fill(Color.organiqSurface)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .stroke(Color.inbotaBorder, lineWidth: 1)
+                .stroke(Color.organiqBorder, lineWidth: 1)
         )
     }
 }
 
-struct InbotaWidget: Widget {
-    let kind: String = "InbotaWidget"
+struct OrganiqWidget: Widget {
+    let kind: String = "OrganiqWidget"
 
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: InbotaWidgetTimelineProvider()) { entry in
-            InbotaWidgetEntryView(entry: entry)
+        StaticConfiguration(kind: kind, provider: OrganiqWidgetTimelineProvider()) { entry in
+            OrganiqWidgetEntryView(entry: entry)
         }
-        .configurationDisplayName("Inbota")
+        .configurationDisplayName("Organiq")
         .description("Mostra um resumo rápido do seu dia.")
         .supportedFamilies([.systemSmall, .systemMedium])
     }
 }
 
-struct InbotaWidgetTask: Codable, Identifiable {
+struct OrganiqWidgetTask: Codable, Identifiable {
     let id: String
     let title: String
     var done: Bool
 }
 
-enum InbotaWidgetSharedStore {
-    private static let appGroupID = "group.com.vxfontes.inbota"
+enum OrganiqWidgetSharedStore {
+    private static let appGroupID = "group.com.vxfontes.organiq"
     private static let tasksStorageKey = "widget_tasks_v1"
     private static let pendingCompletedTaskIDsStorageKey = "widget_pending_completed_task_ids_v1"
 
-    static func loadTasks() -> [InbotaWidgetTask] {
+    static func loadTasks() -> [OrganiqWidgetTask] {
         guard
             let defaults = UserDefaults(suiteName: appGroupID),
             let data = defaults.data(forKey: tasksStorageKey),
-            let decoded = try? JSONDecoder().decode([InbotaWidgetTask].self, from: data)
+            let decoded = try? JSONDecoder().decode([OrganiqWidgetTask].self, from: data)
         else {
             return []
         }
@@ -192,8 +192,8 @@ struct CompleteTaskIntent: AppIntent {
     }
 
     func perform() async throws -> some IntentResult {
-        InbotaWidgetSharedStore.markTaskAsDone(taskID: taskID)
-        WidgetCenter.shared.reloadTimelines(ofKind: "InbotaWidget")
+        OrganiqWidgetSharedStore.markTaskAsDone(taskID: taskID)
+        WidgetCenter.shared.reloadTimelines(ofKind: "OrganiqWidget")
         return .result()
     }
 }
@@ -210,24 +210,24 @@ private extension View {
 }
 
 private extension Color {
-    static let inbotaBackground = Color(red: 250.0 / 255.0, green: 250.0 / 255.0, blue: 250.0 / 255.0)
-    static let inbotaSurface = Color(red: 1, green: 1, blue: 1)
-    static let inbotaBorder = Color(red: 229.0 / 255.0, green: 231.0 / 255.0, blue: 235.0 / 255.0)
-    static let inbotaText = Color(red: 17.0 / 255.0, green: 24.0 / 255.0, blue: 39.0 / 255.0)
-    static let inbotaTextMuted = Color(red: 107.0 / 255.0, green: 114.0 / 255.0, blue: 128.0 / 255.0)
-    static let inbotaPrimary700 = Color(red: 15.0 / 255.0, green: 118.0 / 255.0, blue: 110.0 / 255.0)
-    static let inbotaPrimary200 = Color(red: 153.0 / 255.0, green: 246.0 / 255.0, blue: 228.0 / 255.0)
-    static let inbotaSuccess600 = Color(red: 22.0 / 255.0, green: 163.0 / 255.0, blue: 74.0 / 255.0)
+    static let organiqBackground = Color(red: 250.0 / 255.0, green: 250.0 / 255.0, blue: 250.0 / 255.0)
+    static let organiqSurface = Color(red: 1, green: 1, blue: 1)
+    static let organiqBorder = Color(red: 229.0 / 255.0, green: 231.0 / 255.0, blue: 235.0 / 255.0)
+    static let organiqText = Color(red: 17.0 / 255.0, green: 24.0 / 255.0, blue: 39.0 / 255.0)
+    static let organiqTextMuted = Color(red: 107.0 / 255.0, green: 114.0 / 255.0, blue: 128.0 / 255.0)
+    static let organiqPrimary700 = Color(red: 15.0 / 255.0, green: 118.0 / 255.0, blue: 110.0 / 255.0)
+    static let organiqPrimary200 = Color(red: 153.0 / 255.0, green: 246.0 / 255.0, blue: 228.0 / 255.0)
+    static let organiqSuccess600 = Color(red: 22.0 / 255.0, green: 163.0 / 255.0, blue: 74.0 / 255.0)
 }
 
-struct InbotaWidget_Previews: PreviewProvider {
+struct OrganiqWidget_Previews: PreviewProvider {
     static var previews: some View {
-        InbotaWidgetEntryView(
-            entry: InbotaWidgetEntry(
+        OrganiqWidgetEntryView(
+            entry: OrganiqWidgetEntry(
                 date: Date(),
                 tasks: [
-                    InbotaWidgetTask(id: "1", title: "Tarefa de exemplo", done: false),
-                    InbotaWidgetTask(id: "2", title: "Outra tarefa", done: true),
+                    OrganiqWidgetTask(id: "1", title: "Tarefa de exemplo", done: false),
+                    OrganiqWidgetTask(id: "2", title: "Outra tarefa", done: true),
                 ]
             )
         )

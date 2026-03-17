@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"inbota/backend/internal/app/domain"
-	"inbota/backend/internal/app/repository"
-	"inbota/backend/internal/infra/push"
+	"organiq/backend/internal/app/domain"
+	"organiq/backend/internal/app/repository"
+	"organiq/backend/internal/infra/push"
 )
 
 type NotificationScheduler struct {

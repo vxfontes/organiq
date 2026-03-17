@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
-import 'package:inbota/modules/auth/domain/usecases/get_me_usecase.dart';
-import 'package:inbota/modules/splash/domain/usecases/check_health_usecase.dart';
-import 'package:inbota/shared/errors/failures.dart';
-import 'package:inbota/shared/services/timezone/user_timezone_service.dart';
-import 'package:inbota/shared/state/ib_state.dart';
-import 'package:inbota/shared/storage/auth_token_store.dart';
+import 'package:organiq/modules/auth/domain/usecases/get_me_usecase.dart';
+import 'package:organiq/modules/splash/domain/usecases/check_health_usecase.dart';
+import 'package:organiq/shared/errors/failures.dart';
+import 'package:organiq/shared/services/timezone/user_timezone_service.dart';
+import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/storage/auth_token_store.dart';
 
 class SplashController implements IBController {
   SplashController(

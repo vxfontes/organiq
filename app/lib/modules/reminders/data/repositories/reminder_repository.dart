@@ -1,14 +1,14 @@
 import 'package:dartz/dartz.dart';
 
-import 'package:inbota/modules/reminders/data/models/reminder_list_output.dart';
-import 'package:inbota/modules/reminders/data/models/reminder_output.dart';
-import 'package:inbota/modules/reminders/data/models/reminder_create_input.dart';
-import 'package:inbota/modules/reminders/data/models/reminder_update_input.dart';
-import 'package:inbota/modules/reminders/domain/repositories/i_reminder_repository.dart';
-import 'package:inbota/shared/errors/api_error_mapper.dart';
-import 'package:inbota/shared/errors/failures.dart';
-import 'package:inbota/shared/services/http/app_path.dart';
-import 'package:inbota/shared/services/http/http_client.dart';
+import 'package:organiq/modules/reminders/data/models/reminder_list_output.dart';
+import 'package:organiq/modules/reminders/data/models/reminder_output.dart';
+import 'package:organiq/modules/reminders/data/models/reminder_create_input.dart';
+import 'package:organiq/modules/reminders/data/models/reminder_update_input.dart';
+import 'package:organiq/modules/reminders/domain/repositories/i_reminder_repository.dart';
+import 'package:organiq/shared/errors/api_error_mapper.dart';
+import 'package:organiq/shared/errors/failures.dart';
+import 'package:organiq/shared/services/http/app_path.dart';
+import 'package:organiq/shared/services/http/http_client.dart';
 
 class ReminderRepository implements IReminderRepository {
   ReminderRepository(this._httpClient);

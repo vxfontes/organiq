@@ -1,4 +1,4 @@
-module inbota/backend
+module organiq/backend
 
 go 1.25.6
 

@@ -3,7 +3,7 @@ package usecase
 import (
 	"context"
 
-	"inbota/backend/internal/app/repository"
+	"organiq/backend/internal/app/repository"
 )
 
 type AgendaUsecase struct {

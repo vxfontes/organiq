@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"inbota/backend/internal/app/domain"
+	"organiq/backend/internal/app/domain"
 )
 
 type EmailDigestRepository struct {
@@ -22,7 +22,7 @@ func (r *EmailDigestRepository) Create(ctx context.Context, digest *domain.Email
 	}
 
 	const query = `
-		INSERT INTO inbota.email_digests (user_id, digest_date, type, status, created_at, updated_at)
+		INSERT INTO organiq.email_digests (user_id, digest_date, type, status, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, now(), now())
 		ON CONFLICT (user_id, digest_date, type) DO UPDATE
 		SET status = 'pending',
@@ -30,7 +30,7 @@ func (r *EmailDigestRepository) Create(ctx context.Context, digest *domain.Email
 		    error_msg = NULL,
 		    provider_id = NULL,
 		    updated_at = now()
-		WHERE inbota.email_digests.status = 'failed'
+		WHERE organiq.email_digests.status = 'failed'
 		RETURNING id, created_at, updated_at
 	`
 
@@ -61,7 +61,7 @@ func (r *EmailDigestRepository) Update(ctx context.Context, digest *domain.Email
 	}
 
 	const query = `
-		UPDATE inbota.email_digests
+		UPDATE organiq.email_digests
 		SET status = $1, sent_at = $2, error_msg = $3, provider_id = $4, updated_at = now()
 		WHERE id = $5
 	`

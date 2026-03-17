@@ -1,19 +1,19 @@
 import 'package:dartz/dartz.dart';
 
-import 'package:inbota/modules/routines/data/models/routine_completion_output.dart';
-import 'package:inbota/modules/routines/data/models/routine_create_input.dart';
-import 'package:inbota/modules/routines/data/models/routine_exception_input.dart';
-import 'package:inbota/modules/routines/data/models/routine_exception_output.dart';
-import 'package:inbota/modules/routines/data/models/routine_list_output.dart';
-import 'package:inbota/modules/routines/data/models/routine_output.dart';
-import 'package:inbota/modules/routines/data/models/routine_streak_output.dart';
-import 'package:inbota/modules/routines/data/models/routine_today_summary_output.dart';
-import 'package:inbota/modules/routines/data/models/routine_update_input.dart';
-import 'package:inbota/modules/routines/domain/repositories/i_routine_repository.dart';
-import 'package:inbota/shared/errors/api_error_mapper.dart';
-import 'package:inbota/shared/errors/failures.dart';
-import 'package:inbota/shared/services/http/app_path.dart';
-import 'package:inbota/shared/services/http/http_client.dart';
+import 'package:organiq/modules/routines/data/models/routine_completion_output.dart';
+import 'package:organiq/modules/routines/data/models/routine_create_input.dart';
+import 'package:organiq/modules/routines/data/models/routine_exception_input.dart';
+import 'package:organiq/modules/routines/data/models/routine_exception_output.dart';
+import 'package:organiq/modules/routines/data/models/routine_list_output.dart';
+import 'package:organiq/modules/routines/data/models/routine_output.dart';
+import 'package:organiq/modules/routines/data/models/routine_streak_output.dart';
+import 'package:organiq/modules/routines/data/models/routine_today_summary_output.dart';
+import 'package:organiq/modules/routines/data/models/routine_update_input.dart';
+import 'package:organiq/modules/routines/domain/repositories/i_routine_repository.dart';
+import 'package:organiq/shared/errors/api_error_mapper.dart';
+import 'package:organiq/shared/errors/failures.dart';
+import 'package:organiq/shared/services/http/app_path.dart';
+import 'package:organiq/shared/services/http/http_client.dart';
 
 class RoutineRepository implements IRoutineRepository {
   RoutineRepository(this._httpClient);

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-import 'package:inbota/modules/shopping/data/models/shopping_item_output.dart';
-import 'package:inbota/modules/shopping/data/models/shopping_list_output.dart';
-import 'package:inbota/presentation/screens/shopping_module/components/create_shopping_item_bottom_sheet.dart';
-import 'package:inbota/presentation/screens/shopping_module/components/create_shopping_list_bottom_sheet.dart';
-import 'package:inbota/presentation/screens/shopping_module/controller/shopping_controller.dart';
-import 'package:inbota/shared/components/ib_lib/index.dart';
-import 'package:inbota/shared/state/ib_state.dart';
-import 'package:inbota/shared/theme/app_colors.dart';
-import 'package:inbota/shared/utils/text_utils.dart';
+import 'package:organiq/modules/shopping/data/models/shopping_item_output.dart';
+import 'package:organiq/modules/shopping/data/models/shopping_list_output.dart';
+import 'package:organiq/presentation/screens/shopping_module/components/create_shopping_item_bottom_sheet.dart';
+import 'package:organiq/presentation/screens/shopping_module/components/create_shopping_list_bottom_sheet.dart';
+import 'package:organiq/presentation/screens/shopping_module/controller/shopping_controller.dart';
+import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/theme/app_colors.dart';
+import 'package:organiq/shared/utils/text_utils.dart';
 
 class ShoppingPage extends StatefulWidget {
   const ShoppingPage({super.key});

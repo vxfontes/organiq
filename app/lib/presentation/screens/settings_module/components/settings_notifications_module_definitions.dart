@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:inbota/modules/notifications/data/models/notification_preferences_model.dart';
-import 'package:inbota/shared/components/ib_lib/ib_chip_group.dart';
-import 'package:inbota/shared/components/ib_lib/index.dart';
+import 'package:organiq/modules/notifications/data/models/notification_preferences_model.dart';
+import 'package:organiq/shared/components/ib_lib/ib_chip_group.dart';
+import 'package:organiq/shared/components/ib_lib/index.dart';
 
 enum SettingsNotificationsSection {
   reminders,

@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart' show Unit;
-import 'package:inbota/modules/tasks/domain/repositories/i_task_repository.dart';
-import 'package:inbota/shared/errors/failures.dart';
-import 'package:inbota/shared/templates/ib_usecase.dart';
+import 'package:organiq/modules/tasks/domain/repositories/i_task_repository.dart';
+import 'package:organiq/shared/errors/failures.dart';
+import 'package:organiq/shared/templates/ib_usecase.dart';
 
 class DeleteTaskUsecase extends IBUsecase {
   DeleteTaskUsecase(this._repository);

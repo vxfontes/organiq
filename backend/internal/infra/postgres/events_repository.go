@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"time"
 
-	"inbota/backend/internal/app/domain"
-	"inbota/backend/internal/app/repository"
+	"organiq/backend/internal/app/domain"
+	"organiq/backend/internal/app/repository"
 )
 
 type EventRepository struct {
@@ -23,7 +23,7 @@ func NewEventRepositoryTx(tx *sql.Tx) *EventRepository {
 
 func (r *EventRepository) Create(ctx context.Context, event domain.Event) (domain.Event, error) {
 	row := r.db.QueryRowContext(ctx, `
-		INSERT INTO inbota.events (user_id, title, start_at, end_at, all_day, location, flag_id, subflag_id, source_inbox_item_id)
+		INSERT INTO organiq.events (user_id, title, start_at, end_at, all_day, location, flag_id, subflag_id, source_inbox_item_id)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 		RETURNING id, created_at, updated_at
 	`, event.UserID, event.Title, event.StartAt, event.EndAt, event.AllDay, event.Location, event.FlagID, event.SubflagID, event.SourceInboxItemID)
@@ -36,7 +36,7 @@ func (r *EventRepository) Create(ctx context.Context, event domain.Event) (domai
 
 func (r *EventRepository) Update(ctx context.Context, event domain.Event) (domain.Event, error) {
 	row := r.db.QueryRowContext(ctx, `
-		UPDATE inbota.events
+		UPDATE organiq.events
 		SET title = $1, start_at = $2, end_at = $3, all_day = $4, location = $5, flag_id = $6, subflag_id = $7, updated_at = now()
 		WHERE id = $8 AND user_id = $9
 		RETURNING created_at, updated_at
@@ -53,7 +53,7 @@ func (r *EventRepository) Update(ctx context.Context, event domain.Event) (domai
 
 func (r *EventRepository) Delete(ctx context.Context, userID, id string) error {
 	result, err := r.db.ExecContext(ctx, `
-		DELETE FROM inbota.events
+		DELETE FROM organiq.events
 		WHERE id = $1 AND user_id = $2
 	`, id, userID)
 	if err != nil {
@@ -73,7 +73,7 @@ func (r *EventRepository) Delete(ctx context.Context, userID, id string) error {
 func (r *EventRepository) Get(ctx context.Context, userID, id string) (domain.Event, error) {
 	row := r.db.QueryRowContext(ctx, `
 		SELECT id, user_id, title, start_at, end_at, all_day, location, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
-		FROM inbota.events
+		FROM organiq.events
 		WHERE id = $1 AND user_id = $2
 		LIMIT 1
 	`, id, userID)
@@ -108,7 +108,7 @@ func (r *EventRepository) List(ctx context.Context, userID string, opts reposito
 
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, user_id, title, start_at, end_at, all_day, location, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
-		FROM inbota.events
+		FROM organiq.events
 		WHERE user_id = $1
 		ORDER BY start_at NULLS LAST, created_at DESC
 		LIMIT $2 OFFSET $3
@@ -149,7 +149,7 @@ func (r *EventRepository) List(ctx context.Context, userID string, opts reposito
 func (r *EventRepository) ListUpcoming(ctx context.Context, start, end time.Time) ([]domain.Event, error) {
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, user_id, title, start_at, end_at, all_day, location, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
-		FROM inbota.events
+		FROM organiq.events
 		WHERE start_at >= $1 AND start_at <= $2
 	`, start, end)
 	if err != nil {

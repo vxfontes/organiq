@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:inbota/modules/inbox/data/models/inbox_create_line_result.dart';
-import 'package:inbota/presentation/routes/app_navigation.dart';
-import 'package:inbota/presentation/screens/create_module/components/create_result_line_tile.dart';
-import 'package:inbota/presentation/screens/home_module/controller/home_controller.dart';
-import 'package:inbota/shared/components/ib_lib/index.dart';
+import 'package:organiq/modules/inbox/data/models/inbox_create_line_result.dart';
+import 'package:organiq/presentation/routes/app_navigation.dart';
+import 'package:organiq/presentation/screens/create_module/components/create_result_line_tile.dart';
+import 'package:organiq/presentation/screens/home_module/controller/home_controller.dart';
+import 'package:organiq/shared/components/ib_lib/index.dart';
 
 class QuickAddResultSheet extends StatefulWidget {
   const QuickAddResultSheet({

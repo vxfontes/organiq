@@ -7,7 +7,7 @@ import (
 
 	"github.com/lib/pq"
 
-	"inbota/backend/internal/app/domain"
+	"organiq/backend/internal/app/domain"
 )
 
 type NotificationPreferencesRepository struct {
@@ -27,7 +27,7 @@ func (r *NotificationPreferencesRepository) GetByUserID(ctx context.Context, use
 			quiet_hours_enabled, to_char(quiet_start, 'HH24:MI'), to_char(quiet_end, 'HH24:MI'),
 			daily_digest_enabled, daily_digest_hour, daily_summary_token,
 			created_at, updated_at
-		FROM inbota.notification_preferences
+		FROM organiq.notification_preferences
 		WHERE user_id = $1
 		LIMIT 1
 	`, userID)
@@ -70,7 +70,7 @@ func (r *NotificationPreferencesRepository) GetByUserID(ctx context.Context, use
 
 func (r *NotificationPreferencesRepository) Upsert(ctx context.Context, prefs domain.NotificationPreferences) error {
 	_, err := r.db.ExecContext(ctx, `
-		INSERT INTO inbota.notification_preferences (
+		INSERT INTO organiq.notification_preferences (
 			user_id, reminders_enabled, reminder_at_time, reminder_lead_mins,
 			events_enabled, event_at_time, event_lead_mins,
 			tasks_enabled, task_at_time, task_lead_mins,
@@ -117,7 +117,7 @@ func (r *NotificationPreferencesRepository) ListEnabled(ctx context.Context) ([]
 			quiet_hours_enabled, to_char(quiet_start, 'HH24:MI'), to_char(quiet_end, 'HH24:MI'),
 			daily_digest_enabled, daily_digest_hour, daily_summary_token,
 			created_at, updated_at
-		FROM inbota.notification_preferences
+		FROM organiq.notification_preferences
 		WHERE daily_digest_enabled = true
 	`)
 	if err != nil {

@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:inbota/modules/notifications/domain/repositories/i_notifications_repository.dart';
-import 'package:inbota/presentation/routes/app_navigation.dart';
-import 'package:inbota/presentation/routes/app_routes.dart';
-import 'package:inbota/presentation/screens/splash_module/controller/splash_controller.dart';
-import 'package:inbota/shared/components/ib_lib/ib_button.dart';
-import 'package:inbota/shared/components/ib_lib/ib_loader.dart';
-import 'package:inbota/shared/components/ib_lib/ib_text.dart';
-import 'package:inbota/shared/services/push/push_notification_service.dart';
-import 'package:inbota/shared/state/ib_state.dart';
-import 'package:inbota/shared/theme/app_colors.dart';
+import 'package:organiq/modules/notifications/domain/repositories/i_notifications_repository.dart';
+import 'package:organiq/presentation/routes/app_navigation.dart';
+import 'package:organiq/presentation/routes/app_routes.dart';
+import 'package:organiq/presentation/screens/splash_module/controller/splash_controller.dart';
+import 'package:organiq/shared/components/ib_lib/ib_button.dart';
+import 'package:organiq/shared/components/ib_lib/ib_loader.dart';
+import 'package:organiq/shared/components/ib_lib/ib_text.dart';
+import 'package:organiq/shared/services/push/push_notification_service.dart';
+import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/theme/app_colors.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});

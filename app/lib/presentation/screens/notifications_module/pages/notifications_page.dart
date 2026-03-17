@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:inbota/modules/notifications/data/models/notification_log_model.dart';
-import 'package:inbota/presentation/screens/notifications_module/components/notification_card.dart';
-import 'package:inbota/presentation/screens/notifications_module/controller/notifications_controller.dart';
-import 'package:inbota/shared/components/ib_lib/index.dart';
-import 'package:inbota/shared/state/ib_state.dart';
-import 'package:inbota/shared/theme/app_colors.dart';
+import 'package:organiq/modules/notifications/data/models/notification_log_model.dart';
+import 'package:organiq/presentation/screens/notifications_module/components/notification_card.dart';
+import 'package:organiq/presentation/screens/notifications_module/controller/notifications_controller.dart';
+import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/theme/app_colors.dart';
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});

@@ -1,8 +1,8 @@
-import 'package:inbota/modules/events/data/models/event_create_input.dart';
-import 'package:inbota/modules/events/data/models/event_output.dart';
-import 'package:inbota/modules/events/domain/repositories/i_event_repository.dart';
-import 'package:inbota/shared/errors/failures.dart';
-import 'package:inbota/shared/templates/ib_usecase.dart';
+import 'package:organiq/modules/events/data/models/event_create_input.dart';
+import 'package:organiq/modules/events/data/models/event_output.dart';
+import 'package:organiq/modules/events/domain/repositories/i_event_repository.dart';
+import 'package:organiq/shared/errors/failures.dart';
+import 'package:organiq/shared/templates/ib_usecase.dart';
 
 class CreateEventUsecase extends IBUsecase {
   CreateEventUsecase(this._repository);

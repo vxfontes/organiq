@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:inbota/shared/theme/app_colors.dart';
+import 'package:organiq/shared/theme/app_colors.dart';
 
 class NightSkyPainter extends CustomPainter {
   final Random _random = Random(42);

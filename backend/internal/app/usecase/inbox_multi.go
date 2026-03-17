@@ -3,9 +3,9 @@ package usecase
 import (
 	"context"
 
-	"inbota/backend/internal/app/domain"
-	"inbota/backend/internal/app/repository"
-	"inbota/backend/internal/app/service"
+	"organiq/backend/internal/app/domain"
+	"organiq/backend/internal/app/repository"
+	"organiq/backend/internal/app/service"
 )
 
 func (uc *InboxUsecase) applyValidatedSuggestionTx(ctx context.Context, tx repository.TxRepositories, userID string, item domain.InboxItem, vout service.ValidatedOutput) (ConfirmResult, error) {

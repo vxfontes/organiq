@@ -1,6 +1,6 @@
-// @title Inbota API
+// @title Organiq API
 // @version 0.1
-// @description API do MVP Inbota.
+// @description API do MVP Organiq.
 // @BasePath /
 // @securityDefinitions.apikey BearerAuth
 // @in header
@@ -20,19 +20,19 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	_ "inbota/backend/docs"
-	"inbota/backend/internal/app/digest"
-	"inbota/backend/internal/app/service"
-	"inbota/backend/internal/app/usecase"
-	"inbota/backend/internal/config"
-	inbotahttp "inbota/backend/internal/http"
-	"inbota/backend/internal/http/handler"
-	"inbota/backend/internal/infra/ai"
-	"inbota/backend/internal/infra/mailer"
-	"inbota/backend/internal/infra/postgres"
-	"inbota/backend/internal/infra/push"
-	"inbota/backend/internal/observability"
-	"inbota/backend/internal/scheduler"
+	_ "organiq/backend/docs"
+	"organiq/backend/internal/app/digest"
+	"organiq/backend/internal/app/service"
+	"organiq/backend/internal/app/usecase"
+	"organiq/backend/internal/config"
+	organiqhttp "organiq/backend/internal/http"
+	"organiq/backend/internal/http/handler"
+	"organiq/backend/internal/infra/ai"
+	"organiq/backend/internal/infra/mailer"
+	"organiq/backend/internal/infra/postgres"
+	"organiq/backend/internal/infra/push"
+	"organiq/backend/internal/observability"
+	"organiq/backend/internal/scheduler"
 )
 
 func main() {
@@ -266,7 +266,7 @@ func main() {
 		}
 	}
 
-	router := inbotahttp.NewRouter(cfg, log, authHandler, apiHandlers, db)
+	router := organiqhttp.NewRouter(cfg, log, authHandler, apiHandlers, db)
 
 	srv := &http.Server{
 		Addr:         cfg.Addr(),

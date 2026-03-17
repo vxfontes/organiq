@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:inbota/modules/notifications/data/models/notification_preferences_model.dart';
-import 'package:inbota/modules/notifications/domain/usecases/get_notification_prefs_usecase.dart';
-import 'package:inbota/modules/notifications/domain/usecases/send_test_email_digest_usecase.dart';
-import 'package:inbota/modules/notifications/domain/usecases/send_test_notification_usecase.dart';
-import 'package:inbota/modules/notifications/domain/usecases/update_notification_prefs_usecase.dart';
-import 'package:inbota/shared/errors/failures.dart';
-import 'package:inbota/shared/state/ib_state.dart';
+import 'package:organiq/modules/notifications/data/models/notification_preferences_model.dart';
+import 'package:organiq/modules/notifications/domain/usecases/get_notification_prefs_usecase.dart';
+import 'package:organiq/modules/notifications/domain/usecases/send_test_email_digest_usecase.dart';
+import 'package:organiq/modules/notifications/domain/usecases/send_test_notification_usecase.dart';
+import 'package:organiq/modules/notifications/domain/usecases/update_notification_prefs_usecase.dart';
+import 'package:organiq/shared/errors/failures.dart';
+import 'package:organiq/shared/state/ib_state.dart';
 
 class SettingsNotificationsController implements IBController {
   final GetNotificationPrefsUsecase _getPrefsUsecase;

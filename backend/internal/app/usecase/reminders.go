@@ -5,9 +5,9 @@ import (
 	"errors"
 	"time"
 
-	"inbota/backend/internal/app/domain"
-	"inbota/backend/internal/app/repository"
-	"inbota/backend/internal/infra/postgres"
+	"organiq/backend/internal/app/domain"
+	"organiq/backend/internal/app/repository"
+	"organiq/backend/internal/infra/postgres"
 )
 
 type ReminderUsecase struct {

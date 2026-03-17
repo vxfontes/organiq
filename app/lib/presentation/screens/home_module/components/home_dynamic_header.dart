@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:inbota/modules/home/data/models/home_greeting_style.dart';
-import 'package:inbota/presentation/routes/app_navigation.dart';
-import 'package:inbota/presentation/routes/app_routes.dart';
-import 'package:inbota/shared/components/dynamic_header/afternoon_sky_painter.dart';
-import 'package:inbota/shared/components/dynamic_header/morning_sky_painter.dart';
-import 'package:inbota/shared/components/dynamic_header/night_sky_painter.dart';
-import 'package:inbota/shared/components/ib_lib/index.dart';
-import 'package:inbota/shared/theme/app_colors.dart';
-import 'package:inbota/shared/utils/date_time.dart';
-import 'package:inbota/shared/utils/text_utils.dart';
+import 'package:organiq/modules/home/data/models/home_greeting_style.dart';
+import 'package:organiq/presentation/routes/app_navigation.dart';
+import 'package:organiq/presentation/routes/app_routes.dart';
+import 'package:organiq/shared/components/dynamic_header/afternoon_sky_painter.dart';
+import 'package:organiq/shared/components/dynamic_header/morning_sky_painter.dart';
+import 'package:organiq/shared/components/dynamic_header/night_sky_painter.dart';
+import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/theme/app_colors.dart';
+import 'package:organiq/shared/utils/date_time.dart';
+import 'package:organiq/shared/utils/text_utils.dart';
 
 class HomeDynamicHeader extends StatelessWidget {
   const HomeDynamicHeader({super.key, this.userName});
