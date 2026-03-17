@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"regexp"
 
-	"inbota/backend/internal/app/domain"
-	"inbota/backend/internal/app/repository"
+	"organiq/backend/internal/app/domain"
+	"organiq/backend/internal/app/repository"
 )
 
 type DeviceTokenUsecase struct {
@@ -52,6 +52,6 @@ func (uc *DeviceTokenUsecase) generateTopic(deviceID string) string {
 	cleanID := reg.ReplaceAllString(deviceID, "")
 
 	// Hash para evitar tópicos previsíveis caso o deviceID seja algo simples
-	hash := sha256.Sum256([]byte(cleanID + "inbota_salt_2024"))
-	return fmt.Sprintf("inbota_%x", hash[:12]) // 24 caracteres hex
+	hash := sha256.Sum256([]byte(cleanID + "organiq_salt_2024"))
+	return fmt.Sprintf("organiq_%x", hash[:12]) // 24 caracteres hex
 }

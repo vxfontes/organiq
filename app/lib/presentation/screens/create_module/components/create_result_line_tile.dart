@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:inbota/modules/inbox/data/models/inbox_create_line_result.dart';
-import 'package:inbota/shared/components/ib_lib/index.dart';
-import 'package:inbota/shared/theme/app_colors.dart';
+import 'package:organiq/modules/inbox/data/models/inbox_create_line_result.dart';
+import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/theme/app_colors.dart';
 
 class CreateResultLineTile extends StatelessWidget {
   const CreateResultLineTile({super.key, required this.result, this.onDelete});

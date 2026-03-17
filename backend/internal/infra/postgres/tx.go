@@ -3,7 +3,7 @@ package postgres
 import (
 	"context"
 
-	"inbota/backend/internal/app/repository"
+	"organiq/backend/internal/app/repository"
 )
 
 // TxRunner executes functions inside a SQL transaction.

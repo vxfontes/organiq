@@ -2,21 +2,21 @@
 services:
 #  db:
 #    image: postgres:16-alpine
-#    container_name: inbota_db
+#    container_name: organiq_db
 #    environment:
-#      POSTGRES_DB: inbota
-#      POSTGRES_USER: inbota
-#      POSTGRES_PASSWORD: inbota
+#      POSTGRES_DB: organiq
+#      POSTGRES_USER: organiq
+#      POSTGRES_PASSWORD: organiq
 #    ports:
 #      - "5432:5432"
 #    volumes:
-#      - inbota_pgdata:/var/lib/postgresql/data
+#      - organiq_pgdata:/var/lib/postgresql/data
 
   api:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: inbota_api
+    container_name: organiq_api
     env_file:
       - ./.env
     environment:
@@ -33,4 +33,4 @@ services:
 #      - db
 
 #volumes:
-#  inbota_pgdata:
+#  organiq_pgdata:

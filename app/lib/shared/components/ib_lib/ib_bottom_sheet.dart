@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'package:inbota/shared/components/ib_lib/ib_button.dart';
-import 'package:inbota/shared/components/ib_lib/ib_text.dart';
-import 'package:inbota/shared/theme/app_colors.dart';
-import 'package:inbota/shared/utils/infos_device.dart';
+import 'package:organiq/shared/components/ib_lib/ib_button.dart';
+import 'package:organiq/shared/components/ib_lib/ib_text.dart';
+import 'package:organiq/shared/theme/app_colors.dart';
+import 'package:organiq/shared/utils/infos_device.dart';
 
 class IBBottomSheet extends StatelessWidget {
   const IBBottomSheet({

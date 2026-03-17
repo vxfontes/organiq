@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:inbota/presentation/routes/app_navigation.dart';
-import 'package:inbota/shared/components/ib_lib/index.dart';
+import 'package:organiq/presentation/routes/app_navigation.dart';
+import 'package:organiq/shared/components/ib_lib/index.dart';
 
 class CreateShoppingItemBottomSheet extends StatefulWidget {
   const CreateShoppingItemBottomSheet({

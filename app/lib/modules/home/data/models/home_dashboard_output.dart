@@ -1,9 +1,9 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:inbota/modules/home/data/models/home_day_progress_output.dart';
-import 'package:inbota/modules/home/data/models/home_insight_output.dart';
-import 'package:inbota/modules/home/data/models/home_shopping_preview_output.dart';
-import 'package:inbota/modules/home/data/models/home_timeline_item_output.dart';
-import 'package:inbota/modules/tasks/data/models/task_output.dart';
+import 'package:organiq/modules/home/data/models/home_day_progress_output.dart';
+import 'package:organiq/modules/home/data/models/home_insight_output.dart';
+import 'package:organiq/modules/home/data/models/home_shopping_preview_output.dart';
+import 'package:organiq/modules/home/data/models/home_timeline_item_output.dart';
+import 'package:organiq/modules/tasks/data/models/task_output.dart';
 
 part 'home_dashboard_output.g.dart';
 

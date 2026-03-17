@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"inbota/backend/internal/app/domain"
+	"organiq/backend/internal/app/domain"
 )
 
 type InboxListFilter struct {

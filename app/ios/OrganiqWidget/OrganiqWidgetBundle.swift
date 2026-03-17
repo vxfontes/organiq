@@ -2,8 +2,8 @@ import WidgetKit
 import SwiftUI
 
 @main
-struct InbotaWidgetBundle: WidgetBundle {
+struct OrganiqWidgetBundle: WidgetBundle {
     var body: some Widget {
-        InbotaWidget()
+        OrganiqWidget()
     }
 }

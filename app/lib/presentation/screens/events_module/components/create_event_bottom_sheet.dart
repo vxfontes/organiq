@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import 'package:inbota/modules/flags/data/models/flag_output.dart';
-import 'package:inbota/modules/flags/data/models/subflag_output.dart';
-import 'package:inbota/presentation/routes/app_navigation.dart';
-import 'package:inbota/shared/components/ib_lib/index.dart';
-import 'package:inbota/shared/utils/reminders_format.dart';
+import 'package:organiq/modules/flags/data/models/flag_output.dart';
+import 'package:organiq/modules/flags/data/models/subflag_output.dart';
+import 'package:organiq/presentation/routes/app_navigation.dart';
+import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/utils/reminders_format.dart';
 
 class CreateEventBottomSheet extends StatefulWidget {
   const CreateEventBottomSheet({

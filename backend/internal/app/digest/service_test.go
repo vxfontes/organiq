@@ -3,9 +3,9 @@ package digest
 import (
 	"context"
 	"fmt"
-	"inbota/backend/internal/app/domain"
-	"inbota/backend/internal/app/repository"
-	"inbota/backend/internal/infra/mailer"
+	"organiq/backend/internal/app/domain"
+	"organiq/backend/internal/app/repository"
+	"organiq/backend/internal/infra/mailer"
 	"testing"
 	"time"
 )

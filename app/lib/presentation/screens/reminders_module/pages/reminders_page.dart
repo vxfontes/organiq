@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-import 'package:inbota/modules/reminders/data/models/reminder_output.dart';
-import 'package:inbota/modules/tasks/data/models/task_output.dart';
-import 'package:inbota/presentation/screens/reminders_module/components/create_reminder_bottom_sheet.dart';
-import 'package:inbota/presentation/screens/reminders_module/components/create_todo_bottom_sheet.dart';
-import 'package:inbota/presentation/screens/reminders_module/controller/reminders_controller.dart';
-import 'package:inbota/shared/components/ib_lib/index.dart';
-import 'package:inbota/shared/state/ib_state.dart';
-import 'package:inbota/shared/theme/app_colors.dart';
-import 'package:inbota/shared/utils/reminders_format.dart';
+import 'package:organiq/modules/reminders/data/models/reminder_output.dart';
+import 'package:organiq/modules/tasks/data/models/task_output.dart';
+import 'package:organiq/presentation/screens/reminders_module/components/create_reminder_bottom_sheet.dart';
+import 'package:organiq/presentation/screens/reminders_module/components/create_todo_bottom_sheet.dart';
+import 'package:organiq/presentation/screens/reminders_module/controller/reminders_controller.dart';
+import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/theme/app_colors.dart';
+import 'package:organiq/shared/utils/reminders_format.dart';
 
 class RemindersPage extends StatefulWidget {
   const RemindersPage({super.key});

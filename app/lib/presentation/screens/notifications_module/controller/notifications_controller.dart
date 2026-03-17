@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:inbota/modules/notifications/data/models/notification_log_model.dart';
-import 'package:inbota/modules/notifications/domain/usecases/get_notifications_usecase.dart';
-import 'package:inbota/modules/notifications/domain/usecases/mark_all_notifications_as_read_usecase.dart';
-import 'package:inbota/modules/notifications/domain/usecases/mark_notification_as_read_usecase.dart';
-import 'package:inbota/shared/errors/failures.dart';
-import 'package:inbota/shared/state/ib_state.dart';
+import 'package:organiq/modules/notifications/data/models/notification_log_model.dart';
+import 'package:organiq/modules/notifications/domain/usecases/get_notifications_usecase.dart';
+import 'package:organiq/modules/notifications/domain/usecases/mark_all_notifications_as_read_usecase.dart';
+import 'package:organiq/modules/notifications/domain/usecases/mark_notification_as_read_usecase.dart';
+import 'package:organiq/shared/errors/failures.dart';
+import 'package:organiq/shared/state/ib_state.dart';
 
 class NotificationsController implements IBController {
   final GetNotificationsUsecase _getNotificationsUsecase;

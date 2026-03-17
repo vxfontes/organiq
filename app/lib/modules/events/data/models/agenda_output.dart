@@ -1,6 +1,6 @@
-import 'package:inbota/modules/events/data/models/event_output.dart';
-import 'package:inbota/modules/reminders/data/models/reminder_output.dart';
-import 'package:inbota/modules/tasks/data/models/task_output.dart';
+import 'package:organiq/modules/events/data/models/event_output.dart';
+import 'package:organiq/modules/reminders/data/models/reminder_output.dart';
+import 'package:organiq/modules/tasks/data/models/task_output.dart';
 
 class AgendaOutput {
   const AgendaOutput({

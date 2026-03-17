@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'package:inbota/shared/components/ib_lib/ib_icon.dart';
-import 'package:inbota/shared/components/ib_lib/ib_text.dart';
-import 'package:inbota/shared/theme/app_colors.dart';
+import 'package:organiq/shared/components/ib_lib/ib_icon.dart';
+import 'package:organiq/shared/components/ib_lib/ib_text.dart';
+import 'package:organiq/shared/theme/app_colors.dart';
 
 class IBStatCard extends StatelessWidget {
   const IBStatCard({

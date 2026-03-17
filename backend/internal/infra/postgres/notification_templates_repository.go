@@ -3,7 +3,7 @@ package postgres
 import (
 	"context"
 
-	"inbota/backend/internal/app/domain"
+	"organiq/backend/internal/app/domain"
 )
 
 type NotificationTemplateRepository struct {
@@ -17,7 +17,7 @@ func NewNotificationTemplateRepository(db *DB) *NotificationTemplateRepository {
 func (r *NotificationTemplateRepository) GetAll(ctx context.Context) ([]domain.NotificationTemplate, error) {
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, type, trigger_key, title_template, body_template, is_active, created_at, updated_at
-		FROM inbota.notification_templates
+		FROM organiq.notification_templates
 		WHERE is_active = true
 	`)
 	if err != nil {

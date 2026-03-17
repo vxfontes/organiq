@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:inbota/presentation/screens/events_module/components/event_calendar_strip.dart';
-import 'package:inbota/presentation/screens/events_module/components/create_event_bottom_sheet.dart';
-import 'package:inbota/presentation/screens/events_module/components/event_feed_item.dart';
-import 'package:inbota/presentation/screens/events_module/components/event_filters.dart';
-import 'package:inbota/presentation/screens/events_module/controller/events_controller.dart';
-import 'package:inbota/shared/components/ib_lib/index.dart';
-import 'package:inbota/shared/state/ib_state.dart';
-import 'package:inbota/shared/theme/app_colors.dart';
+import 'package:organiq/presentation/screens/events_module/components/event_calendar_strip.dart';
+import 'package:organiq/presentation/screens/events_module/components/create_event_bottom_sheet.dart';
+import 'package:organiq/presentation/screens/events_module/components/event_feed_item.dart';
+import 'package:organiq/presentation/screens/events_module/components/event_filters.dart';
+import 'package:organiq/presentation/screens/events_module/controller/events_controller.dart';
+import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/theme/app_colors.dart';
 
 class EventsPage extends StatefulWidget {
   const EventsPage({super.key});

@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"inbota/backend/internal/app/domain"
+	"organiq/backend/internal/app/domain"
 )
 
 type NotificationLogRepository struct {
@@ -17,7 +17,7 @@ func NewNotificationLogRepository(db *DB) *NotificationLogRepository {
 
 func (r *NotificationLogRepository) Create(ctx context.Context, log domain.NotificationLog) (domain.NotificationLog, error) {
 	row := r.db.QueryRowContext(ctx, `
-		INSERT INTO inbota.notification_log (user_id, type, reference_id, title, body, lead_mins, status, scheduled_for)
+		INSERT INTO organiq.notification_log (user_id, type, reference_id, title, body, lead_mins, status, scheduled_for)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 		RETURNING id, created_at
 	`, log.UserID, log.Type, log.ReferenceID, log.Title, log.Body, log.LeadMins, log.Status, log.ScheduledFor)
@@ -31,7 +31,7 @@ func (r *NotificationLogRepository) Create(ctx context.Context, log domain.Notif
 func (r *NotificationLogRepository) ListPending(ctx context.Context, scheduledBefore time.Time) ([]domain.NotificationLog, error) {
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, user_id, type, reference_id, title, body, lead_mins, status, scheduled_for, sent_at, read_at, error_msg, created_at
-		FROM inbota.notification_log
+		FROM organiq.notification_log
 		WHERE status = 'pending' AND scheduled_for <= $1
 	`, scheduledBefore)
 	if err != nil {
@@ -57,7 +57,7 @@ func (r *NotificationLogRepository) UpdateStatus(ctx context.Context, id string,
 		sentAt = &now
 	}
 	_, err := r.db.ExecContext(ctx, `
-		UPDATE inbota.notification_log
+		UPDATE organiq.notification_log
 		SET status = $1, error_msg = $2, sent_at = $3
 		WHERE id = $4
 	`, status, errorMsg, sentAt, id)
@@ -67,7 +67,7 @@ func (r *NotificationLogRepository) UpdateStatus(ctx context.Context, id string,
 func (r *NotificationLogRepository) ListByUserID(ctx context.Context, userID string, limit, offset int) ([]domain.NotificationLog, error) {
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, user_id, type, reference_id, title, body, lead_mins, status, scheduled_for, sent_at, read_at, error_msg, created_at
-		FROM inbota.notification_log
+		FROM organiq.notification_log
 		WHERE user_id = $1
 		  AND status IN ('sent', 'delivered', 'read')
 		ORDER BY sent_at DESC NULLS LAST, created_at DESC, id DESC
@@ -94,7 +94,7 @@ func (r *NotificationLogRepository) ListByUserID(ctx context.Context, userID str
 
 func (r *NotificationLogRepository) MarkAsRead(ctx context.Context, id, userID string) error {
 	_, err := r.db.ExecContext(ctx, `
-		UPDATE inbota.notification_log
+		UPDATE organiq.notification_log
 		SET read_at = now(), status = 'read'
 		WHERE id = $1 AND user_id = $2
 	`, id, userID)
@@ -103,7 +103,7 @@ func (r *NotificationLogRepository) MarkAsRead(ctx context.Context, id, userID s
 
 func (r *NotificationLogRepository) MarkAllAsRead(ctx context.Context, userID string) error {
 	_, err := r.db.ExecContext(ctx, `
-		UPDATE inbota.notification_log
+		UPDATE organiq.notification_log
 		SET read_at = now(), status = 'read'
 		WHERE user_id = $1 AND read_at IS NULL
 	`, userID)
@@ -114,7 +114,7 @@ func (r *NotificationLogRepository) Exists(ctx context.Context, referenceID stri
 	var exists bool
 	err := r.db.QueryRowContext(ctx, `
 		SELECT EXISTS(
-			SELECT 1 FROM inbota.notification_log
+			SELECT 1 FROM organiq.notification_log
 			WHERE reference_id = $1 AND (lead_mins = $2 OR (lead_mins IS NULL AND $2 IS NULL))
 			AND status IN ('pending', 'sent', 'delivered')
 		)
@@ -124,7 +124,7 @@ func (r *NotificationLogRepository) Exists(ctx context.Context, referenceID stri
 
 func (r *NotificationLogRepository) UpdateScheduledFor(ctx context.Context, id string, scheduledFor time.Time) error {
 	_, err := r.db.ExecContext(ctx, `
-		UPDATE inbota.notification_log
+		UPDATE organiq.notification_log
 		SET scheduled_for = $1, status = 'pending'
 		WHERE id = $2
 	`, scheduledFor, id)

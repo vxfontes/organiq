@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:inbota/modules/auth/data/models/auth_user_model.dart';
+import 'package:organiq/modules/auth/data/models/auth_user_model.dart';
 
 part 'auth_session_output.g.dart';
 

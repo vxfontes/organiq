@@ -10,7 +10,7 @@ import (
 func (r *NotificationPreferencesRepository) GetDailySummaryTokenByUserID(ctx context.Context, userID string) (string, error) {
 	row := r.db.QueryRowContext(ctx, `
 		SELECT daily_summary_token
-		FROM inbota.notification_preferences
+		FROM organiq.notification_preferences
 		WHERE user_id = $1
 		LIMIT 1
 	`, userID)
@@ -27,7 +27,7 @@ func (r *NotificationPreferencesRepository) GetDailySummaryTokenByUserID(ctx con
 
 func (r *NotificationPreferencesRepository) RotateDailySummaryToken(ctx context.Context, userID string) (string, error) {
 	row := r.db.QueryRowContext(ctx, `
-		UPDATE inbota.notification_preferences
+		UPDATE organiq.notification_preferences
 		SET daily_summary_token = gen_random_uuid()::text, updated_at = now()
 		WHERE user_id = $1
 		RETURNING daily_summary_token
@@ -51,7 +51,7 @@ func (r *NotificationPreferencesRepository) FindUserIDByDailySummaryToken(ctx co
 
 	row := r.db.QueryRowContext(ctx, `
 		SELECT user_id
-		FROM inbota.notification_preferences
+		FROM organiq.notification_preferences
 		WHERE daily_summary_token = $1
 		LIMIT 1
 	`, token)

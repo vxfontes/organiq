@@ -1,6 +1,6 @@
-# API Inbota (MVP)
+# API Organiq (MVP)
 
-Guia detalhado da API HTTP do Inbota. Este documento complementa o Swagger.
+Guia detalhado da API HTTP do Organiq. Este documento complementa o Swagger.
 
 **Base URL**
 - Local: `http://localhost:8080`

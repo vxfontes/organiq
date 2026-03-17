@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:inbota/modules/auth/data/models/auth_user_model.dart';
-import 'package:inbota/presentation/screens/settings_module/controller/settings_account_controller.dart';
-import 'package:inbota/shared/components/ib_lib/index.dart';
-import 'package:inbota/shared/state/ib_state.dart';
+import 'package:organiq/modules/auth/data/models/auth_user_model.dart';
+import 'package:organiq/presentation/screens/settings_module/controller/settings_account_controller.dart';
+import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/state/ib_state.dart';
 
 class SettingsAccountPage extends StatefulWidget {
   const SettingsAccountPage({super.key});

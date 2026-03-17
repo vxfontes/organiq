@@ -5,9 +5,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"inbota/backend/internal/app/domain"
-	"inbota/backend/internal/app/usecase"
-	"inbota/backend/internal/http/dto"
+	"organiq/backend/internal/app/domain"
+	"organiq/backend/internal/app/usecase"
+	"organiq/backend/internal/http/dto"
 )
 
 type RemindersHandler struct {

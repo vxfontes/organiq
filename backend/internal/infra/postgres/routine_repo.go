@@ -6,8 +6,8 @@ import (
 
 	"github.com/lib/pq"
 
-	"inbota/backend/internal/app/domain"
-	"inbota/backend/internal/app/repository"
+	"organiq/backend/internal/app/domain"
+	"organiq/backend/internal/app/repository"
 )
 
 type RoutineRepositoryImpl struct {
@@ -28,7 +28,7 @@ func (r *RoutineRepositoryImpl) Create(ctx context.Context, routine domain.Routi
 	}
 
 	row := r.db.QueryRowContext(ctx, `
-		INSERT INTO inbota.routines (user_id, title, description, recurrence_type, weekdays, start_time, end_time, week_of_month, starts_on, ends_on, color, is_active, flag_id, subflag_id, source_inbox_item_id)
+		INSERT INTO organiq.routines (user_id, title, description, recurrence_type, weekdays, start_time, end_time, week_of_month, starts_on, ends_on, color, is_active, flag_id, subflag_id, source_inbox_item_id)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
 		RETURNING id, created_at, updated_at
 	`, routine.UserID, routine.Title, routine.Description, routine.RecurrenceType, pq.Array(routine.Weekdays), routine.StartTime, nullStringFromStr(routine.EndTime), routine.WeekOfMonth, routine.StartsOn, routine.EndsOn, routine.Color, routine.IsActive, routine.FlagID, routine.SubflagID, routine.SourceInboxItemID)
@@ -41,7 +41,7 @@ func (r *RoutineRepositoryImpl) Create(ctx context.Context, routine domain.Routi
 
 func (r *RoutineRepositoryImpl) Update(ctx context.Context, routine domain.Routine) (domain.Routine, error) {
 	row := r.db.QueryRowContext(ctx, `
-		UPDATE inbota.routines
+		UPDATE organiq.routines
 		SET title = $1, description = $2, recurrence_type = $3, weekdays = $4, start_time = $5, end_time = $6, week_of_month = $7, starts_on = $8, ends_on = $9, color = $10, is_active = $11, flag_id = $12, subflag_id = $13, updated_at = now()
 		WHERE id = $14 AND user_id = $15
 		RETURNING created_at, updated_at
@@ -58,7 +58,7 @@ func (r *RoutineRepositoryImpl) Update(ctx context.Context, routine domain.Routi
 
 func (r *RoutineRepositoryImpl) Delete(ctx context.Context, userID, id string) error {
 	result, err := r.db.ExecContext(ctx, `
-		DELETE FROM inbota.routines
+		DELETE FROM organiq.routines
 		WHERE id = $1 AND user_id = $2
 	`, id, userID)
 	if err != nil {
@@ -81,7 +81,7 @@ func (r *RoutineRepositoryImpl) Get(ctx context.Context, userID, id string) (dom
 			to_char(start_time, 'HH24:MI') as start_time,
 			to_char(end_time, 'HH24:MI') as end_time,
 			week_of_month, starts_on::text, ends_on::text, color, is_active, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
-		FROM inbota.routines
+		FROM organiq.routines
 		WHERE id = $1 AND user_id = $2
 		LIMIT 1
 	`, id, userID)
@@ -135,7 +135,7 @@ func (r *RoutineRepositoryImpl) List(ctx context.Context, userID string, opts re
 			to_char(start_time, 'HH24:MI') as start_time,
 			to_char(end_time, 'HH24:MI') as end_time,
 			week_of_month, starts_on::text, ends_on::text, color, is_active, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
-		FROM inbota.routines
+		FROM organiq.routines
 		WHERE user_id = $1 AND is_active = true
 		ORDER BY start_time, created_at
 		LIMIT $2 OFFSET $3
@@ -195,7 +195,7 @@ func (r *RoutineRepositoryImpl) ListByWeekday(ctx context.Context, userID string
 			to_char(start_time, 'HH24:MI') as start_time,
 			to_char(end_time, 'HH24:MI') as end_time,
 			week_of_month, starts_on::text, ends_on::text, color, is_active, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
-		FROM inbota.routines
+		FROM organiq.routines
 		WHERE user_id = $1 AND is_active = true AND $2 = ANY(weekdays)
 		ORDER BY start_time, created_at
 	`, userID, weekday)
@@ -253,7 +253,7 @@ func (r *RoutineRepositoryImpl) ListDailyStatus(ctx context.Context, userID stri
 			start_time, end_time,
 			week_of_month, starts_on::text, ends_on::text, color, is_active, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at,
 			completed_at, is_completed, exception_action
-		FROM inbota.fnc_routine_daily_status($1, $2, $3::date)
+		FROM organiq.fnc_routine_daily_status($1, $2, $3::date)
 	`, userID, weekday, date)
 	if err != nil {
 		return nil, err
@@ -312,7 +312,7 @@ func (r *RoutineRepositoryImpl) ListDailyStatus(ctx context.Context, userID stri
 func (r *RoutineRepositoryImpl) CheckOverlap(ctx context.Context, userID string, weekdays []int, startTime, endTime string, excludeID *string) (bool, error) {
 	var overlap bool
 	err := r.db.QueryRowContext(ctx, `
-		SELECT inbota.fnc_check_routine_overlap($1, $2, $3::TIME, $4::TIME, $5::UUID)
+		SELECT organiq.fnc_check_routine_overlap($1, $2, $3::TIME, $4::TIME, $5::UUID)
 	`, userID, pq.Array(weekdays), startTime, endTime, excludeID).Scan(&overlap)
 
 	return overlap, err
@@ -320,7 +320,7 @@ func (r *RoutineRepositoryImpl) CheckOverlap(ctx context.Context, userID string,
 
 func (r *RoutineRepositoryImpl) Toggle(ctx context.Context, userID, id string, isActive bool) error {
 	result, err := r.db.ExecContext(ctx, `
-		UPDATE inbota.routines
+		UPDATE organiq.routines
 		SET is_active = $1, updated_at = now()
 		WHERE id = $2 AND user_id = $3
 	`, isActive, id, userID)
@@ -356,9 +356,9 @@ func (r *RoutineExceptionRepositoryImpl) Create(ctx context.Context, userID stri
 	}
 
 	row := r.db.QueryRowContext(ctx, `
-		INSERT INTO inbota.routine_exceptions (routine_id, exception_date, action, new_start_time, new_end_time, reason)
+		INSERT INTO organiq.routine_exceptions (routine_id, exception_date, action, new_start_time, new_end_time, reason)
 		SELECT $1, $2, $3, $4, $5, $6
-		WHERE EXISTS (SELECT 1 FROM inbota.routines WHERE id = $1 AND user_id = $7)
+		WHERE EXISTS (SELECT 1 FROM organiq.routines WHERE id = $1 AND user_id = $7)
 		RETURNING id, created_at
 	`, exception.RoutineID, exception.ExceptionDate, exception.Action, exception.NewStartTime, exception.NewEndTime, exception.Reason, userID)
 
@@ -373,9 +373,9 @@ func (r *RoutineExceptionRepositoryImpl) Create(ctx context.Context, userID stri
 
 func (r *RoutineExceptionRepositoryImpl) Delete(ctx context.Context, userID, routineID, exceptionDate string) error {
 	result, err := r.db.ExecContext(ctx, `
-		DELETE FROM inbota.routine_exceptions
+		DELETE FROM organiq.routine_exceptions
 		WHERE routine_id = $1 AND exception_date = $2
-		AND EXISTS (SELECT 1 FROM inbota.routines WHERE id = $1 AND user_id = $3)
+		AND EXISTS (SELECT 1 FROM organiq.routines WHERE id = $1 AND user_id = $3)
 	`, routineID, exceptionDate, userID)
 	if err != nil {
 		return err
@@ -394,8 +394,8 @@ func (r *RoutineExceptionRepositoryImpl) Delete(ctx context.Context, userID, rou
 func (r *RoutineExceptionRepositoryImpl) GetByRoutine(ctx context.Context, userID, routineID string) ([]domain.RoutineException, error) {
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, routine_id, exception_date, action, new_start_time, new_end_time, reason, created_at
-		FROM inbota.routine_exceptions
-		WHERE routine_id = $1 AND EXISTS (SELECT 1 FROM inbota.routines WHERE id = $1 AND user_id = $2)
+		FROM organiq.routine_exceptions
+		WHERE routine_id = $1 AND EXISTS (SELECT 1 FROM organiq.routines WHERE id = $1 AND user_id = $2)
 		ORDER BY exception_date DESC
 	`, routineID, userID)
 	if err != nil {
@@ -428,8 +428,8 @@ func (r *RoutineExceptionRepositoryImpl) GetByRoutine(ctx context.Context, userI
 func (r *RoutineExceptionRepositoryImpl) GetForDate(ctx context.Context, userID, routineID, date string) (*domain.RoutineException, error) {
 	row := r.db.QueryRowContext(ctx, `
 		SELECT id, routine_id, exception_date, action, new_start_time, new_end_time, reason, created_at
-		FROM inbota.routine_exceptions
-		WHERE routine_id = $1 AND exception_date = $2 AND EXISTS (SELECT 1 FROM inbota.routines WHERE id = $1 AND user_id = $3)
+		FROM organiq.routine_exceptions
+		WHERE routine_id = $1 AND exception_date = $2 AND EXISTS (SELECT 1 FROM organiq.routines WHERE id = $1 AND user_id = $3)
 	`, routineID, date, userID)
 
 	var exception domain.RoutineException
@@ -463,9 +463,9 @@ func NewRoutineCompletionRepositoryTx(tx *sql.Tx) *RoutineCompletionRepositoryIm
 
 func (r *RoutineCompletionRepositoryImpl) Create(ctx context.Context, userID string, completion domain.RoutineCompletion) (domain.RoutineCompletion, error) {
 	row := r.db.QueryRowContext(ctx, `
-		INSERT INTO inbota.routine_completions (routine_id, completed_on)
+		INSERT INTO organiq.routine_completions (routine_id, completed_on)
 		SELECT $1, $2
-		WHERE EXISTS (SELECT 1 FROM inbota.routines WHERE id = $1 AND user_id = $3)
+		WHERE EXISTS (SELECT 1 FROM organiq.routines WHERE id = $1 AND user_id = $3)
 		RETURNING id, completed_at
 	`, completion.RoutineID, completion.CompletedOn, userID)
 
@@ -480,9 +480,9 @@ func (r *RoutineCompletionRepositoryImpl) Create(ctx context.Context, userID str
 
 func (r *RoutineCompletionRepositoryImpl) Delete(ctx context.Context, userID, routineID, completedOn string) error {
 	result, err := r.db.ExecContext(ctx, `
-		DELETE FROM inbota.routine_completions
+		DELETE FROM organiq.routine_completions
 		WHERE routine_id = $1 AND completed_on = $2
-		AND EXISTS (SELECT 1 FROM inbota.routines WHERE id = $1 AND user_id = $3)
+		AND EXISTS (SELECT 1 FROM organiq.routines WHERE id = $1 AND user_id = $3)
 	`, routineID, completedOn, userID)
 	if err != nil {
 		return err
@@ -501,8 +501,8 @@ func (r *RoutineCompletionRepositoryImpl) Delete(ctx context.Context, userID, ro
 func (r *RoutineCompletionRepositoryImpl) GetByRoutine(ctx context.Context, userID, routineID string) ([]domain.RoutineCompletion, error) {
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, routine_id, completed_on::text, completed_at
-		FROM inbota.routine_completions
-		WHERE routine_id = $1 AND EXISTS (SELECT 1 FROM inbota.routines WHERE id = $1 AND user_id = $2)
+		FROM organiq.routine_completions
+		WHERE routine_id = $1 AND EXISTS (SELECT 1 FROM organiq.routines WHERE id = $1 AND user_id = $2)
 		ORDER BY completed_on DESC
 	`, routineID, userID)
 	if err != nil {
@@ -528,8 +528,8 @@ func (r *RoutineCompletionRepositoryImpl) GetByRoutine(ctx context.Context, user
 func (r *RoutineCompletionRepositoryImpl) GetByDate(ctx context.Context, userID, date string) ([]domain.RoutineCompletion, error) {
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, routine_id, completed_on, completed_at
-		FROM inbota.routine_completions
-		WHERE completed_on = $1 AND EXISTS (SELECT 1 FROM inbota.routines WHERE id = routine_id AND user_id = $2)
+		FROM organiq.routine_completions
+		WHERE completed_on = $1 AND EXISTS (SELECT 1 FROM organiq.routines WHERE id = routine_id AND user_id = $2)
 	`, date, userID)
 	if err != nil {
 		return nil, err
@@ -554,8 +554,8 @@ func (r *RoutineCompletionRepositoryImpl) GetByDate(ctx context.Context, userID,
 func (r *RoutineCompletionRepositoryImpl) GetStreak(ctx context.Context, userID, routineID string) (int, int, error) {
 	row := r.db.QueryRowContext(ctx, `
 		SELECT current_streak, total_completions
-		FROM inbota.fnc_get_routine_streak($1)
-		WHERE EXISTS (SELECT 1 FROM inbota.routines WHERE id = $1 AND user_id = $2)
+		FROM organiq.fnc_get_routine_streak($1)
+		WHERE EXISTS (SELECT 1 FROM organiq.routines WHERE id = $1 AND user_id = $2)
 	`, routineID, userID)
 
 	var currentStreak, totalCompletions int
@@ -575,7 +575,7 @@ func (r *RoutineRepositoryImpl) ListAllByWeekday(ctx context.Context, weekday in
 			to_char(start_time, 'HH24:MI') as start_time,
 			to_char(end_time, 'HH24:MI') as end_time,
 			week_of_month, starts_on::text, ends_on::text, color, is_active, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
-		FROM inbota.routines
+		FROM organiq.routines
 		WHERE is_active = true AND $1 = ANY(weekdays)
 		ORDER BY start_time, created_at
 	`, weekday)

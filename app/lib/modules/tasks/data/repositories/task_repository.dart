@@ -1,14 +1,14 @@
 import 'package:dartz/dartz.dart';
 
-import 'package:inbota/modules/tasks/data/models/task_list_output.dart';
-import 'package:inbota/modules/tasks/data/models/task_output.dart';
-import 'package:inbota/modules/tasks/data/models/task_create_input.dart';
-import 'package:inbota/modules/tasks/data/models/task_update_input.dart';
-import 'package:inbota/modules/tasks/domain/repositories/i_task_repository.dart';
-import 'package:inbota/shared/errors/api_error_mapper.dart';
-import 'package:inbota/shared/errors/failures.dart';
-import 'package:inbota/shared/services/http/app_path.dart';
-import 'package:inbota/shared/services/http/http_client.dart';
+import 'package:organiq/modules/tasks/data/models/task_list_output.dart';
+import 'package:organiq/modules/tasks/data/models/task_output.dart';
+import 'package:organiq/modules/tasks/data/models/task_create_input.dart';
+import 'package:organiq/modules/tasks/data/models/task_update_input.dart';
+import 'package:organiq/modules/tasks/domain/repositories/i_task_repository.dart';
+import 'package:organiq/shared/errors/api_error_mapper.dart';
+import 'package:organiq/shared/errors/failures.dart';
+import 'package:organiq/shared/services/http/app_path.dart';
+import 'package:organiq/shared/services/http/http_client.dart';
 
 class TaskRepository implements ITaskRepository {
   TaskRepository(this._httpClient);

@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"time"
 
-	"inbota/backend/internal/app/domain"
-	"inbota/backend/internal/app/repository"
+	"organiq/backend/internal/app/domain"
+	"organiq/backend/internal/app/repository"
 )
 
 type TaskRepository struct {
@@ -27,7 +27,7 @@ func (r *TaskRepository) Create(ctx context.Context, task domain.Task) (domain.T
 	}
 
 	row := r.db.QueryRowContext(ctx, `
-		INSERT INTO inbota.tasks (user_id, title, description, status, due_at, flag_id, subflag_id, source_inbox_item_id)
+		INSERT INTO organiq.tasks (user_id, title, description, status, due_at, flag_id, subflag_id, source_inbox_item_id)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 		RETURNING id, created_at, updated_at
 	`, task.UserID, task.Title, task.Description, string(task.Status), task.DueAt, task.FlagID, task.SubflagID, task.SourceInboxItemID)
@@ -40,7 +40,7 @@ func (r *TaskRepository) Create(ctx context.Context, task domain.Task) (domain.T
 
 func (r *TaskRepository) Update(ctx context.Context, task domain.Task) (domain.Task, error) {
 	row := r.db.QueryRowContext(ctx, `
-		UPDATE inbota.tasks
+		UPDATE organiq.tasks
 		SET title = $1, description = $2, status = $3, due_at = $4, flag_id = $5, subflag_id = $6, updated_at = now()
 		WHERE id = $7 AND user_id = $8
 		RETURNING created_at, updated_at
@@ -57,7 +57,7 @@ func (r *TaskRepository) Update(ctx context.Context, task domain.Task) (domain.T
 
 func (r *TaskRepository) Delete(ctx context.Context, userID, id string) error {
 	result, err := r.db.ExecContext(ctx, `
-		DELETE FROM inbota.tasks
+		DELETE FROM organiq.tasks
 		WHERE id = $1 AND user_id = $2
 	`, id, userID)
 	if err != nil {
@@ -77,7 +77,7 @@ func (r *TaskRepository) Delete(ctx context.Context, userID, id string) error {
 func (r *TaskRepository) Get(ctx context.Context, userID, id string) (domain.Task, error) {
 	row := r.db.QueryRowContext(ctx, `
 		SELECT id, user_id, title, description, status, due_at, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
-		FROM inbota.tasks
+		FROM organiq.tasks
 		WHERE id = $1 AND user_id = $2
 		LIMIT 1
 	`, id, userID)
@@ -112,7 +112,7 @@ func (r *TaskRepository) List(ctx context.Context, userID string, opts repositor
 
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, user_id, title, description, status, due_at, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
-		FROM inbota.tasks
+		FROM organiq.tasks
 		WHERE user_id = $1
 		ORDER BY due_at NULLS LAST, created_at DESC
 		LIMIT $2 OFFSET $3
@@ -153,7 +153,7 @@ func (r *TaskRepository) List(ctx context.Context, userID string, opts repositor
 func (r *TaskRepository) ListUpcoming(ctx context.Context, start, end time.Time) ([]domain.Task, error) {
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, user_id, title, description, status, due_at, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
-		FROM inbota.tasks
+		FROM organiq.tasks
 		WHERE status = 'OPEN' AND due_at >= $1 AND due_at <= $2
 	`, start, end)
 	if err != nil {

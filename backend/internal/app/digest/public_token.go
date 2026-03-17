@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"inbota/backend/internal/infra/postgres"
+	"organiq/backend/internal/infra/postgres"
 )
 
 func (s *DigestService) ResolveUserIDByDailySummaryToken(ctx context.Context, token string) (string, error) {

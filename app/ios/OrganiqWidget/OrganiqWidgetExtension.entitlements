@@ -4,7 +4,7 @@
 <dict>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.com.vxfontes.inbota</string>
+		<string>group.com.vxfontes.organiq</string>
 	</array>
 </dict>
 </plist>

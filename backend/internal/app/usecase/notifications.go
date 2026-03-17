@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log/slog"
 
-	"inbota/backend/internal/app/domain"
-	"inbota/backend/internal/app/repository"
-	"inbota/backend/internal/infra/push"
+	"organiq/backend/internal/app/domain"
+	"organiq/backend/internal/app/repository"
+	"organiq/backend/internal/infra/push"
 )
 
 type NotificationUsecase struct {
@@ -66,7 +66,7 @@ func (uc *NotificationUsecase) SendTestNotification(ctx context.Context, userID 
 	}
 
 	title := "Teste de Notificação"
-	body := "Isso é um teste do Inbota via ntfy.sh! 🎉"
+	body := "Isso é um teste do Organiq via ntfy.sh! 🎉"
 	
 	data := map[string]string{"type": "test"}
 	var lastErr error

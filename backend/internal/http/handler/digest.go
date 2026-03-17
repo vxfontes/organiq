@@ -7,8 +7,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"inbota/backend/internal/app/digest"
-	"inbota/backend/internal/infra/postgres"
+	"organiq/backend/internal/app/digest"
+	"organiq/backend/internal/infra/postgres"
 )
 
 type DigestHandler struct {

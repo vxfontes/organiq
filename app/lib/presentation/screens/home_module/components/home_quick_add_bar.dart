@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:inbota/modules/inbox/data/models/inbox_create_line_result.dart';
-import 'package:inbota/presentation/screens/home_module/components/home_quick_add_result_sheet.dart';
-import 'package:inbota/presentation/screens/home_module/controller/home_controller.dart';
-import 'package:inbota/shared/components/ib_lib/index.dart';
-import 'package:inbota/shared/theme/app_colors.dart';
+import 'package:organiq/modules/inbox/data/models/inbox_create_line_result.dart';
+import 'package:organiq/presentation/screens/home_module/components/home_quick_add_result_sheet.dart';
+import 'package:organiq/presentation/screens/home_module/controller/home_controller.dart';
+import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/theme/app_colors.dart';
 
 class HomeQuickAddBar extends StatefulWidget {
   const HomeQuickAddBar({super.key, required this.controller});

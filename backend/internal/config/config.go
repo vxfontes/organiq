@@ -54,7 +54,7 @@ func Load() (Config, error) {
 		AIMaxRetries:            getEnvInt("AI_MAX_RETRIES", 2),
 
 		ResendAPIKey:      getEnv("RESEND_API_KEY", ""),
-		ResendFrom:        getEnv("RESEND_FROM", "Inbota <noreply@resend.dev>"),
+		ResendFrom:        getEnv("RESEND_FROM", "Organiq <noreply@resend.dev>"),
 		DigestJobInterval: getEnvDuration("DIGEST_JOB_INTERVAL", 30*time.Minute),
 
 		ReadTimeout:  getEnvDuration("READ_TIMEOUT", 5*time.Second),

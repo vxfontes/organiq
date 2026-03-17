@@ -1,7 +1,7 @@
-import 'package:inbota/modules/splash/data/models/health_status_output.dart';
-import 'package:inbota/modules/splash/domain/repositories/i_splash_repository.dart';
-import 'package:inbota/shared/errors/failures.dart';
-import 'package:inbota/shared/templates/ib_usecase.dart';
+import 'package:organiq/modules/splash/data/models/health_status_output.dart';
+import 'package:organiq/modules/splash/domain/repositories/i_splash_repository.dart';
+import 'package:organiq/shared/errors/failures.dart';
+import 'package:organiq/shared/templates/ib_usecase.dart';
 
 class CheckHealthUsecase extends IBUsecase {
   final ISplashRepository _repository;

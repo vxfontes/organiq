@@ -1,10 +1,10 @@
 import 'package:dartz/dartz.dart';
-import 'package:inbota/modules/splash/data/models/health_status_output.dart';
-import 'package:inbota/modules/splash/domain/repositories/i_splash_repository.dart';
-import 'package:inbota/shared/errors/api_error_mapper.dart';
-import 'package:inbota/shared/errors/failures.dart';
-import 'package:inbota/shared/services/http/app_path.dart';
-import 'package:inbota/shared/services/http/http_client.dart';
+import 'package:organiq/modules/splash/data/models/health_status_output.dart';
+import 'package:organiq/modules/splash/domain/repositories/i_splash_repository.dart';
+import 'package:organiq/shared/errors/api_error_mapper.dart';
+import 'package:organiq/shared/errors/failures.dart';
+import 'package:organiq/shared/services/http/app_path.dart';
+import 'package:organiq/shared/services/http/http_client.dart';
 
 class SplashRepository implements ISplashRepository {
   SplashRepository(this._httpClient);

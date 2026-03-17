@@ -1,4 +1,4 @@
-# Inbota Backend (Go + Gin)
+# Organiq Backend (Go + Gin)
 
 API do MVP usando Go e Gin para as rotas.
 

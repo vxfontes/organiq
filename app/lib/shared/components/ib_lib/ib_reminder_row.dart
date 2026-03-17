@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:inbota/shared/components/ib_lib/ib_text.dart';
+import 'package:organiq/shared/components/ib_lib/ib_text.dart';
 
 class IBReminderRow extends StatelessWidget {
   const IBReminderRow({

@@ -1,14 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import 'package:inbota/modules/tasks/data/models/task_output.dart';
+import 'package:organiq/modules/tasks/data/models/task_output.dart';
 
 class WidgetBridgeService {
   WidgetBridgeService._();
 
   static final WidgetBridgeService instance = WidgetBridgeService._();
 
-  static const MethodChannel _channel = MethodChannel('inbota.widget');
+  static const MethodChannel _channel = MethodChannel('organiq.widget');
 
   bool get _isSupported =>
       !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;

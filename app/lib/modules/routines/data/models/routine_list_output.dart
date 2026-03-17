@@ -1,4 +1,4 @@
-import 'package:inbota/modules/routines/data/models/routine_output.dart';
+import 'package:organiq/modules/routines/data/models/routine_output.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'routine_list_output.g.dart';

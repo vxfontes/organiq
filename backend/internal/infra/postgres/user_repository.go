@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"errors"
 
-	"inbota/backend/internal/app/domain"
+	"organiq/backend/internal/app/domain"
 )
 
 var ErrUserNotFound = errors.New("user_not_found")
@@ -20,7 +20,7 @@ func NewUserRepository(db *DB) *UserRepository {
 
 func (r *UserRepository) Create(ctx context.Context, user domain.User) (domain.User, error) {
 	row := r.db.QueryRowContext(ctx, `
-		INSERT INTO inbota.users (email, display_name, password, locale, timezone)
+		INSERT INTO organiq.users (email, display_name, password, locale, timezone)
 		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id
 	`, user.Email, user.DisplayName, user.Password, user.Locale, user.Timezone)
@@ -36,7 +36,7 @@ func (r *UserRepository) Create(ctx context.Context, user domain.User) (domain.U
 func (r *UserRepository) Get(ctx context.Context, id string) (domain.User, error) {
 	row := r.db.QueryRowContext(ctx, `
 		SELECT id, email, display_name, password, locale, timezone, created_at, updated_at
-		FROM inbota.users
+		FROM organiq.users
 		WHERE id = $1
 		LIMIT 1
 	`, id)
@@ -54,7 +54,7 @@ func (r *UserRepository) Get(ctx context.Context, id string) (domain.User, error
 func (r *UserRepository) FindByEmail(ctx context.Context, email string) (domain.User, error) {
 	row := r.db.QueryRowContext(ctx, `
 		SELECT id, email, display_name, password, locale, timezone
-		FROM inbota.users
+		FROM organiq.users
 		WHERE email = $1
 		LIMIT 1
 	`, email)

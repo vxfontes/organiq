@@ -1,18 +1,18 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:inbota/modules/notifications/data/models/notification_preferences_model.dart';
-import 'package:inbota/presentation/screens/settings_module/components/settings_accordion_section.dart';
-import 'package:inbota/presentation/screens/settings_module/components/settings_notifications_device_content.dart';
-import 'package:inbota/presentation/screens/settings_module/components/settings_notifications_header_card.dart';
-import 'package:inbota/presentation/screens/settings_module/components/settings_notifications_module_definitions.dart';
-import 'package:inbota/presentation/screens/settings_module/components/settings_notifications_module_content.dart';
-import 'package:inbota/presentation/screens/settings_module/components/settings_notifications_quiet_hours_content.dart';
-import 'package:inbota/presentation/screens/settings_module/components/settings_notifications_daily_digest_content.dart';
-import 'package:inbota/presentation/screens/settings_module/components/settings_notifications_daily_summary_token_content.dart';
-import 'package:inbota/presentation/screens/settings_module/controller/settings_notifications_controller.dart';
-import 'package:inbota/shared/components/ib_lib/index.dart';
-import 'package:inbota/shared/state/ib_state.dart';
+import 'package:organiq/modules/notifications/data/models/notification_preferences_model.dart';
+import 'package:organiq/presentation/screens/settings_module/components/settings_accordion_section.dart';
+import 'package:organiq/presentation/screens/settings_module/components/settings_notifications_device_content.dart';
+import 'package:organiq/presentation/screens/settings_module/components/settings_notifications_header_card.dart';
+import 'package:organiq/presentation/screens/settings_module/components/settings_notifications_module_definitions.dart';
+import 'package:organiq/presentation/screens/settings_module/components/settings_notifications_module_content.dart';
+import 'package:organiq/presentation/screens/settings_module/components/settings_notifications_quiet_hours_content.dart';
+import 'package:organiq/presentation/screens/settings_module/components/settings_notifications_daily_digest_content.dart';
+import 'package:organiq/presentation/screens/settings_module/components/settings_notifications_daily_summary_token_content.dart';
+import 'package:organiq/presentation/screens/settings_module/controller/settings_notifications_controller.dart';
+import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/state/ib_state.dart';
 
 class SettingsNotificationsPage extends StatefulWidget {
   const SettingsNotificationsPage({super.key});

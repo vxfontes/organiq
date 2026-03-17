@@ -6,8 +6,8 @@ import (
 
 	"github.com/lib/pq"
 
-	"inbota/backend/internal/app/domain"
-	"inbota/backend/internal/app/repository"
+	"organiq/backend/internal/app/domain"
+	"organiq/backend/internal/app/repository"
 )
 
 type FlagRepository struct {
@@ -24,7 +24,7 @@ func NewFlagRepositoryTx(tx *sql.Tx) *FlagRepository {
 
 func (r *FlagRepository) Create(ctx context.Context, flag domain.Flag) (domain.Flag, error) {
 	row := r.db.QueryRowContext(ctx, `
-		INSERT INTO inbota.flags (user_id, name, color, sort_order)
+		INSERT INTO organiq.flags (user_id, name, color, sort_order)
 		VALUES ($1, $2, $3, $4)
 		RETURNING id, created_at, updated_at
 	`, flag.UserID, flag.Name, flag.Color, flag.SortOrder)
@@ -37,7 +37,7 @@ func (r *FlagRepository) Create(ctx context.Context, flag domain.Flag) (domain.F
 
 func (r *FlagRepository) Update(ctx context.Context, flag domain.Flag) (domain.Flag, error) {
 	row := r.db.QueryRowContext(ctx, `
-		UPDATE inbota.flags
+		UPDATE organiq.flags
 		SET name = $1, color = $2, sort_order = $3, updated_at = now()
 		WHERE id = $4 AND user_id = $5
 		RETURNING created_at, updated_at
@@ -54,7 +54,7 @@ func (r *FlagRepository) Update(ctx context.Context, flag domain.Flag) (domain.F
 
 func (r *FlagRepository) Delete(ctx context.Context, userID, id string) error {
 	result, err := r.db.ExecContext(ctx, `
-		DELETE FROM inbota.flags
+		DELETE FROM organiq.flags
 		WHERE id = $1 AND user_id = $2
 	`, id, userID)
 	if err != nil {
@@ -74,7 +74,7 @@ func (r *FlagRepository) Delete(ctx context.Context, userID, id string) error {
 func (r *FlagRepository) Get(ctx context.Context, userID, id string) (domain.Flag, error) {
 	row := r.db.QueryRowContext(ctx, `
 		SELECT id, user_id, name, color, sort_order, created_at, updated_at
-		FROM inbota.flags
+		FROM organiq.flags
 		WHERE id = $1 AND user_id = $2
 		LIMIT 1
 	`, id, userID)
@@ -98,7 +98,7 @@ func (r *FlagRepository) GetByIDs(ctx context.Context, userID string, ids []stri
 
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, user_id, name, color, sort_order, created_at, updated_at
-		FROM inbota.flags
+		FROM organiq.flags
 		WHERE user_id = $1 AND id = ANY($2)
 	`, userID, pq.Array(ids))
 	if err != nil {
@@ -131,7 +131,7 @@ func (r *FlagRepository) List(ctx context.Context, userID string, opts repositor
 
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, user_id, name, color, sort_order, created_at, updated_at
-		FROM inbota.flags
+		FROM organiq.flags
 		WHERE user_id = $1
 		ORDER BY sort_order ASC, created_at ASC
 		LIMIT $2 OFFSET $3

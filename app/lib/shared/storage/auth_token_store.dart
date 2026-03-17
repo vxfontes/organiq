@@ -1,6 +1,6 @@
-import 'package:inbota/shared/global/global_keys.dart';
-import 'package:inbota/shared/global/global_share.dart';
-import 'package:inbota/shared/storage/token_storage.dart';
+import 'package:organiq/shared/global/global_keys.dart';
+import 'package:organiq/shared/global/global_share.dart';
+import 'package:organiq/shared/storage/token_storage.dart';
 
 class AuthTokenStore {
   AuthTokenStore(this._storage);

@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	"inbota/backend/internal/app/repository"
+	"organiq/backend/internal/app/repository"
 )
 
 type AgendaRepository struct {
@@ -26,7 +26,7 @@ func (r *AgendaRepository) List(ctx context.Context, userID string, opts reposit
 		       due_at, remind_at, start_at, end_at, all_day, location,
 		       flag_id, subflag_id, resolved_flag_id, flag_name, flag_color, subflag_name, subflag_color,
 		       created_at, updated_at
-		FROM inbota.view_agenda_consolidada
+		FROM organiq.view_agenda_consolidada
 		WHERE user_id = $1
 		  AND ($2::timestamptz IS NULL OR scheduled_at >= $2::timestamptz)
 		  AND ($3::timestamptz IS NULL OR scheduled_at < $3::timestamptz)

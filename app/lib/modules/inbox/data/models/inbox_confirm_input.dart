@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:inbota/modules/inbox/data/models/inbox_item_output.dart';
+import 'package:organiq/modules/inbox/data/models/inbox_item_output.dart';
 
 part 'inbox_confirm_input.g.dart';
 

@@ -4,7 +4,7 @@ import (
 	"strings"
 	"unicode"
 
-	"inbota/backend/internal/app/domain"
+	"organiq/backend/internal/app/domain"
 )
 
 type MatchedContext struct {

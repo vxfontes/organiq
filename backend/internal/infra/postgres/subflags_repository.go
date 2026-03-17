@@ -6,8 +6,8 @@ import (
 
 	"github.com/lib/pq"
 
-	"inbota/backend/internal/app/domain"
-	"inbota/backend/internal/app/repository"
+	"organiq/backend/internal/app/domain"
+	"organiq/backend/internal/app/repository"
 )
 
 type SubflagRepository struct {
@@ -24,7 +24,7 @@ func NewSubflagRepositoryTx(tx *sql.Tx) *SubflagRepository {
 
 func (r *SubflagRepository) Create(ctx context.Context, subflag domain.Subflag) (domain.Subflag, error) {
 	row := r.db.QueryRowContext(ctx, `
-		INSERT INTO inbota.subflags (user_id, flag_id, name, sort_order)
+		INSERT INTO organiq.subflags (user_id, flag_id, name, sort_order)
 		VALUES ($1, $2, $3, $4)
 		RETURNING id, created_at, updated_at
 	`, subflag.UserID, subflag.FlagID, subflag.Name, subflag.SortOrder)
@@ -37,7 +37,7 @@ func (r *SubflagRepository) Create(ctx context.Context, subflag domain.Subflag) 
 
 func (r *SubflagRepository) Update(ctx context.Context, subflag domain.Subflag) (domain.Subflag, error) {
 	row := r.db.QueryRowContext(ctx, `
-		UPDATE inbota.subflags
+		UPDATE organiq.subflags
 		SET name = $1, sort_order = $2, updated_at = now()
 		WHERE id = $3 AND user_id = $4
 		RETURNING created_at, updated_at
@@ -54,7 +54,7 @@ func (r *SubflagRepository) Update(ctx context.Context, subflag domain.Subflag) 
 
 func (r *SubflagRepository) Delete(ctx context.Context, userID, id string) error {
 	result, err := r.db.ExecContext(ctx, `
-		DELETE FROM inbota.subflags
+		DELETE FROM organiq.subflags
 		WHERE id = $1 AND user_id = $2
 	`, id, userID)
 	if err != nil {
@@ -74,7 +74,7 @@ func (r *SubflagRepository) Delete(ctx context.Context, userID, id string) error
 func (r *SubflagRepository) Get(ctx context.Context, userID, id string) (domain.Subflag, error) {
 	row := r.db.QueryRowContext(ctx, `
 		SELECT id, user_id, flag_id, name, sort_order, created_at, updated_at
-		FROM inbota.subflags
+		FROM organiq.subflags
 		WHERE id = $1 AND user_id = $2
 		LIMIT 1
 	`, id, userID)
@@ -96,7 +96,7 @@ func (r *SubflagRepository) GetByIDs(ctx context.Context, userID string, ids []s
 
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, user_id, flag_id, name, sort_order, created_at, updated_at
-		FROM inbota.subflags
+		FROM organiq.subflags
 		WHERE user_id = $1 AND id = ANY($2)
 	`, userID, pq.Array(ids))
 	if err != nil {
@@ -127,7 +127,7 @@ func (r *SubflagRepository) ListByFlag(ctx context.Context, userID, flagID strin
 
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, user_id, flag_id, name, sort_order, created_at, updated_at
-		FROM inbota.subflags
+		FROM organiq.subflags
 		WHERE user_id = $1 AND flag_id = $2
 		ORDER BY sort_order ASC, created_at ASC
 		LIMIT $3 OFFSET $4

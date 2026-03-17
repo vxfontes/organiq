@@ -5,9 +5,9 @@ import (
 	"context"
 	"fmt"
 	htmltemplate "html/template"
-	"inbota/backend/internal/app/domain"
-	"inbota/backend/internal/app/repository"
-	"inbota/backend/internal/infra/mailer"
+	"organiq/backend/internal/app/domain"
+	"organiq/backend/internal/app/repository"
+	"organiq/backend/internal/infra/mailer"
 	"log/slog"
 	"sort"
 	"strconv"
@@ -19,7 +19,7 @@ import (
 const (
 	digestTypeDaily      = "daily_digest"
 	maxDigestPageSize    = 200
-	defaultDigestSubject = "Seu dia no Inbota"
+	defaultDigestSubject = "Seu dia no Organiq"
 )
 
 type RoutineWeekdayLister interface {

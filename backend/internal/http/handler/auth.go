@@ -5,8 +5,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"inbota/backend/internal/app/domain"
-	"inbota/backend/internal/app/usecase"
+	"organiq/backend/internal/app/domain"
+	"organiq/backend/internal/app/usecase"
 )
 
 type AuthHandler struct {

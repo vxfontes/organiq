@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:inbota/modules/flags/data/models/flag_output.dart';
-import 'package:inbota/modules/flags/data/models/subflag_output.dart';
-import 'package:inbota/modules/flags/domain/usecases/get_flags_usecase.dart';
-import 'package:inbota/modules/flags/domain/usecases/get_subflags_by_flag_usecase.dart';
-import 'package:inbota/modules/events/data/models/event_create_input.dart';
-import 'package:inbota/modules/events/domain/usecases/create_event_usecase.dart';
-import 'package:inbota/modules/events/data/models/event_output.dart';
-import 'package:inbota/modules/events/domain/usecases/delete_event_usecase.dart';
-import 'package:inbota/modules/events/domain/usecases/get_agenda_usecase.dart';
-import 'package:inbota/modules/reminders/data/models/reminder_output.dart';
-import 'package:inbota/modules/reminders/domain/usecases/delete_reminder_usecase.dart';
-import 'package:inbota/modules/tasks/data/models/task_output.dart';
-import 'package:inbota/modules/tasks/domain/usecases/delete_task_usecase.dart';
-import 'package:inbota/presentation/screens/events_module/components/event_feed_item.dart';
-import 'package:inbota/shared/errors/failures.dart';
-import 'package:inbota/shared/state/ib_state.dart';
-import 'package:inbota/shared/utils/text_utils.dart';
+import 'package:organiq/modules/flags/data/models/flag_output.dart';
+import 'package:organiq/modules/flags/data/models/subflag_output.dart';
+import 'package:organiq/modules/flags/domain/usecases/get_flags_usecase.dart';
+import 'package:organiq/modules/flags/domain/usecases/get_subflags_by_flag_usecase.dart';
+import 'package:organiq/modules/events/data/models/event_create_input.dart';
+import 'package:organiq/modules/events/domain/usecases/create_event_usecase.dart';
+import 'package:organiq/modules/events/data/models/event_output.dart';
+import 'package:organiq/modules/events/domain/usecases/delete_event_usecase.dart';
+import 'package:organiq/modules/events/domain/usecases/get_agenda_usecase.dart';
+import 'package:organiq/modules/reminders/data/models/reminder_output.dart';
+import 'package:organiq/modules/reminders/domain/usecases/delete_reminder_usecase.dart';
+import 'package:organiq/modules/tasks/data/models/task_output.dart';
+import 'package:organiq/modules/tasks/domain/usecases/delete_task_usecase.dart';
+import 'package:organiq/presentation/screens/events_module/components/event_feed_item.dart';
+import 'package:organiq/shared/errors/failures.dart';
+import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/utils/text_utils.dart';
 
 class EventsController implements IBController {
   EventsController(

@@ -1,5 +1,5 @@
-import 'package:inbota/shared/config/app_env.dart';
-import 'package:inbota/shared/services/http/app_path.dart';
+import 'package:organiq/shared/config/app_env.dart';
+import 'package:organiq/shared/services/http/app_path.dart';
 
 class AppService {
   static String getBackEndBaseUrl() {

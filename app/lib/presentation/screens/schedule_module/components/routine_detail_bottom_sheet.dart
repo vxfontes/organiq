@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:inbota/modules/routines/data/models/routine_activity_day_output.dart';
-import 'package:inbota/modules/routines/data/models/routine_output.dart';
-import 'package:inbota/modules/routines/data/models/routine_streak_output.dart';
-import 'package:inbota/presentation/routes/app_navigation.dart';
-import 'package:inbota/presentation/screens/schedule_module/components/create_routine_bottom_sheet.dart';
-import 'package:inbota/presentation/screens/schedule_module/controller/schedule_controller.dart';
-import 'package:inbota/shared/components/ib_lib/index.dart';
-import 'package:inbota/shared/theme/app_colors.dart';
+import 'package:organiq/modules/routines/data/models/routine_activity_day_output.dart';
+import 'package:organiq/modules/routines/data/models/routine_output.dart';
+import 'package:organiq/modules/routines/data/models/routine_streak_output.dart';
+import 'package:organiq/presentation/routes/app_navigation.dart';
+import 'package:organiq/presentation/screens/schedule_module/components/create_routine_bottom_sheet.dart';
+import 'package:organiq/presentation/screens/schedule_module/controller/schedule_controller.dart';
+import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/theme/app_colors.dart';
 
 class RoutineDetailBottomSheet extends StatefulWidget {
   const RoutineDetailBottomSheet({

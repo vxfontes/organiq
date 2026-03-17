@@ -1,9 +1,9 @@
-import 'package:inbota/modules/auth/data/repositories/auth_repository.dart';
-import 'package:inbota/modules/auth/domain/repositories/i_auth_repository.dart';
-import 'package:inbota/modules/auth/domain/usecases/get_me_usecase.dart';
-import 'package:inbota/modules/auth/domain/usecases/login_usecase.dart';
-import 'package:inbota/modules/auth/domain/usecases/logout_usecase.dart';
-import 'package:inbota/modules/auth/domain/usecases/signup_usecase.dart';
+import 'package:organiq/modules/auth/data/repositories/auth_repository.dart';
+import 'package:organiq/modules/auth/domain/repositories/i_auth_repository.dart';
+import 'package:organiq/modules/auth/domain/usecases/get_me_usecase.dart';
+import 'package:organiq/modules/auth/domain/usecases/login_usecase.dart';
+import 'package:organiq/modules/auth/domain/usecases/logout_usecase.dart';
+import 'package:organiq/modules/auth/domain/usecases/signup_usecase.dart';
 
 class AuthModule {
   static void binds(i) {

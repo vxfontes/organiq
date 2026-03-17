@@ -5098,8 +5098,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "",
 	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "Inbota API",
-	Description:      "API do MVP Inbota.",
+		Title:            "Organiq API",
+		Description:      "API do MVP Organiq.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }

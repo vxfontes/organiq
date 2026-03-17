@@ -1,8 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "API do MVP Inbota.",
-        "title": "Inbota API",
+        "description": "API do MVP Organiq.",
+        "title": "Organiq API",
         "contact": {},
         "version": "0.1"
     },

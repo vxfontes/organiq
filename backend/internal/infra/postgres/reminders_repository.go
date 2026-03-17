@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"time"
 
-	"inbota/backend/internal/app/domain"
-	"inbota/backend/internal/app/repository"
+	"organiq/backend/internal/app/domain"
+	"organiq/backend/internal/app/repository"
 )
 
 type ReminderRepository struct {
@@ -27,7 +27,7 @@ func (r *ReminderRepository) Create(ctx context.Context, reminder domain.Reminde
 	}
 
 	row := r.db.QueryRowContext(ctx, `
-		INSERT INTO inbota.reminders (user_id, title, status, remind_at, flag_id, subflag_id, source_inbox_item_id)
+		INSERT INTO organiq.reminders (user_id, title, status, remind_at, flag_id, subflag_id, source_inbox_item_id)
 		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		RETURNING id, created_at, updated_at
 	`, reminder.UserID, reminder.Title, string(reminder.Status), reminder.RemindAt, reminder.FlagID, reminder.SubflagID, reminder.SourceInboxItemID)
@@ -40,7 +40,7 @@ func (r *ReminderRepository) Create(ctx context.Context, reminder domain.Reminde
 
 func (r *ReminderRepository) Update(ctx context.Context, reminder domain.Reminder) (domain.Reminder, error) {
 	row := r.db.QueryRowContext(ctx, `
-		UPDATE inbota.reminders
+		UPDATE organiq.reminders
 		SET title = $1, status = $2, remind_at = $3, flag_id = $4, subflag_id = $5, updated_at = now()
 		WHERE id = $6 AND user_id = $7
 		RETURNING created_at, updated_at
@@ -57,7 +57,7 @@ func (r *ReminderRepository) Update(ctx context.Context, reminder domain.Reminde
 
 func (r *ReminderRepository) Delete(ctx context.Context, userID, id string) error {
 	result, err := r.db.ExecContext(ctx, `
-		DELETE FROM inbota.reminders
+		DELETE FROM organiq.reminders
 		WHERE id = $1 AND user_id = $2
 	`, id, userID)
 	if err != nil {
@@ -77,7 +77,7 @@ func (r *ReminderRepository) Delete(ctx context.Context, userID, id string) erro
 func (r *ReminderRepository) Get(ctx context.Context, userID, id string) (domain.Reminder, error) {
 	row := r.db.QueryRowContext(ctx, `
 		SELECT id, user_id, title, status, remind_at, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
-		FROM inbota.reminders
+		FROM organiq.reminders
 		WHERE id = $1 AND user_id = $2
 		LIMIT 1
 	`, id, userID)
@@ -110,7 +110,7 @@ func (r *ReminderRepository) List(ctx context.Context, userID string, opts repos
 
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, user_id, title, status, remind_at, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
-		FROM inbota.reminders
+		FROM organiq.reminders
 		WHERE user_id = $1
 		ORDER BY remind_at NULLS LAST, created_at DESC
 		LIMIT $2 OFFSET $3
@@ -149,7 +149,7 @@ func (r *ReminderRepository) List(ctx context.Context, userID string, opts repos
 func (r *ReminderRepository) ListUpcoming(ctx context.Context, start, end time.Time) ([]domain.Reminder, error) {
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, user_id, title, status, remind_at, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
-		FROM inbota.reminders
+		FROM organiq.reminders
 		WHERE status = 'OPEN' AND remind_at >= $1 AND remind_at <= $2
 	`, start, end)
 	if err != nil {

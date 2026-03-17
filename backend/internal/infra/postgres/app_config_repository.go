@@ -11,7 +11,7 @@ func NewAppConfigRepository(db *DB) *AppConfigRepository {
 }
 
 func (r *AppConfigRepository) GetAll(ctx context.Context) (map[string]string, error) {
-	rows, err := r.db.QueryContext(ctx, `SELECT key, value FROM inbota.app_config`)
+	rows, err := r.db.QueryContext(ctx, `SELECT key, value FROM organiq.app_config`)
 	if err != nil {
 		return nil, err
 	}

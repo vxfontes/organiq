@@ -1,6 +1,6 @@
-# Inbota App (Flutter)
+# Organiq App (Flutter)
 
-App Flutter do Inbota. Esta pasta contem apenas o app (o backend fica em `../backend`).
+App Flutter do Organiq. Esta pasta contem apenas o app (o backend fica em `../backend`).
 
 ## Requisitos
 - Flutter 3.35.x

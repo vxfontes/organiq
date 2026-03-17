@@ -1,13 +1,13 @@
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:inbota/modules/shared_module.dart';
-import 'package:inbota/presentation/routes/app_routes.dart';
-import 'package:inbota/presentation/screens/create_module/create_module.dart';
-import 'package:inbota/presentation/screens/events_module/events_module.dart';
-import 'package:inbota/presentation/screens/home_module/home_module.dart';
-import 'package:inbota/presentation/screens/reminders_module/reminders_module.dart';
-import 'package:inbota/presentation/screens/root_module/pages/root_page.dart';
-import 'package:inbota/presentation/screens/schedule_module/schedule_module.dart';
-import 'package:inbota/presentation/screens/shopping_module/shopping_module.dart';
+import 'package:organiq/modules/shared_module.dart';
+import 'package:organiq/presentation/routes/app_routes.dart';
+import 'package:organiq/presentation/screens/create_module/create_module.dart';
+import 'package:organiq/presentation/screens/events_module/events_module.dart';
+import 'package:organiq/presentation/screens/home_module/home_module.dart';
+import 'package:organiq/presentation/screens/reminders_module/reminders_module.dart';
+import 'package:organiq/presentation/screens/root_module/pages/root_page.dart';
+import 'package:organiq/presentation/screens/schedule_module/schedule_module.dart';
+import 'package:organiq/presentation/screens/shopping_module/shopping_module.dart';
 
 class RootModule extends Module {
   // core_modules

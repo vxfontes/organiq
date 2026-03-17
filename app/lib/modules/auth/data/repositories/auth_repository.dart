@@ -1,14 +1,14 @@
 import 'package:dartz/dartz.dart';
-import 'package:inbota/modules/auth/data/models/auth_login_input.dart';
-import 'package:inbota/modules/auth/data/models/auth_session_output.dart';
-import 'package:inbota/modules/auth/data/models/auth_signup_input.dart';
-import 'package:inbota/modules/auth/data/models/auth_user_model.dart';
-import 'package:inbota/modules/auth/domain/repositories/i_auth_repository.dart';
-import 'package:inbota/shared/errors/api_error_mapper.dart';
-import 'package:inbota/shared/errors/failures.dart';
-import 'package:inbota/shared/services/http/app_path.dart';
-import 'package:inbota/shared/services/http/http_client.dart';
-import 'package:inbota/shared/storage/auth_token_store.dart';
+import 'package:organiq/modules/auth/data/models/auth_login_input.dart';
+import 'package:organiq/modules/auth/data/models/auth_session_output.dart';
+import 'package:organiq/modules/auth/data/models/auth_signup_input.dart';
+import 'package:organiq/modules/auth/data/models/auth_user_model.dart';
+import 'package:organiq/modules/auth/domain/repositories/i_auth_repository.dart';
+import 'package:organiq/shared/errors/api_error_mapper.dart';
+import 'package:organiq/shared/errors/failures.dart';
+import 'package:organiq/shared/services/http/app_path.dart';
+import 'package:organiq/shared/services/http/http_client.dart';
+import 'package:organiq/shared/storage/auth_token_store.dart';
 
 class AuthRepository implements IAuthRepository {
   final IHttpClient _httpClient;

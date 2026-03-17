@@ -1,4 +1,4 @@
-import 'package:inbota/modules/inbox/data/models/inbox_create_line_result.dart';
+import 'package:organiq/modules/inbox/data/models/inbox_create_line_result.dart';
 
 class CreateBatchResult {
   const CreateBatchResult({

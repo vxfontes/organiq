@@ -6,10 +6,10 @@ import (
 	"strings"
 	"time"
 
-	"inbota/backend/internal/app/domain"
-	"inbota/backend/internal/app/repository"
-	"inbota/backend/internal/app/service"
-	"inbota/backend/internal/infra/postgres"
+	"organiq/backend/internal/app/domain"
+	"organiq/backend/internal/app/repository"
+	"organiq/backend/internal/app/service"
+	"organiq/backend/internal/infra/postgres"
 )
 
 var ErrInvalidCredentials = errors.New("invalid_credentials")

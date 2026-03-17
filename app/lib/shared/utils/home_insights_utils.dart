@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:inbota/shared/utils/text_utils.dart';
+import 'package:organiq/shared/utils/text_utils.dart';
 
 class DayScheduleSlot {
   const DayScheduleSlot({required this.start, this.end});

@@ -4,9 +4,9 @@ import WidgetKit
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
-  private let widgetChannelName = "inbota.widget"
-  private let widgetKind = "InbotaWidget"
-  private let appGroupID = "group.com.vxfontes.inbota"
+  private let widgetChannelName = "organiq.widget"
+  private let widgetKind = "OrganiqWidget"
+  private let appGroupID = "group.com.vxfontes.organiq"
   private let tasksStorageKey = "widget_tasks_v1"
   private let pendingCompletedTaskIdsStorageKey = "widget_pending_completed_task_ids_v1"
 

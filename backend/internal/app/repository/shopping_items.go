@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 
-	"inbota/backend/internal/app/domain"
+	"organiq/backend/internal/app/domain"
 )
 
 type ShoppingItemRepository interface {

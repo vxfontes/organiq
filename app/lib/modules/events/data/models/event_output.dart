@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:inbota/modules/flags/data/models/flag_object_output.dart';
+import 'package:organiq/modules/flags/data/models/flag_object_output.dart';
 
 part 'event_output.g.dart';
 

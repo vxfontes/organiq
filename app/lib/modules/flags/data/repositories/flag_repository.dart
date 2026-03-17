@@ -1,18 +1,18 @@
 import 'package:dartz/dartz.dart';
 
-import 'package:inbota/modules/flags/data/models/flag_create_input.dart';
-import 'package:inbota/modules/flags/data/models/flag_list_output.dart';
-import 'package:inbota/modules/flags/data/models/flag_output.dart';
-import 'package:inbota/modules/flags/data/models/flag_update_input.dart';
-import 'package:inbota/modules/flags/data/models/subflag_create_input.dart';
-import 'package:inbota/modules/flags/data/models/subflag_list_output.dart';
-import 'package:inbota/modules/flags/data/models/subflag_output.dart';
-import 'package:inbota/modules/flags/data/models/subflag_update_input.dart';
-import 'package:inbota/modules/flags/domain/repositories/i_flag_repository.dart';
-import 'package:inbota/shared/errors/api_error_mapper.dart';
-import 'package:inbota/shared/errors/failures.dart';
-import 'package:inbota/shared/services/http/app_path.dart';
-import 'package:inbota/shared/services/http/http_client.dart';
+import 'package:organiq/modules/flags/data/models/flag_create_input.dart';
+import 'package:organiq/modules/flags/data/models/flag_list_output.dart';
+import 'package:organiq/modules/flags/data/models/flag_output.dart';
+import 'package:organiq/modules/flags/data/models/flag_update_input.dart';
+import 'package:organiq/modules/flags/data/models/subflag_create_input.dart';
+import 'package:organiq/modules/flags/data/models/subflag_list_output.dart';
+import 'package:organiq/modules/flags/data/models/subflag_output.dart';
+import 'package:organiq/modules/flags/data/models/subflag_update_input.dart';
+import 'package:organiq/modules/flags/domain/repositories/i_flag_repository.dart';
+import 'package:organiq/shared/errors/api_error_mapper.dart';
+import 'package:organiq/shared/errors/failures.dart';
+import 'package:organiq/shared/services/http/app_path.dart';
+import 'package:organiq/shared/services/http/http_client.dart';
 
 class FlagRepository implements IFlagRepository {
   FlagRepository(this._httpClient);

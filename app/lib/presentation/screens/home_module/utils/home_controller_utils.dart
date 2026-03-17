@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
-import 'package:inbota/modules/inbox/data/models/inbox_confirm_output.dart';
-import 'package:inbota/modules/inbox/data/models/inbox_create_line_result.dart';
-import 'package:inbota/presentation/screens/home_module/components/timeline_item.dart';
-import 'package:inbota/shared/errors/failures.dart';
+import 'package:organiq/modules/inbox/data/models/inbox_confirm_output.dart';
+import 'package:organiq/modules/inbox/data/models/inbox_create_line_result.dart';
+import 'package:organiq/presentation/screens/home_module/components/timeline_item.dart';
+import 'package:organiq/shared/errors/failures.dart';
 
 class HomeControllerUtils {
   HomeControllerUtils._();
