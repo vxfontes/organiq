@@ -3,7 +3,7 @@ import 'package:organiq/modules/inbox/data/models/inbox_create_batch_result.dart
 import 'package:organiq/modules/inbox/data/models/inbox_create_line_result.dart';
 import 'package:organiq/presentation/screens/create_module/components/create_page_header.dart';
 import 'package:organiq/presentation/screens/create_module/components/create_result_line_tile.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 import 'package:organiq/shared/utils/text_utils.dart';
 
@@ -28,8 +28,8 @@ class CreateDonePhaseView extends StatelessWidget {
         const CreatePageHeader(),
         const SizedBox(height: 20),
         if (batchResult == null)
-          IBCard(
-            child: IBText(
+          OQCard(
+            child: OQText(
               'Nenhum resultado para mostrar.',
               context: context,
             ).muted.build(),
@@ -83,13 +83,13 @@ class CreateDonePhaseView extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const IBIcon(
-                  IBIcon.autoAwesomeRounded,
+                const OQIcon(
+                  OQIcon.autoAwesomeRounded,
                   color: AppColors.surface,
                   size: 18,
                 ),
                 const SizedBox(width: 8),
-                IBText(
+                OQText(
                   'Criar mais',
                   context: context,
                 ).label.color(AppColors.surface).build(),
@@ -114,37 +114,37 @@ class CreateDonePhaseView extends StatelessWidget {
         batchResult.routinesCount +
         batchResult.shoppingListsCount;
 
-    return IBOverviewCard(
+    return OQOverviewCard(
       title: 'Resumo',
       subtitle:
           '${batchResult.successCount} de $processedLabel. '
           '$detectedItemsTotal itens criados.',
       chips: [
-        IBChip(
+        OQChip(
           label: 'Tarefas ${batchResult.tasksCount}',
           color: AppColors.primary700,
         ),
-        IBChip(
+        OQChip(
           label: 'Lembretes ${batchResult.remindersCount}',
           color: AppColors.ai600,
         ),
-        IBChip(
+        OQChip(
           label: 'Eventos ${batchResult.eventsCount}',
           color: AppColors.success600,
         ),
-        IBChip(
+        OQChip(
           label: 'Cronograma ${batchResult.routinesCount}',
           color: AppColors.primary700,
         ),
-        IBChip(
+        OQChip(
           label: 'Lista de compras ${batchResult.shoppingListsCount}',
           color: AppColors.warning500,
         ),
-        IBChip(
+        OQChip(
           label: 'Itens de compra ${batchResult.shoppingItemsCount}',
           color: AppColors.primary500,
         ),
-        IBChip(
+        OQChip(
           label: 'Falhas ${batchResult.failedCount}',
           color: AppColors.danger600,
         ),
@@ -180,9 +180,9 @@ class CreateDonePhaseView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              IBText('Itens processados', context: context).subtitulo.build(),
+              OQText('Itens processados', context: context).subtitulo.build(),
               const SizedBox(height: 2),
-              IBText(
+              OQText(
                 'Revise o que foi criado a partir do seu texto.',
                 context: context,
               ).caption.build(),
@@ -197,7 +197,7 @@ class CreateDonePhaseView extends StatelessWidget {
               borderRadius: BorderRadius.circular(999),
               border: Border.all(color: AppColors.border),
             ),
-            child: IBText(
+            child: OQText(
               '$visibleCount restante${visibleCount == 1 ? '' : 's'}',
               context: context,
             ).caption.color(AppColors.textMuted).build(),

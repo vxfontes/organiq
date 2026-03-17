@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
 class CreateTranscriptionLoadingCard extends StatelessWidget {
@@ -22,7 +22,7 @@ class CreateTranscriptionLoadingCard extends StatelessWidget {
             child: CircularProgressIndicator(strokeWidth: 2),
           ),
           const SizedBox(width: 12),
-          IBText(
+          OQText(
             'Transcrevendo áudio...',
             context: context,
           ).caption.color(AppColors.textMuted).build(),

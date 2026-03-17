@@ -3,10 +3,10 @@ import 'package:organiq/modules/auth/domain/usecases/get_me_usecase.dart';
 import 'package:organiq/modules/splash/domain/usecases/check_health_usecase.dart';
 import 'package:organiq/shared/errors/failures.dart';
 import 'package:organiq/shared/services/timezone/user_timezone_service.dart';
-import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/state/oq_state.dart';
 import 'package:organiq/shared/storage/auth_token_store.dart';
 
-class SplashController implements IBController {
+class SplashController implements OQController {
   SplashController(
     this._checkHealthUsecase,
     this._tokenStore,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 
 class HomeEmptyState extends StatelessWidget {
   const HomeEmptyState({super.key, required this.onCreateTap});
@@ -9,23 +9,23 @@ class HomeEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IBCard(
+    return OQCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const SizedBox(height: 4),
-          const IBEmptyState(
+          const OQEmptyState(
             title: 'Seu dia esta livre!',
             subtitle: 'Aproveite o tempo ou adicione algo novo.',
-            icon: IBHugeIcon.calendar,
+            icon: OQHugeIcon.calendar,
           ),
           const SizedBox(height: 8),
           SizedBox(
             width: double.infinity,
-            child: IBButton(
+            child: OQButton(
               label: 'Criar com IA',
               onPressed: onCreateTap,
-              variant: IBButtonVariant.secondary,
+              variant: OQButtonVariant.secondary,
             ),
           ),
         ],

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:organiq/presentation/routes/app_navigation.dart';
 import 'package:organiq/presentation/routes/app_routes.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
 class RootPage extends StatefulWidget {
@@ -81,16 +81,16 @@ class _RootPageState extends State<RootPage> {
 
   @override
   Widget build(BuildContext context) {
-    return IBScaffold(
-      appBar: IBAppBar(
+    return OQScaffold(
+      appBar: OQAppBar(
         title: 'OrganiQ',
         padding: const EdgeInsets.only(left: 12, right: 12),
         actions: [
           IconButton(
             onPressed: () => AppNavigation.push(AppRoutes.notificationHistory),
             tooltip: 'Histórico de notificações',
-            icon: const IBIcon(
-              IBIcon.notificationsNoneOutlined,
+            icon: const OQIcon(
+              OQIcon.notificationsNoneOutlined,
               color: AppColors.surface,
               padding: EdgeInsets.all(0),
               size: 22,
@@ -98,8 +98,8 @@ class _RootPageState extends State<RootPage> {
           ),
           IconButton(
             onPressed: () => AppNavigation.push(AppRoutes.settings),
-            icon: const IBIcon(
-              IBIcon.settingsOutlined,
+            icon: const OQIcon(
+              OQIcon.settingsOutlined,
               color: AppColors.surface,
               padding: EdgeInsets.all(0),
               size: 22,

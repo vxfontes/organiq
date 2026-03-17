@@ -14,16 +14,30 @@ import 'package:organiq/modules/notifications/domain/usecases/update_notificatio
 class NotificationsModule {
   static void binds(Injector i) {
     // repositories
-    i.addLazySingleton<INotificationPrefsRepository>(NotificationPrefsRepository.new);
+    i.addLazySingleton<INotificationPrefsRepository>(
+      NotificationPrefsRepository.new,
+    );
     i.addLazySingleton<INotificationsRepository>(NotificationsRepository.new);
 
     // usecases
-    i.addLazySingleton<GetNotificationPrefsUsecase>(GetNotificationPrefsUsecase.new);
-    i.addLazySingleton<UpdateNotificationPrefsUsecase>(UpdateNotificationPrefsUsecase.new);
-    i.addLazySingleton<SendTestNotificationUsecase>(SendTestNotificationUsecase.new);
-    i.addLazySingleton<SendTestEmailDigestUsecase>(SendTestEmailDigestUsecase.new);
+    i.addLazySingleton<GetNotificationPrefsUsecase>(
+      GetNotificationPrefsUsecase.new,
+    );
+    i.addLazySingleton<UpdateNotificationPrefsUsecase>(
+      UpdateNotificationPrefsUsecase.new,
+    );
+    i.addLazySingleton<SendTestNotificationUsecase>(
+      SendTestNotificationUsecase.new,
+    );
+    i.addLazySingleton<SendTestEmailDigestUsecase>(
+      SendTestEmailDigestUsecase.new,
+    );
     i.addLazySingleton<GetNotificationsUsecase>(GetNotificationsUsecase.new);
-    i.addLazySingleton<MarkNotificationAsReadUsecase>(MarkNotificationAsReadUsecase.new);
-    i.addLazySingleton<MarkAllNotificationsAsReadUsecase>(MarkAllNotificationsAsReadUsecase.new);
+    i.addLazySingleton<MarkNotificationAsReadUsecase>(
+      MarkNotificationAsReadUsecase.new,
+    );
+    i.addLazySingleton<MarkAllNotificationsAsReadUsecase>(
+      MarkAllNotificationsAsReadUsecase.new,
+    );
   }
 }

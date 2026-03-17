@@ -9,7 +9,6 @@ class SplashModule extends Module {
   @override
   List<Module> get imports => [SharedModule()];
 
-
   @override
   void binds(Injector i) {
     i.addSingleton<SplashController>(SplashController.new);

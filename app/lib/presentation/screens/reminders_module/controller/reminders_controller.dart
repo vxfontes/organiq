@@ -21,9 +21,9 @@ import 'package:organiq/modules/tasks/domain/usecases/get_tasks_usecase.dart';
 import 'package:organiq/modules/tasks/domain/usecases/update_task_usecase.dart';
 import 'package:organiq/shared/errors/failures.dart';
 import 'package:organiq/shared/services/widget/widget_bridge_service.dart';
-import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/state/oq_state.dart';
 
-class RemindersController implements IBController {
+class RemindersController implements OQController {
   RemindersController(
     this._createTaskUsecase,
     this._getTasksUsecase,

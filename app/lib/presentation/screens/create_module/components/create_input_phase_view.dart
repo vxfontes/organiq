@@ -5,7 +5,7 @@ import 'package:organiq/presentation/screens/create_module/components/create_pag
 import 'package:organiq/presentation/screens/create_module/components/create_processing_line_item.dart';
 import 'package:organiq/presentation/screens/create_module/components/create_transcription_loading_card.dart';
 import 'package:organiq/presentation/screens/create_module/components/create_voice_recording_card.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 
 class CreateInputPhaseView extends StatelessWidget {
   const CreateInputPhaseView({
@@ -30,7 +30,7 @@ class CreateInputPhaseView extends StatelessWidget {
 
   final bool processingMode;
   final TextEditingController inputController;
-  final IBAIInputState inputState;
+  final OQAIInputState inputState;
   final bool loading;
   final bool listening;
   final bool voiceProcessing;
@@ -57,7 +57,7 @@ class CreateInputPhaseView extends StatelessWidget {
       children: [
         const CreatePageHeader(),
         const SizedBox(height: 20),
-        IBAIInputArea(
+        OQAIInputArea(
           controller: inputController,
           label: 'O que está na sua mente?',
           hint:
@@ -86,14 +86,14 @@ class CreateInputPhaseView extends StatelessWidget {
         ],
         if (processingMode) ...[
           const SizedBox(height: 12),
-          const IBAIPulseIndicator(
+          const OQAIPulseIndicator(
             message: 'Processando seus itens...',
             progress: null,
           ),
         ],
         if (!processingMode) ...[
           const SizedBox(height: 14),
-          IBButton(
+          OQButton(
             label: 'Organizar',
             loading: loading || voiceProcessing,
             onPressed: inputLocked ? null : onProcessText,
@@ -139,11 +139,11 @@ class _CreateProcessingCard extends StatelessWidget {
         )
         .length;
 
-    return IBCard(
+    return OQCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          IBText(
+          OQText(
             loading
                 ? 'Processando $processedCount de ${lines.length} linhas...'
                 : '$processedCount de ${lines.length} linhas processadas.',
@@ -158,15 +158,15 @@ class _CreateProcessingCard extends StatelessWidget {
           ),
           if (!loading && suggestions.isNotEmpty) ...[
             const SizedBox(height: 8),
-            IBButton(
+            OQButton(
               label: 'Revisar sugestões',
-              variant: IBButtonVariant.primary,
+              variant: OQButtonVariant.primary,
               onPressed: onReviewSuggestions,
             ),
             const SizedBox(height: 8),
-            IBButton(
+            OQButton(
               label: 'Voltar e editar texto',
-              variant: IBButtonVariant.secondary,
+              variant: OQButtonVariant.secondary,
               onPressed: onGoBackToInput,
             ),
           ],

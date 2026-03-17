@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
 class MorningSkyPainter extends CustomPainter {
-
   @override
   void paint(Canvas canvas, Size size) {
     _drawSky(canvas, size);
@@ -16,10 +15,7 @@ class MorningSkyPainter extends CustomPainter {
     const skyGradient = LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      colors: [
-        AppColors.skyMorningTop,
-        AppColors.skyMorningBottom,
-      ],
+      colors: [AppColors.skyMorningTop, AppColors.skyMorningBottom],
     );
 
     final skyPaint = Paint()
@@ -27,10 +23,7 @@ class MorningSkyPainter extends CustomPainter {
         Rect.fromLTWH(0, 0, size.width, size.height),
       );
 
-    canvas.drawRect(
-      Rect.fromLTWH(0, 0, size.width, size.height),
-      skyPaint,
-    );
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), skyPaint);
   }
 
   void _drawSun(Canvas canvas, Size size) {

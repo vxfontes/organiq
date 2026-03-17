@@ -3,10 +3,10 @@ import 'package:organiq/modules/auth/data/models/auth_signup_input.dart';
 import 'package:organiq/modules/auth/domain/usecases/signup_usecase.dart';
 import 'package:organiq/shared/errors/failures.dart';
 import 'package:organiq/shared/services/timezone/user_timezone_service.dart';
-import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/state/oq_state.dart';
 import 'package:organiq/shared/utils/validators.dart';
 
-class SignupController implements IBController {
+class SignupController implements OQController {
   final SignupUsecase _signupUsecase;
 
   SignupController(this._signupUsecase);

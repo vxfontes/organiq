@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
 class HomeBentoRow extends StatelessWidget {
@@ -104,7 +104,7 @@ class HomeBentoRow extends StatelessWidget {
   }
 
   Widget _buildProgressCard() {
-    return IBDayProgressCard(
+    return OQDayProgressCard(
       progressPercent: progressPercent,
       routinesDone: routinesDone,
       routinesTotal: routinesTotal,
@@ -116,7 +116,7 @@ class HomeBentoRow extends StatelessWidget {
   }
 
   Widget _buildShoppingBanner() {
-    return IBShoppingBanner(
+    return OQShoppingBanner(
       listCount: shoppingListCount,
       itemCount: shoppingItemCount,
       onTap: onShoppingTap,
@@ -144,23 +144,23 @@ class HomeBentoRow extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              IBIcon(
-                IBIcon.autoAwesomeRounded,
+              OQIcon(
+                OQIcon.autoAwesomeRounded,
                 size: 18,
                 color: highlightColor,
               ),
               const SizedBox(height: 8),
-              IBText(
+              OQText(
                 insightTitle,
                 context: context,
               ).subtitulo.weight(FontWeight.w700).build(),
               const SizedBox(height: 4),
-              IBText(
+              OQText(
                 insightSummary,
                 context: context,
               ).muted.maxLines(3).build(),
               const SizedBox(height: 10),
-              IBText(
+              OQText(
                 insightFooter,
                 context: context,
               ).caption.color(highlightColor).maxLines(2).build(),

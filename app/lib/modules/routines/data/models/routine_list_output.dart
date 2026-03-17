@@ -5,10 +5,7 @@ part 'routine_list_output.g.dart';
 
 @JsonSerializable()
 class RoutineListOutput {
-  const RoutineListOutput({
-    this.items = const [],
-    this.nextCursor,
-  });
+  const RoutineListOutput({this.items = const [], this.nextCursor});
 
   final List<RoutineOutput> items;
   final String? nextCursor;
@@ -17,10 +14,7 @@ class RoutineListOutput {
     return _$RoutineListOutputFromJson(json);
   }
 
-  RoutineListOutput copyWith({
-    List<RoutineOutput>? items,
-    String? nextCursor,
-  }) {
+  RoutineListOutput copyWith({List<RoutineOutput>? items, String? nextCursor}) {
     return RoutineListOutput(
       items: items ?? this.items,
       nextCursor: nextCursor ?? this.nextCursor,

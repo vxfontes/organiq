@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:organiq/presentation/routes/app_navigation.dart';
 import 'package:organiq/presentation/routes/app_routes.dart';
 import 'package:organiq/presentation/screens/auth_module/components/auth_background.dart';
-import 'package:organiq/shared/components/ib_lib/ib_button.dart';
-import 'package:organiq/shared/components/ib_lib/ib_icon.dart';
-import 'package:organiq/shared/components/ib_lib/ib_text.dart';
+import 'package:organiq/shared/components/oq_lib/oq_button.dart';
+import 'package:organiq/shared/components/oq_lib/oq_icon.dart';
+import 'package:organiq/shared/components/oq_lib/oq_text.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
 class PreLoginPage extends StatelessWidget {
@@ -47,7 +47,11 @@ class PreLoginPage extends StatelessWidget {
                         TweenAnimationBuilder<double>(
                           tween: Tween(begin: 0, end: 1),
                           duration: const Duration(milliseconds: 600),
-                          curve: const Interval(0.12, 1, curve: Curves.easeOutCubic),
+                          curve: const Interval(
+                            0.12,
+                            1,
+                            curve: Curves.easeOutCubic,
+                          ),
                           builder: (context, value, child) {
                             return Opacity(
                               opacity: value,
@@ -59,12 +63,12 @@ class PreLoginPage extends StatelessWidget {
                           },
                           child: Column(
                             children: [
-                              IBText('Sua rotina mais leve', context: context)
-                                  .titulo
-                                  .align(TextAlign.center)
-                                  .build(),
+                              OQText(
+                                'Sua rotina mais leve',
+                                context: context,
+                              ).titulo.align(TextAlign.center).build(),
                               const SizedBox(height: 12),
-                              IBText(
+                              OQText(
                                 'Organize tarefas, lembretes, listas de compras e projetos em um só lugar.',
                                 context: context,
                               ).muted.align(TextAlign.center).build(),
@@ -75,7 +79,11 @@ class PreLoginPage extends StatelessWidget {
                         TweenAnimationBuilder<double>(
                           tween: Tween(begin: 0, end: 1),
                           duration: const Duration(milliseconds: 560),
-                          curve: const Interval(0.2, 1, curve: Curves.easeOutCubic),
+                          curve: const Interval(
+                            0.2,
+                            1,
+                            curve: Curves.easeOutCubic,
+                          ),
                           builder: (context, value, child) {
                             return Opacity(
                               opacity: value,
@@ -88,15 +96,17 @@ class PreLoginPage extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              IBButton(
+                              OQButton(
                                 label: 'Começar',
-                                onPressed: () => AppNavigation.push(AppRoutes.signup),
+                                onPressed: () =>
+                                    AppNavigation.push(AppRoutes.signup),
                               ),
                               const SizedBox(height: 12),
-                              IBButton(
+                              OQButton(
                                 label: 'Já tenho conta',
-                                onPressed: () => AppNavigation.push(AppRoutes.login),
-                                variant: IBButtonVariant.ghost,
+                                onPressed: () =>
+                                    AppNavigation.push(AppRoutes.login),
+                                variant: OQButtonVariant.ghost,
                               ),
                             ],
                           ),
@@ -130,11 +140,7 @@ class _HeroCard extends StatelessWidget {
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              AppColors.surface,
-              AppColors.primary50,
-              AppColors.ai50,
-            ],
+            colors: [AppColors.surface, AppColors.primary50, AppColors.ai50],
             stops: [0.0, 0.55, 1.0],
           ),
           border: Border.all(color: AppColors.border),
@@ -169,7 +175,7 @@ class _HeroCard extends StatelessWidget {
                 top: 26,
                 left: 22,
                 child: _MiniCard(
-                  icon: IBIcon.autoAwesomeRounded,
+                  icon: OQIcon.autoAwesomeRounded,
                   title: 'Ações inteligentes',
                   subtitle: 'Rotinas rápidas',
                   accent: AppColors.ai600,
@@ -179,7 +185,7 @@ class _HeroCard extends StatelessWidget {
                 bottom: 28,
                 right: 18,
                 child: _MiniCard(
-                  icon: IBIcon.taskAltRounded,
+                  icon: OQIcon.taskAltRounded,
                   title: 'Listas claras',
                   subtitle: 'Tudo em ordem',
                   accent: AppColors.success600,
@@ -189,7 +195,7 @@ class _HeroCard extends StatelessWidget {
                 bottom: 80,
                 left: 18,
                 child: _MiniCard(
-                  icon: IBIcon.notificationsActiveRounded,
+                  icon: OQIcon.notificationsActiveRounded,
                   title: 'Lembretes',
                   subtitle: 'Na hora certa',
                   accent: AppColors.warning500,
@@ -285,15 +291,15 @@ class _MiniCard extends StatelessWidget {
               color: accent.withAlpha((0.14 * 255).round()),
               shape: BoxShape.circle,
             ),
-            child: IBIcon(icon, color: accent, size: 18),
+            child: OQIcon(icon, color: accent, size: 18),
           ),
           const SizedBox(width: 10),
           Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              IBText(title, context: context).label.build(),
-              IBText(subtitle, context: context).caption.build(),
+              OQText(title, context: context).label.build(),
+              OQText(subtitle, context: context).caption.build(),
             ],
           ),
         ],

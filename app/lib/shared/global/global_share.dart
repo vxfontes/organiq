@@ -6,7 +6,8 @@ class GlobalShareValue {
 }
 
 class GlobalShare {
-  static final Map<String, GlobalShareValue> _stores = <String, GlobalShareValue>{};
+  static final Map<String, GlobalShareValue> _stores =
+      <String, GlobalShareValue>{};
 
   static void setValue(String key, dynamic value, {Duration? ttl}) {
     if (ttl != null) {

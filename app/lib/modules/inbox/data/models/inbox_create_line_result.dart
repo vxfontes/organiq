@@ -19,11 +19,11 @@ class CreateLineResult {
 
   bool get canDelete =>
       status == CreateLineStatus.success &&
-          !deleted &&
-          !deleting &&
-          entityId != null &&
-          entityId!.trim().isNotEmpty &&
-          entityType != CreateEntityType.unknown;
+      !deleted &&
+      !deleting &&
+      entityId != null &&
+      entityId!.trim().isNotEmpty &&
+      entityType != CreateEntityType.unknown;
 
   CreateLineResult copyWith({
     String? message,

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:organiq/modules/flags/data/models/flag_output.dart';
 import 'package:organiq/modules/flags/data/models/subflag_output.dart';
 import 'package:organiq/presentation/routes/app_navigation.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/utils/reminders_format.dart';
 
 class CreateReminderBottomSheet extends StatefulWidget {
@@ -80,7 +80,7 @@ class _CreateReminderBottomSheetState extends State<CreateReminderBottomSheet> {
         final flags = widget.flagsListenable.value;
         final flagOptions = flags
             .map(
-              (flag) => IBFlagsFieldOption(
+              (flag) => OQFlagsFieldOption(
                 id: flag.id,
                 label: flag.name,
                 color: flag.color,
@@ -95,7 +95,7 @@ class _CreateReminderBottomSheetState extends State<CreateReminderBottomSheet> {
                   const <SubflagOutput>[];
         final subflagOptions = subflags
             .map(
-              (subflag) => IBFlagsFieldOption(
+              (subflag) => OQFlagsFieldOption(
                 id: subflag.id,
                 label: subflag.name,
                 color: subflag.color,
@@ -103,7 +103,7 @@ class _CreateReminderBottomSheetState extends State<CreateReminderBottomSheet> {
             )
             .toList(growable: false);
 
-        return IBBottomSheet(
+        return OQBottomSheet(
           title: 'Novo lembrete',
           primaryLabel: 'Adicionar',
           primaryLoading: loading,
@@ -123,7 +123,7 @@ class _CreateReminderBottomSheetState extends State<CreateReminderBottomSheet> {
             final message =
                 widget.errorListenable.value ??
                 'Não foi possível criar o lembrete.';
-            IBSnackBar.error(sheetContext, message);
+            OQSnackBar.error(sheetContext, message);
           },
           secondaryLabel: 'Cancelar',
           secondaryEnabled: !loading,
@@ -131,20 +131,20 @@ class _CreateReminderBottomSheetState extends State<CreateReminderBottomSheet> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              IBTextField(
+              OQTextField(
                 label: 'Título',
                 hint: 'Ex: Pagar aluguel',
                 controller: _titleController,
               ),
               const SizedBox(height: 12),
-              IBDateField(
+              OQDateField(
                 valueLabel: _formatReminderDate(_dateNotifier.value),
                 enabled: !loading,
                 hasValue: _dateNotifier.value != null,
                 onTap: loading
                     ? null
                     : () async {
-                        final next = await IBDateField.pickDateTime(
+                        final next = await OQDateField.pickDateTime(
                           sheetContext,
                           current: _dateNotifier.value,
                           helpText: 'Selecionar data',
@@ -154,7 +154,7 @@ class _CreateReminderBottomSheetState extends State<CreateReminderBottomSheet> {
                 onClear: loading ? null : () => _dateNotifier.value = null,
               ),
               const SizedBox(height: 12),
-              IBFlagsField(
+              OQFlagsField(
                 options: flagOptions,
                 selectedId: _selectedFlagId.value,
                 enabled: !loading,
@@ -169,7 +169,7 @@ class _CreateReminderBottomSheetState extends State<CreateReminderBottomSheet> {
               ),
               if (_selectedFlagId.value != null) ...[
                 const SizedBox(height: 12),
-                IBFlagsField(
+                OQFlagsField(
                   label: 'Subflag',
                   emptyLabel: 'Nenhuma subflag disponível',
                   options: subflagOptions,

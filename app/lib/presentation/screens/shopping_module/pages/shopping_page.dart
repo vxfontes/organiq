@@ -5,8 +5,8 @@ import 'package:organiq/modules/shopping/data/models/shopping_list_output.dart';
 import 'package:organiq/presentation/screens/shopping_module/components/create_shopping_item_bottom_sheet.dart';
 import 'package:organiq/presentation/screens/shopping_module/components/create_shopping_list_bottom_sheet.dart';
 import 'package:organiq/presentation/screens/shopping_module/controller/shopping_controller.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
-import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
+import 'package:organiq/shared/state/oq_state.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 import 'package:organiq/shared/utils/text_utils.dart';
 
@@ -17,7 +17,7 @@ class ShoppingPage extends StatefulWidget {
   State<ShoppingPage> createState() => _ShoppingPageState();
 }
 
-class _ShoppingPageState extends IBState<ShoppingPage, ShoppingController> {
+class _ShoppingPageState extends OQState<ShoppingPage, ShoppingController> {
   @override
   void initState() {
     super.initState();
@@ -34,7 +34,7 @@ class _ShoppingPageState extends IBState<ShoppingPage, ShoppingController> {
   void _onErrorChanged() {
     final error = controller.error.value;
     if (error != null && error.isNotEmpty && mounted) {
-      IBSnackBar.error(context, error);
+      OQSnackBar.error(context, error);
     }
   }
 
@@ -63,12 +63,12 @@ class _ShoppingPageState extends IBState<ShoppingPage, ShoppingController> {
                   _buildHeader(context),
                   const SizedBox(height: 18),
                   if (shoppingLists.isEmpty)
-                    const IBCard(
-                      child: IBEmptyState(
+                    const OQCard(
+                      child: OQEmptyState(
                         title: 'Sem listas de compras',
                         subtitle:
                             'Quando você confirmar uma lista pelo inbox, ela aparecerá aqui.',
-                        icon: IBHugeIcon.shoppingBag,
+                        icon: OQHugeIcon.shoppingBag,
                       ),
                     )
                   else
@@ -98,7 +98,7 @@ class _ShoppingPageState extends IBState<ShoppingPage, ShoppingController> {
                 child: ColoredBox(
                   color: AppColors.background,
                   child: Center(
-                    child: IBLoader(label: 'Carregando listas de compras...'),
+                    child: OQLoader(label: 'Carregando listas de compras...'),
                   ),
                 ),
               ),
@@ -116,9 +116,9 @@ class _ShoppingPageState extends IBState<ShoppingPage, ShoppingController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              IBText('Compras', context: context).titulo.build(),
+              OQText('Compras', context: context).titulo.build(),
               const SizedBox(height: 6),
-              IBText(
+              OQText(
                 'Todas as suas listas e itens para comprar em um só lugar.',
                 context: context,
               ).muted.build(),
@@ -128,8 +128,8 @@ class _ShoppingPageState extends IBState<ShoppingPage, ShoppingController> {
         IconButton(
           tooltip: 'Criar lista',
           onPressed: _openCreateShoppingListSheet,
-          icon: const IBIcon(
-            IBIcon.addRounded,
+          icon: const OQIcon(
+            OQIcon.addRounded,
             color: AppColors.primary700,
             size: 20,
           ),
@@ -150,7 +150,7 @@ class _ShoppingPageState extends IBState<ShoppingPage, ShoppingController> {
     final subtitle =
         '${TextUtils.countLabel(pendingCount, 'pendente', 'pendentes')} de ${TextUtils.countLabel(items.length, 'item', 'itens')}';
 
-    return IBTodoList(
+    return OQTodoList(
       title: shoppingList.title,
       subtitle: subtitle,
       action: Row(
@@ -159,8 +159,8 @@ class _ShoppingPageState extends IBState<ShoppingPage, ShoppingController> {
           _buildCompactActionButton(
             tooltip: 'Adicionar item',
             onPressed: () => _openCreateShoppingItemSheet(shoppingList),
-            icon: const IBIcon(
-              IBIcon.addRounded,
+            icon: const OQIcon(
+              OQIcon.addRounded,
               color: AppColors.primary700,
               size: 18,
             ),
@@ -169,8 +169,8 @@ class _ShoppingPageState extends IBState<ShoppingPage, ShoppingController> {
             _buildCompactActionButton(
               tooltip: 'Concluir',
               onPressed: () => controller.concludeList(shoppingList.id),
-              icon: const IBIcon(
-                IBIcon.checkRounded,
+              icon: const OQIcon(
+                OQIcon.checkRounded,
                 color: AppColors.primary700,
                 size: 18,
               ),
@@ -179,7 +179,7 @@ class _ShoppingPageState extends IBState<ShoppingPage, ShoppingController> {
       ),
       items: items
           .map(
-            (item) => IBTodoItemData(
+            (item) => OQTodoItemData(
               id: item.id,
               title: item.title,
               subtitle: _itemSubtitle(item),
@@ -220,7 +220,7 @@ class _ShoppingPageState extends IBState<ShoppingPage, ShoppingController> {
   Future<void> _openCreateShoppingListSheet() async {
     if (!mounted) return;
 
-    await IBBottomSheet.show<void>(
+    await OQBottomSheet.show<void>(
       context: context,
       isFitWithContent: true,
       child: CreateShoppingListBottomSheet(
@@ -234,7 +234,7 @@ class _ShoppingPageState extends IBState<ShoppingPage, ShoppingController> {
   Future<void> _openCreateShoppingItemSheet(ShoppingListOutput list) async {
     if (!mounted) return;
 
-    await IBBottomSheet.show<void>(
+    await OQBottomSheet.show<void>(
       context: context,
       isFitWithContent: true,
       child: CreateShoppingItemBottomSheet(
@@ -260,8 +260,8 @@ class _ShoppingPageState extends IBState<ShoppingPage, ShoppingController> {
         color: AppColors.danger600,
         borderRadius: BorderRadius.circular(20),
       ),
-      child: const IBIcon(
-        IBIcon.deleteOutlineRounded,
+      child: const OQIcon(
+        OQIcon.deleteOutlineRounded,
         color: AppColors.surface,
         size: 22,
       ),

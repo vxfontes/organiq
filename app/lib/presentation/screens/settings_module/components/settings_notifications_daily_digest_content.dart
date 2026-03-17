@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:organiq/modules/notifications/data/models/notification_preferences_model.dart';
-import 'package:organiq/shared/components/ib_lib/ib_toggle.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/oq_toggle.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
 class SettingsNotificationsDailyDigestContent extends StatelessWidget {
@@ -25,10 +25,10 @@ class SettingsNotificationsDailyDigestContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        IBToggle(
+        OQToggle(
           title: 'Resumo diário por e-mail',
           subtitle: 'Receba um resumo matinal com sua agenda e tarefas.',
-          leadingIcon: IBIcon.mailOutlineRounded,
+          leadingIcon: OQIcon.mailOutlineRounded,
           value: prefs.dailyDigestEnabled,
           onChanged: onEnabledChanged,
         ),
@@ -39,7 +39,7 @@ class SettingsNotificationsDailyDigestContent extends StatelessWidget {
               ? Column(
                   key: const ValueKey('daily-digest-enabled'),
                   children: [
-                    IBTimeField(
+                    OQTimeField(
                       label: 'Horário de envio',
                       valueLabel:
                           '${prefs.dailyDigestHour.toString().padLeft(2, '0')}:00',
@@ -48,9 +48,9 @@ class SettingsNotificationsDailyDigestContent extends StatelessWidget {
                       onTap: onPickHour,
                     ),
                     // const SizedBox(height: 16),
-                    // IBButton(
+                    // OQButton(
                     //   label: 'Enviar e-mail de teste agora',
-                    //   variant: IBButtonVariant.secondary,
+                    //   variant: OQButtonVariant.secondary,
                     //   onPressed: onSendTest,
                     //   loading: sendingTest,
                     // ),
@@ -64,7 +64,7 @@ class SettingsNotificationsDailyDigestContent extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: AppColors.border),
                   ),
-                  child: IBText(
+                  child: OQText(
                     'Ative para receber um e-mail diário com tudo o que você precisa fazer no dia.',
                     context: context,
                   ).caption.build(),

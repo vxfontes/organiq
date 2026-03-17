@@ -4,9 +4,9 @@ import 'package:organiq/presentation/routes/app_navigation.dart';
 import 'package:organiq/presentation/routes/app_routes.dart';
 import 'package:organiq/shared/errors/failures.dart';
 import 'package:organiq/shared/services/timezone/user_timezone_service.dart';
-import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/state/oq_state.dart';
 
-class SettingsController implements IBController {
+class SettingsController implements OQController {
   SettingsController(this._logoutUsecase);
 
   final LogoutUsecase _logoutUsecase;

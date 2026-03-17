@@ -14,10 +14,10 @@ import 'package:organiq/modules/tasks/data/models/task_output.dart';
 import 'package:organiq/modules/tasks/domain/usecases/delete_task_usecase.dart';
 import 'package:organiq/presentation/screens/events_module/components/event_feed_item.dart';
 import 'package:organiq/shared/errors/failures.dart';
-import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/state/oq_state.dart';
 import 'package:organiq/shared/utils/text_utils.dart';
 
-class EventsController implements IBController {
+class EventsController implements OQController {
   EventsController(
     this._getAgendaUsecase,
     this._deleteEventUsecase,

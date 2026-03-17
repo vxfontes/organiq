@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:organiq/shared/components/ib_lib/ib_text.dart';
+import 'package:organiq/shared/components/oq_lib/oq_text.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
 class RootPlaceholderPage extends StatelessWidget {
@@ -12,10 +12,10 @@ class RootPlaceholderPage extends StatelessWidget {
     return ColoredBox(
       color: AppColors.background,
       child: Center(
-        child: IBText(title, context: context)
-            .titulo
-            .color(AppColors.textMuted)
-            .build(),
+        child: OQText(
+          title,
+          context: context,
+        ).titulo.color(AppColors.textMuted).build(),
       ),
     );
   }

@@ -4,11 +4,11 @@ import 'package:organiq/modules/notifications/domain/repositories/i_notification
 import 'package:organiq/presentation/routes/app_navigation.dart';
 import 'package:organiq/presentation/routes/app_routes.dart';
 import 'package:organiq/presentation/screens/splash_module/controller/splash_controller.dart';
-import 'package:organiq/shared/components/ib_lib/ib_button.dart';
-import 'package:organiq/shared/components/ib_lib/ib_loader.dart';
-import 'package:organiq/shared/components/ib_lib/ib_text.dart';
+import 'package:organiq/shared/components/oq_lib/oq_button.dart';
+import 'package:organiq/shared/components/oq_lib/oq_loader.dart';
+import 'package:organiq/shared/components/oq_lib/oq_text.dart';
 import 'package:organiq/shared/services/push/push_notification_service.dart';
-import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/state/oq_state.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
 class SplashPage extends StatefulWidget {
@@ -18,7 +18,7 @@ class SplashPage extends StatefulWidget {
   State<SplashPage> createState() => _SplashPageState();
 }
 
-class _SplashPageState extends IBState<SplashPage, SplashController> {
+class _SplashPageState extends OQState<SplashPage, SplashController> {
   @override
   void initState() {
     super.initState();
@@ -60,7 +60,7 @@ class _SplashPageState extends IBState<SplashPage, SplashController> {
                   valueListenable: controller.loading,
                   builder: (context, loading, _) {
                     if (loading) {
-                      return const IBLoader(label: 'Conectando...');
+                      return const OQLoader(label: 'Conectando...');
                     }
                     return const SizedBox.shrink();
                   },
@@ -73,7 +73,7 @@ class _SplashPageState extends IBState<SplashPage, SplashController> {
                     }
                     return Padding(
                       padding: const EdgeInsets.only(top: 12),
-                      child: IBText(error, context: context).body
+                      child: OQText(error, context: context).body
                           .align(TextAlign.center)
                           .color(AppColors.textMuted)
                           .build(),
@@ -86,7 +86,7 @@ class _SplashPageState extends IBState<SplashPage, SplashController> {
                     if (loading) return const SizedBox.shrink();
                     return Padding(
                       padding: const EdgeInsets.only(top: 16),
-                      child: IBButton(
+                      child: OQButton(
                         label: 'Tentar novamente',
                         onPressed: _bootstrap,
                       ),

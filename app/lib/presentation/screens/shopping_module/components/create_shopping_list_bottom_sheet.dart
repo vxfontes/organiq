@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:organiq/presentation/routes/app_navigation.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 
 class CreateShoppingListBottomSheet extends StatefulWidget {
   const CreateShoppingListBottomSheet({
@@ -45,7 +45,7 @@ class _CreateShoppingListBottomSheetState
       builder: (sheetContext, _) {
         final loading = widget.loadingListenable.value;
 
-        return IBBottomSheet(
+        return OQBottomSheet(
           title: 'Nova lista de compras',
           primaryLabel: 'Criar lista',
           primaryLoading: loading,
@@ -66,12 +66,12 @@ class _CreateShoppingListBottomSheetState
                 widget.errorListenable.value ??
                 'Não foi possível criar a lista.';
 
-            IBSnackBar.error(sheetContext, message);
+            OQSnackBar.error(sheetContext, message);
           },
           secondaryLabel: 'Cancelar',
           secondaryEnabled: !loading,
           onSecondaryPressed: () => _closeSheet(sheetContext),
-          child: IBTextField(
+          child: OQTextField(
             label: 'Nome da lista',
             hint: 'Ex: Compras da semana',
             controller: _titleController,

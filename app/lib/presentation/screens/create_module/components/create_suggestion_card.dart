@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:organiq/modules/inbox/data/models/create_suggestion_item.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
 class CreateSuggestionCard extends StatelessWidget {
@@ -31,7 +31,7 @@ class CreateSuggestionCard extends StatelessWidget {
 
     return Opacity(
       opacity: suggestion.removed ? 0.46 : 1,
-      child: IBCard(
+      child: OQCard(
         padding: EdgeInsets.zero,
         child: Container(
           padding: const EdgeInsets.all(14),
@@ -53,24 +53,24 @@ class CreateSuggestionCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  IBChip(label: _typeLabel(type), color: color),
+                  OQChip(label: _typeLabel(type), color: color),
                 ],
               ),
               const SizedBox(height: 8),
-              IBText(
+              OQText(
                 'Origem: ${suggestion.sourceText}',
                 context: context,
               ).caption.maxLines(2).build(),
               if (suggestion.suggestion.flag != null) ...[
                 const SizedBox(height: 6),
-                IBText(
+                OQText(
                   'Flag: ${suggestion.suggestion.flag!.name}',
                   context: context,
                 ).caption.build(),
               ],
               if (suggestion.suggestion.subflag != null) ...[
                 const SizedBox(height: 2),
-                IBText(
+                OQText(
                   'Subflag: ${suggestion.suggestion.subflag!.name}',
                   context: context,
                 ).caption.build(),
@@ -91,7 +91,7 @@ class CreateSuggestionCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    IBText(
+                    OQText(
                       '${(confidence * 100).round()}%',
                       context: context,
                     ).caption.weight(FontWeight.w600).build(),
@@ -105,12 +105,12 @@ class CreateSuggestionCard extends StatelessWidget {
                   if (!suggestion.removed) ...[
                     TextButton(
                       onPressed: onEdit,
-                      child: IBText('Editar', context: context).label.build(),
+                      child: OQText('Editar', context: context).label.build(),
                     ),
                     const SizedBox(width: 4),
                     TextButton(
                       onPressed: onRemove,
-                      child: IBText(
+                      child: OQText(
                         'Remover',
                         context: context,
                       ).label.color(AppColors.danger600).build(),
@@ -118,7 +118,7 @@ class CreateSuggestionCard extends StatelessWidget {
                   ] else
                     TextButton(
                       onPressed: onRestore,
-                      child: IBText(
+                      child: OQText(
                         'Restaurar',
                         context: context,
                       ).label.color(AppColors.ai600).build(),

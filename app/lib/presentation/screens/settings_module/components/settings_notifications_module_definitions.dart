@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:organiq/modules/notifications/data/models/notification_preferences_model.dart';
-import 'package:organiq/shared/components/ib_lib/ib_chip_group.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/oq_chip_group.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 
 enum SettingsNotificationsSection {
   reminders,
@@ -37,7 +37,7 @@ class SettingsNotificationsModuleDefinition {
   final IconData icon;
   final String atTimeTitle;
   final String atTimeSubtitle;
-  final List<IBChipOption<int>> leadOptions;
+  final List<OQChipOption<int>> leadOptions;
 
   final bool Function(NotificationPreferencesModel prefs) isEnabled;
   final bool Function(NotificationPreferencesModel prefs) atTimeValue;
@@ -66,14 +66,14 @@ settingsNotificationsModuleDefinitions = [
     section: SettingsNotificationsSection.reminders,
     title: 'Lembretes',
     subtitle: 'Avisos para não perder compromissos importantes.',
-    icon: IBIcon.stickyNote2Outlined,
+    icon: OQIcon.stickyNote2Outlined,
     atTimeTitle: 'Na hora exata',
     atTimeSubtitle: 'Envia aviso no horário do lembrete.',
     leadOptions: const [
-      IBChipOption(label: '5 min', value: 5),
-      IBChipOption(label: '15 min', value: 15),
-      IBChipOption(label: '30 min', value: 30),
-      IBChipOption(label: '1 h', value: 60),
+      OQChipOption(label: '5 min', value: 5),
+      OQChipOption(label: '15 min', value: 15),
+      OQChipOption(label: '30 min', value: 30),
+      OQChipOption(label: '1 h', value: 60),
     ],
     isEnabled: (prefs) => prefs.remindersEnabled,
     atTimeValue: (prefs) => prefs.reminderAtTime,
@@ -86,13 +86,13 @@ settingsNotificationsModuleDefinitions = [
     section: SettingsNotificationsSection.events,
     title: 'Eventos',
     subtitle: 'Notificações de encontros, reuniões e ocasiões.',
-    icon: IBIcon.eventAvailableOutlined,
+    icon: OQIcon.eventAvailableOutlined,
     atTimeTitle: 'Na hora exata',
     atTimeSubtitle: 'Notifica no horário de início do evento.',
     leadOptions: const [
-      IBChipOption(label: '15 min', value: 15),
-      IBChipOption(label: '1 h', value: 60),
-      IBChipOption(label: '1 dia', value: 1440),
+      OQChipOption(label: '15 min', value: 15),
+      OQChipOption(label: '1 h', value: 60),
+      OQChipOption(label: '1 dia', value: 1440),
     ],
     isEnabled: (prefs) => prefs.eventsEnabled,
     atTimeValue: (prefs) => prefs.eventAtTime,
@@ -105,15 +105,15 @@ settingsNotificationsModuleDefinitions = [
     section: SettingsNotificationsSection.tasks,
     title: 'Tarefas',
     subtitle: 'Lembretes de vencimento para manter o fluxo em dia.',
-    icon: IBIcon.taskAltRounded,
+    icon: OQIcon.taskAltRounded,
     atTimeTitle: 'Na hora do vencimento',
     atTimeSubtitle: 'Notifica quando a tarefa expira.',
     leadOptions: const [
-      IBChipOption(label: '5 min', value: 5),
-      IBChipOption(label: '15 min', value: 15),
-      IBChipOption(label: '30 min', value: 30),
-      IBChipOption(label: '1 h', value: 60),
-      IBChipOption(label: '1 dia', value: 1440),
+      OQChipOption(label: '5 min', value: 5),
+      OQChipOption(label: '15 min', value: 15),
+      OQChipOption(label: '30 min', value: 30),
+      OQChipOption(label: '1 h', value: 60),
+      OQChipOption(label: '1 dia', value: 1440),
     ],
     isEnabled: (prefs) => prefs.tasksEnabled,
     atTimeValue: (prefs) => prefs.taskAtTime,
@@ -126,10 +126,10 @@ settingsNotificationsModuleDefinitions = [
     section: SettingsNotificationsSection.routines,
     title: 'Rotinas',
     subtitle: 'Alertas para manter consistência nos hábitos.',
-    icon: IBIcon.repeatRounded,
+    icon: OQIcon.repeatRounded,
     atTimeTitle: 'Na hora de início',
     atTimeSubtitle: 'Envia no início da rotina.',
-    leadOptions: const [IBChipOption(label: '15 min', value: 15)],
+    leadOptions: const [OQChipOption(label: '15 min', value: 15)],
     isEnabled: (prefs) => prefs.routinesEnabled,
     atTimeValue: (prefs) => prefs.routineAtTime,
     selectedLeadMins: (prefs) => prefs.routineLeadMins,

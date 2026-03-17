@@ -19,21 +19,40 @@ class NotificationPrefsRepository implements INotificationPrefsRepository {
       if (statusCode >= 200 && statusCode < 300) {
         return Right(NotificationPreferencesModel.fromMap(response.data));
       }
-      return Left(GetFailure(message: ApiErrorMapper.fromResponseData(response.data, fallbackMessage: 'Erro ao carregar preferências.')));
+      return Left(
+        GetFailure(
+          message: ApiErrorMapper.fromResponseData(
+            response.data,
+            fallbackMessage: 'Erro ao carregar preferências.',
+          ),
+        ),
+      );
     } catch (e) {
       return Left(GetFailure(message: e.toString()));
     }
   }
 
   @override
-  Future<Either<Failure, NotificationPreferencesModel>> updatePreferences(NotificationPreferencesModel prefs) async {
+  Future<Either<Failure, NotificationPreferencesModel>> updatePreferences(
+    NotificationPreferencesModel prefs,
+  ) async {
     try {
-      final response = await _httpClient.put(AppPath.notificationPreferences, data: prefs.toMap());
+      final response = await _httpClient.put(
+        AppPath.notificationPreferences,
+        data: prefs.toMap(),
+      );
       final statusCode = response.statusCode ?? 0;
       if (statusCode >= 200 && statusCode < 300) {
         return Right(NotificationPreferencesModel.fromMap(response.data));
       }
-      return Left(UpdateFailure(message: ApiErrorMapper.fromResponseData(response.data, fallbackMessage: 'Erro ao atualizar preferências.')));
+      return Left(
+        UpdateFailure(
+          message: ApiErrorMapper.fromResponseData(
+            response.data,
+            fallbackMessage: 'Erro ao atualizar preferências.',
+          ),
+        ),
+      );
     } catch (e) {
       return Left(UpdateFailure(message: e.toString()));
     }
@@ -50,7 +69,14 @@ class NotificationPrefsRepository implements INotificationPrefsRepository {
           'url': response.data['url'] as String? ?? '',
         });
       }
-      return Left(GetFailure(message: ApiErrorMapper.fromResponseData(response.data, fallbackMessage: 'Erro ao carregar token.')));
+      return Left(
+        GetFailure(
+          message: ApiErrorMapper.fromResponseData(
+            response.data,
+            fallbackMessage: 'Erro ao carregar token.',
+          ),
+        ),
+      );
     } catch (e) {
       return Left(GetFailure(message: e.toString()));
     }
@@ -67,7 +93,14 @@ class NotificationPrefsRepository implements INotificationPrefsRepository {
           'url': response.data['url'] as String? ?? '',
         });
       }
-      return Left(UpdateFailure(message: ApiErrorMapper.fromResponseData(response.data, fallbackMessage: 'Erro ao rotacionar token.')));
+      return Left(
+        UpdateFailure(
+          message: ApiErrorMapper.fromResponseData(
+            response.data,
+            fallbackMessage: 'Erro ao rotacionar token.',
+          ),
+        ),
+      );
     } catch (e) {
       return Left(UpdateFailure(message: e.toString()));
     }

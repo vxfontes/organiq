@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:organiq/presentation/screens/create_module/components/voice_react_wave_component.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
 class CreateVoiceRecordingCard extends StatelessWidget {
@@ -32,12 +32,12 @@ class CreateVoiceRecordingCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                IBText(
+                OQText(
                   'Gravando',
                   context: context,
                 ).label.color(AppColors.danger600).build(),
                 const SizedBox(height: 2),
-                IBText(
+                OQText(
                   _formatRecordingTime(recordingSeconds),
                   context: context,
                 ).caption.color(AppColors.textMuted).build(),

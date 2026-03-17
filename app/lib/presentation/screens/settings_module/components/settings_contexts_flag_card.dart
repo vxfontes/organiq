@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:organiq/modules/flags/data/models/flag_output.dart';
 import 'package:organiq/modules/flags/data/models/subflag_output.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 import 'package:organiq/shared/utils/text_utils.dart';
 
@@ -31,7 +31,7 @@ class SettingsContextsFlagCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IBCard(
+    return OQCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -61,7 +61,7 @@ class SettingsContextsFlagCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    IBText(
+                    OQText(
                       flag.name,
                       context: context,
                     ).subtitulo.maxLines(2).build(),
@@ -76,7 +76,7 @@ class SettingsContextsFlagCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(999),
                         border: Border.all(color: AppColors.border),
                       ),
-                      child: IBText(
+                      child: OQText(
                         TextUtils.countLabel(
                           subflags.length,
                           'subflag',
@@ -91,7 +91,7 @@ class SettingsContextsFlagCard extends StatelessWidget {
               _ActionIconButton(
                 tooltip: 'Adicionar subflag',
                 onPressed: disabled ? null : onAddSubflag,
-                icon: IBIcon.addRounded,
+                icon: OQIcon.addRounded,
                 iconColor: AppColors.primary700,
                 backgroundColor: AppColors.surfaceSoft,
               ),
@@ -99,7 +99,7 @@ class SettingsContextsFlagCard extends StatelessWidget {
               _ActionIconButton(
                 tooltip: 'Editar flag',
                 onPressed: disabled ? null : onEditFlag,
-                icon: IBIcon.editOutlineRounded,
+                icon: OQIcon.editOutlineRounded,
                 iconColor: AppColors.textMuted,
                 backgroundColor: AppColors.surfaceSoft,
               ),
@@ -107,14 +107,14 @@ class SettingsContextsFlagCard extends StatelessWidget {
               _ActionIconButton(
                 tooltip: 'Excluir flag',
                 onPressed: disabled ? null : onDeleteFlag,
-                icon: IBIcon.deleteOutlineRounded,
+                icon: OQIcon.deleteOutlineRounded,
                 iconColor: AppColors.danger600,
                 backgroundColor: AppColors.surfaceSoft,
               ),
             ],
           ),
           const SizedBox(height: 12),
-          IBText('Subflags', context: context).caption.build(),
+          OQText('Subflags', context: context).caption.build(),
           const SizedBox(height: 8),
           if (subflags.isEmpty)
             Container(
@@ -125,7 +125,7 @@ class SettingsContextsFlagCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: AppColors.border),
               ),
-              child: IBText(
+              child: OQText(
                 'Sem subflags. Adicione para detalhar esse contexto.',
                 context: context,
               ).muted.build(),
@@ -147,9 +147,9 @@ class SettingsContextsFlagCard extends StatelessWidget {
           const Divider(height: 18),
           Align(
             alignment: Alignment.centerLeft,
-            child: IBButton(
+            child: OQButton(
               label: 'Adicionar subflag',
-              variant: IBButtonVariant.ghost,
+              variant: OQButtonVariant.ghost,
               onPressed: disabled ? null : onAddSubflag,
             ),
           ),
@@ -207,7 +207,7 @@ class _SubflagRow extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: IBText(
+            child: OQText(
               subflag.name,
               context: context,
             ).body.maxLines(2).build(),
@@ -215,7 +215,7 @@ class _SubflagRow extends StatelessWidget {
           _ActionIconButton(
             tooltip: 'Editar subflag',
             onPressed: disabled ? null : onEdit,
-            icon: IBIcon.editOutlineRounded,
+            icon: OQIcon.editOutlineRounded,
             iconColor: AppColors.textMuted,
             backgroundColor: AppColors.surface,
           ),
@@ -223,7 +223,7 @@ class _SubflagRow extends StatelessWidget {
           _ActionIconButton(
             tooltip: 'Excluir subflag',
             onPressed: disabled ? null : onDelete,
-            icon: IBIcon.deleteOutlineRounded,
+            icon: OQIcon.deleteOutlineRounded,
             iconColor: AppColors.danger600,
             backgroundColor: AppColors.surface,
           ),

@@ -226,9 +226,7 @@ class RoutineRepository implements IRoutineRepository {
 
       final statusCode = response.statusCode ?? 0;
       if (_isSuccess(statusCode)) {
-        return Right(
-          RoutineCompletionOutput.fromJson(_asMap(response.data)),
-        );
+        return Right(RoutineCompletionOutput.fromJson(_asMap(response.data)));
       }
 
       return Left(
@@ -245,7 +243,10 @@ class RoutineRepository implements IRoutineRepository {
   }
 
   @override
-  Future<Either<Failure, Unit>> uncompleteRoutine(String id, String date) async {
+  Future<Either<Failure, Unit>> uncompleteRoutine(
+    String id,
+    String date,
+  ) async {
     try {
       final response = await _httpClient.delete(
         AppPath.routineCompleteByDate(id, date),
@@ -330,9 +331,7 @@ class RoutineRepository implements IRoutineRepository {
 
       final statusCode = response.statusCode ?? 0;
       if (_isSuccess(statusCode)) {
-        return Right(
-          RoutineTodaySummaryOutput.fromJson(_asMap(response.data)),
-        );
+        return Right(RoutineTodaySummaryOutput.fromJson(_asMap(response.data)));
       }
 
       return Left(
@@ -361,9 +360,7 @@ class RoutineRepository implements IRoutineRepository {
 
       final statusCode = response.statusCode ?? 0;
       if (_isSuccess(statusCode)) {
-        return Right(
-          RoutineExceptionOutput.fromJson(_asMap(response.data)),
-        );
+        return Right(RoutineExceptionOutput.fromJson(_asMap(response.data)));
       }
 
       return Left(

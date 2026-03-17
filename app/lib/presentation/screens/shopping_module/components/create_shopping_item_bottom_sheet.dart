@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:organiq/presentation/routes/app_navigation.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 
 class CreateShoppingItemBottomSheet extends StatefulWidget {
   const CreateShoppingItemBottomSheet({
@@ -51,7 +51,7 @@ class _CreateShoppingItemBottomSheetState
       builder: (sheetContext, _) {
         final loading = widget.loadingListenable.value;
 
-        return IBBottomSheet(
+        return OQBottomSheet(
           title: 'Novo item',
           subtitle: widget.listTitle,
           primaryLabel: 'Adicionar item',
@@ -74,7 +74,7 @@ class _CreateShoppingItemBottomSheetState
                 widget.errorListenable.value ??
                 'Não foi possível criar o item.';
 
-            IBSnackBar.error(sheetContext, message);
+            OQSnackBar.error(sheetContext, message);
           },
           secondaryLabel: 'Cancelar',
           secondaryEnabled: !loading,
@@ -82,13 +82,13 @@ class _CreateShoppingItemBottomSheetState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              IBTextField(
+              OQTextField(
                 label: 'Item',
                 hint: 'Ex: Arroz',
                 controller: _titleController,
               ),
               const SizedBox(height: 12),
-              IBTextField(
+              OQTextField(
                 label: 'Informações adicionais (opcional)',
                 hint: 'Ex: 2 pacotes',
                 controller: _quantityController,

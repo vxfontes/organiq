@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/services/push/push_notification_service.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
@@ -20,7 +20,7 @@ class SettingsNotificationsDeviceContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        IBText(
+        OQText(
           'As push notifications deste aparelho sao sincronizadas automaticamente com o backend.',
           context: context,
         ).caption.build(),
@@ -71,11 +71,11 @@ class SettingsNotificationsDeviceContent extends StatelessWidget {
         const SizedBox(height: 12),
         SizedBox(
           width: double.infinity,
-          child: IBButton(
+          child: OQButton(
             label: 'Enviar notificacao de teste',
             loading: sendingTest,
             onPressed: onSendTest,
-            variant: IBButtonVariant.secondary,
+            variant: OQButtonVariant.secondary,
           ),
         ),
       ],

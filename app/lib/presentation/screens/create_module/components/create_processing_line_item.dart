@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:organiq/modules/inbox/data/models/create_processing_line.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
 class CreateProcessingLineItem extends StatelessWidget {
@@ -24,7 +24,7 @@ class CreateProcessingLineItem extends StatelessWidget {
         Padding(padding: const EdgeInsets.only(top: 1), child: statusIcon),
         const SizedBox(width: 8),
         Expanded(
-          child: IBText(
+          child: OQText(
             line.text,
             context: context,
           ).caption.color(textColor).build(),
@@ -54,14 +54,14 @@ class CreateProcessingLineItem extends StatelessWidget {
           ),
         );
       case LineProcessingStatus.done:
-        return const IBIcon(
-          IBIcon.checkRounded,
+        return const OQIcon(
+          OQIcon.checkRounded,
           color: AppColors.success600,
           size: 16,
         );
       case LineProcessingStatus.failed:
-        return const IBIcon(
-          IBIcon.closeRounded,
+        return const OQIcon(
+          OQIcon.closeRounded,
           color: AppColors.danger600,
           size: 16,
         );

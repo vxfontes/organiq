@@ -5,8 +5,8 @@ import 'package:organiq/modules/tasks/data/models/task_output.dart';
 import 'package:organiq/presentation/screens/reminders_module/components/create_reminder_bottom_sheet.dart';
 import 'package:organiq/presentation/screens/reminders_module/components/create_todo_bottom_sheet.dart';
 import 'package:organiq/presentation/screens/reminders_module/controller/reminders_controller.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
-import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
+import 'package:organiq/shared/state/oq_state.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 import 'package:organiq/shared/utils/reminders_format.dart';
 
@@ -17,7 +17,7 @@ class RemindersPage extends StatefulWidget {
   State<RemindersPage> createState() => _RemindersPageState();
 }
 
-class _RemindersPageState extends IBState<RemindersPage, RemindersController> {
+class _RemindersPageState extends OQState<RemindersPage, RemindersController> {
   @override
   void initState() {
     super.initState();
@@ -34,7 +34,7 @@ class _RemindersPageState extends IBState<RemindersPage, RemindersController> {
   void _onErrorChanged() {
     final error = controller.error.value;
     if (error != null && error.isNotEmpty && mounted) {
-      IBSnackBar.error(context, error);
+      OQSnackBar.error(context, error);
     }
   }
 
@@ -74,7 +74,7 @@ class _RemindersPageState extends IBState<RemindersPage, RemindersController> {
               Positioned.fill(
                 child: ColoredBox(
                   color: AppColors.background,
-                  child: Center(child: IBLoader(label: loadingLabel)),
+                  child: Center(child: OQLoader(label: loadingLabel)),
                 ),
               ),
           ],
@@ -91,9 +91,9 @@ class _RemindersPageState extends IBState<RemindersPage, RemindersController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              IBText('Lembretes e tarefas', context: context).titulo.build(),
+              OQText('Lembretes e tarefas', context: context).titulo.build(),
               const SizedBox(height: 6),
-              IBText(
+              OQText(
                 'Priorize o que vence hoje e acompanhe os próximos dias.',
                 context: context,
               ).muted.build(),
@@ -103,8 +103,8 @@ class _RemindersPageState extends IBState<RemindersPage, RemindersController> {
         IconButton(
           tooltip: 'Adicionar lembrete',
           onPressed: _openCreateReminder,
-          icon: const IBIcon(
-            IBIcon.addRounded,
+          icon: const OQIcon(
+            OQIcon.addRounded,
             color: AppColors.primary700,
             size: 20,
           ),
@@ -114,13 +114,13 @@ class _RemindersPageState extends IBState<RemindersPage, RemindersController> {
   }
 
   Widget _buildTodoSection(BuildContext context, List<TaskOutput> tasks) {
-    return IBTodoList(
+    return OQTodoList(
       title: 'Tarefas',
       action: IconButton(
         tooltip: 'Adicionar tarefa',
         onPressed: _openCreateTodo,
-        icon: const IBIcon(
-          IBIcon.addRounded,
+        icon: const OQIcon(
+          OQIcon.addRounded,
           color: AppColors.primary700,
           size: 20,
         ),
@@ -128,7 +128,7 @@ class _RemindersPageState extends IBState<RemindersPage, RemindersController> {
       emptyLabel: 'Quando surgirem tarefas, elas vão aparecer aqui.',
       items: tasks
           .map(
-            (task) => IBTodoItemData(
+            (task) => OQTodoItemData(
               id: task.id,
               title: task.title,
               subtitle: RemindersFormat.taskSubtitle(task),
@@ -190,17 +190,17 @@ class _RemindersPageState extends IBState<RemindersPage, RemindersController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (items.isNotEmpty) const SizedBox(height: 24),
-        IBText(title, context: context).subtitulo.build(),
+        OQText(title, context: context).subtitulo.build(),
         const SizedBox(height: 12),
         if (items.isEmpty)
-          IBText(fallback, context: context).muted.build()
+          OQText(fallback, context: context).muted.build()
         else
-          IBCard(
+          OQCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 for (var i = 0; i < items.length; i++) ...[
-                  IBReminderRow(
+                  OQReminderRow(
                     title: items[i].title,
                     time: RemindersFormat.formatReminderTime(items[i]),
                     color: muted
@@ -251,7 +251,7 @@ class _RemindersPageState extends IBState<RemindersPage, RemindersController> {
     BuildContext context,
     DateTime? current,
   ) async {
-    return IBDateField.pickDateTime(
+    return OQDateField.pickDateTime(
       context,
       current: current,
       helpText: 'Selecionar data',
@@ -269,7 +269,7 @@ class _RemindersPageState extends IBState<RemindersPage, RemindersController> {
   Future<void> _openCreateTodo() async {
     if (!mounted) return;
 
-    await IBBottomSheet.show<void>(
+    await OQBottomSheet.show<void>(
       smallBottomSheet: false,
       context: context,
       child: CreateTodoSheet(
@@ -286,7 +286,7 @@ class _RemindersPageState extends IBState<RemindersPage, RemindersController> {
   Future<void> _openCreateReminder() async {
     if (!mounted) return;
 
-    await IBBottomSheet.show<void>(
+    await OQBottomSheet.show<void>(
       context: context,
       isFitWithContent: true,
       child: CreateReminderBottomSheet(

@@ -4,10 +4,7 @@ part 'health_status_output.g.dart';
 
 @JsonSerializable()
 class HealthStatusOutput {
-  const HealthStatusOutput({
-    required this.status,
-    this.time,
-  });
+  const HealthStatusOutput({required this.status, this.time});
 
   final String status;
   final DateTime? time;

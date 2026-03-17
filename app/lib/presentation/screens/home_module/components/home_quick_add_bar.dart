@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:organiq/modules/inbox/data/models/inbox_create_line_result.dart';
 import 'package:organiq/presentation/screens/home_module/components/home_quick_add_result_sheet.dart';
 import 'package:organiq/presentation/screens/home_module/controller/home_controller.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
 class HomeQuickAddBar extends StatefulWidget {
@@ -59,14 +59,14 @@ class _HomeQuickAddBarState extends State<HomeQuickAddBar> {
       });
 
       result.fold(
-        (error) => IBSnackBar.error(context, error),
+        (error) => OQSnackBar.error(context, error),
         (lineResult) => _showResultBottomSheet(lineResult),
       );
     }
   }
 
   void _showResultBottomSheet(CreateLineResult initialResult) {
-    IBBottomSheet.show(
+    OQBottomSheet.show(
       context: context,
       isFitWithContent: true,
       child: QuickAddResultSheet(
@@ -89,8 +89,8 @@ class _HomeQuickAddBarState extends State<HomeQuickAddBar> {
         children: [
           const Padding(
             padding: EdgeInsets.only(left: 14),
-            child: IBIcon(
-              IBIcon.autoAwesomeRounded,
+            child: OQIcon(
+              OQIcon.autoAwesomeRounded,
               size: 18,
               color: AppColors.primary700,
             ),
@@ -127,8 +127,8 @@ class _HomeQuickAddBarState extends State<HomeQuickAddBar> {
                     )
                   : IconButton(
                       onPressed: _submit,
-                      icon: const IBIcon(
-                        IBIcon.arrowForwardRounded,
+                      icon: const OQIcon(
+                        OQIcon.arrowForwardRounded,
                         color: AppColors.primary700,
                         size: 20,
                       ),

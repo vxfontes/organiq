@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'package:organiq/presentation/screens/home_module/components/timeline_item.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
 class HomeNextActionsCarousel extends StatefulWidget {
@@ -41,10 +41,10 @@ class _HomeNextActionsCarouselState extends State<HomeNextActionsCarousel> {
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Row(
               children: [
-                IBText('A seguir', context: context).subtitulo.build(),
+                OQText('A seguir', context: context).subtitulo.build(),
                 const Spacer(),
-                const IBIcon(
-                  IBIcon.chevronRight,
+                const OQIcon(
+                  OQIcon.chevronRight,
                   size: 18,
                   color: AppColors.textMuted,
                 ),
@@ -72,7 +72,7 @@ class _HomeNextActionsCarouselState extends State<HomeNextActionsCarousel> {
                     switchOutCurve: Curves.easeIn,
                     child: isCompleting
                         ? const SizedBox.shrink()
-                        : IBNextActionCard(
+                        : OQNextActionCard(
                             key: ValueKey(item.stableKey),
                             item: _toIBItem(item),
                             isPast: isPast,
@@ -103,8 +103,8 @@ class _HomeNextActionsCarouselState extends State<HomeNextActionsCarousel> {
     setState(() => _completingIds.remove(stableKey));
   }
 
-  IBNextActionItem _toIBItem(TimelineItem item) {
-    return IBNextActionItem(
+  OQNextActionItem _toIBItem(TimelineItem item) {
+    return OQNextActionItem(
       id: item.id,
       title: item.title,
       subtitle: item.subtitle,
@@ -116,16 +116,16 @@ class _HomeNextActionsCarouselState extends State<HomeNextActionsCarousel> {
     );
   }
 
-  IBNextActionType _mapType(TimelineItemType type) {
+  OQNextActionType _mapType(TimelineItemType type) {
     switch (type) {
       case TimelineItemType.event:
-        return IBNextActionType.event;
+        return OQNextActionType.event;
       case TimelineItemType.reminder:
-        return IBNextActionType.reminder;
+        return OQNextActionType.reminder;
       case TimelineItemType.routine:
-        return IBNextActionType.routine;
+        return OQNextActionType.routine;
       case TimelineItemType.task:
-        return IBNextActionType.task;
+        return OQNextActionType.task;
     }
   }
 }

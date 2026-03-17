@@ -3,10 +3,10 @@ import 'package:organiq/modules/auth/data/models/auth_login_input.dart';
 import 'package:organiq/modules/auth/domain/usecases/login_usecase.dart';
 import 'package:organiq/shared/errors/failures.dart';
 import 'package:organiq/shared/services/timezone/user_timezone_service.dart';
-import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/state/oq_state.dart';
 import 'package:organiq/shared/utils/validators.dart';
 
-class LoginController implements IBController {
+class LoginController implements OQController {
   LoginController(this._loginUsecase);
 
   final LoginUsecase _loginUsecase;

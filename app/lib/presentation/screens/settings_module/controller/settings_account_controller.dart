@@ -3,9 +3,9 @@ import 'package:organiq/modules/auth/data/models/auth_user_model.dart';
 import 'package:organiq/modules/auth/domain/usecases/get_me_usecase.dart';
 import 'package:organiq/shared/errors/failures.dart';
 import 'package:organiq/shared/services/timezone/user_timezone_service.dart';
-import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/state/oq_state.dart';
 
-class SettingsAccountController implements IBController {
+class SettingsAccountController implements OQController {
   SettingsAccountController(this._getMeUsecase);
 
   final GetMeUsecase _getMeUsecase;

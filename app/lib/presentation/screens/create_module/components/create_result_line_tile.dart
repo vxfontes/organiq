@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:organiq/modules/inbox/data/models/inbox_create_line_result.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
 class CreateResultLineTile extends StatelessWidget {
@@ -48,8 +48,8 @@ class CreateResultLineTile extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Center(
-                  child: IBIcon(
-                    success ? IBIcon.checkRounded : IBIcon.closeRounded,
+                  child: OQIcon(
+                    success ? OQIcon.checkRounded : OQIcon.closeRounded,
                     color: accentColor,
                     size: 18,
                   ),
@@ -69,13 +69,13 @@ class CreateResultLineTile extends StatelessWidget {
                         color: badgeBackground,
                         borderRadius: BorderRadius.circular(999),
                       ),
-                      child: IBText(
+                      child: OQText(
                         statusLabel,
                         context: context,
                       ).caption.color(accentColor).build(),
                     ),
                     const SizedBox(height: 6),
-                    IBText(
+                    OQText(
                       result.message,
                       context: context,
                     ).label.weight(FontWeight.w700).build(),
@@ -106,8 +106,8 @@ class CreateResultLineTile extends StatelessWidget {
                                   strokeWidth: 2,
                                 ),
                               )
-                            : const IBIcon(
-                                IBIcon.deleteOutlineRounded,
+                            : const OQIcon(
+                                OQIcon.deleteOutlineRounded,
                                 color: AppColors.textMuted,
                                 size: 18,
                               ),
@@ -119,7 +119,7 @@ class CreateResultLineTile extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          IBText(
+          OQText(
             result.sourceText,
             context: context,
           ).body.color(AppColors.textMuted).maxLines(3).build(),

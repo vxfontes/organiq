@@ -28,5 +28,4 @@ class HomeFormat {
         return AppColors.success600;
     }
   }
-
 }

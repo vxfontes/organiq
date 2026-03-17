@@ -25,10 +25,10 @@ import 'package:organiq/modules/routines/domain/usecases/toggle_routine_usecase.
 import 'package:organiq/modules/routines/domain/usecases/uncomplete_routine_usecase.dart';
 import 'package:organiq/modules/routines/domain/usecases/update_routine_usecase.dart';
 import 'package:organiq/shared/errors/failures.dart';
-import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/state/oq_state.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
-class ScheduleController implements IBController {
+class ScheduleController implements OQController {
   ScheduleController(
     this._getRoutinesByWeekdayUsecase,
     this._createRoutineUsecase,
@@ -61,20 +61,26 @@ class ScheduleController implements IBController {
 
   final ValueNotifier<bool> loading = ValueNotifier(false);
   final ValueNotifier<bool> detailsLoading = ValueNotifier(false);
-  final ValueNotifier<ScheduleViewMode> viewMode = ValueNotifier(ScheduleViewMode.daily);
+  final ValueNotifier<ScheduleViewMode> viewMode = ValueNotifier(
+    ScheduleViewMode.daily,
+  );
   final ValueNotifier<String?> error = ValueNotifier(null);
   final ValueNotifier<List<RoutineOutput>> allRoutines = ValueNotifier([]);
   final ValueNotifier<List<RoutineOutput>> routines = ValueNotifier([]);
-  final ValueNotifier<Map<RoutinePeriod, List<RoutineOutput>>> routinesByPeriod = ValueNotifier({});
-  final ValueNotifier<Map<int, List<RoutineOutput>>> routinesByWeekdayInWeek = ValueNotifier({});
+  final ValueNotifier<Map<RoutinePeriod, List<RoutineOutput>>>
+  routinesByPeriod = ValueNotifier({});
+  final ValueNotifier<Map<int, List<RoutineOutput>>> routinesByWeekdayInWeek =
+      ValueNotifier({});
   final ValueNotifier<int> selectedWeekday = ValueNotifier(0);
   final ValueNotifier<int> selectedWeekOffset = ValueNotifier(0);
   final ValueNotifier<List<FlagOutput>> flags = ValueNotifier([]);
   final ValueNotifier<Map<String, List<SubflagOutput>>> subflagsByFlag =
       ValueNotifier({});
-  
-  final ValueNotifier<List<RoutineCompletionOutput>> currentRoutineHistory = ValueNotifier([]);
-  final ValueNotifier<RoutineStreakOutput?> currentRoutineStreak = ValueNotifier(null);
+
+  final ValueNotifier<List<RoutineCompletionOutput>> currentRoutineHistory =
+      ValueNotifier([]);
+  final ValueNotifier<RoutineStreakOutput?> currentRoutineStreak =
+      ValueNotifier(null);
 
   int _loadRevision = 0;
 
@@ -155,7 +161,11 @@ class ScheduleController implements IBController {
     final now = DateTime.now();
     final daysSinceMonday = now.weekday - 1;
     final monday = now.subtract(Duration(days: daysSinceMonday));
-    return DateTime(monday.year, monday.month, monday.day).add(Duration(days: selectedWeekOffset.value * 7));
+    return DateTime(
+      monday.year,
+      monday.month,
+      monday.day,
+    ).add(Duration(days: selectedWeekOffset.value * 7));
   }
 
   List<DateTime> get currentWeekDays {
@@ -166,7 +176,7 @@ class ScheduleController implements IBController {
   void selectWeekOffset(int offset) {
     if (selectedWeekOffset.value == offset) return;
     selectedWeekOffset.value = offset;
-    
+
     if (viewMode.value == ScheduleViewMode.daily) {
       loadRoutinesForWeekday(selectedWeekday.value);
     } else {
@@ -176,11 +186,11 @@ class ScheduleController implements IBController {
 
   bool get hasRoutines =>
       routinesByPeriod.value.values.any((list) => list.isNotEmpty);
-  bool get shouldShowLoadingOverlay =>
-      loading.value && routines.value.isEmpty;
+  bool get shouldShowLoadingOverlay => loading.value && routines.value.isEmpty;
   bool get isEditing => _editingRoutineId != null;
   String get formTitle => isEditing ? 'Editar Rotina' : 'Nova Rotina';
-  String get formPrimaryLabel => isEditing ? 'Salvar alterações' : 'Criar rotina';
+  String get formPrimaryLabel =>
+      isEditing ? 'Salvar alterações' : 'Criar rotina';
   List<RoutineSection> get routineSections {
     final sections = <RoutineSection>[];
     for (final period in routinePeriodOrder) {
@@ -206,7 +216,7 @@ class ScheduleController implements IBController {
     viewMode.value = viewMode.value == ScheduleViewMode.daily
         ? ScheduleViewMode.weekly
         : ScheduleViewMode.daily;
-    
+
     if (viewMode.value == ScheduleViewMode.weekly) {
       loadFullWeek();
     } else {
@@ -223,7 +233,7 @@ class ScheduleController implements IBController {
 
     await _loadFlags();
     await _loadAllRoutines();
-    
+
     if (viewMode.value == ScheduleViewMode.daily) {
       await loadRoutinesForWeekday(selectedWeekday.value);
     } else {
@@ -235,22 +245,16 @@ class ScheduleController implements IBController {
 
   Future<void> _loadAllRoutines() async {
     final result = await _getRoutinesUsecase.call(limit: 1000);
-    result.fold(
-      (failure) {},
-      (data) {
-        allRoutines.value = data.items;
-      },
-    );
+    result.fold((failure) {}, (data) {
+      allRoutines.value = data.items;
+    });
   }
 
   Future<void> _loadFlags() async {
     final result = await _getFlagsUsecase.call(limit: 100);
-    result.fold(
-      (failure) {},
-      (data) {
-        flags.value = _safeFlagItems(data.items);
-      },
-    );
+    result.fold((failure) {}, (data) {
+      flags.value = _safeFlagItems(data.items);
+    });
   }
 
   Future<void> loadSubflags(String flagId) async {
@@ -292,7 +296,10 @@ class ScheduleController implements IBController {
     loading.value = true;
     try {
       final date = _dateForWeekday(weekday);
-      final result = await _getRoutinesByWeekdayUsecase.call(weekday, date: date);
+      final result = await _getRoutinesByWeekdayUsecase.call(
+        weekday,
+        date: date,
+      );
 
       if (revision != _loadRevision) return;
 
@@ -314,7 +321,7 @@ class ScheduleController implements IBController {
   Future<void> loadFullWeek() async {
     final revision = ++_loadRevision;
     loading.value = true;
-    
+
     try {
       final weekDays = currentWeekDays;
       final resultsMap = <int, List<RoutineOutput>>{};
@@ -322,12 +329,13 @@ class ScheduleController implements IBController {
       final futures = List.generate(7, (index) {
         final date = weekDays[index];
         final apiWeekday = date.weekday % 7;
-        final dateStr = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+        final dateStr =
+            '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
         return _getRoutinesByWeekdayUsecase.call(apiWeekday, date: dateStr);
       });
 
       final results = await Future.wait(futures);
-      
+
       if (revision != _loadRevision) return;
 
       for (int i = 0; i < results.length; i++) {
@@ -355,10 +363,14 @@ class ScheduleController implements IBController {
       _getRoutineStreakUsecase.call(id),
     ]);
 
-    final historyResult = results[0] as Either<Failure, List<RoutineCompletionOutput>>;
+    final historyResult =
+        results[0] as Either<Failure, List<RoutineCompletionOutput>>;
     final streakResult = results[1] as Either<Failure, RoutineStreakOutput>;
 
-    historyResult.fold((_) => null, (data) => currentRoutineHistory.value = data);
+    historyResult.fold(
+      (_) => null,
+      (data) => currentRoutineHistory.value = data,
+    );
     streakResult.fold((_) => null, (data) => currentRoutineStreak.value = data);
 
     detailsLoading.value = false;
@@ -373,7 +385,9 @@ class ScheduleController implements IBController {
     try {
       final startsOn = DateTime.parse(routine.startsOn);
       final compareDate = DateTime(date.year, date.month, date.day);
-      if (compareDate.isBefore(DateTime(startsOn.year, startsOn.month, startsOn.day))) {
+      if (compareDate.isBefore(
+        DateTime(startsOn.year, startsOn.month, startsOn.day),
+      )) {
         return false;
       }
     } catch (_) {}
@@ -383,7 +397,9 @@ class ScheduleController implements IBController {
       try {
         final endsOn = DateTime.parse(routine.endsOn!);
         final compareDate = DateTime(date.year, date.month, date.day);
-        if (compareDate.isAfter(DateTime(endsOn.year, endsOn.month, endsOn.day))) {
+        if (compareDate.isAfter(
+          DateTime(endsOn.year, endsOn.month, endsOn.day),
+        )) {
           return false;
         }
       } catch (_) {}
@@ -522,7 +538,8 @@ class ScheduleController implements IBController {
       endTime: endTime,
       excludeId: _editingRoutineId,
     )) {
-      error.value = 'Já existe uma rotina neste horário em um dos dias selecionados.';
+      error.value =
+          'Já existe uma rotina neste horário em um dos dias selecionados.';
       return false;
     }
 
@@ -690,8 +707,10 @@ class ScheduleController implements IBController {
         return false;
       },
       (updated) {
-        allRoutines.value = allRoutines.value.map((r) => r.id == updated.id ? updated : r).toList();
-        
+        allRoutines.value = allRoutines.value
+            .map((r) => r.id == updated.id ? updated : r)
+            .toList();
+
         if (viewMode.value == ScheduleViewMode.daily) {
           final list = routines.value.where((r) => r.id != updated.id).toList();
           if (updated.weekdays.contains(selectedWeekday.value)) {
@@ -713,14 +732,15 @@ class ScheduleController implements IBController {
     _togglingRoutineIds.add(routine.id);
     final dateStr = _dateForWeekday(selectedWeekday.value);
 
-    final result = completed 
-      ? await _completeRoutineUsecase.call(routine.id, date: dateStr)
-      : await _uncompleteRoutineUsecase.call(routine.id, dateStr);
-    
+    final result = completed
+        ? await _completeRoutineUsecase.call(routine.id, date: dateStr)
+        : await _uncompleteRoutineUsecase.call(routine.id, dateStr);
+
     _togglingRoutineIds.remove(routine.id);
 
     result.fold(
-      (failure) => _setError(failure, fallback: 'Não foi possível atualizar a rotina.'),
+      (failure) =>
+          _setError(failure, fallback: 'Não foi possível atualizar a rotina.'),
       (_) {
         final list = List<RoutineOutput>.from(routines.value);
         final idx = list.indexWhere((r) => r.id == routine.id);
@@ -741,12 +761,19 @@ class ScheduleController implements IBController {
     loading.value = false;
 
     result.fold(
-      (failure) => _setError(failure, fallback: 'Não foi possível alterar o status da rotina.'),
+      (failure) => _setError(
+        failure,
+        fallback: 'Não foi possível alterar o status da rotina.',
+      ),
       (_) {
         final updated = routine.copyWith(isActive: isActive);
-        allRoutines.value = allRoutines.value.map((r) => r.id == routine.id ? updated : r).toList();
+        allRoutines.value = allRoutines.value
+            .map((r) => r.id == routine.id ? updated : r)
+            .toList();
         if (viewMode.value == ScheduleViewMode.daily) {
-          routines.value = routines.value.map((r) => r.id == routine.id ? updated : r).toList();
+          routines.value = routines.value
+              .map((r) => r.id == routine.id ? updated : r)
+              .toList();
           _groupRoutinesByPeriod();
         } else {
           loadFullWeek();
@@ -763,10 +790,7 @@ class ScheduleController implements IBController {
     final dateStr = _dateForWeekday(selectedWeekday.value);
     final result = await _createRoutineExceptionUsecase.call(
       routine.id,
-      RoutineExceptionInput(
-        exceptionDate: dateStr,
-        action: 'skip',
-      ),
+      RoutineExceptionInput(exceptionDate: dateStr, action: 'skip'),
     );
 
     loading.value = false;
@@ -796,9 +820,13 @@ class ScheduleController implements IBController {
         return false;
       },
       (_) {
-        allRoutines.value = allRoutines.value.where((r) => r.id != routineId).toList();
+        allRoutines.value = allRoutines.value
+            .where((r) => r.id != routineId)
+            .toList();
         if (viewMode.value == ScheduleViewMode.daily) {
-          routines.value = routines.value.where((r) => r.id != routineId).toList();
+          routines.value = routines.value
+              .where((r) => r.id != routineId)
+              .toList();
           _groupRoutinesByPeriod();
         } else {
           loadFullWeek();
@@ -819,8 +847,9 @@ class ScheduleController implements IBController {
       if (r.id == routine.id || !r.isActive) continue;
 
       final routineWeekdays = r.weekdays.toSet();
-      final hasCommonWeekday =
-          routine.weekdays.any((d) => routineWeekdays.contains(d));
+      final hasCommonWeekday = routine.weekdays.any(
+        (d) => routineWeekdays.contains(d),
+      );
       if (!hasCommonWeekday) continue;
 
       final rStart = _timeToMinutes(r.startTime);

@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
 class SettingsNotificationsDailySummaryTokenContent extends StatelessWidget {
@@ -30,7 +30,7 @@ class SettingsNotificationsDailySummaryTokenContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        IBText(
+        OQText(
           'Use este token para acessar o endpoint público de resumo diário (sem login).',
           context: context,
         ).caption.build(),
@@ -44,17 +44,17 @@ class SettingsNotificationsDailySummaryTokenContent extends StatelessWidget {
           ),
           child: Row(
             children: [
-              const IBIcon(
-                IBIcon.keyRounded,
+              const OQIcon(
+                OQIcon.keyRounded,
                 size: 16,
                 color: AppColors.textMuted,
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: IBText(tokenLabel, context: context)
-                    .body
-                    .maxLines(2)
-                    .build(),
+                child: OQText(
+                  tokenLabel,
+                  context: context,
+                ).body.maxLines(2).build(),
               ),
             ],
           ),
@@ -72,17 +72,17 @@ class SettingsNotificationsDailySummaryTokenContent extends StatelessWidget {
                 child: Row(
                   children: [
                     const SizedBox(width: 12),
-                    const IBIcon(
-                      IBIcon.linkRounded,
+                    const OQIcon(
+                      OQIcon.linkRounded,
                       size: 16,
                       color: AppColors.textMuted,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: IBText(url ?? 'URL indisponível', context: context)
-                          .body
-                          .maxLines(1)
-                          .build(),
+                      child: OQText(
+                        url ?? 'URL indisponível',
+                        context: context,
+                      ).body.maxLines(1).build(),
                     ),
                   ],
                 ),
@@ -93,7 +93,7 @@ class SettingsNotificationsDailySummaryTokenContent extends StatelessWidget {
               onPressed: (url?.trim().isNotEmpty == true)
                   ? () {
                       Clipboard.setData(ClipboardData(text: url!));
-                      IBSnackBar.success(context, 'Link copiado!');
+                      OQSnackBar.success(context, 'Link copiado!');
                     }
                   : null,
               tooltip: 'Copiar link',
@@ -115,9 +115,7 @@ class SettingsNotificationsDailySummaryTokenContent extends StatelessWidget {
             ),
             const SizedBox(width: 6),
             IconButton(
-              onPressed: loading
-                  ? null
-                  : () => unawaited(onRotate()),
+              onPressed: loading ? null : () => unawaited(onRotate()),
               tooltip: 'Rotacionar token',
               icon: loading
                   ? const SizedBox(
@@ -128,7 +126,7 @@ class SettingsNotificationsDailySummaryTokenContent extends StatelessWidget {
                         color: AppColors.textMuted,
                       ),
                     )
-                  : const IBIcon(IBIcon.autoRenew, size: 18),
+                  : const OQIcon(OQIcon.autoRenew, size: 18),
               style: IconButton.styleFrom(
                 backgroundColor: loading
                     ? AppColors.surfaceSoft
@@ -148,9 +146,9 @@ class SettingsNotificationsDailySummaryTokenContent extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         Center(
-          child: IBButton(
+          child: OQButton(
             label: 'Atualizar',
-            variant: IBButtonVariant.ghost,
+            variant: OQButtonVariant.ghost,
             onPressed: loading ? null : onRefresh,
           ),
         ),

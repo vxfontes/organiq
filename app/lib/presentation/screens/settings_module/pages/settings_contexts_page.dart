@@ -6,8 +6,8 @@ import 'package:organiq/presentation/screens/settings_module/components/settings
 import 'package:organiq/presentation/screens/settings_module/components/settings_contexts_flag_card.dart';
 import 'package:organiq/presentation/screens/settings_module/components/settings_contexts_header_row.dart';
 import 'package:organiq/presentation/screens/settings_module/controller/settings_contexts_controller.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
-import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
+import 'package:organiq/shared/state/oq_state.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
 class SettingsContextsPage extends StatefulWidget {
@@ -18,7 +18,7 @@ class SettingsContextsPage extends StatefulWidget {
 }
 
 class _SettingsContextsPageState
-    extends IBState<SettingsContextsPage, SettingsContextsController> {
+    extends OQState<SettingsContextsPage, SettingsContextsController> {
   @override
   void initState() {
     super.initState();
@@ -35,14 +35,14 @@ class _SettingsContextsPageState
   void _onErrorChanged() {
     final error = controller.error.value;
     if (error != null && error.isNotEmpty && mounted) {
-      IBSnackBar.error(context, error);
+      OQSnackBar.error(context, error);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const IBLightAppBar(title: 'Flags e subflags'),
+      appBar: const OQLightAppBar(title: 'Flags e subflags'),
       body: AnimatedBuilder(
         animation: Listenable.merge([
           controller.loading,
@@ -61,7 +61,7 @@ class _SettingsContextsPageState
 
           if (loading && !controller.hasContent) {
             return const Center(
-              child: IBLoader(label: 'Carregando contextos...'),
+              child: OQLoader(label: 'Carregando contextos...'),
             );
           }
 
@@ -174,7 +174,7 @@ class _SettingsContextsPageState
     required String title,
     required String body,
   }) {
-    return IBBottomSheet.show<bool>(
+    return OQBottomSheet.show<bool>(
       context: context,
       isFitWithContent: true,
       child: SettingsDeleteConfirmationBottomSheet(title: title, body: body),
@@ -186,7 +186,7 @@ class _SettingsContextsPageState
     String? initialName,
     String? initialColor,
   }) {
-    return IBBottomSheet.show<SettingsFlagFormData>(
+    return OQBottomSheet.show<SettingsFlagFormData>(
       context: context,
       isFitWithContent: true,
       child: SettingsFlagFormBottomSheet(
@@ -202,7 +202,7 @@ class _SettingsContextsPageState
     required String label,
     String? initialValue,
   }) {
-    return IBBottomSheet.show<String>(
+    return OQBottomSheet.show<String>(
       context: context,
       isFitWithContent: true,
       child: SettingsNameFormBottomSheet(

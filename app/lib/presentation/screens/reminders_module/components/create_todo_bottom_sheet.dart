@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:organiq/modules/flags/data/models/flag_output.dart';
 import 'package:organiq/presentation/routes/app_navigation.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 
 class CreateTodoSheet extends StatefulWidget {
   const CreateTodoSheet({
@@ -71,14 +71,14 @@ class CreateTodoSheetState extends State<CreateTodoSheet> {
         final flags = widget.flagsListenable.value;
         final flagOptions = flags
             .map(
-              (flag) => IBFlagsFieldOption(
+              (flag) => OQFlagsFieldOption(
                 id: flag.id,
                 label: flag.name,
                 color: flag.color,
               ),
             )
             .toList(growable: false);
-        return IBBottomSheet(
+        return OQBottomSheet(
           title: 'Nova tarefa',
           primaryLabel: 'Adicionar',
           primaryLoading: loading,
@@ -99,7 +99,7 @@ class CreateTodoSheetState extends State<CreateTodoSheet> {
             final message =
                 widget.errorListenable.value ??
                 'Não foi possível criar a tarefa.';
-            IBSnackBar.error(sheetContext, message);
+            OQSnackBar.error(sheetContext, message);
           },
           secondaryLabel: 'Cancelar',
           secondaryEnabled: !loading,
@@ -107,13 +107,13 @@ class CreateTodoSheetState extends State<CreateTodoSheet> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              IBTextField(
+              OQTextField(
                 label: 'Título',
                 hint: 'Ex: Enviar proposta',
                 controller: _titleController,
               ),
               const SizedBox(height: 12),
-              IBTextField(
+              OQTextField(
                 label: 'Descrição',
                 hint: 'Opcional',
                 controller: _descriptionController,
@@ -121,7 +121,7 @@ class CreateTodoSheetState extends State<CreateTodoSheet> {
                 maxLines: 3,
               ),
               const SizedBox(height: 12),
-              IBFlagsField(
+              OQFlagsField(
                 options: flagOptions,
                 selectedId: _selectedFlagId.value,
                 enabled: !loading,
@@ -133,7 +133,7 @@ class CreateTodoSheetState extends State<CreateTodoSheet> {
               ValueListenableBuilder<DateTime?>(
                 valueListenable: _dateNotifier,
                 builder: (context, selectedDate, _) {
-                  return IBDateField(
+                  return OQDateField(
                     valueLabel: widget.formatTaskDate(selectedDate),
                     enabled: !loading,
                     hasValue: selectedDate != null,

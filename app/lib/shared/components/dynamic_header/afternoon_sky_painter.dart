@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
 class AfternoonSkyPainter extends CustomPainter {
-
   @override
   void paint(Canvas canvas, Size size) {
     _drawSunsetSky(canvas, size);
@@ -28,10 +27,7 @@ class AfternoonSkyPainter extends CustomPainter {
         Rect.fromLTWH(0, 0, size.width, size.height),
       );
 
-    canvas.drawRect(
-      Rect.fromLTWH(0, 0, size.width, size.height),
-      skyPaint,
-    );
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), skyPaint);
   }
 
   void _drawSun(Canvas canvas, Size size) {
@@ -58,13 +54,8 @@ class AfternoonSkyPainter extends CustomPainter {
       ..shader = const LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [
-          AppColors.sunYellow,
-          AppColors.sunsetOrange,
-        ],
-      ).createShader(
-        Rect.fromCircle(center: sunCenter, radius: sunRadius),
-      );
+        colors: [AppColors.sunYellow, AppColors.sunsetOrange],
+      ).createShader(Rect.fromCircle(center: sunCenter, radius: sunRadius));
 
     canvas.drawCircle(sunCenter, sunRadius, sunPaint);
   }
@@ -106,7 +97,12 @@ class AfternoonSkyPainter extends CustomPainter {
     );
   }
 
-  void _drawSunsetCloud(Canvas canvas, Offset position, double size, double opacity) {
+  void _drawSunsetCloud(
+    Canvas canvas,
+    Offset position,
+    double size,
+    double opacity,
+  ) {
     final baseColor = Color.lerp(
       const Color(0xFFFDBA74),
       const Color(0xFFFB923C),

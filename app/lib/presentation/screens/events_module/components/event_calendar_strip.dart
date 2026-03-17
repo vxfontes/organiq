@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
 class EventCalendarStrip extends StatefulWidget {
@@ -115,17 +115,17 @@ class _EventCalendarStripState extends State<EventCalendarStrip> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  IBText(widget.months[day.month - 1], context: context).caption
+                  OQText(widget.months[day.month - 1], context: context).caption
                       .color(
                         isSelected ? AppColors.surface : AppColors.textMuted,
                       )
                       .build(),
                   const SizedBox(height: 2),
-                  IBText('${day.day}', context: context).titulo
+                  OQText('${day.day}', context: context).titulo
                       .color(isSelected ? AppColors.surface : AppColors.text)
                       .build(),
                   const SizedBox(height: 2),
-                  IBText(_weekdayLabel(day), context: context).caption
+                  OQText(_weekdayLabel(day), context: context).caption
                       .color(
                         isSelected ? AppColors.surface : AppColors.textMuted,
                       )

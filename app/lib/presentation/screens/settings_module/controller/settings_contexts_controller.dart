@@ -14,9 +14,9 @@ import 'package:organiq/modules/flags/domain/usecases/get_subflags_by_flag_useca
 import 'package:organiq/modules/flags/domain/usecases/update_flag_usecase.dart';
 import 'package:organiq/modules/flags/domain/usecases/update_subflag_usecase.dart';
 import 'package:organiq/shared/errors/failures.dart';
-import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/state/oq_state.dart';
 
-class SettingsContextsController implements IBController {
+class SettingsContextsController implements OQController {
   SettingsContextsController(
     this._getFlagsUsecase,
     this._createFlagUsecase,

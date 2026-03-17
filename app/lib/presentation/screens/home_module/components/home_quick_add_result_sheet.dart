@@ -3,7 +3,7 @@ import 'package:organiq/modules/inbox/data/models/inbox_create_line_result.dart'
 import 'package:organiq/presentation/routes/app_navigation.dart';
 import 'package:organiq/presentation/screens/create_module/components/create_result_line_tile.dart';
 import 'package:organiq/presentation/screens/home_module/controller/home_controller.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 
 class QuickAddResultSheet extends StatefulWidget {
   const QuickAddResultSheet({
@@ -35,16 +35,13 @@ class QuickAddResultSheetState extends State<QuickAddResultSheet> {
 
     if (mounted) {
       deleteResult.fold(
-            (failure) {
+        (failure) {
           setState(() => _result = _result.copyWith(deleting: false));
-          IBSnackBar.error(
-            context,
-            failure.message ?? 'Erro ao excluir item.',
-          );
+          OQSnackBar.error(context, failure.message ?? 'Erro ao excluir item.');
         },
-            (_) {
+        (_) {
           setState(
-                () => _result = _result.copyWith(
+            () => _result = _result.copyWith(
               deleting: false,
               deleted: true,
               message: 'Item excluído com sucesso.',
@@ -61,7 +58,7 @@ class QuickAddResultSheetState extends State<QuickAddResultSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return IBBottomSheet(
+    return OQBottomSheet(
       title: 'Item processado',
       child: Column(
         children: [

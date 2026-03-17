@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 
 class CreatePageHeader extends StatelessWidget {
   const CreatePageHeader({super.key});
@@ -9,9 +9,9 @@ class CreatePageHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        IBText('Criar', context: context).titulo.build(),
+        OQText('Criar', context: context).titulo.build(),
         const SizedBox(height: 6),
-        IBText(
+        OQText(
           'Transforme texto em itens organizados: tarefas, lembretes, eventos e compras.',
           context: context,
         ).muted.build(),

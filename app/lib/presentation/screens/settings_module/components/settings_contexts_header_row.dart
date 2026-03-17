@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 import 'package:organiq/shared/utils/text_utils.dart';
 
@@ -19,15 +19,15 @@ class SettingsContextsHeaderRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IBCard(
+    return OQCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const IBIcon(
-                IBIcon.tune,
+              const OQIcon(
+                OQIcon.tune,
                 size: 20,
                 color: AppColors.primary700,
                 backgroundColor: AppColors.surfaceSoft,
@@ -40,12 +40,12 @@ class SettingsContextsHeaderRow extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    IBText(
+                    OQText(
                       'Organize suas áreas de foco',
                       context: context,
                     ).subtitulo.build(),
                     const SizedBox(height: 2),
-                    IBText(
+                    OQText(
                       '${TextUtils.countLabel(flagCount, 'flag', 'flags')} • ${TextUtils.countLabel(subflagCount, 'subflag', 'subflags')}',
                       context: context,
                     ).caption.build(),
@@ -58,7 +58,7 @@ class SettingsContextsHeaderRow extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: IBText(
+                child: OQText(
                   'Defina contextos para separar tarefas, eventos e rotinas.',
                   context: context,
                 ).muted.build(),
@@ -66,9 +66,9 @@ class SettingsContextsHeaderRow extends StatelessWidget {
               const SizedBox(width: 12),
               SizedBox(
                 width: 110,
-                child: IBButton(
+                child: OQButton(
                   label: 'Nova flag',
-                  variant: IBButtonVariant.secondary,
+                  variant: OQButtonVariant.secondary,
                   onPressed: disabled ? null : onCreateFlag,
                 ),
               ),

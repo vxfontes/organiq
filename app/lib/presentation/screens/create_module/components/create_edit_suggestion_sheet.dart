@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:organiq/modules/inbox/data/models/create_suggestion_item.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 
 class CreateEditSuggestionSheet extends StatefulWidget {
   const CreateEditSuggestionSheet({
@@ -38,7 +38,7 @@ class _CreateEditSuggestionSheetState extends State<CreateEditSuggestionSheet> {
   Widget build(BuildContext context) {
     final typeLabel = _typeLabel(widget.suggestion.resolvedType);
 
-    return IBBottomSheet(
+    return OQBottomSheet(
       title: 'Editar sugestão',
       subtitle:
           'Ajuste o título antes de confirmar. A edição de payload será adicionada no próximo passo.',
@@ -49,14 +49,14 @@ class _CreateEditSuggestionSheetState extends State<CreateEditSuggestionSheet> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          IBText('Tipo', context: context).label.build(),
+          OQText('Tipo', context: context).label.build(),
           const SizedBox(height: 8),
           Align(
             alignment: Alignment.centerLeft,
-            child: IBChip(label: typeLabel),
+            child: OQChip(label: typeLabel),
           ),
           const SizedBox(height: 14),
-          IBTextField(
+          OQTextField(
             label: 'Título',
             controller: _titleController,
             minLines: 1,

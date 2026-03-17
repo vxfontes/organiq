@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:organiq/presentation/routes/app_navigation.dart';
 import 'package:organiq/presentation/routes/app_routes.dart';
 import 'package:organiq/presentation/screens/home_module/controller/home_controller.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 
 class HomeWeekStripSection extends StatelessWidget {
   const HomeWeekStripSection({
@@ -19,7 +19,7 @@ class HomeWeekStripSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IBWeekStrip(
+    return OQWeekStrip(
       selectedDate: selectedDate,
       densityMap: controller.weekDensityMap,
       onDayTap: (day) {

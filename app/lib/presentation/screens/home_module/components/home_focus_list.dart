@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:organiq/modules/tasks/data/models/task_output.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 import 'package:organiq/shared/utils/date_time.dart';
 import 'package:organiq/shared/utils/text_utils.dart';
@@ -23,7 +23,7 @@ class HomeFocusList extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        IBTodoList(
+        OQTodoList(
           title: 'Foco e prioridades',
           subtitle: TextUtils.countLabel(
             tasks.length,
@@ -33,7 +33,7 @@ class HomeFocusList extends StatelessWidget {
           emptyLabel: 'Nenhuma tarefa pendente.',
           items: tasks
               .map(
-                (task) => IBTodoItemData(
+                (task) => OQTodoItemData(
                   id: task.id,
                   title: task.title,
                   subtitle: _subtitleFor(task),
@@ -56,13 +56,13 @@ class HomeFocusList extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              IBText(
+              OQText(
                 'Ver todas as tarefas',
                 context: context,
               ).label.color(AppColors.primary700).build(),
               const SizedBox(width: 4),
-              const IBIcon(
-                IBIcon.chevronRight,
+              const OQIcon(
+                OQIcon.chevronRight,
                 size: 16,
                 color: AppColors.primary700,
               ),

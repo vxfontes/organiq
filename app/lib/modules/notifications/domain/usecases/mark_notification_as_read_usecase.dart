@@ -1,9 +1,9 @@
 import 'package:dartz/dartz.dart';
 import 'package:organiq/modules/notifications/domain/repositories/i_notifications_repository.dart';
 import 'package:organiq/shared/errors/failures.dart';
-import 'package:organiq/shared/templates/ib_usecase.dart';
+import 'package:organiq/shared/templates/oq_usecase.dart';
 
-class MarkNotificationAsReadUsecase extends IBUsecase {
+class MarkNotificationAsReadUsecase extends OQUsecase {
   final INotificationsRepository repository;
 
   MarkNotificationAsReadUsecase(this.repository);

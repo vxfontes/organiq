@@ -34,8 +34,8 @@ class NotificationPreferencesModel {
 
   @JsonKey(defaultValue: false)
   final bool quietHoursEnabled;
-  final String? quietStart;  // "22:00"
-  final String? quietEnd;    // "08:00"
+  final String? quietStart; // "22:00"
+  final String? quietEnd; // "08:00"
 
   @JsonKey(defaultValue: false)
   final bool dailyDigestEnabled;

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
 class SettingsAccordionSection extends StatelessWidget {
@@ -24,7 +24,7 @@ class SettingsAccordionSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IBCard(
+    return OQCard(
       padding: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -39,7 +39,7 @@ class SettingsAccordionSection extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    IBIcon(
+                    OQIcon(
                       icon,
                       size: 18,
                       color: AppColors.primary700,
@@ -53,9 +53,9 @@ class SettingsAccordionSection extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          IBText(title, context: context).subtitulo.build(),
+                          OQText(title, context: context).subtitulo.build(),
                           const SizedBox(height: 2),
-                          IBText(
+                          OQText(
                             isExpanded ? subtitle : collapsedSummary,
                             context: context,
                           ).caption.build(),

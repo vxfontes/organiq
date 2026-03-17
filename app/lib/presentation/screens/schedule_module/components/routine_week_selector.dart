@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:organiq/presentation/screens/schedule_module/controller/schedule_controller.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
 class RoutineWeekSelector extends StatelessWidget {
-  const RoutineWeekSelector({
-    super.key,
-    required this.controller,
-  });
+  const RoutineWeekSelector({super.key, required this.controller});
 
   final ScheduleController controller;
 
@@ -51,10 +48,10 @@ class RoutineWeekSelector extends StatelessWidget {
             border: Border.all(color: borderColor),
           ),
           child: Center(
-            child: IBText(label, context: context)
-                .label
-                .color(textColor)
-                .build(),
+            child: OQText(
+              label,
+              context: context,
+            ).label.color(textColor).build(),
           ),
         ),
       ),

@@ -1,9 +1,9 @@
 import 'package:dartz/dartz.dart' show Unit;
 import 'package:organiq/modules/shopping/domain/repositories/i_shopping_repository.dart';
 import 'package:organiq/shared/errors/failures.dart';
-import 'package:organiq/shared/templates/ib_usecase.dart';
+import 'package:organiq/shared/templates/oq_usecase.dart';
 
-class DeleteShoppingItemUsecase extends IBUsecase {
+class DeleteShoppingItemUsecase extends OQUsecase {
   DeleteShoppingItemUsecase(this._repository);
 
   final IShoppingRepository _repository;

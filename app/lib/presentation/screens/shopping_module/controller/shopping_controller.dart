@@ -15,9 +15,9 @@ import 'package:organiq/modules/shopping/domain/usecases/get_shopping_lists_usec
 import 'package:organiq/modules/shopping/domain/usecases/update_shopping_item_usecase.dart';
 import 'package:organiq/modules/shopping/domain/usecases/update_shopping_list_usecase.dart';
 import 'package:organiq/shared/errors/failures.dart';
-import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/state/oq_state.dart';
 
-class ShoppingController implements IBController {
+class ShoppingController implements OQController {
   ShoppingController(
     this._getShoppingListsUsecase,
     this._getShoppingItemsUsecase,

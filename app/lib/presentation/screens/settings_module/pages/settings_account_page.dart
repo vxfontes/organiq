@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:organiq/modules/auth/data/models/auth_user_model.dart';
 import 'package:organiq/presentation/screens/settings_module/controller/settings_account_controller.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
-import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
+import 'package:organiq/shared/state/oq_state.dart';
 
 class SettingsAccountPage extends StatefulWidget {
   const SettingsAccountPage({super.key});
@@ -11,7 +11,8 @@ class SettingsAccountPage extends StatefulWidget {
   State<SettingsAccountPage> createState() => _SettingsAccountPageState();
 }
 
-class _SettingsAccountPageState extends IBState<SettingsAccountPage, SettingsAccountController> {
+class _SettingsAccountPageState
+    extends OQState<SettingsAccountPage, SettingsAccountController> {
   @override
   void initState() {
     super.initState();
@@ -28,27 +29,22 @@ class _SettingsAccountPageState extends IBState<SettingsAccountPage, SettingsAcc
   void _onErrorChanged() {
     final error = controller.error.value;
     if (error != null && error.isNotEmpty && mounted) {
-      IBSnackBar.error(context, error);
+      OQSnackBar.error(context, error);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const IBLightAppBar(title: 'Minha conta'),
+      appBar: const OQLightAppBar(title: 'Minha conta'),
       body: AnimatedBuilder(
-        animation: Listenable.merge([
-          controller.loading,
-          controller.user,
-        ]),
+        animation: Listenable.merge([controller.loading, controller.user]),
         builder: (context, _) {
           final loading = controller.loading.value;
           final user = controller.user.value;
 
           if (loading && user == null) {
-            return const Center(
-              child: IBLoader(label: 'Carregando conta...'),
-            );
+            return const Center(child: OQLoader(label: 'Carregando conta...'));
           }
 
           return RefreshIndicator(
@@ -57,9 +53,9 @@ class _SettingsAccountPageState extends IBState<SettingsAccountPage, SettingsAcc
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
               children: [
-                IBText('Minha conta', context: context).subtitulo.build(),
+                OQText('Minha conta', context: context).subtitulo.build(),
                 const SizedBox(height: 6),
-                IBText(
+                OQText(
                   'Revise seus dados cadastrados.',
                   context: context,
                 ).muted.build(),
@@ -74,11 +70,11 @@ class _SettingsAccountPageState extends IBState<SettingsAccountPage, SettingsAcc
   }
 
   Widget _buildProfileCard(BuildContext context, AuthUserModel? user) {
-    return IBCard(
+    return OQCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          IBText('Dados do perfil', context: context).subtitulo.build(),
+          OQText('Dados do perfil', context: context).subtitulo.build(),
           const SizedBox(height: 12),
           _buildInfoRow(
             context,
@@ -116,9 +112,9 @@ class _SettingsAccountPageState extends IBState<SettingsAccountPage, SettingsAcc
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        IBText(label, context: context).caption.build(),
+        OQText(label, context: context).caption.build(),
         const SizedBox(height: 6),
-        IBText(value, context: context).body.build(),
+        OQText(value, context: context).body.build(),
       ],
     );
   }

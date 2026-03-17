@@ -32,11 +32,11 @@ import 'package:organiq/modules/tasks/domain/usecases/update_task_usecase.dart';
 import 'package:organiq/presentation/screens/home_module/components/timeline_item.dart';
 import 'package:organiq/presentation/screens/home_module/utils/home_controller_utils.dart';
 import 'package:organiq/shared/errors/failures.dart';
-import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/state/oq_state.dart';
 import 'package:organiq/shared/utils/date_time.dart';
 import 'package:organiq/shared/utils/text_utils.dart';
 
-class HomeController implements IBController {
+class HomeController implements OQController {
   HomeController(
     this._getHomeDashboardUsecase,
     this._updateTaskUsecase,

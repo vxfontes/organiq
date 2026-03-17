@@ -132,8 +132,7 @@ class HomeDashboardOutput {
       if (item is! Map) continue;
       try {
         timeline.add(HomeTimelineItemOutput.fromJson(_asMap(item)));
-      } catch (_) {
-      }
+      } catch (_) {}
     }
     return timeline;
   }
@@ -148,8 +147,7 @@ class HomeDashboardOutput {
       if (item is! Map) continue;
       try {
         preview.add(HomeShoppingPreviewOutput.fromJson(_asMap(item)));
-      } catch (_) {
-      }
+      } catch (_) {}
     }
     return preview;
   }
@@ -174,8 +172,7 @@ class HomeDashboardOutput {
       if (item is! Map) continue;
       try {
         tasks.add(TaskOutput.fromJson(_asMap(item)));
-      } catch (_) {
-      }
+      } catch (_) {}
     }
     return tasks;
   }

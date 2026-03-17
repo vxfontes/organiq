@@ -4,8 +4,8 @@ import 'package:organiq/presentation/screens/events_module/components/create_eve
 import 'package:organiq/presentation/screens/events_module/components/event_feed_item.dart';
 import 'package:organiq/presentation/screens/events_module/components/event_filters.dart';
 import 'package:organiq/presentation/screens/events_module/controller/events_controller.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
-import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
+import 'package:organiq/shared/state/oq_state.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
 class EventsPage extends StatefulWidget {
@@ -15,7 +15,7 @@ class EventsPage extends StatefulWidget {
   State<EventsPage> createState() => _EventsPageState();
 }
 
-class _EventsPageState extends IBState<EventsPage, EventsController> {
+class _EventsPageState extends OQState<EventsPage, EventsController> {
   @override
   void initState() {
     super.initState();
@@ -32,7 +32,7 @@ class _EventsPageState extends IBState<EventsPage, EventsController> {
   void _onErrorChanged() {
     final error = controller.error.value;
     if (error != null && error.isNotEmpty && mounted) {
-      IBSnackBar.error(context, error);
+      OQSnackBar.error(context, error);
     }
   }
 
@@ -77,15 +77,15 @@ class _EventsPageState extends IBState<EventsPage, EventsController> {
               if (loading)
                 const Padding(
                   padding: EdgeInsets.only(top: 24),
-                  child: Center(child: IBLoader(label: 'Carregando agenda...')),
+                  child: Center(child: OQLoader(label: 'Carregando agenda...')),
                 )
               else if (items.isEmpty)
-                const IBCard(
-                  child: IBEmptyState(
+                const OQCard(
+                  child: OQEmptyState(
                     title: 'Sem itens para este dia',
                     subtitle:
                         'Selecione outra data ou ajuste o filtro para ver mais resultados.',
-                    icon: IBHugeIcon.calendar,
+                    icon: OQHugeIcon.calendar,
                   ),
                 )
               else
@@ -103,7 +103,7 @@ class _EventsPageState extends IBState<EventsPage, EventsController> {
                         secondaryBackground: _buildDeleteBackground(),
                         confirmDismiss: (_) =>
                             controller.deleteVisibleItem(item),
-                        child: IBItemCard(
+                        child: OQItemCard(
                           title: item.title,
                           secondary: item.secondary,
                           done: item.done,
@@ -113,8 +113,8 @@ class _EventsPageState extends IBState<EventsPage, EventsController> {
                           typeIcon: _typeIcon(item.type),
                           timeLabel: _timeLabel(item),
                           timeIcon: item.allDay
-                              ? IBIcon.eventAvailableOutlined
-                              : IBIcon.alarmOutlined,
+                              ? OQIcon.eventAvailableOutlined
+                              : OQIcon.alarmOutlined,
                           footer: _buildContextFooter(item),
                         ),
                       ),
@@ -136,9 +136,9 @@ class _EventsPageState extends IBState<EventsPage, EventsController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              IBText('Agenda', context: context).titulo.build(),
+              OQText('Agenda', context: context).titulo.build(),
               const SizedBox(height: 6),
-              IBText(
+              OQText(
                 'Eventos, tarefas e lembretes com data em um calendário único.',
                 context: context,
               ).muted.build(),
@@ -148,8 +148,8 @@ class _EventsPageState extends IBState<EventsPage, EventsController> {
         IconButton(
           tooltip: 'Adicionar evento',
           onPressed: _openCreateEvent,
-          icon: const IBIcon(
-            IBIcon.addRounded,
+          icon: const OQIcon(
+            OQIcon.addRounded,
             color: AppColors.primary700,
             size: 20,
           ),
@@ -183,11 +183,11 @@ class _EventsPageState extends IBState<EventsPage, EventsController> {
   IconData _typeIcon(EventFeedItemType type) {
     switch (type) {
       case EventFeedItemType.event:
-        return IBIcon.eventAvailableOutlined;
+        return OQIcon.eventAvailableOutlined;
       case EventFeedItemType.todo:
-        return IBIcon.taskAltRounded;
+        return OQIcon.taskAltRounded;
       case EventFeedItemType.reminder:
-        return IBIcon.alarmOutlined;
+        return OQIcon.alarmOutlined;
     }
   }
 
@@ -220,7 +220,7 @@ class _EventsPageState extends IBState<EventsPage, EventsController> {
     final chips = <Widget>[];
     if (hasFlag) {
       chips.add(
-        IBTagChip(
+        OQTagChip(
           label: flag,
           color: _parseHexColor(item.flagColor, fallback: AppColors.primary700),
         ),
@@ -228,7 +228,7 @@ class _EventsPageState extends IBState<EventsPage, EventsController> {
     }
     if (hasSubflag) {
       chips.add(
-        IBTagChip(
+        OQTagChip(
           label: subflag,
           color: _parseHexColor(
             item.subflagColor ?? item.flagColor,
@@ -267,8 +267,8 @@ class _EventsPageState extends IBState<EventsPage, EventsController> {
             borderRadius: BorderRadius.circular(16),
           ),
           child: const Center(
-            child: IBIcon(
-              IBIcon.deleteOutlineRounded,
+            child: OQIcon(
+              OQIcon.deleteOutlineRounded,
               color: AppColors.surface,
               size: 22,
             ),
@@ -281,7 +281,7 @@ class _EventsPageState extends IBState<EventsPage, EventsController> {
   Future<void> _openCreateEvent() async {
     if (!mounted) return;
 
-    await IBBottomSheet.show<void>(
+    await OQBottomSheet.show<void>(
       context: context,
       isFitWithContent: true,
       child: CreateEventBottomSheet(

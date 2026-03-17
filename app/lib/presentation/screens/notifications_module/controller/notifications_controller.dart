@@ -4,9 +4,9 @@ import 'package:organiq/modules/notifications/domain/usecases/get_notifications_
 import 'package:organiq/modules/notifications/domain/usecases/mark_all_notifications_as_read_usecase.dart';
 import 'package:organiq/modules/notifications/domain/usecases/mark_notification_as_read_usecase.dart';
 import 'package:organiq/shared/errors/failures.dart';
-import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/state/oq_state.dart';
 
-class NotificationsController implements IBController {
+class NotificationsController implements OQController {
   final GetNotificationsUsecase _getNotificationsUsecase;
   final MarkNotificationAsReadUsecase _markAsReadUsecase;
   final MarkAllNotificationsAsReadUsecase _markAllAsReadUsecase;

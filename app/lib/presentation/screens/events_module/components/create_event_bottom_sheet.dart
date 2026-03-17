@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:organiq/modules/flags/data/models/flag_output.dart';
 import 'package:organiq/modules/flags/data/models/subflag_output.dart';
 import 'package:organiq/presentation/routes/app_navigation.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/utils/reminders_format.dart';
 
 class CreateEventBottomSheet extends StatefulWidget {
@@ -88,7 +88,7 @@ class _CreateEventBottomSheetState extends State<CreateEventBottomSheet> {
         final flags = widget.flagsListenable.value;
         final flagOptions = flags
             .map(
-              (flag) => IBFlagsFieldOption(
+              (flag) => OQFlagsFieldOption(
                 id: flag.id,
                 label: flag.name,
                 color: flag.color,
@@ -103,7 +103,7 @@ class _CreateEventBottomSheetState extends State<CreateEventBottomSheet> {
                   const <SubflagOutput>[];
         final subflagOptions = subflags
             .map(
-              (subflag) => IBFlagsFieldOption(
+              (subflag) => OQFlagsFieldOption(
                 id: subflag.id,
                 label: subflag.name,
                 color: subflag.color,
@@ -111,7 +111,7 @@ class _CreateEventBottomSheetState extends State<CreateEventBottomSheet> {
             )
             .toList(growable: false);
 
-        return IBBottomSheet(
+        return OQBottomSheet(
           title: 'Novo evento',
           primaryLabel: 'Adicionar',
           primaryLoading: loading,
@@ -133,7 +133,7 @@ class _CreateEventBottomSheetState extends State<CreateEventBottomSheet> {
             final message =
                 widget.errorListenable.value ??
                 'Não foi possível criar o evento.';
-            IBSnackBar.error(sheetContext, message);
+            OQSnackBar.error(sheetContext, message);
           },
           secondaryLabel: 'Cancelar',
           secondaryEnabled: !loading,
@@ -141,26 +141,26 @@ class _CreateEventBottomSheetState extends State<CreateEventBottomSheet> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              IBTextField(
+              OQTextField(
                 label: 'Título',
                 hint: 'Ex: Reunião com cliente',
                 controller: _titleController,
               ),
               const SizedBox(height: 12),
-              IBTextField(
+              OQTextField(
                 label: 'Local (opcional)',
                 hint: 'Ex: Google Meet',
                 controller: _locationController,
               ),
               const SizedBox(height: 12),
-              IBDateField(
+              OQDateField(
                 valueLabel: _formatEventDate(_startNotifier.value),
                 enabled: !loading,
                 hasValue: _startNotifier.value != null,
                 onTap: loading
                     ? null
                     : () async {
-                        final next = await IBDateField.pickDateTime(
+                        final next = await OQDateField.pickDateTime(
                           sheetContext,
                           current: _startNotifier.value,
                           helpText: 'Selecionar início',
@@ -171,14 +171,14 @@ class _CreateEventBottomSheetState extends State<CreateEventBottomSheet> {
                 label: 'Início',
               ),
               const SizedBox(height: 12),
-              IBDateField(
+              OQDateField(
                 valueLabel: _formatEventDate(_endNotifier.value),
                 enabled: !loading,
                 hasValue: _endNotifier.value != null,
                 onTap: loading
                     ? null
                     : () async {
-                        final next = await IBDateField.pickDateTime(
+                        final next = await OQDateField.pickDateTime(
                           sheetContext,
                           current: _endNotifier.value ?? _startNotifier.value,
                           helpText: 'Selecionar fim',
@@ -189,7 +189,7 @@ class _CreateEventBottomSheetState extends State<CreateEventBottomSheet> {
                 label: 'Fim',
               ),
               const SizedBox(height: 12),
-              IBFlagsField(
+              OQFlagsField(
                 options: flagOptions,
                 selectedId: _selectedFlagId.value,
                 enabled: !loading,
@@ -204,7 +204,7 @@ class _CreateEventBottomSheetState extends State<CreateEventBottomSheet> {
               ),
               if (_selectedFlagId.value != null) ...[
                 const SizedBox(height: 12),
-                IBFlagsField(
+                OQFlagsField(
                   label: 'Subflag',
                   emptyLabel: 'Nenhuma subflag disponível',
                   options: subflagOptions,

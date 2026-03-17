@@ -18,10 +18,9 @@ class AppTheme {
       surfaceContainerHighest: AppColors.text,
     );
 
-    final baseText = ThemeData(useMaterial3: true).textTheme.apply(
-      bodyColor: AppColors.text,
-      displayColor: AppColors.text,
-    );
+    final baseText = ThemeData(
+      useMaterial3: true,
+    ).textTheme.apply(bodyColor: AppColors.text, displayColor: AppColors.text);
 
     return ThemeData(
       useMaterial3: true,
@@ -30,7 +29,9 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.background,
       textTheme: baseText.copyWith(
         titleLarge: baseText.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-        titleMedium: baseText.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+        titleMedium: baseText.titleMedium?.copyWith(
+          fontWeight: FontWeight.w600,
+        ),
         bodyMedium: baseText.bodyMedium?.copyWith(color: AppColors.textMuted),
       ),
       appBarTheme: const AppBarTheme(
@@ -56,7 +57,10 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surface2,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.border),

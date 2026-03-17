@@ -41,7 +41,14 @@ class AppNavigation {
 
   static String get path => Modular.to.path;
 
-  static Future<T?> clearAndPush<T extends Object?>(String route, {dynamic args}) {
-    return Modular.to.pushNamedAndRemoveUntil<T>(route, (r) => false, arguments: args);
+  static Future<T?> clearAndPush<T extends Object?>(
+    String route, {
+    dynamic args,
+  }) {
+    return Modular.to.pushNamedAndRemoveUntil<T>(
+      route,
+      (r) => false,
+      arguments: args,
+    );
   }
 }

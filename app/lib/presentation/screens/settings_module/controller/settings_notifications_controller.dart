@@ -5,9 +5,9 @@ import 'package:organiq/modules/notifications/domain/usecases/send_test_email_di
 import 'package:organiq/modules/notifications/domain/usecases/send_test_notification_usecase.dart';
 import 'package:organiq/modules/notifications/domain/usecases/update_notification_prefs_usecase.dart';
 import 'package:organiq/shared/errors/failures.dart';
-import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/state/oq_state.dart';
 
-class SettingsNotificationsController implements IBController {
+class SettingsNotificationsController implements OQController {
   final GetNotificationPrefsUsecase _getPrefsUsecase;
   final UpdateNotificationPrefsUsecase _updatePrefsUsecase;
   final SendTestNotificationUsecase _sendTestUsecase;
@@ -27,7 +27,9 @@ class SettingsNotificationsController implements IBController {
   final ValueNotifier<String?> dailySummaryToken = ValueNotifier(null);
   final ValueNotifier<String?> dailySummaryUrl = ValueNotifier(null);
   final ValueNotifier<String?> error = ValueNotifier(null);
-  final ValueNotifier<NotificationPreferencesModel?> prefs = ValueNotifier(null);
+  final ValueNotifier<NotificationPreferencesModel?> prefs = ValueNotifier(
+    null,
+  );
 
   Future<void> fetchPreferences() async {
     loading.value = true;
@@ -36,7 +38,10 @@ class SettingsNotificationsController implements IBController {
     final result = await _getPrefsUsecase();
 
     result.fold(
-      (failure) => error.value = _failureMessage(failure, fallback: 'Erro ao carregar preferências.'),
+      (failure) => error.value = _failureMessage(
+        failure,
+        fallback: 'Erro ao carregar preferências.',
+      ),
       (data) => prefs.value = data,
     );
 
@@ -49,7 +54,10 @@ class SettingsNotificationsController implements IBController {
     final result = await _getPrefsUsecase.repository.getDailySummaryToken();
     result.fold(
       (failure) {
-        error.value = _failureMessage(failure, fallback: 'Erro ao carregar token.');
+        error.value = _failureMessage(
+          failure,
+          fallback: 'Erro ao carregar token.',
+        );
       },
       (data) {
         dailySummaryToken.value = data['token'];
@@ -66,7 +74,10 @@ class SettingsNotificationsController implements IBController {
     final result = await _getPrefsUsecase.repository.rotateDailySummaryToken();
     result.fold(
       (failure) {
-        error.value = _failureMessage(failure, fallback: 'Erro ao rotacionar token.');
+        error.value = _failureMessage(
+          failure,
+          fallback: 'Erro ao rotacionar token.',
+        );
       },
       (data) {
         dailySummaryToken.value = data['token'];
@@ -84,13 +95,13 @@ class SettingsNotificationsController implements IBController {
 
     final result = await _updatePrefsUsecase(newPrefs);
 
-    result.fold(
-      (failure) {
-        prefs.value = oldPrefs; // Rollback
-        error.value = _failureMessage(failure, fallback: 'Erro ao atualizar preferências.');
-      },
-      (data) => prefs.value = data,
-    );
+    result.fold((failure) {
+      prefs.value = oldPrefs; // Rollback
+      error.value = _failureMessage(
+        failure,
+        fallback: 'Erro ao atualizar preferências.',
+      );
+    }, (data) => prefs.value = data);
   }
 
   Future<bool> sendTestNotification() async {
@@ -99,13 +110,13 @@ class SettingsNotificationsController implements IBController {
     final result = await _sendTestUsecase();
     sendingTest.value = false;
 
-    return result.fold(
-      (failure) {
-        error.value = _failureMessage(failure, fallback: 'Erro ao enviar notificação de teste.');
-        return false;
-      },
-      (_) => true,
-    );
+    return result.fold((failure) {
+      error.value = _failureMessage(
+        failure,
+        fallback: 'Erro ao enviar notificação de teste.',
+      );
+      return false;
+    }, (_) => true);
   }
 
   Future<bool> sendTestEmailDigest() async {
@@ -114,13 +125,13 @@ class SettingsNotificationsController implements IBController {
     final result = await _sendTestEmailUsecase();
     sendingEmailTest.value = false;
 
-    return result.fold(
-      (failure) {
-        error.value = _failureMessage(failure, fallback: 'Erro ao enviar e-mail de teste.');
-        return false;
-      },
-      (_) => true,
-    );
+    return result.fold((failure) {
+      error.value = _failureMessage(
+        failure,
+        fallback: 'Erro ao enviar e-mail de teste.',
+      );
+      return false;
+    }, (_) => true);
   }
 
   String _failureMessage(Failure failure, {required String fallback}) {

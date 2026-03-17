@@ -11,17 +11,20 @@ import 'package:organiq/presentation/screens/settings_module/components/settings
 import 'package:organiq/presentation/screens/settings_module/components/settings_notifications_daily_digest_content.dart';
 import 'package:organiq/presentation/screens/settings_module/components/settings_notifications_daily_summary_token_content.dart';
 import 'package:organiq/presentation/screens/settings_module/controller/settings_notifications_controller.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
-import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
+import 'package:organiq/shared/state/oq_state.dart';
 
 class SettingsNotificationsPage extends StatefulWidget {
   const SettingsNotificationsPage({super.key});
 
   @override
-  State<SettingsNotificationsPage> createState() => _SettingsNotificationsPageState();
+  State<SettingsNotificationsPage> createState() =>
+      _SettingsNotificationsPageState();
 }
 
-class _SettingsNotificationsPageState extends IBState<SettingsNotificationsPage, SettingsNotificationsController> {
+class _SettingsNotificationsPageState
+    extends
+        OQState<SettingsNotificationsPage, SettingsNotificationsController> {
   SettingsNotificationsSection? _expandedSection =
       SettingsNotificationsSection.reminders;
 
@@ -42,7 +45,7 @@ class _SettingsNotificationsPageState extends IBState<SettingsNotificationsPage,
   void _onErrorChanged() {
     final error = controller.error.value;
     if (error != null && error.isNotEmpty && mounted) {
-      IBSnackBar.error(context, error);
+      OQSnackBar.error(context, error);
     }
   }
 
@@ -58,7 +61,7 @@ class _SettingsNotificationsPageState extends IBState<SettingsNotificationsPage,
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const IBLightAppBar(title: 'Notificações'),
+      appBar: const OQLightAppBar(title: 'Notificações'),
       body: SafeArea(
         child: AnimatedBuilder(
           animation: Listenable.merge([controller.loading, controller.prefs]),
@@ -68,7 +71,7 @@ class _SettingsNotificationsPageState extends IBState<SettingsNotificationsPage,
 
             if (prefs == null) {
               if (loading) {
-                return const Center(child: IBLoader());
+                return const Center(child: OQLoader());
               }
 
               return Center(
@@ -77,16 +80,16 @@ class _SettingsNotificationsPageState extends IBState<SettingsNotificationsPage,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      IBText(
+                      OQText(
                         'Não foi possível carregar as preferências.',
                         context: context,
                       ).muted.align(TextAlign.center).build(),
                       const SizedBox(height: 16),
                       SizedBox(
                         width: 210,
-                        child: IBButton(
+                        child: OQButton(
                           label: 'Tentar novamente',
-                          variant: IBButtonVariant.secondary,
+                          variant: OQButtonVariant.secondary,
                           onPressed: () =>
                               unawaited(controller.fetchPreferences()),
                         ),
@@ -118,20 +121,20 @@ class _SettingsNotificationsPageState extends IBState<SettingsNotificationsPage,
                   // ValueListenableBuilder<bool>(
                   //   valueListenable: controller.sendingTest,
                   //   builder: (_, sending, _) {
-                  //     return IBButton(
+                  //     return OQButton(
                   //       label: 'Enviar notificação de teste',
                   //       loading: sending,
                   //       onPressed: () async {
                   //         final success = await controller
                   //             .sendTestNotification();
                   //         if (success && mounted) {
-                  //           IBSnackBar.success(
+                  //           OQSnackBar.success(
                   //             this.context,
                   //             'Notificação de teste enviada!',
                   //           );
                   //         }
                   //       },
-                  //       variant: IBButtonVariant.secondary,
+                  //       variant: OQButtonVariant.secondary,
                   //     );
                   //   },
                   // ),
@@ -198,7 +201,7 @@ class _SettingsNotificationsPageState extends IBState<SettingsNotificationsPage,
       title: 'Horário de silêncio',
       subtitle: 'Evita notificações em períodos de descanso ou foco.',
       collapsedSummary: quietSummary,
-      icon: IBIcon.stopCircleRounded,
+      icon: OQIcon.stopCircleRounded,
       isExpanded: _isExpanded(SettingsNotificationsSection.quietHours),
       onTap: () => _toggleSection(SettingsNotificationsSection.quietHours),
       child: SettingsNotificationsQuietHoursContent(
@@ -220,7 +223,7 @@ class _SettingsNotificationsPageState extends IBState<SettingsNotificationsPage,
       title: 'Resumo Diário',
       subtitle: 'Resumo diário por e-mail com sua agenda.',
       collapsedSummary: digestSummary,
-      icon: IBIcon.mailOutlineRounded,
+      icon: OQIcon.mailOutlineRounded,
       isExpanded: _isExpanded(SettingsNotificationsSection.dailyDigest),
       onTap: () => _toggleSection(SettingsNotificationsSection.dailyDigest),
       child: ValueListenableBuilder<bool>(
@@ -234,7 +237,7 @@ class _SettingsNotificationsPageState extends IBState<SettingsNotificationsPage,
             onSendTest: () async {
               final success = await controller.sendTestEmailDigest();
               if (success && mounted) {
-                IBSnackBar.success(this.context, 'E-mail de teste enviado!');
+                OQSnackBar.success(this.context, 'E-mail de teste enviado!');
               }
             },
             sendingTest: sending,
@@ -249,7 +252,7 @@ class _SettingsNotificationsPageState extends IBState<SettingsNotificationsPage,
       title: 'Resumo Diario API',
       subtitle: 'Token de acesso para seu resumo diário via API.',
       collapsedSummary: 'Copiar/rotacionar token',
-      icon: IBIcon.keyRounded,
+      icon: OQIcon.keyRounded,
       isExpanded: _isExpanded(SettingsNotificationsSection.dailySummaryToken),
       onTap: () =>
           _toggleSection(SettingsNotificationsSection.dailySummaryToken),
@@ -278,7 +281,7 @@ class _SettingsNotificationsPageState extends IBState<SettingsNotificationsPage,
       subtitle:
           'Receba alertas com o app fechado usando o token FCM do seu aparelho.',
       collapsedSummary: 'Token do dispositivo e teste de entrega',
-      icon: IBIcon.notificationsNoneOutlined,
+      icon: OQIcon.notificationsNoneOutlined,
       isExpanded: _isExpanded(SettingsNotificationsSection.device),
       onTap: () => _toggleSection(SettingsNotificationsSection.device),
       child: ValueListenableBuilder<bool>(
@@ -289,7 +292,7 @@ class _SettingsNotificationsPageState extends IBState<SettingsNotificationsPage,
             onSendTest: () async {
               final success = await controller.sendTestNotification();
               if (success && mounted) {
-                IBSnackBar.success(
+                OQSnackBar.success(
                   this.context,
                   'Notificacao de teste enviada!',
                 );
@@ -323,7 +326,7 @@ class _SettingsNotificationsPageState extends IBState<SettingsNotificationsPage,
   }
 
   Future<void> _pickDigestHour(NotificationPreferencesModel prefs) async {
-    final time = await IBTimeField.pickTime(
+    final time = await OQTimeField.pickTime(
       context,
       initialTime: TimeOfDay(hour: prefs.dailyDigestHour, minute: 0),
     );
@@ -338,7 +341,7 @@ class _SettingsNotificationsPageState extends IBState<SettingsNotificationsPage,
     NotificationPreferencesModel prefs,
   ) async {
     final initial = isStart ? prefs.quietStart : prefs.quietEnd;
-    final time = await IBTimeField.pickTime(
+    final time = await OQTimeField.pickTime(
       context,
       initialTime: initial != null
           ? _parseTime(initial)

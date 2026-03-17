@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:organiq/presentation/screens/events_module/controller/events_controller.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
 class EventFilters extends StatelessWidget {
@@ -48,7 +48,7 @@ class EventFilters extends StatelessWidget {
                 ),
               ),
               child: Center(
-                child: IBText(labelBuilder(filter), context: context).label
+                child: OQText(labelBuilder(filter), context: context).label
                     .color(
                       isSelected ? AppColors.surface : AppColors.primary700,
                     )

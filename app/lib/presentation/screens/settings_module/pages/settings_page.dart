@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:organiq/presentation/routes/app_navigation.dart';
 import 'package:organiq/presentation/routes/app_routes.dart';
 import 'package:organiq/presentation/screens/settings_module/controller/settings_controller.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
-import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
+import 'package:organiq/shared/state/oq_state.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -12,7 +12,7 @@ class SettingsPage extends StatefulWidget {
   State<SettingsPage> createState() => _SettingsPageState();
 }
 
-class _SettingsPageState extends IBState<SettingsPage, SettingsController> {
+class _SettingsPageState extends OQState<SettingsPage, SettingsController> {
   @override
   void initState() {
     super.initState();
@@ -28,73 +28,74 @@ class _SettingsPageState extends IBState<SettingsPage, SettingsController> {
   void _onErrorChanged() {
     final error = controller.error.value;
     if (error != null && error.isNotEmpty && mounted) {
-      IBSnackBar.error(context, error);
+      OQSnackBar.error(context, error);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const IBLightAppBar(title: 'Configurações'),
+      appBar: const OQLightAppBar(title: 'Configurações'),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              IBText('Configurações', context: context).subtitulo.build(),
+              OQText('Configurações', context: context).subtitulo.build(),
               const SizedBox(height: 12),
-              IBMenuCard(
+              OQMenuCard(
                 items: [
-                  IBMenuItem(
+                  OQMenuItem(
                     title: 'Conta',
                     subtitle: 'Dados pessoais e segurança',
-                    icon: IBIcon.personOutline,
+                    icon: OQIcon.personOutline,
                     onTap: () => AppNavigation.push(AppRoutes.settingsAccount),
                   ),
-                  IBMenuItem(
+                  OQMenuItem(
                     title: 'Notificações',
                     subtitle: 'Lembretes e alertas',
-                    icon: IBIcon.notificationsNoneOutlined,
-                    onTap: () => AppNavigation.push(AppRoutes.settingsNotifications),
+                    icon: OQIcon.notificationsNoneOutlined,
+                    onTap: () =>
+                        AppNavigation.push(AppRoutes.settingsNotifications),
                   ),
-                  // IBMenuItem(
+                  // OQMenuItem(
                   //   title: 'Preferências',
                   //   subtitle: 'Idioma e aparência',
-                  //   icon: IBIcon.tune,
+                  //   icon: OQIcon.tune,
                   //   onTap: () {},
                   // ),
-                  IBMenuItem(
+                  OQMenuItem(
                     title: 'Contextos',
                     subtitle: 'Gerenciar flags e subflags',
-                    icon: IBIcon.gridViewRounded,
+                    icon: OQIcon.gridViewRounded,
                     onTap: () => AppNavigation.push(AppRoutes.settingsContexts),
                   ),
-                  // IBMenuItem(
+                  // OQMenuItem(
                   //   title: 'Componentes',
                   //   subtitle: 'Biblioteca visual',
-                  //   icon: IBIcon.starRounded,
+                  //   icon: OQIcon.starRounded,
                   //   onTap: () =>
                   //       AppNavigation.push(AppRoutes.settingsComponents),
                   // ),
                 ],
               ),
               const SizedBox(height: 20),
-              // IBText('Suporte', context: context).subtitulo.build(),
+              // OQText('Suporte', context: context).subtitulo.build(),
               // const SizedBox(height: 12),
-              // IBMenuCard(
+              // OQMenuCard(
               //   items: [
-              //     IBMenuItem(
+              //     OQMenuItem(
               //       title: 'Central de ajuda',
               //       subtitle: 'Perguntas frequentes',
-              //       icon: IBIcon.helpOutline,
+              //       icon: OQIcon.helpOutline,
               //       onTap: () {},
               //       iconColor: AppColors.ai600,
               //     ),
-              //     IBMenuItem(
+              //     OQMenuItem(
               //       title: 'Privacidade',
               //       subtitle: 'Termos e políticas',
-              //       icon: IBIcon.privacyTipOutlined,
+              //       icon: OQIcon.privacyTipOutlined,
               //       onTap: () {},
               //       iconColor: AppColors.ai600,
               //     ),
@@ -104,11 +105,11 @@ class _SettingsPageState extends IBState<SettingsPage, SettingsController> {
               ValueListenableBuilder<bool>(
                 valueListenable: controller.loading,
                 builder: (context, loading, _) {
-                  return IBButton(
+                  return OQButton(
                     label: 'Sair',
                     loading: loading,
                     onPressed: () async => await controller.logout(),
-                    variant: IBButtonVariant.secondary,
+                    variant: OQButtonVariant.secondary,
                   );
                 },
               ),

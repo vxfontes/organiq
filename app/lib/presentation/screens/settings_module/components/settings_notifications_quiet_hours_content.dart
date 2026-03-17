@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:organiq/modules/notifications/data/models/notification_preferences_model.dart';
-import 'package:organiq/shared/components/ib_lib/ib_toggle.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/oq_toggle.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
 class SettingsNotificationsQuietHoursContent extends StatelessWidget {
@@ -23,10 +23,10 @@ class SettingsNotificationsQuietHoursContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        IBToggle(
+        OQToggle(
           title: 'Ativar silêncio',
           subtitle: 'Bloqueia alertas dentro do intervalo configurado.',
-          leadingIcon: IBIcon.notificationsNoneOutlined,
+          leadingIcon: OQIcon.notificationsNoneOutlined,
           value: prefs.quietHoursEnabled,
           onChanged: onEnabledChanged,
         ),
@@ -40,7 +40,7 @@ class SettingsNotificationsQuietHoursContent extends StatelessWidget {
                   key: const ValueKey('quiet-hours-enabled'),
                   children: [
                     Expanded(
-                      child: IBTimeField(
+                      child: OQTimeField(
                         label: 'Das',
                         valueLabel: prefs.quietStart ?? '22:00',
                         enabled: true,
@@ -50,7 +50,7 @@ class SettingsNotificationsQuietHoursContent extends StatelessWidget {
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: IBTimeField(
+                      child: OQTimeField(
                         label: 'Até',
                         valueLabel: prefs.quietEnd ?? '08:00',
                         enabled: true,
@@ -68,7 +68,7 @@ class SettingsNotificationsQuietHoursContent extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: AppColors.border),
                   ),
-                  child: IBText(
+                  child: OQText(
                     'As notificações serão enviadas a qualquer hora enquanto essa opção estiver desativada.',
                     context: context,
                   ).caption.build(),

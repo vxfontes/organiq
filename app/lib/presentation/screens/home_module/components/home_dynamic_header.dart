@@ -5,7 +5,7 @@ import 'package:organiq/presentation/routes/app_routes.dart';
 import 'package:organiq/shared/components/dynamic_header/afternoon_sky_painter.dart';
 import 'package:organiq/shared/components/dynamic_header/morning_sky_painter.dart';
 import 'package:organiq/shared/components/dynamic_header/night_sky_painter.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 import 'package:organiq/shared/utils/date_time.dart';
 import 'package:organiq/shared/utils/text_utils.dart';
@@ -55,12 +55,12 @@ class HomeDynamicHeader extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    IBText(
+                    OQText(
                       greetingLabel,
                       context: context,
                     ).subtitulo.color(greeting.textColor).build(),
                     const SizedBox(height: 4),
-                    IBText(
+                    OQText(
                       _formatPtDate(now),
                       context: context,
                     ).caption.color(greeting.textColor).build(),
@@ -69,8 +69,8 @@ class HomeDynamicHeader extends StatelessWidget {
                 IconButton(
                   tooltip: 'Ver todos os lembretes',
                   onPressed: () => AppNavigation.push(AppRoutes.rootReminders),
-                  icon: IBIcon(
-                    IBIcon.alarmOutlined,
+                  icon: OQIcon(
+                    OQIcon.alarmOutlined,
                     color: greeting.accentColor,
                   ),
                 ),

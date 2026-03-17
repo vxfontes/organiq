@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:organiq/presentation/routes/app_navigation.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 
 class SettingsFlagFormData {
   const SettingsFlagFormData({required this.name, required this.color});
@@ -35,7 +35,7 @@ class _SettingsFlagFormBottomSheetState
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.initialName ?? '');
-    _selectedColor = IBColorPicker.normalizeHex(widget.initialColor);
+    _selectedColor = OQColorPicker.normalizeHex(widget.initialColor);
     _nameController.addListener(_onNameChanged);
   }
 
@@ -52,7 +52,7 @@ class _SettingsFlagFormBottomSheetState
 
   @override
   Widget build(BuildContext context) {
-    return IBBottomSheet(
+    return OQBottomSheet(
       title: widget.title,
       primaryLabel: 'Salvar',
       primaryEnabled: _canSubmit,
@@ -72,9 +72,9 @@ class _SettingsFlagFormBottomSheetState
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          IBTextField(label: 'Nome da flag', controller: _nameController),
+          OQTextField(label: 'Nome da flag', controller: _nameController),
           const SizedBox(height: 14),
-          IBColorPicker(
+          OQColorPicker(
             label: 'Escolha uma cor',
             selectedColor: _selectedColor,
             onChanged: (value) => setState(() => _selectedColor = value),
@@ -126,7 +126,7 @@ class _SettingsNameFormBottomSheetState
 
   @override
   Widget build(BuildContext context) {
-    return IBBottomSheet(
+    return OQBottomSheet(
       title: widget.title,
       primaryLabel: 'Salvar',
       primaryEnabled: _canSubmit,
@@ -136,7 +136,7 @@ class _SettingsNameFormBottomSheetState
       },
       secondaryLabel: 'Cancelar',
       onSecondaryPressed: () => AppNavigation.pop(null, context),
-      child: IBTextField(label: widget.label, controller: _controller),
+      child: OQTextField(label: widget.label, controller: _controller),
     );
   }
 }
@@ -153,13 +153,13 @@ class SettingsDeleteConfirmationBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IBBottomSheet(
+    return OQBottomSheet(
       title: title,
       primaryLabel: 'Excluir',
       onPrimaryPressed: () => AppNavigation.pop(true, context),
       secondaryLabel: 'Cancelar',
       onSecondaryPressed: () => AppNavigation.pop(false, context),
-      child: IBText(body, context: context).body.build(),
+      child: OQText(body, context: context).body.build(),
     );
   }
 }

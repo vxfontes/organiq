@@ -5,7 +5,7 @@ import 'package:organiq/modules/routines/data/models/routine_streak_output.dart'
 import 'package:organiq/presentation/routes/app_navigation.dart';
 import 'package:organiq/presentation/screens/schedule_module/components/create_routine_bottom_sheet.dart';
 import 'package:organiq/presentation/screens/schedule_module/controller/schedule_controller.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
 class RoutineDetailBottomSheet extends StatefulWidget {
@@ -19,7 +19,8 @@ class RoutineDetailBottomSheet extends StatefulWidget {
   final ScheduleController controller;
 
   @override
-  State<RoutineDetailBottomSheet> createState() => _RoutineDetailBottomSheetState();
+  State<RoutineDetailBottomSheet> createState() =>
+      _RoutineDetailBottomSheetState();
 }
 
 class _RoutineDetailBottomSheetState extends State<RoutineDetailBottomSheet> {
@@ -29,11 +30,13 @@ class _RoutineDetailBottomSheetState extends State<RoutineDetailBottomSheet> {
   void initState() {
     super.initState();
     widget.controller.loadRoutineDetails(widget.routine.id);
-    
+
     // scroll começa no final (dia de hoje)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_activityScrollController.hasClients) {
-        _activityScrollController.jumpTo(_activityScrollController.position.maxScrollExtent);
+        _activityScrollController.jumpTo(
+          _activityScrollController.position.maxScrollExtent,
+        );
       }
     });
   }
@@ -102,16 +105,20 @@ class _RoutineDetailBottomSheetState extends State<RoutineDetailBottomSheet> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  IBText(widget.routine.title, context: context).titulo.build(),
-                  if (widget.routine.description != null && widget.routine.description!.isNotEmpty) ...[
+                  OQText(widget.routine.title, context: context).titulo.build(),
+                  if (widget.routine.description != null &&
+                      widget.routine.description!.isNotEmpty) ...[
                     const SizedBox(height: 4),
-                    IBText(widget.routine.description!, context: context).body.color(AppColors.textMuted).build(),
+                    OQText(
+                      widget.routine.description!,
+                      context: context,
+                    ).body.color(AppColors.textMuted).build(),
                   ],
                 ],
               ),
             ),
             if (hasFlag)
-              IBChip(
+              OQChip(
                 label: widget.routine.subflagName ?? widget.routine.flagName!,
                 color: color,
               ),
@@ -132,65 +139,134 @@ class _RoutineDetailBottomSheetState extends State<RoutineDetailBottomSheet> {
       child: IntrinsicHeight(
         child: Row(
           children: [
-            Expanded(child: _buildCompactInfo(context, 'Horário', widget.routine.timeLabel, IBIcon.alarmOutlined)),
-            const VerticalDivider(color: AppColors.border, indent: 4, endIndent: 4),
-            Expanded(child: _buildCompactInfo(context, 'Dias', widget.routine.weekdaysLabel, IBIcon.calendar)),
-            const VerticalDivider(color: AppColors.border, indent: 4, endIndent: 4),
-            Expanded(child: _buildCompactInfo(context, 'Frequência', widget.routine.recurrenceTypeLabel, IBIcon.repeatRounded)),
+            Expanded(
+              child: _buildCompactInfo(
+                context,
+                'Horário',
+                widget.routine.timeLabel,
+                OQIcon.alarmOutlined,
+              ),
+            ),
+            const VerticalDivider(
+              color: AppColors.border,
+              indent: 4,
+              endIndent: 4,
+            ),
+            Expanded(
+              child: _buildCompactInfo(
+                context,
+                'Dias',
+                widget.routine.weekdaysLabel,
+                OQIcon.calendar,
+              ),
+            ),
+            const VerticalDivider(
+              color: AppColors.border,
+              indent: 4,
+              endIndent: 4,
+            ),
+            Expanded(
+              child: _buildCompactInfo(
+                context,
+                'Frequência',
+                widget.routine.recurrenceTypeLabel,
+                OQIcon.repeatRounded,
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildCompactInfo(BuildContext context, String label, String value, IconData icon) {
+  Widget _buildCompactInfo(
+    BuildContext context,
+    String label,
+    String value,
+    IconData icon,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        IBIcon(icon, size: 16, color: AppColors.primary600),
+        OQIcon(icon, size: 16, color: AppColors.primary600),
         const SizedBox(height: 4),
-        IBText(label, context: context).caption.color(AppColors.textMuted).build(),
+        OQText(
+          label,
+          context: context,
+        ).caption.color(AppColors.textMuted).build(),
         const SizedBox(height: 2),
-        IBText(value, context: context).label.weight(FontWeight.w600).maxLines(1).build(),
+        OQText(
+          value,
+          context: context,
+        ).label.weight(FontWeight.w600).maxLines(1).build(),
       ],
     );
   }
 
-  Widget _buildProgressSection(BuildContext context, List<dynamic> history, RoutineStreakOutput? streak, bool isLoading) {
-    if (isLoading) return const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator()));
+  Widget _buildProgressSection(
+    BuildContext context,
+    List<dynamic> history,
+    RoutineStreakOutput? streak,
+    bool isLoading,
+  ) {
+    if (isLoading)
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: CircularProgressIndicator(),
+        ),
+      );
 
     final hasStreak = streak != null && streak.currentStreak > 0;
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: hasStreak ? AppColors.ai500.withValues(alpha: 0.05) : AppColors.surfaceSoft,
+        color: hasStreak
+            ? AppColors.ai500.withValues(alpha: 0.05)
+            : AppColors.surfaceSoft,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: hasStreak ? AppColors.ai500.withValues(alpha: 0.2) : AppColors.border),
+        border: Border.all(
+          color: hasStreak
+              ? AppColors.ai500.withValues(alpha: 0.2)
+              : AppColors.border,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              IBText('Progresso', context: context).label.weight(FontWeight.w700).build(),
+              OQText(
+                'Progresso',
+                context: context,
+              ).label.weight(FontWeight.w700).build(),
               const Spacer(),
               if (hasStreak) ...[
-                const IBIcon(IBIcon.fireRounded, size: 16, color: AppColors.ai500),
+                const OQIcon(
+                  OQIcon.fireRounded,
+                  size: 16,
+                  color: AppColors.ai500,
+                ),
                 const SizedBox(width: 4),
-                IBText(streak.streakText, context: context).label.weight(FontWeight.w700).color(AppColors.ai600).build(),
+                OQText(
+                  streak.streakText,
+                  context: context,
+                ).label.weight(FontWeight.w700).color(AppColors.ai600).build(),
               ],
             ],
           ),
           const SizedBox(height: 16),
-          if (streak != null)
-            _buildActivityStrip(context, streak.activity),
+          if (streak != null) _buildActivityStrip(context, streak.activity),
         ],
       ),
     );
   }
 
-  Widget _buildActivityStrip(BuildContext context, List<RoutineActivityDayOutput> activity) {
+  Widget _buildActivityStrip(
+    BuildContext context,
+    List<RoutineActivityDayOutput> activity,
+  ) {
     // scroll vá para o final
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_activityScrollController.hasClients) {
@@ -233,14 +309,29 @@ class _RoutineDetailBottomSheetState extends State<RoutineDetailBottomSheet> {
                   decoration: BoxDecoration(
                     color: color,
                     shape: BoxShape.circle,
-                    border: isToday ? Border.all(color: AppColors.primary600, width: 2) : null,
+                    border: isToday
+                        ? Border.all(color: AppColors.primary600, width: 2)
+                        : null,
                   ),
-                  child: isCompleted 
-                    ? const IBIcon(IBIcon.checkRounded, size: 16, color: Colors.white)
-                    : (isSkipped ? const IBIcon(IBIcon.forwardRounded, size: 16, color: Colors.white) : null),
+                  child: isCompleted
+                      ? const OQIcon(
+                          OQIcon.checkRounded,
+                          size: 16,
+                          color: Colors.white,
+                        )
+                      : (isSkipped
+                            ? const OQIcon(
+                                OQIcon.forwardRounded,
+                                size: 16,
+                                color: Colors.white,
+                              )
+                            : null),
                 ),
                 const SizedBox(height: 6),
-                IBText(day.weekdayLabel, context: context).caption.color(isToday ? AppColors.text : AppColors.textMuted).weight(isToday ? FontWeight.w800 : FontWeight.w400).build(),
+                OQText(day.weekdayLabel, context: context).caption
+                    .color(isToday ? AppColors.text : AppColors.textMuted)
+                    .weight(isToday ? FontWeight.w800 : FontWeight.w400)
+                    .build(),
               ],
             ),
           );
@@ -253,9 +344,9 @@ class _RoutineDetailBottomSheetState extends State<RoutineDetailBottomSheet> {
     return Row(
       children: [
         Expanded(
-          child: IBButton(
+          child: OQButton(
             label: 'Editar',
-            variant: IBButtonVariant.secondary,
+            variant: OQButtonVariant.secondary,
             onPressed: () {
               AppNavigation.pop(null, context);
               widget.controller.startEditRoutine(widget.routine);
@@ -265,11 +356,14 @@ class _RoutineDetailBottomSheetState extends State<RoutineDetailBottomSheet> {
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: IBButton(
+          child: OQButton(
             label: widget.routine.isActive ? 'Desativar' : 'Ativar',
-            variant: IBButtonVariant.ghost,
+            variant: OQButtonVariant.ghost,
             onPressed: () {
-              widget.controller.toggleRoutineActive(widget.routine, !widget.routine.isActive);
+              widget.controller.toggleRoutineActive(
+                widget.routine,
+                !widget.routine.isActive,
+              );
               AppNavigation.pop(null, context);
             },
           ),
@@ -279,7 +373,7 @@ class _RoutineDetailBottomSheetState extends State<RoutineDetailBottomSheet> {
   }
 
   void _openEditForm() {
-    IBBottomSheet.show<void>(
+    OQBottomSheet.show<void>(
       context: context,
       smallBottomSheet: false,
       child: CreateRoutineBottomSheet(controller: widget.controller),

@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:organiq/modules/notifications/data/models/notification_log_model.dart';
-import 'package:organiq/shared/components/ib_lib/ib_text.dart';
+import 'package:organiq/shared/components/oq_lib/oq_text.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
 class NotificationCard extends StatelessWidget {
   final NotificationLogModel notification;
   final VoidCallback? onTap;
 
-  const NotificationCard({super.key, required this.notification, required this.onTap});
+  const NotificationCard({
+    super.key,
+    required this.notification,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -36,12 +40,12 @@ class NotificationCard extends StatelessWidget {
           boxShadow: isRead
               ? null
               : [
-            BoxShadow(
-              color: AppColors.primary500.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+                  BoxShadow(
+                    color: AppColors.primary500.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -66,17 +70,17 @@ class NotificationCard extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: IBText(
+                        child: OQText(
                           notification.title,
                           context: context,
                         ).build(),
                       ),
                       const SizedBox(width: 8),
-                      IBText(date, context: context).caption.muted.build(),
+                      OQText(date, context: context).caption.muted.build(),
                     ],
                   ),
                   const SizedBox(height: 4),
-                  IBText(
+                  OQText(
                     notification.body,
                     context: context,
                   ).muted.maxLines(3).build(),

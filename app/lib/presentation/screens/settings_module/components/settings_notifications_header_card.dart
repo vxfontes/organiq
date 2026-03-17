@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
 class SettingsNotificationsHeaderCard extends StatelessWidget {
@@ -7,12 +7,12 @@ class SettingsNotificationsHeaderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IBCard(
+    return OQCard(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const IBIcon(
-            IBIcon.notificationsActiveRounded,
+          const OQIcon(
+            OQIcon.notificationsActiveRounded,
             size: 20,
             color: AppColors.primary700,
             backgroundColor: AppColors.surfaceSoft,
@@ -25,12 +25,12 @@ class SettingsNotificationsHeaderCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                IBText(
+                OQText(
                   'Central de notificações',
                   context: context,
                 ).subtitulo.build(),
                 const SizedBox(height: 4),
-                IBText(
+                OQText(
                   'Escolha quais alertas receber, com qual antecedência e quando silenciar.',
                   context: context,
                 ).caption.build(),

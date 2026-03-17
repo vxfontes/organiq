@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 
 class SettingsContextsEmptyStateCard extends StatelessWidget {
   const SettingsContextsEmptyStateCard({
@@ -13,17 +13,17 @@ class SettingsContextsEmptyStateCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IBCard(
+    return OQCard(
       child: Column(
         children: [
-          const IBEmptyState(
+          const OQEmptyState(
             title: 'Sem contextos ainda',
             subtitle:
                 'Crie sua primeira flag para organizar tarefas e eventos.',
-            icon: IBHugeIcon.home,
+            icon: OQHugeIcon.home,
           ),
           const SizedBox(height: 14),
-          IBButton(
+          OQButton(
             label: 'Criar primeira flag',
             onPressed: disabled ? null : onCreateFlag,
           ),

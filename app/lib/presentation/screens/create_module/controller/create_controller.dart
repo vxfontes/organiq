@@ -21,7 +21,7 @@ import 'package:organiq/modules/shopping/domain/usecases/delete_shopping_list_us
 import 'package:organiq/modules/tasks/domain/usecases/delete_task_usecase.dart';
 import 'package:organiq/shared/errors/failures.dart';
 import 'package:organiq/shared/services/speech/speech_transcription_service.dart';
-import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/state/oq_state.dart';
 
 enum CreatePhase { input, processing, review, confirming, done }
 
@@ -49,7 +49,7 @@ class _LineReviewOutcome {
   bool get isAutoConfirmed => autoConfirmed != null;
 }
 
-class CreateController implements IBController {
+class CreateController implements OQController {
   CreateController(
     this._createInboxItemUsecase,
     this._reprocessInboxItemUsecase,

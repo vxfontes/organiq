@@ -7,7 +7,9 @@ class UpdateNotificationPrefsUsecase {
   final INotificationPrefsRepository repository;
   UpdateNotificationPrefsUsecase(this.repository);
 
-  Future<Either<Failure, NotificationPreferencesModel>> call(NotificationPreferencesModel prefs) {
+  Future<Either<Failure, NotificationPreferencesModel>> call(
+    NotificationPreferencesModel prefs,
+  ) {
     return repository.updatePreferences(prefs);
   }
 }

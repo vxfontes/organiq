@@ -2,14 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:organiq/modules/routines/data/models/routine_output.dart';
 import 'package:organiq/presentation/screens/schedule_module/components/routine_week_selector.dart';
 import 'package:organiq/presentation/screens/schedule_module/controller/schedule_controller.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
 class WeekOverview extends StatelessWidget {
-  const WeekOverview({
-    super.key,
-    required this.controller,
-  });
+  const WeekOverview({super.key, required this.controller});
 
   final ScheduleController controller;
 
@@ -24,14 +21,15 @@ class WeekOverview extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-             RoutineWeekSelector(controller: controller),
+            RoutineWeekSelector(controller: controller),
             const SizedBox(height: 20),
             if (!hasAnyRoutine)
-              const IBCard(
-                child: IBEmptyState(
+              const OQCard(
+                child: OQEmptyState(
                   title: 'Nenhuma rotina para esta semana',
-                  subtitle: 'Alterne a semana ou crie novas rotinas recorrentes.',
-                  icon: IBHugeIcon.calendar,
+                  subtitle:
+                      'Alterne a semana ou crie novas rotinas recorrentes.',
+                  icon: OQHugeIcon.calendar,
                 ),
               )
             else
@@ -44,7 +42,8 @@ class WeekOverview extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: List.generate(7, (index) {
                         final apiWeekday = (index + 1) % 7;
-                        final dayLabel = ScheduleController.weekdayTabLabels[index];
+                        final dayLabel =
+                            ScheduleController.weekdayTabLabels[index];
                         final dayRoutines = routinesMap[apiWeekday] ?? [];
 
                         return Container(
@@ -54,14 +53,20 @@ class WeekOverview extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Container(
-                                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8,
+                                  horizontal: 12,
+                                ),
                                 decoration: BoxDecoration(
                                   color: AppColors.surfaceSoft,
                                   borderRadius: BorderRadius.circular(10),
                                   border: Border.all(color: AppColors.border),
                                 ),
                                 child: Center(
-                                  child: IBText(dayLabel, context: context).label.weight(FontWeight.w700).build(),
+                                  child: OQText(
+                                    dayLabel,
+                                    context: context,
+                                  ).label.weight(FontWeight.w700).build(),
                                 ),
                               ),
                               const SizedBox(height: 12),
@@ -69,11 +74,16 @@ class WeekOverview extends StatelessWidget {
                                 Center(
                                   child: Padding(
                                     padding: const EdgeInsets.only(top: 20),
-                                    child: IBText('-', context: context).muted.build(),
+                                    child: OQText(
+                                      '-',
+                                      context: context,
+                                    ).muted.build(),
                                   ),
                                 )
                               else
-                                ...dayRoutines.map((r) => _buildMiniRoutineCard(context, r)),
+                                ...dayRoutines.map(
+                                  (r) => _buildMiniRoutineCard(context, r),
+                                ),
                             ],
                           ),
                         );
@@ -90,7 +100,7 @@ class WeekOverview extends StatelessWidget {
 
   Widget _buildMiniRoutineCard(BuildContext context, RoutineOutput routine) {
     final color = controller.routineTagColor(routine);
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(10),
@@ -114,19 +124,19 @@ class WeekOverview extends StatelessWidget {
               Container(
                 width: 6,
                 height: 6,
-                decoration: BoxDecoration(
-                  color: color,
-                  shape: BoxShape.circle,
-                ),
+                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
               ),
               const SizedBox(width: 6),
               Expanded(
-                child: IBText(routine.startTime, context: context).caption.color(AppColors.primary700).weight(FontWeight.w700).build(),
+                child: OQText(routine.startTime, context: context).caption
+                    .color(AppColors.primary700)
+                    .weight(FontWeight.w700)
+                    .build(),
               ),
             ],
           ),
           const SizedBox(height: 4),
-          IBText(routine.title, context: context).label.maxLines(2).build(),
+          OQText(routine.title, context: context).label.maxLines(2).build(),
         ],
       ),
     );

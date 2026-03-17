@@ -7,7 +7,7 @@ import 'package:organiq/shared/storage/auth_token_store.dart';
 
 class DioHttpClient implements IHttpClient {
   DioHttpClient(this.profile, {AuthTokenStore? tokenStore})
-      : _tokenStore = tokenStore {
+    : _tokenStore = tokenStore {
     _onCreate();
   }
 
@@ -22,7 +22,10 @@ class DioHttpClient implements IHttpClient {
     Map<String, dynamic>? extra,
     ResponseType responseType = ResponseType.json,
   }) async {
-    final options = await _buildOptions(extra: extra, responseType: responseType);
+    final options = await _buildOptions(
+      extra: extra,
+      responseType: responseType,
+    );
     return _request(
       () => _instance.get(
         path,
@@ -39,7 +42,10 @@ class DioHttpClient implements IHttpClient {
     Map<String, dynamic>? queryParameters,
     Map<String, dynamic>? extra,
   }) async {
-    final options = await _buildOptions(extra: extra, responseType: ResponseType.json);
+    final options = await _buildOptions(
+      extra: extra,
+      responseType: ResponseType.json,
+    );
     return _request(
       () => _instance.post(
         path,
@@ -57,7 +63,10 @@ class DioHttpClient implements IHttpClient {
     Map<String, dynamic>? queryParameters,
     Map<String, dynamic>? extra,
   }) async {
-    final options = await _buildOptions(extra: extra, responseType: ResponseType.json);
+    final options = await _buildOptions(
+      extra: extra,
+      responseType: ResponseType.json,
+    );
     return _request(
       () => _instance.put(
         path,
@@ -75,7 +84,10 @@ class DioHttpClient implements IHttpClient {
     Map<String, dynamic>? queryParameters,
     Map<String, dynamic>? extra,
   }) async {
-    final options = await _buildOptions(extra: extra, responseType: ResponseType.json);
+    final options = await _buildOptions(
+      extra: extra,
+      responseType: ResponseType.json,
+    );
     return _request(
       () => _instance.delete(
         path,
@@ -93,7 +105,10 @@ class DioHttpClient implements IHttpClient {
     Map<String, dynamic>? queryParameters,
     Map<String, dynamic>? extra,
   }) async {
-    final options = await _buildOptions(extra: extra, responseType: ResponseType.json);
+    final options = await _buildOptions(
+      extra: extra,
+      responseType: ResponseType.json,
+    );
     return _request(
       () => _instance.patch(
         path,
@@ -104,10 +119,15 @@ class DioHttpClient implements IHttpClient {
     );
   }
 
-  Future<ResponseModel> _request(Future<Response<dynamic>> Function() call) async {
+  Future<ResponseModel> _request(
+    Future<Response<dynamic>> Function() call,
+  ) async {
     try {
       final response = await call();
-      return ResponseModel(data: response.data, statusCode: response.statusCode);
+      return ResponseModel(
+        data: response.data,
+        statusCode: response.statusCode,
+      );
     } on DioException catch (err) {
       final statusCode = err.response?.statusCode;
       final data = err.response?.data ?? {'error': _mapDioError(err)};

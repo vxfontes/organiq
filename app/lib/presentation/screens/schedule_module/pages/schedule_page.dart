@@ -8,8 +8,8 @@ import 'package:organiq/presentation/screens/schedule_module/components/routine_
 import 'package:organiq/presentation/screens/schedule_module/components/routine_week_selector.dart';
 import 'package:organiq/presentation/screens/schedule_module/components/week_overview.dart';
 import 'package:organiq/presentation/screens/schedule_module/controller/schedule_controller.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
-import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
+import 'package:organiq/shared/state/oq_state.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
 class SchedulePage extends StatefulWidget {
@@ -19,7 +19,7 @@ class SchedulePage extends StatefulWidget {
   State<SchedulePage> createState() => _SchedulePageState();
 }
 
-class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
+class _SchedulePageState extends OQState<SchedulePage, ScheduleController> {
   @override
   void initState() {
     super.initState();
@@ -36,7 +36,7 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
   void _onErrorChanged() {
     final error = controller.error.value;
     if (error != null && error.isNotEmpty && mounted) {
-      IBSnackBar.error(context, error);
+      OQSnackBar.error(context, error);
     }
   }
 
@@ -80,7 +80,7 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
               const Positioned.fill(
                 child: ColoredBox(
                   color: AppColors.background,
-                  child: Center(child: IBLoader(label: 'Carregando...')),
+                  child: Center(child: OQLoader(label: 'Carregando...')),
                 ),
               ),
           ],
@@ -97,12 +97,9 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              IBText('Cronograma', context: context).titulo.build(),
+              OQText('Cronograma', context: context).titulo.build(),
               const SizedBox(height: 6),
-              IBText(
-                'Suas rotinas semanais',
-                context: context,
-              ).muted.build(),
+              OQText('Suas rotinas semanais', context: context).muted.build(),
             ],
           ),
         ),
@@ -110,12 +107,14 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
           valueListenable: controller.viewMode,
           builder: (context, mode, _) {
             return IconButton(
-              tooltip: mode == ScheduleViewMode.daily ? 'Ver semana' : 'Ver dia',
+              tooltip: mode == ScheduleViewMode.daily
+                  ? 'Ver semana'
+                  : 'Ver dia',
               onPressed: controller.toggleViewMode,
-              icon: IBIcon(
+              icon: OQIcon(
                 mode == ScheduleViewMode.daily
-                    ? IBIcon.calendarMonthRounded
-                    : IBIcon.calendarTodayRounded,
+                    ? OQIcon.calendarMonthRounded
+                    : OQIcon.calendarTodayRounded,
                 color: AppColors.primary700,
                 size: 20,
               ),
@@ -125,8 +124,8 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
         IconButton(
           tooltip: 'Adicionar rotina',
           onPressed: _openCreateRoutine,
-          icon: const IBIcon(
-            IBIcon.addRounded,
+          icon: const OQIcon(
+            OQIcon.addRounded,
             color: AppColors.primary700,
             size: 20,
           ),
@@ -151,13 +150,16 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
           final label = ScheduleController.weekdayTabLabels[index];
           final date = weekDays[index];
           final dayStr = date.day.toString().padLeft(2, '0');
-          
-          final isToday = date.year == today.year && 
-                         date.month == today.month && 
-                         date.day == today.day;
+
+          final isToday =
+              date.year == today.year &&
+              date.month == today.month &&
+              date.day == today.day;
 
           final textColor = isSelected ? AppColors.surface : AppColors.text;
-          final dateColor = isSelected ? AppColors.surface.withValues(alpha: 0.8) : AppColors.textMuted;
+          final dateColor = isSelected
+              ? AppColors.surface.withValues(alpha: 0.8)
+              : AppColors.textMuted;
 
           return InkWell(
             onTap: () => controller.selectWeekdayIndex(index),
@@ -167,28 +169,31 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
               width: 58,
               padding: const EdgeInsets.symmetric(vertical: 8),
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary700 : AppColors.surfaceSoft,
+                color: isSelected
+                    ? AppColors.primary700
+                    : AppColors.surfaceSoft,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: isSelected 
-                      ? AppColors.primary700 
-                      : (isToday ? AppColors.primary600.withValues(alpha: 0.5) : AppColors.border),
+                  color: isSelected
+                      ? AppColors.primary700
+                      : (isToday
+                            ? AppColors.primary600.withValues(alpha: 0.5)
+                            : AppColors.border),
                   width: isToday && !isSelected ? 2 : 1,
                 ),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  IBText(label, context: context)
-                      .label
+                  OQText(label, context: context).label
                       .color(textColor)
                       .weight(isToday ? FontWeight.w800 : FontWeight.w400)
                       .build(),
                   const SizedBox(height: 2),
-                  IBText(dayStr, context: context)
-                      .caption
-                      .color(dateColor)
-                      .build(),
+                  OQText(
+                    dayStr,
+                    context: context,
+                  ).caption.color(dateColor).build(),
                 ],
               ),
             ),
@@ -217,12 +222,14 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 20),
-        IBText(title, context: context).subtitulo.build(),
+        OQText(title, context: context).subtitulo.build(),
         const SizedBox(height: 12),
-        ...routines.map((routine) => Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: _buildRoutineCard(routine),
-            )),
+        ...routines.map(
+          (routine) => Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: _buildRoutineCard(routine),
+          ),
+        ),
       ],
     );
   }
@@ -230,12 +237,11 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
   Widget _buildRoutineCard(RoutineOutput routine) {
     final cardColor = controller.routineTagColor(routine);
     final recurrenceLabel = routine.recurrenceTypeLabel;
-    final secondaryLabel =
-        '$recurrenceLabel • ${routine.weekdaysLabel}'.trim();
+    final secondaryLabel = '$recurrenceLabel • ${routine.weekdaysLabel}'.trim();
     final conflicts = controller.getConflicts(routine);
 
-    final typeLabel = routine.subflagName != null 
-        ? '${routine.flagName} > ${routine.subflagName}' 
+    final typeLabel = routine.subflagName != null
+        ? '${routine.flagName} > ${routine.subflagName}'
         : (routine.flagName ?? 'Rotina');
 
     return Dismissible(
@@ -250,12 +256,12 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
         ),
         child: Row(
           children: [
-            const IBIcon(
-              IBIcon.skipNextRounded,
-              color: AppColors.surface,
-            ),
+            const OQIcon(OQIcon.skipNextRounded, color: AppColors.surface),
             const SizedBox(width: 8),
-            IBText('Pular', context: null).label.color(AppColors.surface).build(),
+            OQText(
+              'Pular',
+              context: null,
+            ).label.color(AppColors.surface).build(),
           ],
         ),
       ),
@@ -269,12 +275,12 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            IBText('Excluir', context: null).label.color(AppColors.surface).build(),
+            OQText(
+              'Excluir',
+              context: null,
+            ).label.color(AppColors.surface).build(),
             const SizedBox(width: 8),
-            const IBIcon(
-              IBIcon.deleteOutlineRounded,
-              color: AppColors.surface,
-            ),
+            const OQIcon(OQIcon.deleteOutlineRounded, color: AppColors.surface),
           ],
         ),
       ),
@@ -282,7 +288,10 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
         if (direction == DismissDirection.startToEnd) {
           final success = await controller.skipToday(routine);
           if (success) {
-            IBSnackBar.success(context, 'Rotina "${routine.title}" pulada hoje.');
+            OQSnackBar.success(
+              context,
+              'Rotina "${routine.title}" pulada hoje.',
+            );
           }
           return false;
         }
@@ -296,7 +305,7 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
       child: GestureDetector(
         onTap: () => _openRoutineDetails(routine),
         onLongPress: () => _openEditRoutine(routine),
-        child: IBItemCard(
+        child: OQItemCard(
           title: routine.title,
           secondary: secondaryLabel,
           done: routine.isCompletedToday,
@@ -304,19 +313,19 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
           onToggle: (val) => controller.toggleRoutine(routine, val),
           typeLabel: typeLabel,
           typeColor: cardColor,
-          typeIcon: IBIcon.repeatRounded,
+          typeIcon: OQIcon.repeatRounded,
           timeLabel: routine.timeLabel,
-          timeIcon: IBIcon.alarmOutlined,
+          timeIcon: OQIcon.alarmOutlined,
           footer: conflicts.isNotEmpty
               ? Row(
                   children: [
-                    const IBIcon(
-                      IBIcon.errorOutlineRounded,
+                    const OQIcon(
+                      OQIcon.errorOutlineRounded,
                       color: AppColors.warning500,
                       size: 16,
                     ),
                     const SizedBox(width: 6),
-                    IBText(
+                    OQText(
                       'Conflito com: ${conflicts.first.title}',
                       context: context,
                     ).caption.color(AppColors.warning600).build(),
@@ -329,12 +338,12 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
   }
 
   Widget _buildEmptyState() {
-    return const IBCard(
-      child: IBEmptyState(
+    return const OQCard(
+      child: OQEmptyState(
         title: 'Nenhuma rotina para este dia',
         subtitle:
             'Adicione rotinas pelo botão + ou diga algo como "academia toda terça às 7h".',
-        icon: IBHugeIcon.calendar,
+        icon: OQHugeIcon.calendar,
       ),
     );
   }
@@ -346,20 +355,20 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
         backgroundColor: AppColors.surface,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: IBText('Excluir rotina?', context: context).subtitulo.build(),
-        content: IBText(
+        title: OQText('Excluir rotina?', context: context).subtitulo.build(),
+        content: OQText(
           'Tem certeza que deseja excluir "${routine.title}"?',
           context: context,
         ).body.build(),
         actions: [
-          IBButton(
+          OQButton(
             label: 'Cancelar',
-            variant: IBButtonVariant.ghost,
+            variant: OQButtonVariant.ghost,
             onPressed: () => AppNavigation.pop(false, context),
           ),
-          IBButton(
+          OQButton(
             label: 'Excluir',
-            variant: IBButtonVariant.primary,
+            variant: OQButtonVariant.primary,
             onPressed: () async {
               await controller.deleteRoutine(routine.id);
               if (context.mounted) {
@@ -376,25 +385,20 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
     if (!mounted) return;
 
     controller.resetCreateForm();
-    await IBBottomSheet.show<void>(
+    await OQBottomSheet.show<void>(
       smallBottomSheet: false,
       context: context,
-      child: CreateRoutineBottomSheet(
-        controller: controller,
-      ),
+      child: CreateRoutineBottomSheet(controller: controller),
     );
   }
 
   Future<void> _openRoutineDetails(RoutineOutput routine) async {
     if (!mounted) return;
 
-    await IBBottomSheet.show<void>(
+    await OQBottomSheet.show<void>(
       context: context,
       isFitWithContent: true,
-      child: RoutineDetailBottomSheet(
-        routine: routine,
-        controller: controller,
-      ),
+      child: RoutineDetailBottomSheet(routine: routine, controller: controller),
     );
   }
 
@@ -402,12 +406,10 @@ class _SchedulePageState extends IBState<SchedulePage, ScheduleController> {
     if (!mounted) return;
 
     controller.startEditRoutine(routine);
-    await IBBottomSheet.show<void>(
+    await OQBottomSheet.show<void>(
       smallBottomSheet: false,
       context: context,
-      child: CreateRoutineBottomSheet(
-        controller: controller,
-      ),
+      child: CreateRoutineBottomSheet(controller: controller),
     );
   }
 }

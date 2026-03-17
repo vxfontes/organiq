@@ -5,8 +5,8 @@ import 'package:organiq/presentation/screens/create_module/components/create_edi
 import 'package:organiq/presentation/screens/create_module/components/create_input_phase_view.dart';
 import 'package:organiq/presentation/screens/create_module/components/create_review_phase_view.dart';
 import 'package:organiq/presentation/screens/create_module/controller/create_controller.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
-import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
+import 'package:organiq/shared/state/oq_state.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
 class CreatePage extends StatefulWidget {
@@ -16,8 +16,8 @@ class CreatePage extends StatefulWidget {
   State<CreatePage> createState() => _CreatePageState();
 }
 
-class _CreatePageState extends IBState<CreatePage, CreateController> {
-  IBAIInputState _inputState = IBAIInputState.idle;
+class _CreatePageState extends OQState<CreatePage, CreateController> {
+  OQAIInputState _inputState = OQAIInputState.idle;
 
   @override
   void initState() {
@@ -36,7 +36,7 @@ class _CreatePageState extends IBState<CreatePage, CreateController> {
   void _onErrorChanged() {
     final error = controller.error.value;
     if (error != null && error.isNotEmpty && mounted) {
-      IBSnackBar.error(context, error);
+      OQSnackBar.error(context, error);
     }
   }
 
@@ -46,9 +46,9 @@ class _CreatePageState extends IBState<CreatePage, CreateController> {
     final voiceProcessing = controller.voiceProcessing.value;
 
     final nextState = switch ((loading, voiceProcessing, text.isEmpty)) {
-      (true, _, _) || (_, true, _) => IBAIInputState.processing,
-      (_, _, true) => IBAIInputState.idle,
-      _ => IBAIInputState.typing,
+      (true, _, _) || (_, true, _) => OQAIInputState.processing,
+      (_, _, true) => OQAIInputState.idle,
+      _ => OQAIInputState.typing,
     };
 
     if (!mounted || nextState == _inputState) {
@@ -59,8 +59,8 @@ class _CreatePageState extends IBState<CreatePage, CreateController> {
   }
 
   void _onTextChanged(String text) {
-    if (text.isNotEmpty && _inputState != IBAIInputState.typing) {
-      setState(() => _inputState = IBAIInputState.typing);
+    if (text.isNotEmpty && _inputState != OQAIInputState.typing) {
+      setState(() => _inputState = OQAIInputState.typing);
     }
   }
 
@@ -162,7 +162,7 @@ class _CreatePageState extends IBState<CreatePage, CreateController> {
     required int index,
     required CreateSuggestionItem item,
   }) async {
-    await IBBottomSheet.show(
+    await OQBottomSheet.show(
       context: context,
       isAdaptive: true,
       child: CreateEditSuggestionSheet(

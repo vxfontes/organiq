@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:organiq/modules/inbox/data/models/create_suggestion_item.dart';
 import 'package:organiq/presentation/screens/create_module/components/create_suggestion_card.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 
 class CreateReviewPhaseView extends StatelessWidget {
   const CreateReviewPhaseView({
@@ -36,12 +36,12 @@ class CreateReviewPhaseView extends StatelessWidget {
           children: [
             IconButton(
               onPressed: confirming ? null : onGoBackToInput,
-              icon: const IBIcon(IBIcon.arrowBackRounded),
+              icon: const OQIcon(OQIcon.arrowBackRounded),
               tooltip: 'Voltar',
             ),
             const SizedBox(width: 2),
             Expanded(
-              child: IBText(
+              child: OQText(
                 'Revisar sugestões',
                 context: context,
               ).titulo.build(),
@@ -49,14 +49,14 @@ class CreateReviewPhaseView extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 6),
-        IBText(
+        OQText(
           'Verifique e ajuste antes de confirmar.',
           context: context,
         ).muted.build(),
         const SizedBox(height: 12),
         if (suggestions.isEmpty)
-          IBCard(
-            child: IBText(
+          OQCard(
+            child: OQText(
               'Nenhuma sugestão disponível para revisão.',
               context: context,
             ).muted.build(),
@@ -80,15 +80,15 @@ class CreateReviewPhaseView extends StatelessWidget {
             ),
           ),
         const SizedBox(height: 8),
-        IBButton(
+        OQButton(
           label: confirmLabel,
-          variant: IBButtonVariant.primary,
+          variant: OQButtonVariant.primary,
           onPressed: confirming ? null : onConfirmAll,
         ),
         const SizedBox(height: 8),
-        IBButton(
+        OQButton(
           label: 'Voltar e editar texto',
-          variant: IBButtonVariant.secondary,
+          variant: OQButtonVariant.secondary,
           onPressed: confirming ? null : onGoBackToInput,
         ),
       ],

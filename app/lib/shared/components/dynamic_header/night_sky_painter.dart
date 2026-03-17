@@ -18,10 +18,7 @@ class NightSkyPainter extends CustomPainter {
     const skyGradient = LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      colors: [
-        AppColors.skyNightTop,
-        AppColors.skyNightBottom,
-      ],
+      colors: [AppColors.skyNightTop, AppColors.skyNightBottom],
     );
 
     final skyPaint = Paint()
@@ -29,10 +26,7 @@ class NightSkyPainter extends CustomPainter {
         Rect.fromLTWH(0, 0, size.width, size.height),
       );
 
-    canvas.drawRect(
-      Rect.fromLTWH(0, 0, size.width, size.height),
-      skyPaint,
-    );
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), skyPaint);
   }
 
   void _drawStars(Canvas canvas, Size size) {
@@ -110,9 +104,7 @@ class NightSkyPainter extends CustomPainter {
     );
 
     final starPaint = Paint()
-      ..shader = gradient.createShader(
-        Rect.fromPoints(startPoint, endPoint),
-      )
+      ..shader = gradient.createShader(Rect.fromPoints(startPoint, endPoint))
       ..strokeWidth = 1.5
       ..style = PaintingStyle.stroke;
 
@@ -148,19 +140,28 @@ class NightSkyPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     canvas.drawCircle(
-      Offset(moonCenter.dx - moonRadius * 0.3, moonCenter.dy - moonRadius * 0.2),
+      Offset(
+        moonCenter.dx - moonRadius * 0.3,
+        moonCenter.dy - moonRadius * 0.2,
+      ),
       moonRadius * 0.2,
       craterPaint,
     );
 
     canvas.drawCircle(
-      Offset(moonCenter.dx + moonRadius * 0.2, moonCenter.dy + moonRadius * 0.3),
+      Offset(
+        moonCenter.dx + moonRadius * 0.2,
+        moonCenter.dy + moonRadius * 0.3,
+      ),
       moonRadius * 0.15,
       craterPaint,
     );
 
     canvas.drawCircle(
-      Offset(moonCenter.dx + moonRadius * 0.4, moonCenter.dy - moonRadius * 0.3),
+      Offset(
+        moonCenter.dx + moonRadius * 0.4,
+        moonCenter.dy - moonRadius * 0.3,
+      ),
       moonRadius * 0.1,
       craterPaint,
     );
@@ -203,7 +204,12 @@ class NightSkyPainter extends CustomPainter {
     );
   }
 
-  void _drawNightCloud(Canvas canvas, Offset position, double size, double opacity) {
+  void _drawNightCloud(
+    Canvas canvas,
+    Offset position,
+    double size,
+    double opacity,
+  ) {
     final cloudPaint = Paint()
       ..color = AppColors.nightCloud.withValues(alpha: opacity * 0.6)
       ..style = PaintingStyle.fill;

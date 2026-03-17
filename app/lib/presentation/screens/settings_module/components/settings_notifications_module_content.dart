@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:organiq/shared/components/ib_lib/ib_chip_group.dart';
-import 'package:organiq/shared/components/ib_lib/ib_toggle.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
+import 'package:organiq/shared/components/oq_lib/oq_chip_group.dart';
+import 'package:organiq/shared/components/oq_lib/oq_toggle.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 import 'package:organiq/shared/utils/text_utils.dart';
 
@@ -25,7 +25,7 @@ class SettingsNotificationsModuleContent extends StatelessWidget {
   final String atTimeSubtitle;
   final bool atTimeValue;
   final ValueChanged<bool> onAtTimeChanged;
-  final List<IBChipOption<int>> leadOptions;
+  final List<OQChipOption<int>> leadOptions;
   final List<int> selectedLeadMins;
   final ValueChanged<List<int>> onLeadChanged;
 
@@ -34,18 +34,18 @@ class SettingsNotificationsModuleContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        IBToggle(
+        OQToggle(
           title: 'Ativar notificações',
           subtitle: 'Controle principal deste módulo.',
-          leadingIcon: IBIcon.notificationsActiveRounded,
+          leadingIcon: OQIcon.notificationsActiveRounded,
           value: enabled,
           onChanged: onEnabledChanged,
         ),
         const SizedBox(height: 10),
-        IBToggle(
+        OQToggle(
           title: atTimeTitle,
           subtitle: atTimeSubtitle,
-          leadingIcon: IBIcon.alarmOutlined,
+          leadingIcon: OQIcon.alarmOutlined,
           enabled: enabled,
           value: atTimeValue,
           onChanged: onAtTimeChanged,
@@ -71,7 +71,7 @@ class _LeadTimeSelector extends StatelessWidget {
   });
 
   final bool enabled;
-  final List<IBChipOption<int>> options;
+  final List<OQChipOption<int>> options;
   final List<int> selectedValues;
   final ValueChanged<List<int>> onChanged;
 
@@ -95,11 +95,11 @@ class _LeadTimeSelector extends StatelessWidget {
         children: [
           Row(
             children: [
-              IBText('Antecedência', context: context).label
+              OQText('Antecedência', context: context).label
                   .color(enabled ? AppColors.text : AppColors.textMuted)
                   .build(),
               const Spacer(),
-              IBText(
+              OQText(
                 selectedLabels.isEmpty
                     ? 'Nenhuma selecionada'
                     : TextUtils.countLabel(
@@ -113,13 +113,13 @@ class _LeadTimeSelector extends StatelessWidget {
           ),
           if (selectedLabels.isNotEmpty) ...[
             const SizedBox(height: 4),
-            IBText(
+            OQText(
               selectedLabels.join(' • '),
               context: context,
             ).caption.build(),
           ],
           const SizedBox(height: 10),
-          IBChipGroup<int>(
+          OQChipGroup<int>(
             options: options,
             enabled: enabled,
             selectedValues: selectedValues,

@@ -12,19 +12,34 @@ class NotificationsRepository implements INotificationsRepository {
   final IHttpClient _httpClient;
 
   @override
-  Future<Either<Failure, List<NotificationLogModel>>> fetchNotifications({int? limit, int? offset}) async {
+  Future<Either<Failure, List<NotificationLogModel>>> fetchNotifications({
+    int? limit,
+    int? offset,
+  }) async {
     try {
       final query = <String, dynamic>{};
       if (limit != null) query['limit'] = limit;
       if (offset != null) query['offset'] = offset;
 
-      final response = await _httpClient.get(AppPath.notifications, queryParameters: query);
+      final response = await _httpClient.get(
+        AppPath.notifications,
+        queryParameters: query,
+      );
       final statusCode = response.statusCode ?? 0;
       if (statusCode >= 200 && statusCode < 300) {
         final List items = response.data['items'] ?? [];
-        return Right(items.map((e) => NotificationLogModel.fromMap(e)).toList());
+        return Right(
+          items.map((e) => NotificationLogModel.fromMap(e)).toList(),
+        );
       }
-      return Left(GetListFailure(message: ApiErrorMapper.fromResponseData(response.data, fallbackMessage: 'Erro ao carregar notificações.')));
+      return Left(
+        GetListFailure(
+          message: ApiErrorMapper.fromResponseData(
+            response.data,
+            fallbackMessage: 'Erro ao carregar notificações.',
+          ),
+        ),
+      );
     } catch (e) {
       return Left(GetListFailure(message: e.toString()));
     }
@@ -35,7 +50,14 @@ class NotificationsRepository implements INotificationsRepository {
     try {
       final response = await _httpClient.patch(AppPath.notificationRead(id));
       if ((response.statusCode ?? 0) < 300) return const Right(unit);
-      return Left(UpdateFailure(message: ApiErrorMapper.fromResponseData(response.data, fallbackMessage: 'Erro ao marcar como lida.')));
+      return Left(
+        UpdateFailure(
+          message: ApiErrorMapper.fromResponseData(
+            response.data,
+            fallbackMessage: 'Erro ao marcar como lida.',
+          ),
+        ),
+      );
     } catch (e) {
       return Left(UpdateFailure(message: e.toString()));
     }
@@ -46,7 +68,14 @@ class NotificationsRepository implements INotificationsRepository {
     try {
       final response = await _httpClient.patch(AppPath.notificationsReadAll);
       if ((response.statusCode ?? 0) < 300) return const Right(unit);
-      return Left(UpdateFailure(message: ApiErrorMapper.fromResponseData(response.data, fallbackMessage: 'Erro ao marcar todas como lidas.')));
+      return Left(
+        UpdateFailure(
+          message: ApiErrorMapper.fromResponseData(
+            response.data,
+            fallbackMessage: 'Erro ao marcar todas como lidas.',
+          ),
+        ),
+      );
     } catch (e) {
       return Left(UpdateFailure(message: e.toString()));
     }
@@ -90,11 +119,19 @@ class NotificationsRepository implements INotificationsRepository {
   @override
   Future<Either<Failure, Unit>> unregisterDeviceToken(String deviceId) async {
     try {
-      final response = await _httpClient.delete(AppPath.deviceToken, data: {
-        'deviceId': deviceId,
-      });
+      final response = await _httpClient.delete(
+        AppPath.deviceToken,
+        data: {'deviceId': deviceId},
+      );
       if ((response.statusCode ?? 0) < 300) return const Right(unit);
-      return Left(DeleteFailure(message: ApiErrorMapper.fromResponseData(response.data, fallbackMessage: 'Erro ao remover dispositivo.')));
+      return Left(
+        DeleteFailure(
+          message: ApiErrorMapper.fromResponseData(
+            response.data,
+            fallbackMessage: 'Erro ao remover dispositivo.',
+          ),
+        ),
+      );
     } catch (e) {
       return Left(DeleteFailure(message: e.toString()));
     }
@@ -105,7 +142,14 @@ class NotificationsRepository implements INotificationsRepository {
     try {
       final response = await _httpClient.post(AppPath.notificationTest);
       if ((response.statusCode ?? 0) < 300) return const Right(unit);
-      return Left(SaveFailure(message: ApiErrorMapper.fromResponseData(response.data, fallbackMessage: 'Erro ao enviar teste.')));
+      return Left(
+        SaveFailure(
+          message: ApiErrorMapper.fromResponseData(
+            response.data,
+            fallbackMessage: 'Erro ao enviar teste.',
+          ),
+        ),
+      );
     } catch (e) {
       return Left(SaveFailure(message: e.toString()));
     }
@@ -116,7 +160,14 @@ class NotificationsRepository implements INotificationsRepository {
     try {
       final response = await _httpClient.post(AppPath.digestTest);
       if ((response.statusCode ?? 0) < 300) return const Right(unit);
-      return Left(SaveFailure(message: ApiErrorMapper.fromResponseData(response.data, fallbackMessage: 'Erro ao enviar e-mail de teste.')));
+      return Left(
+        SaveFailure(
+          message: ApiErrorMapper.fromResponseData(
+            response.data,
+            fallbackMessage: 'Erro ao enviar e-mail de teste.',
+          ),
+        ),
+      );
     } catch (e) {
       return Left(SaveFailure(message: e.toString()));
     }

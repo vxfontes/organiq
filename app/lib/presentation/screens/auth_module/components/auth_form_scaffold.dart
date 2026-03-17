@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:organiq/shared/components/ib_lib/ib_text.dart';
+import 'package:organiq/shared/components/oq_lib/oq_text.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 import 'auth_background.dart';
 
@@ -50,9 +50,9 @@ class AuthFormScaffold extends StatelessWidget {
             Center(child: header!),
             const SizedBox(height: 20),
           ],
-          IBText(title, context: context).titulo.build(),
+          OQText(title, context: context).titulo.build(),
           const SizedBox(height: 8),
-          IBText(subtitle, context: context).muted.build(),
+          OQText(subtitle, context: context).muted.build(),
           const SizedBox(height: 20),
           ...fields,
           const SizedBox(height: 24),

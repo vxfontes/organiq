@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:organiq/modules/notifications/data/models/notification_log_model.dart';
 import 'package:organiq/presentation/screens/notifications_module/components/notification_card.dart';
 import 'package:organiq/presentation/screens/notifications_module/controller/notifications_controller.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
-import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
+import 'package:organiq/shared/state/oq_state.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
 class NotificationsPage extends StatefulWidget {
@@ -13,7 +13,8 @@ class NotificationsPage extends StatefulWidget {
   State<NotificationsPage> createState() => _NotificationsPageState();
 }
 
-class _NotificationsPageState extends IBState<NotificationsPage, NotificationsController> {
+class _NotificationsPageState
+    extends OQState<NotificationsPage, NotificationsController> {
   @override
   void initState() {
     super.initState();
@@ -30,14 +31,14 @@ class _NotificationsPageState extends IBState<NotificationsPage, NotificationsCo
   void _onErrorChanged() {
     final error = controller.error.value;
     if (error != null && error.isNotEmpty && mounted) {
-      IBSnackBar.error(context, error);
+      OQSnackBar.error(context, error);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: IBLightAppBar(
+      appBar: OQLightAppBar(
         title: 'Notificações',
         actions: [
           ValueListenableBuilder<List<NotificationLogModel>>(
@@ -49,8 +50,8 @@ class _NotificationsPageState extends IBState<NotificationsPage, NotificationsCo
               return IconButton(
                 onPressed: controller.markAllAsRead,
                 tooltip: 'Marcar todas como lidas',
-                icon: const IBIcon(
-                  IBIcon.checkRounded,
+                icon: const OQIcon(
+                  OQIcon.checkRounded,
                   color: AppColors.primary700,
                   size: 22,
                 ),
@@ -66,12 +67,12 @@ class _NotificationsPageState extends IBState<NotificationsPage, NotificationsCo
             valueListenable: controller.notifications,
             builder: (context, notifications, _) {
               if (loading && notifications.isEmpty) {
-                return const Center(child: IBLoader());
+                return const Center(child: OQLoader());
               }
 
               if (notifications.isEmpty) {
                 return const Center(
-                  child: IBEmptyState(
+                  child: OQEmptyState(
                     title: 'Nenhuma notificação',
                     subtitle: 'Suas notificações aparecerão aqui.',
                   ),

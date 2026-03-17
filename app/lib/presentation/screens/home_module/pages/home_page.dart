@@ -4,8 +4,8 @@ import 'package:organiq/presentation/routes/app_navigation.dart';
 import 'package:organiq/presentation/routes/app_routes.dart';
 import 'package:organiq/presentation/screens/home_module/components/index.dart';
 import 'package:organiq/presentation/screens/home_module/controller/home_controller.dart';
-import 'package:organiq/shared/components/ib_lib/index.dart';
-import 'package:organiq/shared/state/ib_state.dart';
+import 'package:organiq/shared/components/oq_lib/index.dart';
+import 'package:organiq/shared/state/oq_state.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 import 'package:organiq/shared/utils/date_time.dart';
 
@@ -16,7 +16,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends IBState<HomePage, HomeController> {
+class _HomePageState extends OQState<HomePage, HomeController> {
   DateTime _selectedDate = DateTimeUtils.nowInUserTimezone();
 
   @override
@@ -35,7 +35,7 @@ class _HomePageState extends IBState<HomePage, HomeController> {
   void _onErrorChanged() {
     final error = controller.error.value;
     if (error != null && error.isNotEmpty && mounted) {
-      IBSnackBar.error(context, error);
+      OQSnackBar.error(context, error);
     }
   }
 
@@ -89,7 +89,7 @@ class _HomePageState extends IBState<HomePage, HomeController> {
                   ? CrossFadeState.showFirst
                   : CrossFadeState.showSecond,
               firstChild: const Center(
-                child: IBLoader(label: 'Carregando resumo...'),
+                child: OQLoader(label: 'Carregando resumo...'),
               ),
               secondChild: RefreshIndicator(
                 onRefresh: controller.refresh,

@@ -21,7 +21,9 @@ class SettingsModule extends Module {
     i.addSingleton<SettingsController>(SettingsController.new);
     i.addSingleton<SettingsAccountController>(SettingsAccountController.new);
     i.addSingleton<SettingsContextsController>(SettingsContextsController.new);
-    i.addSingleton<SettingsNotificationsController>(SettingsNotificationsController.new);
+    i.addSingleton<SettingsNotificationsController>(
+      SettingsNotificationsController.new,
+    );
   }
 
   @override
@@ -30,6 +32,9 @@ class SettingsModule extends Module {
     r.child(AppRoutes.account, child: (_) => const SettingsAccountPage());
     r.child(AppRoutes.components, child: (_) => const SettingsComponentsPage());
     r.child(AppRoutes.contexts, child: (_) => const SettingsContextsPage());
-    r.child(AppRoutes.notifications, child: (_) => const SettingsNotificationsPage());
+    r.child(
+      AppRoutes.notifications,
+      child: (_) => const SettingsNotificationsPage(),
+    );
   }
 }
