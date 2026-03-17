@@ -113,8 +113,8 @@ class _SettingsNotificationsPageState extends IBState<SettingsNotificationsPage,
                   _buildQuietHoursSection(prefs),
                   _buildDailyDigestSection(prefs),
                   _buildDailySummaryTokenSection(),
-                  _buildDeviceSection(),
-                  const SizedBox(height: 24),
+                  // _buildDeviceSection(),
+                  // const SizedBox(height: 24),
                   // ValueListenableBuilder<bool>(
                   //   valueListenable: controller.sendingTest,
                   //   builder: (_, sending, _) {
@@ -234,10 +234,7 @@ class _SettingsNotificationsPageState extends IBState<SettingsNotificationsPage,
             onSendTest: () async {
               final success = await controller.sendTestEmailDigest();
               if (success && mounted) {
-                IBSnackBar.success(
-                  this.context,
-                  'E-mail de teste enviado!',
-                );
+                IBSnackBar.success(this.context, 'E-mail de teste enviado!');
               }
             },
             sendingTest: sending,
@@ -254,7 +251,8 @@ class _SettingsNotificationsPageState extends IBState<SettingsNotificationsPage,
       collapsedSummary: 'Copiar/rotacionar token',
       icon: IBIcon.keyRounded,
       isExpanded: _isExpanded(SettingsNotificationsSection.dailySummaryToken),
-      onTap: () => _toggleSection(SettingsNotificationsSection.dailySummaryToken),
+      onTap: () =>
+          _toggleSection(SettingsNotificationsSection.dailySummaryToken),
       child: AnimatedBuilder(
         animation: Listenable.merge([
           controller.dailySummaryToken,
@@ -276,14 +274,30 @@ class _SettingsNotificationsPageState extends IBState<SettingsNotificationsPage,
 
   Widget _buildDeviceSection() {
     return SettingsAccordionSection(
-      title: 'Dispositivo (ntfy.sh)',
+      title: 'Dispositivo (push)',
       subtitle:
-          'Receba alertas com o app fechado usando o tópico do seu aparelho.',
-      collapsedSummary: 'Configuração do tópico e teste de entrega',
+          'Receba alertas com o app fechado usando o token FCM do seu aparelho.',
+      collapsedSummary: 'Token do dispositivo e teste de entrega',
       icon: IBIcon.notificationsNoneOutlined,
       isExpanded: _isExpanded(SettingsNotificationsSection.device),
       onTap: () => _toggleSection(SettingsNotificationsSection.device),
-      child: const SettingsNotificationsDeviceContent(),
+      child: ValueListenableBuilder<bool>(
+        valueListenable: controller.sendingTest,
+        builder: (context, sending, _) {
+          return SettingsNotificationsDeviceContent(
+            sendingTest: sending,
+            onSendTest: () async {
+              final success = await controller.sendTestNotification();
+              if (success && mounted) {
+                IBSnackBar.success(
+                  this.context,
+                  'Notificacao de teste enviada!',
+                );
+              }
+            },
+          );
+        },
+      ),
     );
   }
 

@@ -4109,6 +4109,12 @@ const docTemplate = `{
         "dto.InboxItemResponse": {
             "type": "object",
             "properties": {
+                "confirmed": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.ConfirmInboxItemResponse"
+                    }
+                },
                 "createdAt": {
                     "type": "string"
                 },
@@ -4132,6 +4138,12 @@ const docTemplate = `{
                 },
                 "suggestion": {
                     "$ref": "#/definitions/dto.AiSuggestionResponse"
+                },
+                "suggestions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.AiSuggestionResponse"
+                    }
                 },
                 "updatedAt": {
                     "type": "string"
@@ -4407,7 +4419,8 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "deviceId",
-                "platform"
+                "platform",
+                "pushToken"
             ],
             "properties": {
                 "appVersion": {
@@ -4422,13 +4435,16 @@ const docTemplate = `{
                 "platform": {
                     "description": "ios | android",
                     "type": "string"
+                },
+                "pushToken": {
+                    "type": "string"
                 }
             }
         },
         "dto.RegisterTokenResponse": {
             "type": "object",
             "properties": {
-                "topic": {
+                "status": {
                     "type": "string"
                 }
             }
@@ -4461,6 +4477,29 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.RoutineActivityDay": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "isCompleted": {
+                    "type": "boolean"
+                },
+                "isScheduled": {
+                    "type": "boolean"
+                },
+                "isSkipped": {
+                    "type": "boolean"
+                },
+                "isToday": {
+                    "type": "boolean"
+                },
+                "weekdayLabel": {
                     "type": "string"
                 }
             }
@@ -4573,8 +4612,17 @@ const docTemplate = `{
         "dto.RoutineStreakResponse": {
             "type": "object",
             "properties": {
+                "activity": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.RoutineActivityDay"
+                    }
+                },
                 "currentStreak": {
                     "type": "integer"
+                },
+                "streakText": {
+                    "type": "string"
                 },
                 "totalCompletions": {
                     "type": "integer"
@@ -5098,8 +5146,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "",
 	BasePath:         "/",
 	Schemes:          []string{},
-		Title:            "Organiq API",
-		Description:      "API do MVP Organiq.",
+	Title:            "Organiq API",
+	Description:      "API do MVP Organiq.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }

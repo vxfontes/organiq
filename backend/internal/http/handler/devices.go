@@ -17,7 +17,7 @@ func NewDevicesHandler(uc *usecase.DeviceTokenUsecase) *DevicesHandler {
 	return &DevicesHandler{Usecase: uc}
 }
 
-// RegisterToken registers or updates a device and returns its ntfy topic.
+// RegisterToken registers or updates a device push token.
 // @Summary Registrar dispositivo
 // @Tags Devices
 // @Security BearerAuth
@@ -49,13 +49,21 @@ func (h *DevicesHandler) RegisterToken(c *gin.Context) {
 		appVersion = *req.AppVersion
 	}
 
-	topic, err := h.Usecase.RegisterToken(c.Request.Context(), userID, req.DeviceID, req.Platform, deviceName, appVersion)
+	err := h.Usecase.RegisterToken(
+		c.Request.Context(),
+		userID,
+		req.DeviceID,
+		req.PushToken,
+		req.Platform,
+		deviceName,
+		appVersion,
+	)
 	if err != nil {
 		writeUsecaseError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.RegisterTokenResponse{Topic: topic})
+	c.JSON(http.StatusOK, dto.RegisterTokenResponse{Status: "ok"})
 }
 
 // UnregisterToken removes a device subscription.

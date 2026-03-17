@@ -27,7 +27,7 @@ class _SplashPageState extends IBState<SplashPage, SplashController> {
 
   Future<void> _bootstrap() async {
     final shouldGoHome = await controller.check();
-    
+
     if (shouldGoHome != null && shouldGoHome && mounted) {
       final pushService = PushNotificationService.instance;
       pushService.setRepository(Modular.get<INotificationsRepository>());
@@ -35,7 +35,12 @@ class _SplashPageState extends IBState<SplashPage, SplashController> {
     }
 
     if (!mounted) return;
-    AppNavigation.replace(shouldGoHome == true ? AppRoutes.rootHome : AppRoutes.auth);
+    AppNavigation.replace(
+      shouldGoHome == true ? AppRoutes.rootHome : AppRoutes.auth,
+    );
+    if (shouldGoHome == true) {
+      PushNotificationService.instance.consumePendingNavigation();
+    }
   }
 
   @override
@@ -49,11 +54,7 @@ class _SplashPageState extends IBState<SplashPage, SplashController> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset(
-                  'assets/app_icon.png',
-                  width: 160,
-                  height: 160,
-                ),
+                Image.asset('assets/app_icon.png', width: 160, height: 160),
                 const SizedBox(height: 24),
                 ValueListenableBuilder<bool>(
                   valueListenable: controller.loading,
@@ -72,8 +73,7 @@ class _SplashPageState extends IBState<SplashPage, SplashController> {
                     }
                     return Padding(
                       padding: const EdgeInsets.only(top: 12),
-                      child: IBText(error, context: context)
-                          .body
+                      child: IBText(error, context: context).body
                           .align(TextAlign.center)
                           .color(AppColors.textMuted)
                           .build(),

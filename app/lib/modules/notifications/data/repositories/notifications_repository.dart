@@ -5,7 +5,6 @@ import 'package:organiq/shared/errors/api_error_mapper.dart';
 import 'package:organiq/shared/errors/failures.dart';
 import 'package:organiq/shared/services/http/app_path.dart';
 import 'package:organiq/shared/services/http/http_client.dart';
-import 'package:organiq/shared/services/push/push_notification_service.dart';
 
 class NotificationsRepository implements INotificationsRepository {
   NotificationsRepository(this._httpClient);
@@ -54,20 +53,35 @@ class NotificationsRepository implements INotificationsRepository {
   }
 
   @override
-  Future<Either<Failure, String>> registerDeviceToken(String deviceId, String platform, {String? deviceName, String? appVersion}) async {
+  Future<Either<Failure, Unit>> registerDeviceToken(
+    String deviceId,
+    String pushToken,
+    String platform, {
+    String? deviceName,
+    String? appVersion,
+  }) async {
     try {
-      final response = await _httpClient.post(AppPath.deviceToken, data: {
-        'deviceId': deviceId,
-        'platform': platform,
-        'deviceName': deviceName,
-        'appVersion': appVersion,
-      });
+      final response = await _httpClient.post(
+        AppPath.deviceToken,
+        data: {
+          'deviceId': deviceId,
+          'pushToken': pushToken,
+          'platform': platform,
+          'deviceName': deviceName,
+          'appVersion': appVersion,
+        },
+      );
       if ((response.statusCode ?? 0) < 300) {
-        final topic = response.data['topic'] as String;
-        PushNotificationService.instance.updateTopicFromServer(topic);
-        return Right(topic);
+        return const Right(unit);
       }
-      return Left(SaveFailure(message: ApiErrorMapper.fromResponseData(response.data, fallbackMessage: 'Erro ao registrar dispositivo.')));
+      return Left(
+        SaveFailure(
+          message: ApiErrorMapper.fromResponseData(
+            response.data,
+            fallbackMessage: 'Erro ao registrar dispositivo.',
+          ),
+        ),
+      );
     } catch (e) {
       return Left(SaveFailure(message: e.toString()));
     }

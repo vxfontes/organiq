@@ -11,11 +11,11 @@ import (
 )
 
 type NotificationUsecase struct {
-	Prefs   repository.NotificationPreferencesRepository
-	Log     repository.NotificationLogRepository
-	Tokens  repository.DeviceTokenRepository
-	Config  repository.AppConfigRepository
-	Ntfy    *push.NtfyClient
+	Prefs  repository.NotificationPreferencesRepository
+	Log    repository.NotificationLogRepository
+	Tokens repository.DeviceTokenRepository
+	Config repository.AppConfigRepository
+	Push   *push.FCMClient
 }
 
 func (uc *NotificationUsecase) GetDailySummaryToken(ctx context.Context, userID string) (string, error) {
@@ -52,8 +52,8 @@ func (uc *NotificationUsecase) MarkAllAsRead(ctx context.Context, userID string)
 }
 
 func (uc *NotificationUsecase) SendTestNotification(ctx context.Context, userID string) error {
-	if uc.Ntfy == nil {
-		return fmt.Errorf("ntfy_not_initialized")
+	if uc.Push == nil {
+		return fmt.Errorf("push_not_initialized")
 	}
 
 	tokens, err := uc.Tokens.ListByUserID(ctx, userID)
@@ -66,19 +66,44 @@ func (uc *NotificationUsecase) SendTestNotification(ctx context.Context, userID 
 	}
 
 	title := "Teste de Notificação"
-	body := "Isso é um teste do Organiq via ntfy.sh! 🎉"
-	
-	data := map[string]string{"type": "test"}
-	var lastErr error
+	body := "Isso e um teste do Organiq via push notification!"
+
+	data := map[string]string{
+		"type":      "test",
+		"click_url": "/settings/notifications",
+	}
+	var (
+		lastErr  error
+		success  bool
+		attempts int
+	)
 	for _, t := range tokens {
-		if err := uc.Ntfy.Send(ctx, t.Topic, title, body, data); err != nil {
-			slog.Error("ntfy_test_send_error",
+		attempts++
+		if err := uc.Push.Send(ctx, t.PushToken, title, body, data); err != nil {
+			if push.IsInvalidTokenError(err) {
+				if deactivateErr := uc.Tokens.Deactivate(ctx, t.PushToken); deactivateErr != nil {
+					slog.Error("push_test_deactivate_invalid_token_error",
+						slog.String("error", deactivateErr.Error()),
+						slog.String("device_id", t.DeviceID),
+					)
+				}
+			}
+			slog.Error("push_test_send_error",
 				slog.String("error", err.Error()),
-				slog.String("topic", t.Topic),
+				slog.String("device_id", t.DeviceID),
 			)
-			lastErr = fmt.Errorf("ntfy_send_failed: %w", err)
+			lastErr = fmt.Errorf("push_send_failed: %w", err)
+			continue
 		}
+
+		success = true
 	}
 
+	if success {
+		return nil
+	}
+	if attempts == 0 {
+		return fmt.Errorf("no_active_devices")
+	}
 	return lastErr
 }

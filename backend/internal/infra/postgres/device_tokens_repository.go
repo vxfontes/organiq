@@ -16,17 +16,17 @@ func NewDeviceTokenRepository(db *DB) *DeviceTokenRepository {
 
 func (r *DeviceTokenRepository) Upsert(ctx context.Context, dt domain.DeviceToken) error {
 	_, err := r.db.ExecContext(ctx, `
-		INSERT INTO organiq.device_tokens (user_id, device_id, ntfy_topic, platform, device_name, app_version, is_active, last_seen_at)
+		INSERT INTO organiq.device_tokens (user_id, device_id, push_token, platform, device_name, app_version, is_active, last_seen_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, now())
 		ON CONFLICT (device_id) DO UPDATE SET
 			user_id = EXCLUDED.user_id,
-			ntfy_topic = EXCLUDED.ntfy_topic,
+			push_token = EXCLUDED.push_token,
 			platform = EXCLUDED.platform,
 			device_name = EXCLUDED.device_name,
 			app_version = EXCLUDED.app_version,
 			is_active = EXCLUDED.is_active,
 			last_seen_at = now()
-	`, dt.UserID, dt.DeviceID, dt.Topic, dt.Platform, dt.DeviceName, dt.AppVersion, dt.IsActive)
+	`, dt.UserID, dt.DeviceID, dt.PushToken, dt.Platform, dt.DeviceName, dt.AppVersion, dt.IsActive)
 	return err
 }
 
@@ -37,7 +37,7 @@ func (r *DeviceTokenRepository) Delete(ctx context.Context, deviceID, userID str
 
 func (r *DeviceTokenRepository) ListByUserID(ctx context.Context, userID string) ([]domain.DeviceToken, error) {
 	rows, err := r.db.QueryContext(ctx, `
-		SELECT id, user_id, device_id, ntfy_topic, platform, device_name, app_version, is_active, last_seen_at, created_at
+		SELECT id, user_id, device_id, push_token, platform, device_name, app_version, is_active, last_seen_at, created_at
 		FROM organiq.device_tokens
 		WHERE user_id = $1 AND is_active = true
 	`, userID)
@@ -49,7 +49,7 @@ func (r *DeviceTokenRepository) ListByUserID(ctx context.Context, userID string)
 	var tokens []domain.DeviceToken
 	for rows.Next() {
 		var t domain.DeviceToken
-		if err := rows.Scan(&t.ID, &t.UserID, &t.DeviceID, &t.Topic, &t.Platform, &t.DeviceName, &t.AppVersion, &t.IsActive, &t.LastSeenAt, &t.CreatedAt); err != nil {
+		if err := rows.Scan(&t.ID, &t.UserID, &t.DeviceID, &t.PushToken, &t.Platform, &t.DeviceName, &t.AppVersion, &t.IsActive, &t.LastSeenAt, &t.CreatedAt); err != nil {
 			return nil, err
 		}
 		tokens = append(tokens, t)
@@ -57,7 +57,7 @@ func (r *DeviceTokenRepository) ListByUserID(ctx context.Context, userID string)
 	return tokens, rows.Err()
 }
 
-func (r *DeviceTokenRepository) Deactivate(ctx context.Context, topic string) error {
-	_, err := r.db.ExecContext(ctx, `UPDATE organiq.device_tokens SET is_active = false WHERE ntfy_topic = $1`, topic)
+func (r *DeviceTokenRepository) Deactivate(ctx context.Context, pushToken string) error {
+	_, err := r.db.ExecContext(ctx, `UPDATE organiq.device_tokens SET is_active = false WHERE push_token = $1`, pushToken)
 	return err
 }

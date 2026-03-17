@@ -47,6 +47,7 @@ class _LoginPageState extends IBState<LoginPage, LoginController> {
     await pushService.initialize();
 
     AppNavigation.clearAndPush(AppRoutes.rootHome);
+    pushService.consumePendingNavigation();
   }
 
   @override

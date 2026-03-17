@@ -48,6 +48,7 @@ class _SignupPageState extends IBState<SignupPage, SignupController> {
     await pushService.initialize();
 
     AppNavigation.clearAndPush(AppRoutes.rootHome);
+    pushService.consumePendingNavigation();
   }
 
   @override

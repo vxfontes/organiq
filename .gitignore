@@ -3,3 +3,5 @@
 **/tmp
 
 .DS_Store
+
+/backend/config/firebase-admin.json

@@ -23,9 +23,11 @@ services:
       APP_ENV: dev
       PORT: 8080
       DATABASE_URL: ${DATABASE_URL}
+      GOOGLE_APPLICATION_CREDENTIALS: /config/firebase-admin.json
       JWT_SECRET: ${JWT_SECRET}
     volumes:
       - ./:/app
+      - ./config:/config:ro
     command: ["air", "-c", ".air.toml"]
     ports:
       - "8080:8080"

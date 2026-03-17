@@ -135,7 +135,7 @@ struct OrganiqWidgetTask: Codable, Identifiable {
 }
 
 enum OrganiqWidgetSharedStore {
-    private static let appGroupID = "group.com.vxfontes.organiq"
+    private static let appGroupID = "group.vxfontes.organiq"
     private static let tasksStorageKey = "widget_tasks_v1"
     private static let pendingCompletedTaskIDsStorageKey = "widget_pending_completed_task_ids_v1"
 

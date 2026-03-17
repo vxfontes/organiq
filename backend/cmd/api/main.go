@@ -173,16 +173,25 @@ func main() {
 			TxRunner:         txRunner,
 		}
 
-		// ntfy.sh client
-		ntfyClient := push.NewNtfyClient("") // default baseURL: https://ntfy.sh
-		log.Info("ntfy_client_ready")
+		var fcmClient *push.FCMClient
+		if cfg.GoogleApplicationCredentials != "" {
+			client, err := push.NewFCMClient(ctx, cfg.GoogleApplicationCredentials)
+			if err != nil {
+				log.Error("fcm_client_error", slog.String("error", err.Error()))
+			} else {
+				fcmClient = client
+				log.Info("fcm_client_ready")
+			}
+		} else {
+			log.Warn("fcm_client_disabled", slog.String("reason", "GOOGLE_APPLICATION_CREDENTIALS not set"))
+		}
 
 		notificationUC := &usecase.NotificationUsecase{
 			Prefs:  notificationPrefsRepo,
 			Log:    notificationLogRepo,
 			Tokens: deviceTokenRepo,
 			Config: appConfigRepo,
-			Ntfy:   ntfyClient,
+			Push:   fcmClient,
 		}
 
 		var digestHandler *handler.DigestHandler
@@ -241,7 +250,7 @@ func main() {
 			Routines:  routineRepo,
 			Templates: notificationTemplateRepo,
 			Config:    appConfigRepo,
-			Ntfy:      ntfyClient,
+			Push:      fcmClient,
 			Logger:    log,
 		}
 		go notifScheduler.Run(ctx)

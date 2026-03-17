@@ -520,6 +520,10 @@ definitions:
     type: object
   dto.InboxItemResponse:
     properties:
+      confirmed:
+        items:
+          $ref: '#/definitions/dto.ConfirmInboxItemResponse'
+        type: array
       createdAt:
         type: string
       id:
@@ -536,6 +540,10 @@ definitions:
         type: string
       suggestion:
         $ref: '#/definitions/dto.AiSuggestionResponse'
+      suggestions:
+        items:
+          $ref: '#/definitions/dto.AiSuggestionResponse'
+        type: array
       updatedAt:
         type: string
     type: object
@@ -723,13 +731,16 @@ definitions:
       platform:
         description: ios | android
         type: string
+      pushToken:
+        type: string
     required:
     - deviceId
     - platform
+    - pushToken
     type: object
   dto.RegisterTokenResponse:
     properties:
-      topic:
+      status:
         type: string
     type: object
   dto.ReminderResponse:
@@ -751,6 +762,21 @@ definitions:
       title:
         type: string
       updatedAt:
+        type: string
+    type: object
+  dto.RoutineActivityDay:
+    properties:
+      date:
+        type: string
+      isCompleted:
+        type: boolean
+      isScheduled:
+        type: boolean
+      isSkipped:
+        type: boolean
+      isToday:
+        type: boolean
+      weekdayLabel:
         type: string
     type: object
   dto.RoutineCompletionResponse:
@@ -824,8 +850,14 @@ definitions:
     type: object
   dto.RoutineStreakResponse:
     properties:
+      activity:
+        items:
+          $ref: '#/definitions/dto.RoutineActivityDay'
+        type: array
       currentStreak:
         type: integer
+      streakText:
+        type: string
       totalCompletions:
         type: integer
     type: object

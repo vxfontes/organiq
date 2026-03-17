@@ -24,7 +24,7 @@ type NotificationScheduler struct {
 	Routines  repository.RoutineRepository
 	Templates repository.NotificationTemplateRepository
 	Config    repository.AppConfigRepository
-	Ntfy      *push.NtfyClient
+	Push      *push.FCMClient
 	Logger    *slog.Logger
 
 	// carregados em memória no startup
@@ -527,7 +527,7 @@ func (s *NotificationScheduler) dispatch(ctx context.Context) {
 }
 
 func (s *NotificationScheduler) dispatchOne(ctx context.Context, l domain.NotificationLog) {
-	// 1. Busca tópicos do usuário
+	// 1. Busca tokens ativos do usuário
 	tokens, err := s.Tokens.ListByUserID(ctx, l.UserID)
 	if err != nil || len(tokens) == 0 {
 		return
@@ -549,7 +549,7 @@ func (s *NotificationScheduler) dispatchOne(ctx context.Context, l domain.Notifi
 		}
 	}
 
-	// 3. Envia via ntfy.sh
+	// 3. Envia via FCM
 	data := map[string]string{
 		"type":                string(l.Type),
 		"reference_id":        l.ReferenceID,
@@ -562,13 +562,28 @@ func (s *NotificationScheduler) dispatchOne(ctx context.Context, l domain.Notifi
 
 	success := false
 	for _, t := range tokens {
-		if s.Ntfy != nil {
-			err := s.Ntfy.Send(ctx, t.Topic, l.Title, l.Body, data)
-			if err == nil {
-				success = true
-			} else {
-				s.Logger.Warn("ntfy_send_error", slog.String("error", err.Error()), slog.String("topic", t.Topic))
+		if s.Push == nil {
+			continue
+		}
+
+		err := s.Push.Send(ctx, t.PushToken, l.Title, l.Body, data)
+		if err == nil {
+			success = true
+		} else {
+			if push.IsInvalidTokenError(err) {
+				if deactivateErr := s.Tokens.Deactivate(ctx, t.PushToken); deactivateErr != nil {
+					s.Logger.Warn(
+						"push_deactivate_invalid_token_error",
+						slog.String("error", deactivateErr.Error()),
+						slog.String("device_id", t.DeviceID),
+					)
+				}
 			}
+			s.Logger.Warn(
+				"push_send_error",
+				slog.String("error", err.Error()),
+				slog.String("device_id", t.DeviceID),
+			)
 		}
 	}
 
@@ -577,7 +592,7 @@ func (s *NotificationScheduler) dispatchOne(ctx context.Context, l domain.Notifi
 			s.Logger.Error("update_status_sent_error", slog.String("error", err.Error()))
 		}
 	} else {
-		msg := "failed to send to all devices via ntfy"
+		msg := "failed to send to all devices via fcm"
 		if err := s.Log.UpdateStatus(ctx, l.ID, domain.NotificationStatusFailed, &msg); err != nil {
 			s.Logger.Error("update_status_failed_error", slog.String("error", err.Error()))
 		}

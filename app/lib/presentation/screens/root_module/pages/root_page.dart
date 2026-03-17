@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:hugeicons/hugeicons.dart';
 import 'package:organiq/presentation/routes/app_navigation.dart';
 import 'package:organiq/presentation/routes/app_routes.dart';
 import 'package:organiq/shared/components/ib_lib/index.dart';

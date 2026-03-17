@@ -4,16 +4,20 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/widgets.dart';
 import 'package:organiq/modules/notifications/domain/repositories/i_notifications_repository.dart';
 import 'package:organiq/presentation/routes/app_navigation.dart';
+import 'package:organiq/presentation/routes/app_routes.dart';
+import 'package:organiq/shared/services/push/firebase_bootstrap.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
 
 class PushNotificationService {
   PushNotificationService._();
+
   static final PushNotificationService instance = PushNotificationService._();
   static const String _deviceIdStorageKey = 'push_device_id';
 
@@ -21,21 +25,27 @@ class PushNotificationService {
       FlutterLocalNotificationsPlugin();
   final DeviceInfoPlugin _deviceInfo = DeviceInfoPlugin();
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
-  final ValueNotifier<String?> _topicNotifier = ValueNotifier(null);
-  final ValueNotifier<bool> _topicLoadingNotifier = ValueNotifier(false);
+  final ValueNotifier<String?> _pushTokenNotifier = ValueNotifier(null);
+  final ValueNotifier<bool> _pushTokenLoadingNotifier = ValueNotifier(false);
 
   INotificationsRepository? _repository;
-  WebSocketChannel? _channel;
   bool _initialized = false;
   bool _registering = false;
   bool _permissionsRequested = false;
+  bool _firebaseListenersAttached = false;
+  Future<void>? _initializing;
   String? _deviceName;
   String? _deviceId;
-  Timer? _reconnectTimer;
+  String? _pendingClickUrl;
+  StreamSubscription<RemoteMessage>? _onMessageSubscription;
+  StreamSubscription<RemoteMessage>? _onMessageOpenedAppSubscription;
+  StreamSubscription<String>? _onTokenRefreshSubscription;
+  AppLifecycleListener? _lifecycleListener;
 
-  String? get currentTopic => _topicNotifier.value;
-  ValueListenable<String?> get topicListenable => _topicNotifier;
-  ValueListenable<bool> get topicLoadingListenable => _topicLoadingNotifier;
+  String? get currentPushToken => _pushTokenNotifier.value;
+  ValueListenable<String?> get pushTokenListenable => _pushTokenNotifier;
+  ValueListenable<bool> get pushTokenLoadingListenable =>
+      _pushTokenLoadingNotifier;
 
   void setRepository(INotificationsRepository repository) {
     _repository = repository;
@@ -43,22 +53,40 @@ class PushNotificationService {
 
   Future<void> initialize() async {
     if (_initialized) return;
-    if (_repository == null) {
-      if (kDebugMode) print('PushNotificationService: repository not set.');
+    if (_initializing != null) {
+      await _initializing;
       return;
     }
 
-    // 1. Init local notifications
+    _initializing = _initializeInternal();
+    try {
+      await _initializing;
+    } finally {
+      _initializing = null;
+    }
+  }
+
+  Future<void> _initializeInternal() async {
+    if (_repository == null) {
+      if (kDebugMode) {
+        print('PushNotificationService: repository not set.');
+      }
+      return;
+    }
+
     await _initLocalNotifications();
 
-    // 2. Ask OS notification permission when needed
+    if (!FirebaseBootstrap.isSupportedPlatform) {
+      _initialized = true;
+      return;
+    }
+
     await _requestNotificationPermissions();
-
-    // 3. Load device info
     await _loadDeviceInfo();
-
-    // 4. Register on backend to get the topic
-    await registerDevice();
+    _attachFirebaseListeners();
+    _attachLifecycleRetry();
+    await _syncCurrentPushToken();
+    await _handleInitialMessage();
 
     _initialized = true;
   }
@@ -67,81 +95,43 @@ class PushNotificationService {
     if (_permissionsRequested) return;
     _permissionsRequested = true;
 
-    if (Platform.isAndroid) {
-      final androidPlugin = _localNotifications
-          .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin
-          >();
-      final granted = await androidPlugin?.requestNotificationsPermission();
-      if (kDebugMode) {
-        print(
-          'PushNotificationService: Android notification permission=$granted',
-        );
-      }
-      return;
-    }
+    final settings = await FirebaseMessaging.instance.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
 
-    if (Platform.isIOS) {
-      final iosPlugin = _localNotifications
-          .resolvePlatformSpecificImplementation<
-            IOSFlutterLocalNotificationsPlugin
-          >();
-      final granted = await iosPlugin?.requestPermissions(
-        alert: true,
-        badge: true,
-        sound: true,
+    if (kDebugMode) {
+      print(
+        'PushNotificationService: notification permission=${settings.authorizationStatus}',
       );
-      if (kDebugMode) {
-        print('PushNotificationService: iOS notification permission=$granted');
-      }
-      return;
-    }
-
-    if (Platform.isMacOS) {
-      final macosPlugin = _localNotifications
-          .resolvePlatformSpecificImplementation<
-            MacOSFlutterLocalNotificationsPlugin
-          >();
-      final granted = await macosPlugin?.requestPermissions(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
-      if (kDebugMode) {
-        print(
-          'PushNotificationService: macOS notification permission=$granted',
-        );
-      }
     }
   }
 
   Future<void> _initLocalNotifications() async {
-    const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
+    );
+    const iosSettings = DarwinInitializationSettings();
 
-    const DarwinInitializationSettings initializationSettingsIOS =
-        DarwinInitializationSettings();
-
-    const InitializationSettings initializationSettings =
-        InitializationSettings(
-          android: initializationSettingsAndroid,
-          iOS: initializationSettingsIOS,
-        );
+    const initializationSettings = InitializationSettings(
+      android: androidSettings,
+      iOS: iosSettings,
+    );
 
     await _localNotifications.initialize(
       settings: initializationSettings,
       onDidReceiveNotificationResponse: (details) {
-        if (details.payload != null) {
-          try {
-            final data = jsonDecode(details.payload!);
-            if (data is Map<String, dynamic>) {
-              final clickUrl = data['click_url'] as String?;
-              if (clickUrl != null) {
-                _navigateByUrl(clickUrl);
-              }
-            }
-          } catch (e) {
-            if (kDebugMode) print('Error parsing notification payload: $e');
+        if (details.payload == null) return;
+
+        try {
+          final data = jsonDecode(details.payload!);
+          if (data is Map<String, dynamic>) {
+            _navigateByData(data);
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            print('PushNotificationService: payload parse error=$e');
           }
         }
       },
@@ -160,6 +150,19 @@ class PushNotificationService {
           description: 'Notificações importantes do Organiq.',
           importance: Importance.max,
         ),
+      );
+    }
+
+    if (Platform.isIOS) {
+      final iosPlugin = _localNotifications
+          .resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin
+          >();
+
+      await iosPlugin?.requestPermissions(
+        alert: true,
+        badge: true,
+        sound: true,
       );
     }
   }
@@ -181,109 +184,148 @@ class PushNotificationService {
     }
   }
 
-  Future<void> ensureTopic({bool forceRefresh = false}) async {
-    if (!forceRefresh && _topicNotifier.value != null) return;
+  void _attachFirebaseListeners() {
+    if (_firebaseListenersAttached) return;
+    _firebaseListenersAttached = true;
+
+    _onMessageSubscription = FirebaseMessaging.onMessage.listen(
+      _handleForegroundMessage,
+    );
+    _onMessageOpenedAppSubscription = FirebaseMessaging.onMessageOpenedApp
+        .listen(_handleMessageOpenedApp);
+    _onTokenRefreshSubscription = FirebaseMessaging.instance.onTokenRefresh
+        .listen((token) {
+          _updatePushTokenLocally(token);
+          unawaited(
+            registerDevice(forceRefresh: true, pushTokenOverride: token),
+          );
+        });
+  }
+
+  void _attachLifecycleRetry() {
+    _lifecycleListener ??= AppLifecycleListener(
+      onResume: () {
+        unawaited(ensurePushToken(forceRefresh: true));
+      },
+    );
+  }
+
+  Future<void> _syncCurrentPushToken() async {
+    try {
+      final token = await FirebaseMessaging.instance.getToken();
+      _updatePushTokenLocally(token);
+
+      if (token != null) {
+        await registerDevice(forceRefresh: true, pushTokenOverride: token);
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('PushNotificationService: getToken error=$e');
+      }
+    }
+  }
+
+  Future<void> _handleInitialMessage() async {
+    final initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+    if (initialMessage != null) {
+      _handleMessageOpenedApp(initialMessage);
+    }
+  }
+
+  Future<void> ensurePushToken({bool forceRefresh = false}) async {
+    if (!FirebaseBootstrap.isSupportedPlatform) return;
+
     if (_deviceId == null) {
       await _loadDeviceInfo();
     }
-    await registerDevice(forceRefresh: forceRefresh);
+
+    if (forceRefresh) {
+      try {
+        final token = await FirebaseMessaging.instance.getToken();
+        _updatePushTokenLocally(token);
+        await registerDevice(forceRefresh: true, pushTokenOverride: token);
+      } catch (e) {
+        if (kDebugMode) {
+          print('PushNotificationService: force getToken error=$e');
+        }
+      }
+      return;
+    }
+
+    if (_pushTokenNotifier.value == null) {
+      await _syncCurrentPushToken();
+    }
   }
 
-  Future<void> registerDevice({bool forceRefresh = false}) async {
+  Future<void> registerDevice({
+    bool forceRefresh = false,
+    String? pushTokenOverride,
+  }) async {
     if (_registering) return;
-    if (!forceRefresh && _topicNotifier.value != null) return;
     if (_repository == null) return;
     if (_deviceId == null) return;
 
+    final pushToken = pushTokenOverride ?? _pushTokenNotifier.value;
+    if (pushToken == null || pushToken.isEmpty) return;
+
     _registering = true;
-    _topicLoadingNotifier.value = true;
+    _pushTokenLoadingNotifier.value = true;
     try {
       final info = await PackageInfo.fromPlatform();
       final platform = Platform.isIOS ? 'ios' : 'android';
       final result = await _repository!.registerDeviceToken(
         _deviceId!,
+        pushToken,
         platform,
         deviceName: _deviceName,
         appVersion: info.version,
       );
 
-      result.fold((failure) {
-        if (kDebugMode) print('Error registering device: ${failure.message}');
-      }, updateTopicFromServer);
-    } finally {
-      _registering = false;
-      _topicLoadingNotifier.value = false;
-    }
-  }
-
-  void updateTopicFromServer(String topic) {
-    if (_topicNotifier.value != topic) {
-      _topicNotifier.value = topic;
-      _connectWebSocket();
-    }
-  }
-
-  void _connectWebSocket() {
-    final topic = _topicNotifier.value;
-    if (topic == null) return;
-
-    _reconnectTimer?.cancel();
-    _channel?.sink.close();
-    final wsUrl = Uri.parse('wss://ntfy.sh/$topic/ws');
-
-    try {
-      if (kDebugMode) {
-        print('PushNotificationService: connecting ws topic=$topic');
-      }
-      _channel = WebSocketChannel.connect(wsUrl);
-      _channel!.stream.listen(
-        (message) => _handleWsMessage(message),
-        onDone: () {
-          if (kDebugMode) print('PushNotificationService: ws done');
-          _scheduleReconnect();
+      result.fold(
+        (failure) {
+          if (kDebugMode) {
+            print('PushNotificationService: register error=${failure.message}');
+          }
         },
-        onError: (error) {
-          if (kDebugMode) print('PushNotificationService: ws error=$error');
-          _scheduleReconnect();
+        (_) {
+          if (forceRefresh) {
+            _updatePushTokenLocally(pushToken);
+          }
         },
       );
-    } catch (e) {
-      if (kDebugMode) print('PushNotificationService: ws connect error=$e');
-      _scheduleReconnect();
+    } finally {
+      _registering = false;
+      _pushTokenLoadingNotifier.value = false;
     }
   }
 
-  void _scheduleReconnect() {
-    _reconnectTimer?.cancel();
-    _reconnectTimer = Timer(const Duration(seconds: 10), () {
-      _connectWebSocket();
-    });
-  }
-
-  void _handleWsMessage(dynamic message) {
-    try {
-      final data = jsonDecode(message);
-      if (data['event'] == 'message') {
-        final title = data['title'] ?? 'Organiq';
-        final body = data['message'] ?? '';
-
-        // ntfy envia metadados no campo 'attachment' ou em campos customizados se configurado,
-        // mas aqui estamos usando o payload que o backend enviou.
-        // Se o backend enviou click_url no corpo da mensagem ou metadados:
-        final clickUrl = data['click_url'] ?? data['attachment']?['url'];
-
-        _showLocalNotification(title, body, {'click_url': clickUrl});
-      } else if (data['event'] == 'open') {
-        if (kDebugMode) {
-          print('PushNotificationService: ws open topic=${data['topic']}');
-        }
-      }
-    } catch (e) {
-      if (kDebugMode) print('Error parsing ntfy message: $e');
+  void _updatePushTokenLocally(String? pushToken) {
+    if (pushToken?.isEmpty == true) return;
+    if (_pushTokenNotifier.value != pushToken) {
+      _pushTokenNotifier.value = pushToken;
     }
   }
 
-  void _showLocalNotification(
+  Future<void> _handleForegroundMessage(RemoteMessage message) async {
+    final title = message.notification?.title ?? message.data['title'];
+    final body = message.notification?.body ?? message.data['body'];
+
+    if ((title == null || title.isEmpty) && (body == null || body.isEmpty)) {
+      return;
+    }
+
+    await _showLocalNotification(
+      title ?? 'Organiq',
+      body ?? '',
+      Map<String, dynamic>.from(message.data),
+    );
+  }
+
+  void _handleMessageOpenedApp(RemoteMessage message) {
+    _navigateByData(Map<String, dynamic>.from(message.data));
+  }
+
+  Future<void> _showLocalNotification(
     String title,
     String body,
     Map<String, dynamic> data,
@@ -309,9 +351,37 @@ class PushNotificationService {
     );
   }
 
+  void _navigateByData(Map<String, dynamic> data) {
+    final rawUrl = data['click_url'];
+    if (rawUrl is! String || rawUrl.isEmpty) return;
+    _navigateOrQueue(rawUrl);
+  }
+
+  void consumePendingNavigation() {
+    final pendingClickUrl = _pendingClickUrl;
+    if (pendingClickUrl == null || pendingClickUrl.isEmpty) return;
+
+    _pendingClickUrl = null;
+    _navigateByUrl(pendingClickUrl);
+  }
+
+  void _navigateOrQueue(String url) {
+    final currentPath = AppNavigation.path;
+    final shouldQueue =
+        currentPath == AppRoutes.splash ||
+        currentPath == AppRoutes.auth ||
+        currentPath == AppRoutes.login ||
+        currentPath == AppRoutes.signup;
+
+    if (shouldQueue) {
+      _pendingClickUrl = url;
+      return;
+    }
+
+    _navigateByUrl(url);
+  }
+
   void _navigateByUrl(String url) {
-    // Agora o app é burro: ele apenas recebe uma URL/Caminho e navega.
-    // Ex: /reminders?id=123
     final uri = Uri.parse(url);
     final path = uri.path;
     final params = uri.queryParameters;
@@ -323,15 +393,26 @@ class PushNotificationService {
     if (_deviceId != null && _repository != null) {
       await _repository!.unregisterDeviceToken(_deviceId!);
     }
-    _reconnectTimer?.cancel();
-    _channel?.sink.close();
-    _channel = null;
+
+    await _onMessageSubscription?.cancel();
+    await _onMessageOpenedAppSubscription?.cancel();
+    await _onTokenRefreshSubscription?.cancel();
+    _onMessageSubscription = null;
+    _onMessageOpenedAppSubscription = null;
+    _onTokenRefreshSubscription = null;
+    _lifecycleListener?.dispose();
+    _lifecycleListener = null;
+
     _initialized = false;
+    _initializing = null;
     _registering = false;
+    _permissionsRequested = false;
+    _firebaseListenersAttached = false;
     _deviceId = null;
     _deviceName = null;
-    _topicLoadingNotifier.value = false;
-    _topicNotifier.value = null;
+    _pendingClickUrl = null;
+    _pushTokenLoadingNotifier.value = false;
+    _pushTokenNotifier.value = null;
   }
 
   Future<String> _createAndPersistDeviceId({required String seed}) async {

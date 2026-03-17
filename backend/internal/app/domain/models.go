@@ -278,7 +278,7 @@ type DeviceToken struct {
 	ID         string
 	UserID     string
 	DeviceID   string
-	Topic      string
+	PushToken  string
 	Platform   DevicePlatform
 	DeviceName *string
 	AppVersion *string
@@ -310,8 +310,8 @@ type NotificationPreferences struct {
 	DailyDigestHour    int
 	DailySummaryToken  string
 
-	CreatedAt         time.Time
-	UpdatedAt         time.Time
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 type EmailDigestStatus string

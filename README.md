@@ -112,11 +112,51 @@ Requisitos:
 Passos:
 
 1. Ajuste a URL da API em `app/lib/shared/services/http/app_service.dart`.
-2. Rode:
+2. Instale as dependencias:
 
 ```bash
 cd app
 flutter pub get
+```
+
+3. Configure o Firebase para Android e iOS.
+
+Arquivos esperados:
+- `app/android/app/google-services.json`
+- `app/ios/Runner/GoogleService-Info.plist`
+- `app/lib/firebase_options.dart`
+
+Os arquivos abaixo estao ignorados no git em `app/.gitignore`:
+- `/android/app/google-services.json`
+- `/ios/Runner/GoogleService-Info.plist`
+- `/lib/firebase_options.dart`
+
+Gerar `firebase_options.dart` com FlutterFire CLI:
+
+```bash
+npm install -g firebase-tools
+dart pub global activate flutterfire_cli
+firebase login
+export PATH="$PATH:$HOME/.pub-cache/bin"
+cd /Users/vanessa/Desktop/coding/personal/inbota/app
+flutterfire configure \
+  --project=organiq-app \
+  --platforms=android,ios \
+  --android-package-name=com.vxfontes.organiq \
+  --ios-bundle-id=com.vxfontes.organiq \
+  --out=lib/firebase_options.dart
+```
+
+Observacoes:
+- O comando acima gera apenas `app/lib/firebase_options.dart`.
+- Ele nao substitui `app/android/app/google-services.json`.
+- Ele nao substitui `app/ios/Runner/GoogleService-Info.plist`.
+- Para iOS, o arquivo `GoogleService-Info.plist` precisa estar adicionado ao target `Runner`.
+
+4. Rode o app:
+
+```bash
+cd app
 flutter run
 ```
 

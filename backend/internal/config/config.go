@@ -11,20 +11,21 @@ import (
 
 // Config holds application configuration loaded from environment variables.
 type Config struct {
-	Env                     string
-	Port                    int
-	RequestIDHeader         string
-	LogLevel                string
-	DatabaseURL             string
-	JWTSecret               string
-	AIProvider              string
-	AIAPIKey                string
-	AIBaseURL               string
-	AIModel                 string
-	AIFallbackModel         string
-	AIFallbackOnNeedsReview bool
-	AITimeout               time.Duration
-	AIMaxRetries            int
+	Env                          string
+	Port                         int
+	RequestIDHeader              string
+	LogLevel                     string
+	DatabaseURL                  string
+	GoogleApplicationCredentials string
+	JWTSecret                    string
+	AIProvider                   string
+	AIAPIKey                     string
+	AIBaseURL                    string
+	AIModel                      string
+	AIFallbackModel              string
+	AIFallbackOnNeedsReview      bool
+	AITimeout                    time.Duration
+	AIMaxRetries                 int
 
 	ResendAPIKey      string
 	ResendFrom        string
@@ -38,20 +39,21 @@ type Config struct {
 // Load reads environment variables and applies defaults.
 func Load() (Config, error) {
 	cfg := Config{
-		Env:                     getEnv("APP_ENV", "dev"),
-		Port:                    getEnvInt("PORT", 8080),
-		RequestIDHeader:         getEnv("REQUEST_ID_HEADER", "X-Request-Id"),
-		LogLevel:                strings.ToLower(getEnv("LOG_LEVEL", "info")),
-		DatabaseURL:             getEnv("DATABASE_URL", ""),
-		JWTSecret:               getEnv("JWT_SECRET", ""),
-		AIProvider:              getEnv("AI_PROVIDER", ""),
-		AIAPIKey:                getEnv("AI_API_KEY", ""),
-		AIBaseURL:               getEnv("AI_BASE_URL", ""),
-		AIModel:                 getEnv("AI_MODEL", ""),
-		AIFallbackModel:         getEnv("AI_FALLBACK_MODEL", ""),
-		AIFallbackOnNeedsReview: getEnvBool("AI_FALLBACK_ON_NEEDS_REVIEW", false),
-		AITimeout:               getEnvDuration("AI_TIMEOUT", 15*time.Second),
-		AIMaxRetries:            getEnvInt("AI_MAX_RETRIES", 2),
+		Env:                          getEnv("APP_ENV", "dev"),
+		Port:                         getEnvInt("PORT", 8080),
+		RequestIDHeader:              getEnv("REQUEST_ID_HEADER", "X-Request-Id"),
+		LogLevel:                     strings.ToLower(getEnv("LOG_LEVEL", "info")),
+		DatabaseURL:                  getEnv("DATABASE_URL", ""),
+		GoogleApplicationCredentials: getEnv("GOOGLE_APPLICATION_CREDENTIALS", ""),
+		JWTSecret:                    getEnv("JWT_SECRET", ""),
+		AIProvider:                   getEnv("AI_PROVIDER", ""),
+		AIAPIKey:                     getEnv("AI_API_KEY", ""),
+		AIBaseURL:                    getEnv("AI_BASE_URL", ""),
+		AIModel:                      getEnv("AI_MODEL", ""),
+		AIFallbackModel:              getEnv("AI_FALLBACK_MODEL", ""),
+		AIFallbackOnNeedsReview:      getEnvBool("AI_FALLBACK_ON_NEEDS_REVIEW", false),
+		AITimeout:                    getEnvDuration("AI_TIMEOUT", 15*time.Second),
+		AIMaxRetries:                 getEnvInt("AI_MAX_RETRIES", 2),
 
 		ResendAPIKey:      getEnv("RESEND_API_KEY", ""),
 		ResendFrom:        getEnv("RESEND_FROM", "Organiq <noreply@resend.dev>"),

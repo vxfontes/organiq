@@ -30,6 +30,7 @@ class ApiErrorMapper {
     'unauthorized': 'Não autorizado.',
     'internal_error': 'Erro interno do servidor.',
     'no_active_devices': 'Nenhum dispositivo ativo encontrado para este usuário.',
+    'notification_send_failed': 'Não foi possível enviar a notificação.',
   };
 
   static String fromResponseData(

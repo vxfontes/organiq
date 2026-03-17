@@ -545,13 +545,14 @@ type CompleteRoutineRequest struct {
 
 type RegisterTokenRequest struct {
 	DeviceID   string  `json:"deviceId" binding:"required"`
+	PushToken  string  `json:"pushToken" binding:"required"`
 	Platform   string  `json:"platform" binding:"required"` // ios | android
 	DeviceName *string `json:"deviceName,omitempty"`
 	AppVersion *string `json:"appVersion,omitempty"`
 }
 
 type RegisterTokenResponse struct {
-	Topic string `json:"topic"`
+	Status string `json:"status"`
 }
 
 type UnregisterTokenRequest struct {

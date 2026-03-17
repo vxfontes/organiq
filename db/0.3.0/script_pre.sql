@@ -1,0 +1,128 @@
+ALTER TABLE organiq.device_tokens RENAME COLUMN ntfy_topic TO push_token;
+ALTER INDEX organiq.idx_device_tokens_topic RENAME TO idx_device_tokens_push_token;
+
+UPDATE organiq.device_tokens
+SET is_active = false
+WHERE is_active = true
+  AND (
+    push_token LIKE 'inbota_%'
+    OR push_token LIKE 'organiq_%'
+  );
+
+
+
+CREATE OR REPLACE VIEW organiq.view_agenda_consolidada AS
+SELECT
+    'task' as item_type,
+    t.id,
+    t.user_id,
+    t.title,
+    t.description,
+    t.status,
+    t.due_at as scheduled_at,
+    t.due_at as due_at,
+    NULL::TIMESTAMPTZ as remind_at,
+    NULL::TIMESTAMPTZ as start_at,
+    NULL::TIMESTAMPTZ as end_at,
+    NULL::BOOLEAN as all_day,
+    NULL::TEXT as location,
+    t.flag_id,
+    t.subflag_id,
+    f.id as resolved_flag_id,
+    f.name as flag_name,
+    f.color as flag_color,
+    sf.name as subflag_name,
+    f.color as subflag_color,
+    t.created_at,
+    t.updated_at
+FROM organiq.tasks t
+         LEFT JOIN organiq.subflags sf ON t.subflag_id = sf.id
+         LEFT JOIN organiq.flags f ON COALESCE(t.flag_id, sf.flag_id) = f.id
+WHERE t.due_at IS NOT NULL
+UNION ALL
+SELECT
+    'reminder' as item_type,
+    r.id,
+    r.user_id,
+    r.title,
+    NULL::TEXT as description,
+    r.status,
+    r.remind_at as scheduled_at,
+    NULL::TIMESTAMPTZ as due_at,
+    r.remind_at as remind_at,
+    NULL::TIMESTAMPTZ as start_at,
+    NULL::TIMESTAMPTZ as end_at,
+    NULL::BOOLEAN as all_day,
+    NULL::TEXT as location,
+    r.flag_id,
+    r.subflag_id,
+    f.id as resolved_flag_id,
+    f.name as flag_name,
+    f.color as flag_color,
+    sf.name as subflag_name,
+    f.color as subflag_color,
+    r.created_at,
+    r.updated_at
+FROM organiq.reminders r
+         LEFT JOIN organiq.subflags sf ON r.subflag_id = sf.id
+         LEFT JOIN organiq.flags f ON COALESCE(r.flag_id, sf.flag_id) = f.id
+WHERE r.remind_at IS NOT NULL
+UNION ALL
+SELECT
+    'event' as item_type,
+    e.id,
+    e.user_id,
+    e.title,
+    NULL::TEXT as description,
+    'OPEN' as status,
+    e.start_at as scheduled_at,
+    NULL::TIMESTAMPTZ as due_at,
+    NULL::TIMESTAMPTZ as remind_at,
+    e.start_at as start_at,
+    e.end_at as end_at,
+    e.all_day as all_day,
+    e.location as location,
+    e.flag_id,
+    e.subflag_id,
+    f.id as resolved_flag_id,
+    f.name as flag_name,
+    f.color as flag_color,
+    sf.name as subflag_name,
+    f.color as subflag_color,
+    e.created_at,
+    e.updated_at
+FROM organiq.events e
+         LEFT JOIN organiq.subflags sf ON e.subflag_id = sf.id
+         LEFT JOIN organiq.flags f ON COALESCE(e.flag_id, sf.flag_id) = f.id
+WHERE e.start_at IS NOT NULL;
+
+CREATE OR REPLACE VIEW organiq.view_inbox_with_latest_suggestion AS
+WITH latest_suggestions AS (
+    SELECT DISTINCT ON (inbox_item_id) *
+    FROM organiq.ai_suggestions
+    ORDER BY inbox_item_id, created_at DESC
+)
+SELECT
+    i.*,
+    s.id as suggestion_id,
+    s.type as suggestion_type,
+    s.title as suggestion_title,
+    s.confidence as suggestion_confidence,
+    s.payload_json,
+    s.needs_review as suggestion_needs_review,
+    s.created_at as suggestion_created_at,
+    s.flag_id as suggestion_flag_id,
+    s.subflag_id as suggestion_subflag_id
+FROM organiq.inbox_items i
+         LEFT JOIN latest_suggestions s ON i.id = s.inbox_item_id;
+
+CREATE OR REPLACE VIEW organiq.view_routine_daily_status AS
+SELECT
+    r.*,
+    c.completed_at,
+    (c.id IS NOT NULL) as is_completed,
+    e.action as exception_action
+FROM organiq.routines r
+         LEFT JOIN organiq.routine_completions c ON r.id = c.routine_id AND c.completed_on = CURRENT_DATE
+         LEFT JOIN organiq.routine_exceptions e ON r.id = e.routine_id AND e.exception_date = CURRENT_DATE
+WHERE r.is_active = true;
