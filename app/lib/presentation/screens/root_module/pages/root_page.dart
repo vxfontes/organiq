@@ -83,7 +83,7 @@ class _RootPageState extends State<RootPage> {
   Widget build(BuildContext context) {
     return IBScaffold(
       appBar: IBAppBar(
-        title: 'Organiq',
+        title: 'OrganiQ',
         padding: const EdgeInsets.only(left: 12, right: 12),
         actions: [
           IconButton(

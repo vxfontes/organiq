@@ -1,9 +1,10 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:dartz/dartz.dart';
+import 'package:flutter/material.dart';
 import 'package:organiq/modules/events/domain/usecases/delete_event_usecase.dart';
-import 'package:organiq/modules/inbox/data/models/inbox_confirm_input.dart';
+import 'package:organiq/modules/inbox/data/models/create_processing_line.dart';
+import 'package:organiq/modules/inbox/data/models/create_suggestion_item.dart';
 import 'package:organiq/modules/inbox/data/models/inbox_confirm_output.dart';
 import 'package:organiq/modules/inbox/data/models/inbox_create_batch_result.dart';
 import 'package:organiq/modules/inbox/data/models/inbox_create_input.dart';
@@ -21,6 +22,32 @@ import 'package:organiq/modules/tasks/domain/usecases/delete_task_usecase.dart';
 import 'package:organiq/shared/errors/failures.dart';
 import 'package:organiq/shared/services/speech/speech_transcription_service.dart';
 import 'package:organiq/shared/state/ib_state.dart';
+
+enum CreatePhase { input, processing, review, confirming, done }
+
+class _LineReviewOutcome {
+  const _LineReviewOutcome._({
+    this.failureMessage,
+    this.autoConfirmed,
+    this.reviewSuggestions = const <CreateSuggestionItem>[],
+  });
+
+  const _LineReviewOutcome.failed(String message)
+    : this._(failureMessage: message);
+
+  const _LineReviewOutcome.autoConfirmed(LineProcessSuccess result)
+    : this._(autoConfirmed: result);
+
+  const _LineReviewOutcome.review(List<CreateSuggestionItem> suggestions)
+    : this._(reviewSuggestions: suggestions);
+
+  final String? failureMessage;
+  final LineProcessSuccess? autoConfirmed;
+  final List<CreateSuggestionItem> reviewSuggestions;
+
+  bool get isFailed => failureMessage != null;
+  bool get isAutoConfirmed => autoConfirmed != null;
+}
 
 class CreateController implements IBController {
   CreateController(
@@ -53,6 +80,12 @@ class CreateController implements IBController {
   final ValueNotifier<int> recordingSeconds = ValueNotifier(0);
   final ValueNotifier<String?> error = ValueNotifier(null);
   final ValueNotifier<CreateBatchResult?> batchResult = ValueNotifier(null);
+  final ValueNotifier<CreatePhase> phase = ValueNotifier(CreatePhase.input);
+  final ValueNotifier<List<CreateProcessingLine>> processingLines =
+      ValueNotifier(const <CreateProcessingLine>[]);
+  final ValueNotifier<List<CreateSuggestionItem>> suggestions = ValueNotifier(
+    const <CreateSuggestionItem>[],
+  );
 
   String? _voiceBaseText;
   String _latestRecognizedText = '';
@@ -60,6 +93,15 @@ class CreateController implements IBController {
   Completer<void>? _voiceResultCompleter;
   Timer? _recordingTimer;
   bool _finalizingVoice = false;
+  int _lastTotalInputs = 0;
+  int _processingFailedLines = 0;
+  int _baseTasks = 0;
+  int _baseReminders = 0;
+  int _baseEvents = 0;
+  int _baseShoppingLists = 0;
+  int _baseShoppingItems = 0;
+  int _baseRoutines = 0;
+  final List<CreateLineResult> _baseLineResults = <CreateLineResult>[];
 
   @override
   void dispose() {
@@ -73,6 +115,9 @@ class CreateController implements IBController {
     recordingSeconds.dispose();
     error.dispose();
     batchResult.dispose();
+    phase.dispose();
+    processingLines.dispose();
+    suggestions.dispose();
   }
 
   void clearInput() {
@@ -257,65 +302,95 @@ class CreateController implements IBController {
       return false;
     }
 
+    _resetFlowState(keepInput: true);
+    _lastTotalInputs = lines.length;
+    phase.value = CreatePhase.processing;
     loading.value = true;
     error.value = null;
 
-    var success = 0;
-    var failed = 0;
-    var tasks = 0;
-    var reminders = 0;
-    var events = 0;
-    var shoppingLists = 0;
-    var shoppingItems = 0;
-    var routines = 0;
+    processingLines.value = lines
+        .map(
+          (line) => CreateProcessingLine(
+            text: line,
+            status: LineProcessingStatus.pending,
+          ),
+        )
+        .toList();
 
-    final lineResults = <CreateLineResult>[];
+    final reviewSuggestions = <CreateSuggestionItem>[];
+    for (var i = 0; i < lines.length; i++) {
+      final line = lines[i];
+      _updateProcessingLine(i, status: LineProcessingStatus.processing);
 
-    for (final line in lines) {
-      final processing = await _processSingleLine(line);
+      final outcome = await _processSingleLineForReview(line);
+      if (outcome.isFailed) {
+        _processingFailedLines += 1;
+        _baseLineResults.add(
+          CreateLineResult(
+            sourceText: line,
+            status: CreateLineStatus.failed,
+            message: outcome.failureMessage!,
+          ),
+        );
+        _updateProcessingLine(
+          i,
+          status: LineProcessingStatus.failed,
+          message: outcome.failureMessage,
+        );
+        continue;
+      }
 
-      processing.fold(
-        (failureMessage) {
-          failed++;
-          lineResults.add(
-            CreateLineResult(
-              sourceText: line,
-              status: CreateLineStatus.failed,
-              message: failureMessage,
-            ),
-          );
-        },
-        (result) {
-          success++;
+      if (outcome.isAutoConfirmed) {
+        final auto = outcome.autoConfirmed!;
+        _baseTasks += auto.tasksCount;
+        _baseReminders += auto.remindersCount;
+        _baseEvents += auto.eventsCount;
+        _baseRoutines += auto.routinesCount;
+        _baseShoppingLists += auto.shoppingListsCount;
+        _baseShoppingItems += auto.shoppingItemsCount;
+        _baseLineResults.addAll(auto.lineResults);
+        _updateProcessingLine(
+          i,
+          status: LineProcessingStatus.done,
+          message: 'Confirmado automaticamente.',
+        );
+        continue;
+      }
 
-          tasks += result.tasksCount;
-          reminders += result.remindersCount;
-          events += result.eventsCount;
-          routines += result.routinesCount;
-          shoppingLists += result.shoppingListsCount;
-          shoppingItems += result.shoppingItemsCount;
-
-          lineResults.addAll(result.lineResults);
-        },
+      reviewSuggestions.addAll(outcome.reviewSuggestions);
+      _updateProcessingLine(
+        i,
+        status: LineProcessingStatus.done,
+        suggestions: outcome.reviewSuggestions
+            .map((entry) => entry.suggestion)
+            .toList(),
+        inboxItemId: outcome.reviewSuggestions.isEmpty
+            ? null
+            : outcome.reviewSuggestions.first.inboxItemId,
       );
     }
 
-    batchResult.value = CreateBatchResult(
-      totalInputs: lines.length,
-      successCount: success,
-      failedCount: failed,
-      tasksCount: tasks,
-      remindersCount: reminders,
-      eventsCount: events,
-      shoppingListsCount: shoppingLists,
-      shoppingItemsCount: shoppingItems,
-      routinesCount: routines,
-      lines: lineResults,
-    );
-
+    suggestions.value = reviewSuggestions;
     loading.value = false;
 
-    if (failed > 0 && success == 0) {
+    if (reviewSuggestions.isNotEmpty) {
+      return true;
+    }
+
+    _finalizeBatchResult(
+      confirmedLines: const <CreateLineResult>[],
+      tasks: 0,
+      reminders: 0,
+      events: 0,
+      routines: 0,
+      shoppingLists: 0,
+      shoppingItems: 0,
+      confirmFailures: 0,
+    );
+    phase.value = CreatePhase.done;
+
+    if (_processingFailedLines > 0 &&
+        _baseLineResults.length == _processingFailedLines) {
       error.value = 'Não foi possível processar os textos enviados.';
       return false;
     }
@@ -323,64 +398,251 @@ class CreateController implements IBController {
     return true;
   }
 
-  Future<Either<String, LineProcessSuccess>> _processSingleLine(
-    String line,
-  ) async {
+  void goToReview() {
+    if (loading.value || suggestions.value.isEmpty) return;
+    phase.value = CreatePhase.review;
+  }
+
+  Future<bool> confirmAll() async {
+    if (loading.value) return false;
+
+    final activeSuggestions = suggestions.value
+        .where((entry) => !entry.removed)
+        .toList();
+
+    phase.value = CreatePhase.confirming;
+    loading.value = true;
+    error.value = null;
+
+    var tasks = 0;
+    var reminders = 0;
+    var events = 0;
+    var routines = 0;
+    var shoppingLists = 0;
+    var shoppingItems = 0;
+    var confirmFailures = 0;
+    final confirmedLines = <CreateLineResult>[];
+
+    for (final suggestion in activeSuggestions) {
+      final confirmInput = suggestion.toConfirmInput();
+      if (!confirmInput.isValidForConfirm) {
+        confirmFailures += 1;
+        confirmedLines.add(
+          CreateLineResult(
+            sourceText: suggestion.sourceText,
+            status: CreateLineStatus.failed,
+            message: 'A sugestão não possui dados válidos para confirmação.',
+          ),
+        );
+        continue;
+      }
+
+      final confirmResult = await _confirmInboxItemUsecase.call(confirmInput);
+      confirmResult.fold(
+        (failure) {
+          confirmFailures += 1;
+          final message = (failure.message?.trim().isNotEmpty ?? false)
+              ? failure.message!.trim()
+              : 'Falha ao confirmar sugestão.';
+          confirmedLines.add(
+            CreateLineResult(
+              sourceText: suggestion.sourceText,
+              status: CreateLineStatus.failed,
+              message: message,
+            ),
+          );
+        },
+        (output) {
+          final success = _buildManualConfirmedSuccess(
+            output,
+            sourceText: suggestion.sourceText,
+          );
+          tasks += success.tasksCount;
+          reminders += success.remindersCount;
+          events += success.eventsCount;
+          routines += success.routinesCount;
+          shoppingLists += success.shoppingListsCount;
+          shoppingItems += success.shoppingItemsCount;
+          confirmedLines.addAll(success.lineResults);
+        },
+      );
+    }
+
+    _finalizeBatchResult(
+      confirmedLines: confirmedLines,
+      tasks: tasks,
+      reminders: reminders,
+      events: events,
+      routines: routines,
+      shoppingLists: shoppingLists,
+      shoppingItems: shoppingItems,
+      confirmFailures: confirmFailures,
+    );
+
+    loading.value = false;
+    phase.value = CreatePhase.done;
+
+    if (confirmFailures > 0) {
+      error.value = 'Algumas sugestões não puderam ser confirmadas.';
+      return false;
+    }
+
+    return true;
+  }
+
+  void editSuggestion(int index, CreateSuggestionItem edited) {
+    final list = List<CreateSuggestionItem>.from(suggestions.value);
+    if (index < 0 || index >= list.length) return;
+    list[index] = edited;
+    suggestions.value = list;
+  }
+
+  void toggleRemoveSuggestion(int index) {
+    final list = List<CreateSuggestionItem>.from(suggestions.value);
+    if (index < 0 || index >= list.length) return;
+    list[index] = list[index].copyWith(removed: !list[index].removed);
+    suggestions.value = list;
+  }
+
+  void goBackToInput() {
+    phase.value = CreatePhase.input;
+    processingLines.value = const <CreateProcessingLine>[];
+    suggestions.value = const <CreateSuggestionItem>[];
+    batchResult.value = null;
+    error.value = null;
+    _resetBaseResultState();
+  }
+
+  void resetAll() {
+    if (loading.value || listening.value || voiceProcessing.value) return;
+    inputController.clear();
+    goBackToInput();
+  }
+
+  Future<_LineReviewOutcome> _processSingleLineForReview(String line) async {
     final createResult = await _createInboxItemUsecase.call(
       InboxCreateInput(source: 'manual', rawText: line),
     );
 
     final createdItem = createResult.fold<InboxItemOutput?>(
-      (failure) {
-        return null;
-      },
-      (item) {
-        return item;
-      },
+      (failure) => null,
+      (item) => item,
     );
 
     if (createdItem == null) {
-      return Left(_failureMessage(createResult));
+      return _LineReviewOutcome.failed(_failureMessage(createResult));
     }
 
     final reprocessResult = await _reprocessInboxItemUsecase.call(
       createdItem.id,
     );
     final processedItem = reprocessResult.fold<InboxItemOutput?>(
-      (failure) {
-        return null;
-      },
-      (item) {
-        return item;
-      },
+      (failure) => null,
+      (item) => item,
     );
 
     if (processedItem == null) {
-      return Left(_failureMessage(reprocessResult));
+      return _LineReviewOutcome.failed(_failureMessage(reprocessResult));
     }
 
     if (processedItem.status.trim().toUpperCase() == 'CONFIRMED') {
-      return Right(_buildAutoConfirmedSuccess(processedItem, sourceText: line));
+      return _LineReviewOutcome.autoConfirmed(
+        _buildAutoConfirmedSuccess(processedItem, sourceText: line),
+      );
     }
 
-    final confirmInput = InboxConfirmInput.fromSuggestion(
-      processedItem,
-      fallbackTitle: line,
-    );
-
-    if (!confirmInput.isValidForConfirm) {
-      return const Left('A IA não retornou dados suficientes para confirmar.');
+    final resolvedSuggestions = _resolvedSuggestions(processedItem);
+    if (resolvedSuggestions.isEmpty) {
+      final lastError = processedItem.lastError?.trim();
+      return _LineReviewOutcome.failed(
+        (lastError != null && lastError.isNotEmpty)
+            ? lastError
+            : 'A IA não retornou sugestões para revisão.',
+      );
     }
 
-    final confirmResult = await _confirmInboxItemUsecase.call(confirmInput);
-    return confirmResult.fold(
-      (failure) => Left(
-        (failure.message?.trim().isNotEmpty ?? false)
-            ? failure.message!.trim()
-            : 'Falha ao confirmar item processado.',
-      ),
-      (output) => Right(_buildManualConfirmedSuccess(output, sourceText: line)),
+    final items = resolvedSuggestions
+        .map(
+          (suggestion) => CreateSuggestionItem(
+            sourceText: line,
+            inboxItemId: processedItem.id,
+            suggestion: suggestion,
+          ),
+        )
+        .toList();
+
+    return _LineReviewOutcome.review(items);
+  }
+
+  void _updateProcessingLine(
+    int index, {
+    required LineProcessingStatus status,
+    String? message,
+    List<InboxSuggestionOutput>? suggestions,
+    String? inboxItemId,
+  }) {
+    final list = List<CreateProcessingLine>.from(processingLines.value);
+    if (index < 0 || index >= list.length) return;
+    list[index] = list[index].copyWith(
+      status: status,
+      message: message,
+      suggestions: suggestions,
+      inboxItemId: inboxItemId,
     );
+    processingLines.value = list;
+  }
+
+  void _finalizeBatchResult({
+    required List<CreateLineResult> confirmedLines,
+    required int tasks,
+    required int reminders,
+    required int events,
+    required int routines,
+    required int shoppingLists,
+    required int shoppingItems,
+    required int confirmFailures,
+  }) {
+    final successCount = (_lastTotalInputs - _processingFailedLines).clamp(
+      0,
+      _lastTotalInputs,
+    );
+
+    batchResult.value = CreateBatchResult(
+      totalInputs: _lastTotalInputs,
+      successCount: successCount,
+      failedCount: _processingFailedLines + confirmFailures,
+      tasksCount: _baseTasks + tasks,
+      remindersCount: _baseReminders + reminders,
+      eventsCount: _baseEvents + events,
+      shoppingListsCount: _baseShoppingLists + shoppingLists,
+      shoppingItemsCount: _baseShoppingItems + shoppingItems,
+      routinesCount: _baseRoutines + routines,
+      lines: <CreateLineResult>[..._baseLineResults, ...confirmedLines],
+    );
+  }
+
+  void _resetFlowState({required bool keepInput}) {
+    batchResult.value = null;
+    error.value = null;
+    phase.value = CreatePhase.input;
+    processingLines.value = const <CreateProcessingLine>[];
+    suggestions.value = const <CreateSuggestionItem>[];
+    _resetBaseResultState();
+    if (!keepInput) {
+      inputController.clear();
+    }
+  }
+
+  void _resetBaseResultState() {
+    _lastTotalInputs = 0;
+    _processingFailedLines = 0;
+    _baseTasks = 0;
+    _baseReminders = 0;
+    _baseEvents = 0;
+    _baseShoppingLists = 0;
+    _baseShoppingItems = 0;
+    _baseRoutines = 0;
+    _baseLineResults.clear();
   }
 
   LineProcessSuccess _buildAutoConfirmedSuccess(

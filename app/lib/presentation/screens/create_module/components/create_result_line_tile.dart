@@ -12,56 +12,117 @@ class CreateResultLineTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final success = result.status == CreateLineStatus.success;
-    final color = success ? AppColors.success600 : AppColors.danger600;
+    final accentColor = success ? AppColors.primary700 : AppColors.danger600;
+    final badgeBackground = success
+        ? AppColors.primary50
+        : AppColors.danger600.withAlpha(18);
+    final borderColor = success ? AppColors.border : AppColors.danger600;
+    final statusLabel = success ? 'Criado' : 'Falha';
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withValues(alpha: 0.25)),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: success ? borderColor : borderColor.withAlpha(76),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.dark.withAlpha(8),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              IBIcon(
-                success ? IBIcon.checkRounded : IBIcon.closeRounded,
-                color: color,
-                size: 18,
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: badgeBackground,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Center(
+                  child: IBIcon(
+                    success ? IBIcon.checkRounded : IBIcon.closeRounded,
+                    color: accentColor,
+                    size: 18,
+                  ),
+                ),
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: 10),
               Expanded(
-                child: IBText(
-                  result.message,
-                  context: context,
-                ).label.color(color).build(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: badgeBackground,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: IBText(
+                        statusLabel,
+                        context: context,
+                      ).caption.color(accentColor).build(),
+                    ),
+                    const SizedBox(height: 6),
+                    IBText(
+                      result.message,
+                      context: context,
+                    ).label.weight(FontWeight.w700).build(),
+                  ],
+                ),
               ),
               if (result.canDelete && onDelete != null) ...[
                 const SizedBox(width: 8),
-                GestureDetector(
-                  onTap: result.deleting ? null : () => onDelete!(result),
-                  child: result.deleting
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const IBIcon(
-                          IBIcon.deleteOutlineRounded,
-                          color: AppColors.danger600,
-                          size: 18,
-                        ),
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: result.deleting ? null : () => onDelete!(result),
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: Center(
+                        child: result.deleting
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const IBIcon(
+                                IBIcon.deleteOutlineRounded,
+                                color: AppColors.textMuted,
+                                size: 18,
+                              ),
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 10),
           IBText(
             result.sourceText,
             context: context,
-          ).caption.maxLines(3).build(),
+          ).body.color(AppColors.textMuted).maxLines(3).build(),
         ],
       ),
     );

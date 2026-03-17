@@ -1,3 +1,5 @@
+export 'ib_ai_input_area.dart';
+export 'ib_ai_pulse_indicator.dart';
 export 'ib_app_bar.dart';
 export 'ib_bottom_sheet.dart';
 export 'ib_bottom_nav.dart';

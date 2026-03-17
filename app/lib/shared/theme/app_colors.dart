@@ -23,8 +23,11 @@ class AppColors {
 
   static const ai50 = Color(0xFFEEF2FF);
   static const ai100 = Color(0xFFE0E7FF);
+  static const ai200 = Color(0xFFC7D2FE);
+  static const ai300 = Color(0xFFA5B4FC);
   static const ai600 = Color(0xFF4F46E5);
   static const ai500 = Color(0xFF6366F1);
+  static const ai700 = Color(0xFF4338CA);
   static const warning500 = Color(0xFFF59E0B);
   static const warning600 = Color(0xFFEA580C);
   static const danger600 = Color(0xFFDC2626);
@@ -50,7 +53,7 @@ class AppColors {
   static const cloudGray = Color(0xFFE5E7EB);
   static const cloudGrayLight = Color(0xFFF3F4F6);
 
-// Sky scene colors - Afternoon/Sunset
+  // Sky scene colors - Afternoon/Sunset
   static const skyAfternoonTop = Color(0xFF7C3AED);
   static const skyAfternoonMid = Color(0xFFF97316);
   static const skyAfternoonBottom = Color(0xFFFBBF24);
@@ -58,7 +61,7 @@ class AppColors {
   static const sunsetPink = Color(0xFFEC4899);
   static const sunsetPurple = Color(0xFF8B5CF6);
 
-// Sky scene colors - Night
+  // Sky scene colors - Night
   static const skyNightTop = Color(0xFF1E1B4B);
   static const skyNightBottom = Color(0xFF312E81);
   static const starWhite = Color(0xFFFFFFFF);
