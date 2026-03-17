@@ -12,16 +12,16 @@ Estrutura proposta (resumida):
 - `lib/shared`: itens compartilhados (tema, components base, utilitarios, config).
 
 ## Camadas (Clean Architecture)
-- Presentation Layer: UI + State Management (IBState/Controllers).
+- Presentation Layer: UI + State Management (OQState/Controllers).
 - Domain Layer: regras de negocio puras e usecases.
 - Data Layer: acesso a API/DB, mappers e repositorios concretos.
 
-## Convencao atual do projeto (IBState + Controller)
+## Convencao atual do projeto (OQState + Controller)
 - Pages (`StatefulWidget` em `presentation/screens/.../pages`) devem ficar declarativas:
   - montar UI
   - delegar acao para o controller
   - evitar regra de negocio na page
-- Controllers (classes que implementam `IBController`) concentram:
+- Controllers (classes que implementam `OQController`) concentram:
   - regras de fluxo
   - transformacao de estado para a UI
   - timers/efeitos de exibicao (quando houver)
