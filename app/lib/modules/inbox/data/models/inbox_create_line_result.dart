@@ -7,7 +7,6 @@ class CreateLineResult {
     this.entityType = CreateEntityType.unknown,
     this.deleted = false,
     this.deleting = false,
-    this.confirmed = false,
   });
 
   final String sourceText;
@@ -17,7 +16,6 @@ class CreateLineResult {
   final CreateEntityType entityType;
   final bool deleted;
   final bool deleting;
-  final bool confirmed;
 
   bool get canDelete =>
       status == CreateLineStatus.success &&
@@ -33,7 +31,6 @@ class CreateLineResult {
     CreateEntityType? entityType,
     bool? deleted,
     bool? deleting,
-    bool? confirmed,
   }) {
     return CreateLineResult(
       sourceText: sourceText,
@@ -43,7 +40,6 @@ class CreateLineResult {
       entityType: entityType ?? this.entityType,
       deleted: deleted ?? this.deleted,
       deleting: deleting ?? this.deleting,
-      confirmed: confirmed ?? this.confirmed,
     );
   }
 }
