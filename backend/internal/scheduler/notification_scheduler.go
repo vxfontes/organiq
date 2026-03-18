@@ -310,7 +310,7 @@ func (s *NotificationScheduler) scheduleItem(ctx context.Context, userID string,
 		return
 	}
 
-	exists, err := s.Log.Exists(ctx, refID, leadMins)
+	exists, err := s.Log.Exists(ctx, nType, refID, leadMins, *scheduledFor)
 	if err != nil || exists {
 		return
 	}
@@ -515,16 +515,15 @@ func mondayOf(t time.Time) time.Time {
 }
 
 func (s *NotificationScheduler) dispatch(ctx context.Context) {
-	if s.Push == nil {
-		s.Logger.Warn("push_client_not_initialized")
-		return
-	}
-
 	now := time.Now()
 	pending, err := s.Log.ListPending(ctx, now)
 	if err != nil {
 		s.Logger.Error("scheduler_list_pending_error", slog.String("error", err.Error()))
 		return
+	}
+
+	if s.Push == nil && len(pending) > 0 {
+		s.Logger.Warn("push_client_not_initialized", slog.Int("pending_count", len(pending)))
 	}
 
 	for _, l := range pending {
@@ -535,7 +534,14 @@ func (s *NotificationScheduler) dispatch(ctx context.Context) {
 func (s *NotificationScheduler) dispatchOne(ctx context.Context, l domain.NotificationLog) {
 	// 1. Busca tokens ativos do usuário
 	tokens, err := s.Tokens.ListByUserID(ctx, l.UserID)
-	if err != nil || len(tokens) == 0 {
+	if err != nil {
+		msg := "failed to load active device tokens"
+		s.markNotificationFailed(ctx, l.ID, msg)
+		return
+	}
+	if len(tokens) == 0 {
+		msg := "no active device tokens"
+		s.markNotificationFailed(ctx, l.ID, msg)
 		return
 	}
 
@@ -569,6 +575,18 @@ func (s *NotificationScheduler) dispatchOne(ctx context.Context, l domain.Notifi
 	success := false
 	for i, t := range tokens {
 		if s.Push == nil {
+			errCode := "push_client_not_initialized"
+			errMsg := "fcm client not initialized"
+			s.recordDeliveryAttempt(
+				ctx,
+				l.ID,
+				l.UserID,
+				t.DeviceID,
+				i+1,
+				domain.NotificationDeliveryStatusFailed,
+				&errCode,
+				&errMsg,
+			)
 			continue
 		}
 
@@ -625,6 +643,12 @@ func (s *NotificationScheduler) dispatchOne(ctx context.Context, l domain.Notifi
 		if err := s.Log.UpdateStatus(ctx, l.ID, domain.NotificationStatusFailed, &msg); err != nil {
 			s.Logger.Error("update_status_failed_error", slog.String("error", err.Error()))
 		}
+	}
+}
+
+func (s *NotificationScheduler) markNotificationFailed(ctx context.Context, notificationID, message string) {
+	if err := s.Log.UpdateStatus(ctx, notificationID, domain.NotificationStatusFailed, &message); err != nil {
+		s.Logger.Error("update_status_failed_error", slog.String("error", err.Error()))
 	}
 }
 
