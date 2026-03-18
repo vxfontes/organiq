@@ -289,11 +289,19 @@ func main() {
 	}
 
 	go func() {
-		log.Info("server_start", slog.String("addr", cfg.Addr()))
+		log.Info("server_start_attempt", slog.String("addr", cfg.Addr()))
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Error("server_error", slog.String("error", err.Error()))
+			log.Error("server_listen_error", slog.String("error", err.Error()))
+			// Signal main goroutine to shutdown on listen error
+			shutdown <- syscall.SIGTERM
+		} else if err == http.ErrServerClosed {
+			log.Info("server_closed_gracefully")
 		}
 	}()
+
+	// Give server a moment to bind
+	time.Sleep(100 * time.Millisecond)
+	log.Info("server_listening", slog.String("addr", cfg.Addr()))
 
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
