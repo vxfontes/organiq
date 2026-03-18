@@ -69,7 +69,7 @@ func (r *NotificationLogRepository) ListByUserID(ctx context.Context, userID str
 		SELECT id, user_id, type, reference_id, title, body, lead_mins, status, scheduled_for, sent_at, read_at, error_msg, created_at
 		FROM organiq.notification_log
 		WHERE user_id = $1
-		  AND status IN ('sent', 'delivered', 'read')
+		  AND status IN ('sent', 'delivered', 'read', 'failed')
 		ORDER BY sent_at DESC NULLS LAST, created_at DESC, id DESC
 		LIMIT $2 OFFSET $3
 	`, userID, limit, offset)

@@ -625,3 +625,20 @@ type ListNotificationsResponse struct {
 	Items      []NotificationLogResponse `json:"items"`
 	NextCursor *string                   `json:"nextCursor,omitempty"`
 }
+
+type NotificationDeliveryAttemptResponse struct {
+	ID                string    `json:"id"`
+	NotificationLogID *string   `json:"notificationLogId,omitempty"`
+	DeviceID          string    `json:"deviceId"`
+	Provider          string    `json:"provider"`
+	AttemptNo         int       `json:"attemptNo"`
+	Status            string    `json:"status"`
+	ErrorCode         *string   `json:"errorCode,omitempty"`
+	ErrorMessage      *string   `json:"errorMessage,omitempty"`
+	CreatedAt         time.Time `json:"createdAt"`
+}
+
+type ListNotificationDeliveryAttemptsResponse struct {
+	Items      []NotificationDeliveryAttemptResponse `json:"items"`
+	NextCursor *string                               `json:"nextCursor,omitempty"`
+}

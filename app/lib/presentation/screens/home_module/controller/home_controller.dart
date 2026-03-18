@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:organiq/modules/events/data/models/agenda_output.dart';
@@ -32,6 +34,7 @@ import 'package:organiq/modules/tasks/domain/usecases/update_task_usecase.dart';
 import 'package:organiq/presentation/screens/home_module/components/timeline_item.dart';
 import 'package:organiq/presentation/screens/home_module/utils/home_controller_utils.dart';
 import 'package:organiq/shared/errors/failures.dart';
+import 'package:organiq/shared/services/widget/widget_bridge_service.dart';
 import 'package:organiq/shared/state/oq_state.dart';
 import 'package:organiq/shared/utils/date_time.dart';
 import 'package:organiq/shared/utils/text_utils.dart';
@@ -605,6 +608,7 @@ class HomeController implements OQController {
       total: data.dayProgress.routinesTotal,
       completed: data.dayProgress.routinesDone,
     );
+    unawaited(_syncWidgetData());
 
     agenda.value = const AgendaOutput(events: [], tasks: [], reminders: []);
     routines.value = const [];
@@ -999,6 +1003,38 @@ class HomeController implements OQController {
           ),
         );
     }
+  }
+
+  Future<void> _syncWidgetData() async {
+    final bridge = WidgetBridgeService.instance;
+
+    // Day progress
+    await bridge.syncDayProgress(
+      percent: dayProgressPercent,
+      tasksDone: tasksDone,
+      tasksTotal: tasksTotal,
+      routinesDone: routinesDone,
+      routinesTotal: routinesTotal,
+      remindersDone: remindersDoneToday,
+      remindersTotal: remindersTotalToday,
+    );
+
+    // Next actions timeline
+    final actionItems = nextActionsTimeline.take(8).map((item) {
+      return <String, dynamic>{
+        'id': item.id,
+        'title': item.title,
+        'type': item.type.name,
+        'scheduledTime': item.scheduledTime.toUtc().toIso8601String(),
+        'endScheduledTime': item.endScheduledTime?.toUtc().toIso8601String(),
+        'isCompleted': item.isCompleted,
+        'isOverdue': item.isOverdue,
+      };
+    }).toList(growable: false);
+    await bridge.syncNextActions(actionItems);
+
+    // Reminders
+    await bridge.syncReminders(upcomingReminders);
   }
 
   @override

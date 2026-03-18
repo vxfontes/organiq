@@ -15,6 +15,41 @@ import 'package:organiq/presentation/routes/app_routes.dart';
 import 'package:organiq/shared/services/push/firebase_bootstrap.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
+enum PushDeviceSyncErrorCode {
+  unsupportedPlatform,
+  permissionDenied,
+  tokenUnavailable,
+  registerFailed,
+  syncInProgress,
+}
+
+class PushDeviceSyncResult {
+  const PushDeviceSyncResult._({
+    required this.success,
+    this.errorCode,
+    this.details,
+  });
+
+  final bool success;
+  final PushDeviceSyncErrorCode? errorCode;
+  final String? details;
+
+  factory PushDeviceSyncResult.success() {
+    return const PushDeviceSyncResult._(success: true);
+  }
+
+  factory PushDeviceSyncResult.failure(
+    PushDeviceSyncErrorCode errorCode, {
+    String? details,
+  }) {
+    return PushDeviceSyncResult._(
+      success: false,
+      errorCode: errorCode,
+      details: details,
+    );
+  }
+}
+
 class PushNotificationService {
   PushNotificationService._();
 
@@ -213,7 +248,7 @@ class PushNotificationService {
 
   Future<void> _syncCurrentPushToken() async {
     try {
-      final token = await FirebaseMessaging.instance.getToken();
+      final token = await _resolvePushToken();
       _updatePushTokenLocally(token);
 
       if (token != null) {
@@ -242,7 +277,7 @@ class PushNotificationService {
 
     if (forceRefresh) {
       try {
-        final token = await FirebaseMessaging.instance.getToken();
+        final token = await _resolvePushToken();
         _updatePushTokenLocally(token);
         await registerDevice(forceRefresh: true, pushTokenOverride: token);
       } catch (e) {
@@ -258,16 +293,128 @@ class PushNotificationService {
     }
   }
 
+  Future<PushDeviceSyncResult> syncDeviceToken({
+    bool forceRefresh = true,
+  }) async {
+    if (!FirebaseBootstrap.isSupportedPlatform) {
+      return PushDeviceSyncResult.failure(
+        PushDeviceSyncErrorCode.unsupportedPlatform,
+      );
+    }
+
+    if (_deviceId == null) {
+      await _loadDeviceInfo();
+    }
+
+    final settings = await FirebaseMessaging.instance.getNotificationSettings();
+    if (settings.authorizationStatus == AuthorizationStatus.denied) {
+      return PushDeviceSyncResult.failure(
+        PushDeviceSyncErrorCode.permissionDenied,
+      );
+    }
+
+    String? token = _pushTokenNotifier.value;
+    if (forceRefresh || token == null || token.isEmpty) {
+      token = await _resolvePushToken();
+      if (token == null || token.isEmpty) {
+        return PushDeviceSyncResult.failure(
+          PushDeviceSyncErrorCode.tokenUnavailable,
+        );
+      }
+      _updatePushTokenLocally(token);
+    }
+
+    return _registerDeviceToken(
+      forceRefresh: forceRefresh,
+      pushTokenOverride: token,
+    );
+  }
+
+  Future<String?> _resolvePushToken() async {
+    if (Platform.isIOS) {
+      await _waitForApnsToken();
+    }
+
+    final maxAttempts = Platform.isIOS ? 6 : 2;
+    for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+      final token = await FirebaseMessaging.instance.getToken();
+      if (token != null && token.isNotEmpty) {
+        return token;
+      }
+
+      if (kDebugMode) {
+        print(
+          'PushNotificationService: getToken returned null attempt=$attempt/$maxAttempts',
+        );
+      }
+
+      if (attempt < maxAttempts) {
+        await Future<void>.delayed(const Duration(seconds: 1));
+      }
+    }
+
+    return null;
+  }
+
+  Future<void> _waitForApnsToken() async {
+    const maxAttempts = 10;
+    for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+      final apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+      if (apnsToken != null && apnsToken.isNotEmpty) {
+        if (kDebugMode) {
+          print('PushNotificationService: APNS token available.');
+        }
+        return;
+      }
+
+      if (kDebugMode) {
+        print(
+          'PushNotificationService: APNS token pending attempt=$attempt/$maxAttempts',
+        );
+      }
+
+      if (attempt < maxAttempts) {
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+      }
+    }
+  }
+
   Future<void> registerDevice({
     bool forceRefresh = false,
     String? pushTokenOverride,
   }) async {
-    if (_registering) return;
-    if (_repository == null) return;
-    if (_deviceId == null) return;
+    final syncResult = await _registerDeviceToken(
+      forceRefresh: forceRefresh,
+      pushTokenOverride: pushTokenOverride,
+    );
+    if (!syncResult.success && kDebugMode) {
+      print(
+        'PushNotificationService: register error code=${syncResult.errorCode} details=${syncResult.details}',
+      );
+    }
+  }
+
+  Future<PushDeviceSyncResult> _registerDeviceToken({
+    bool forceRefresh = false,
+    String? pushTokenOverride,
+  }) async {
+    if (_registering) {
+      return PushDeviceSyncResult.failure(
+        PushDeviceSyncErrorCode.syncInProgress,
+      );
+    }
+    if (_repository == null || _deviceId == null) {
+      return PushDeviceSyncResult.failure(
+        PushDeviceSyncErrorCode.registerFailed,
+      );
+    }
 
     final pushToken = pushTokenOverride ?? _pushTokenNotifier.value;
-    if (pushToken == null || pushToken.isEmpty) return;
+    if (pushToken == null || pushToken.isEmpty) {
+      return PushDeviceSyncResult.failure(
+        PushDeviceSyncErrorCode.tokenUnavailable,
+      );
+    }
 
     _registering = true;
     _pushTokenLoadingNotifier.value = true;
@@ -282,16 +429,18 @@ class PushNotificationService {
         appVersion: info.version,
       );
 
-      result.fold(
+      return result.fold(
         (failure) {
-          if (kDebugMode) {
-            print('PushNotificationService: register error=${failure.message}');
-          }
+          return PushDeviceSyncResult.failure(
+            PushDeviceSyncErrorCode.registerFailed,
+            details: failure.message,
+          );
         },
         (_) {
           if (forceRefresh) {
             _updatePushTokenLocally(pushToken);
           }
+          return PushDeviceSyncResult.success();
         },
       );
     } finally {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"strings"
 
 	"organiq/backend/internal/app/domain"
 	"organiq/backend/internal/app/repository"
@@ -11,11 +12,12 @@ import (
 )
 
 type NotificationUsecase struct {
-	Prefs  repository.NotificationPreferencesRepository
-	Log    repository.NotificationLogRepository
-	Tokens repository.DeviceTokenRepository
-	Config repository.AppConfigRepository
-	Push   *push.FCMClient
+	Prefs    repository.NotificationPreferencesRepository
+	Log      repository.NotificationLogRepository
+	Tokens   repository.DeviceTokenRepository
+	Attempts repository.NotificationDeliveryAttemptRepository
+	Config   repository.AppConfigRepository
+	Push     *push.FCMClient
 }
 
 func (uc *NotificationUsecase) GetDailySummaryToken(ctx context.Context, userID string) (string, error) {
@@ -51,6 +53,24 @@ func (uc *NotificationUsecase) MarkAllAsRead(ctx context.Context, userID string)
 	return uc.Log.MarkAllAsRead(ctx, userID)
 }
 
+func (uc *NotificationUsecase) ListDeliveryAttempts(
+	ctx context.Context,
+	userID, notificationLogID string,
+	limit, offset int,
+) ([]domain.NotificationDeliveryAttempt, error) {
+	if uc.Attempts == nil {
+		return nil, ErrDependencyMissing
+	}
+
+	var filterID *string
+	trimmed := strings.TrimSpace(notificationLogID)
+	if trimmed != "" {
+		filterID = &trimmed
+	}
+
+	return uc.Attempts.ListByUserID(ctx, userID, filterID, limit, offset)
+}
+
 func (uc *NotificationUsecase) SendTestNotification(ctx context.Context, userID string) error {
 	if uc.Push == nil {
 		return fmt.Errorf("push_not_initialized")
@@ -77,9 +97,22 @@ func (uc *NotificationUsecase) SendTestNotification(ctx context.Context, userID 
 		success  bool
 		attempts int
 	)
-	for _, t := range tokens {
+	for i, t := range tokens {
 		attempts++
 		if err := uc.Push.Send(ctx, t.PushToken, title, body, data); err != nil {
+			errCode := push.ErrorCode(err)
+			errMsg := err.Error()
+			uc.recordDeliveryAttempt(
+				ctx,
+				nil,
+				userID,
+				t.DeviceID,
+				i+1,
+				domain.NotificationDeliveryStatusFailed,
+				&errCode,
+				&errMsg,
+			)
+
 			if push.IsInvalidTokenError(err) {
 				if deactivateErr := uc.Tokens.Deactivate(ctx, t.PushToken); deactivateErr != nil {
 					slog.Error("push_test_deactivate_invalid_token_error",
@@ -96,6 +129,16 @@ func (uc *NotificationUsecase) SendTestNotification(ctx context.Context, userID 
 			continue
 		}
 
+		uc.recordDeliveryAttempt(
+			ctx,
+			nil,
+			userID,
+			t.DeviceID,
+			i+1,
+			domain.NotificationDeliveryStatusSuccess,
+			nil,
+			nil,
+		)
 		success = true
 	}
 
@@ -106,4 +149,34 @@ func (uc *NotificationUsecase) SendTestNotification(ctx context.Context, userID 
 		return fmt.Errorf("no_active_devices")
 	}
 	return lastErr
+}
+
+func (uc *NotificationUsecase) recordDeliveryAttempt(
+	ctx context.Context,
+	notificationLogID *string,
+	userID, deviceID string,
+	attemptNo int,
+	status domain.NotificationDeliveryStatus,
+	errorCode, errorMessage *string,
+) {
+	if uc.Attempts == nil {
+		return
+	}
+
+	_, err := uc.Attempts.Create(ctx, domain.NotificationDeliveryAttempt{
+		NotificationLogID: notificationLogID,
+		UserID:            userID,
+		DeviceID:          deviceID,
+		Provider:          "fcm",
+		AttemptNo:         attemptNo,
+		Status:            status,
+		ErrorCode:         errorCode,
+		ErrorMessage:      errorMessage,
+	})
+	if err != nil {
+		slog.Warn("push_delivery_attempt_log_error",
+			slog.String("error", err.Error()),
+			slog.String("device_id", deviceID),
+		)
+	}
 }

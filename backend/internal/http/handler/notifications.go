@@ -212,6 +212,53 @@ func (h *NotificationsHandler) ListNotifications(c *gin.Context) {
 	})
 }
 
+// ListDeliveryAttempts returns delivery attempts for troubleshooting push notifications.
+// @Summary Listar tentativas de entrega de notificacoes
+// @Tags Notifications
+// @Security BearerAuth
+// @Produce json
+// @Param notificationLogId query string false "Filtrar por notification log ID"
+// @Param limit query int false "Limite"
+// @Param offset query int false "Offset"
+// @Success 200 {object} dto.ListNotificationDeliveryAttemptsResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Router /v1/notifications/delivery-attempts [get]
+func (h *NotificationsHandler) ListDeliveryAttempts(c *gin.Context) {
+	userID, ok := getUserID(c)
+	if !ok {
+		return
+	}
+
+	notificationLogID := c.Query("notificationLogId")
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "50"))
+	offset, _ := strconv.Atoi(c.DefaultQuery("offset", "0"))
+
+	if limit < 1 {
+		limit = 50
+	}
+	if limit > 200 {
+		limit = 200
+	}
+	if offset < 0 {
+		offset = 0
+	}
+
+	items, err := h.Usecase.ListDeliveryAttempts(c.Request.Context(), userID, notificationLogID, limit, offset)
+	if err != nil {
+		writeUsecaseError(c, err)
+		return
+	}
+
+	respItems := make([]dto.NotificationDeliveryAttemptResponse, len(items))
+	for i, item := range items {
+		respItems[i] = toNotificationDeliveryAttemptResponse(item)
+	}
+
+	c.JSON(http.StatusOK, dto.ListNotificationDeliveryAttemptsResponse{
+		Items: respItems,
+	})
+}
+
 // MarkAsRead marks a notification as read.
 // @Summary Marcar notificação como lida
 // @Tags Notifications
@@ -276,6 +323,10 @@ func (h *NotificationsHandler) SendTestNotification(c *gin.Context) {
 			writeError(c, http.StatusBadRequest, "no_active_devices")
 			return
 		}
+		if errMsg == "push_not_initialized" {
+			writeError(c, http.StatusServiceUnavailable, "dependency_missing")
+			return
+		}
 		// Log detail server-side; keep client contract stable.
 		c.Error(err)
 		writeError(c, http.StatusBadGateway, "notification_send_failed")
@@ -287,24 +338,24 @@ func (h *NotificationsHandler) SendTestNotification(c *gin.Context) {
 
 func toNotificationPreferencesResponse(p domain.NotificationPreferences) dto.NotificationPreferencesResponse {
 	return dto.NotificationPreferencesResponse{
-		RemindersEnabled:  p.RemindersEnabled,
-		ReminderAtTime:    p.ReminderAtTime,
-		ReminderLeadMins:  p.ReminderLeadMins,
-		EventsEnabled:     p.EventsEnabled,
-		EventAtTime:       p.EventAtTime,
-		EventLeadMins:     p.EventLeadMins,
-		TasksEnabled:      p.TasksEnabled,
-		TaskAtTime:        p.TaskAtTime,
-		TaskLeadMins:      p.TaskLeadMins,
-		RoutinesEnabled:   p.RoutinesEnabled,
-		RoutineAtTime:     p.RoutineAtTime,
-		RoutineLeadMins:   p.RoutineLeadMins,
-		QuietHoursEnabled: p.QuietHoursEnabled,
-		QuietStart:        p.QuietStart,
-		QuietEnd:          p.QuietEnd,
+		RemindersEnabled:   p.RemindersEnabled,
+		ReminderAtTime:     p.ReminderAtTime,
+		ReminderLeadMins:   p.ReminderLeadMins,
+		EventsEnabled:      p.EventsEnabled,
+		EventAtTime:        p.EventAtTime,
+		EventLeadMins:      p.EventLeadMins,
+		TasksEnabled:       p.TasksEnabled,
+		TaskAtTime:         p.TaskAtTime,
+		TaskLeadMins:       p.TaskLeadMins,
+		RoutinesEnabled:    p.RoutinesEnabled,
+		RoutineAtTime:      p.RoutineAtTime,
+		RoutineLeadMins:    p.RoutineLeadMins,
+		QuietHoursEnabled:  p.QuietHoursEnabled,
+		QuietStart:         p.QuietStart,
+		QuietEnd:           p.QuietEnd,
 		DailyDigestEnabled: p.DailyDigestEnabled,
 		DailyDigestHour:    p.DailyDigestHour,
-		UpdatedAt:         p.UpdatedAt,
+		UpdatedAt:          p.UpdatedAt,
 	}
 }
 
@@ -321,5 +372,19 @@ func toNotificationLogResponse(l domain.NotificationLog) dto.NotificationLogResp
 		SentAt:       l.SentAt,
 		ReadAt:       l.ReadAt,
 		CreatedAt:    l.CreatedAt,
+	}
+}
+
+func toNotificationDeliveryAttemptResponse(a domain.NotificationDeliveryAttempt) dto.NotificationDeliveryAttemptResponse {
+	return dto.NotificationDeliveryAttemptResponse{
+		ID:                a.ID,
+		NotificationLogID: a.NotificationLogID,
+		DeviceID:          a.DeviceID,
+		Provider:          a.Provider,
+		AttemptNo:         a.AttemptNo,
+		Status:            string(a.Status),
+		ErrorCode:         a.ErrorCode,
+		ErrorMessage:      a.ErrorMessage,
+		CreatedAt:         a.CreatedAt,
 	}
 }

@@ -83,3 +83,23 @@ func IsInvalidTokenError(err error) bool {
 	return strings.Contains(msg, "registration token") ||
 		strings.Contains(msg, "requested entity was not found")
 }
+
+func ErrorCode(err error) string {
+	if err == nil {
+		return ""
+	}
+
+	if messaging.IsUnregistered(err) {
+		return "unregistered"
+	}
+
+	msg := strings.ToLower(err.Error())
+	switch {
+	case strings.Contains(msg, "registration token"), strings.Contains(msg, "invalid argument"):
+		return "invalid_token"
+	case strings.Contains(msg, "permission"), strings.Contains(msg, "auth"):
+		return "provider_auth_error"
+	default:
+		return "send_error"
+	}
+}

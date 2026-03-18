@@ -2,7 +2,7 @@ name: organiq
 description: "Inbox App."
 publish_to: 'none'
 
-version: 0.3.1+0003001 # 1.2.3 vira -> 0102003 / 11.20.30 vira -> 1120030
+version: 0.3.3+0003003 # 1.2.3 vira -> 0102003 / 11.20.30 vira -> 1120030
 
 environment:
   sdk: ^3.9.2
