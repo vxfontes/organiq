@@ -17,6 +17,7 @@ type NotificationScheduler struct {
 	Prefs     repository.NotificationPreferencesRepository
 	Log       repository.NotificationLogRepository
 	Tokens    repository.DeviceTokenRepository
+	Attempts  repository.NotificationDeliveryAttemptRepository
 	Users     repository.UserRepository
 	Reminders repository.ReminderRepository
 	Events    repository.EventRepository
@@ -514,6 +515,11 @@ func mondayOf(t time.Time) time.Time {
 }
 
 func (s *NotificationScheduler) dispatch(ctx context.Context) {
+	if s.Push == nil {
+		s.Logger.Warn("push_client_not_initialized")
+		return
+	}
+
 	now := time.Now()
 	pending, err := s.Log.ListPending(ctx, now)
 	if err != nil {
@@ -561,15 +567,38 @@ func (s *NotificationScheduler) dispatchOne(ctx context.Context, l domain.Notifi
 	}
 
 	success := false
-	for _, t := range tokens {
+	for i, t := range tokens {
 		if s.Push == nil {
 			continue
 		}
 
 		err := s.Push.Send(ctx, t.PushToken, l.Title, l.Body, data)
 		if err == nil {
+			s.recordDeliveryAttempt(
+				ctx,
+				l.ID,
+				l.UserID,
+				t.DeviceID,
+				i+1,
+				domain.NotificationDeliveryStatusSuccess,
+				nil,
+				nil,
+			)
 			success = true
 		} else {
+			errCode := push.ErrorCode(err)
+			errMsg := err.Error()
+			s.recordDeliveryAttempt(
+				ctx,
+				l.ID,
+				l.UserID,
+				t.DeviceID,
+				i+1,
+				domain.NotificationDeliveryStatusFailed,
+				&errCode,
+				&errMsg,
+			)
+
 			if push.IsInvalidTokenError(err) {
 				if deactivateErr := s.Tokens.Deactivate(ctx, t.PushToken); deactivateErr != nil {
 					s.Logger.Warn(
@@ -596,6 +625,37 @@ func (s *NotificationScheduler) dispatchOne(ctx context.Context, l domain.Notifi
 		if err := s.Log.UpdateStatus(ctx, l.ID, domain.NotificationStatusFailed, &msg); err != nil {
 			s.Logger.Error("update_status_failed_error", slog.String("error", err.Error()))
 		}
+	}
+}
+
+func (s *NotificationScheduler) recordDeliveryAttempt(
+	ctx context.Context,
+	notificationLogID, userID, deviceID string,
+	attemptNo int,
+	status domain.NotificationDeliveryStatus,
+	errorCode, errorMessage *string,
+) {
+	if s.Attempts == nil {
+		return
+	}
+
+	_, err := s.Attempts.Create(ctx, domain.NotificationDeliveryAttempt{
+		NotificationLogID: &notificationLogID,
+		UserID:            userID,
+		DeviceID:          deviceID,
+		Provider:          "fcm",
+		AttemptNo:         attemptNo,
+		Status:            status,
+		ErrorCode:         errorCode,
+		ErrorMessage:      errorMessage,
+	})
+	if err != nil {
+		s.Logger.Warn(
+			"push_delivery_attempt_log_error",
+			slog.String("error", err.Error()),
+			slog.String("notification_log_id", notificationLogID),
+			slog.String("device_id", deviceID),
+		)
 	}
 }
 

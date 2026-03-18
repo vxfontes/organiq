@@ -129,6 +129,7 @@ func NewRouter(cfg config.Config, log *slog.Logger, authHandler *handler.AuthHan
 			authGroup.GET("/notification-preferences/daily-summary-token", apiHandlers.Notifications.GetDailySummaryToken)
 			authGroup.POST("/notification-preferences/daily-summary-token/rotate", apiHandlers.Notifications.RotateDailySummaryToken)
 			authGroup.GET("/notifications", apiHandlers.Notifications.ListNotifications)
+			authGroup.GET("/notifications/delivery-attempts", apiHandlers.Notifications.ListDeliveryAttempts)
 			authGroup.POST("/notifications/test", apiHandlers.Notifications.SendTestNotification)
 			authGroup.PATCH("/notifications/:id/read", apiHandlers.Notifications.MarkAsRead)
 			authGroup.PATCH("/notifications/read-all", apiHandlers.Notifications.MarkAllAsRead)

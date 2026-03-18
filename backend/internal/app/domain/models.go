@@ -274,6 +274,13 @@ const (
 	NotificationTypeRoutine  NotificationType = "routine"
 )
 
+type NotificationDeliveryStatus string
+
+const (
+	NotificationDeliveryStatusSuccess NotificationDeliveryStatus = "success"
+	NotificationDeliveryStatusFailed  NotificationDeliveryStatus = "failed"
+)
+
 type DeviceToken struct {
 	ID         string
 	UserID     string
@@ -349,4 +356,17 @@ type NotificationLog struct {
 	ReadAt       *time.Time
 	ErrorMsg     *string
 	CreatedAt    time.Time
+}
+
+type NotificationDeliveryAttempt struct {
+	ID                string
+	NotificationLogID *string
+	UserID            string
+	DeviceID          string
+	Provider          string
+	AttemptNo         int
+	Status            NotificationDeliveryStatus
+	ErrorCode         *string
+	ErrorMessage      *string
+	CreatedAt         time.Time
 }

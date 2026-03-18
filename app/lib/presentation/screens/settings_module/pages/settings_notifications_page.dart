@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:organiq/modules/notifications/data/models/notification_preferences_model.dart';
 import 'package:organiq/presentation/screens/settings_module/components/settings_accordion_section.dart';
-import 'package:organiq/presentation/screens/settings_module/components/settings_notifications_device_content.dart';
 import 'package:organiq/presentation/screens/settings_module/components/settings_notifications_header_card.dart';
 import 'package:organiq/presentation/screens/settings_module/components/settings_notifications_module_definitions.dart';
 import 'package:organiq/presentation/screens/settings_module/components/settings_notifications_module_content.dart';
@@ -269,35 +268,6 @@ class _SettingsNotificationsPageState
             loading: controller.loadingDailySummaryToken.value,
             onRefresh: () => unawaited(controller.fetchDailySummaryToken()),
             onRotate: controller.rotateDailySummaryToken,
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildDeviceSection() {
-    return SettingsAccordionSection(
-      title: 'Dispositivo (push)',
-      subtitle:
-          'Receba alertas com o app fechado usando o token FCM do seu aparelho.',
-      collapsedSummary: 'Token do dispositivo e teste de entrega',
-      icon: OQIcon.notificationsNoneOutlined,
-      isExpanded: _isExpanded(SettingsNotificationsSection.device),
-      onTap: () => _toggleSection(SettingsNotificationsSection.device),
-      child: ValueListenableBuilder<bool>(
-        valueListenable: controller.sendingTest,
-        builder: (context, sending, _) {
-          return SettingsNotificationsDeviceContent(
-            sendingTest: sending,
-            onSendTest: () async {
-              final success = await controller.sendTestNotification();
-              if (success && mounted) {
-                OQSnackBar.success(
-                  this.context,
-                  'Notificacao de teste enviada!',
-                );
-              }
-            },
           );
         },
       ),

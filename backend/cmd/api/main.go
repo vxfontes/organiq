@@ -74,6 +74,7 @@ func main() {
 		deviceTokenRepo := postgres.NewDeviceTokenRepository(db)
 		notificationPrefsRepo := postgres.NewNotificationPreferencesRepository(db)
 		notificationLogRepo := postgres.NewNotificationLogRepository(db)
+		notificationDeliveryAttemptRepo := postgres.NewNotificationDeliveryAttemptRepository(db)
 		notificationTemplateRepo := postgres.NewNotificationTemplateRepository(db)
 		appConfigRepo := postgres.NewAppConfigRepository(db)
 		emailDigestRepo := postgres.NewEmailDigestRepository(db)
@@ -187,11 +188,12 @@ func main() {
 		}
 
 		notificationUC := &usecase.NotificationUsecase{
-			Prefs:  notificationPrefsRepo,
-			Log:    notificationLogRepo,
-			Tokens: deviceTokenRepo,
-			Config: appConfigRepo,
-			Push:   fcmClient,
+			Prefs:    notificationPrefsRepo,
+			Log:      notificationLogRepo,
+			Tokens:   deviceTokenRepo,
+			Attempts: notificationDeliveryAttemptRepo,
+			Config:   appConfigRepo,
+			Push:     fcmClient,
 		}
 
 		var digestHandler *handler.DigestHandler
@@ -243,6 +245,7 @@ func main() {
 			Prefs:     notificationPrefsRepo,
 			Log:       notificationLogRepo,
 			Tokens:    deviceTokenRepo,
+			Attempts:  notificationDeliveryAttemptRepo,
 			Users:     userRepo,
 			Reminders: reminderRepo,
 			Events:    eventRepo,
