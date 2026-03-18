@@ -11,6 +11,11 @@ Copie os exemplos de env e preencha as credenciais:
 - Variaveis chave:
   - `DATABASE_URL`
   - `JWT_SECRET`
+  - `CORS_ALLOWED_ORIGINS`
+  - `CORS_ALLOWED_METHODS`
+  - `CORS_ALLOWED_HEADERS`
+  - `CORS_EXPOSE_HEADERS`
+  - `CORS_ALLOW_CREDENTIALS`
   - `AI_PROVIDER`
   - `AI_API_KEY`
   - `AI_BASE_URL`
@@ -64,3 +69,4 @@ docker compose restart api
 - O roteamento usa Gin (`github.com/gin-gonic/gin`).
 - Em `APP_ENV=prod`, o Gin roda em `ReleaseMode`.
 - Se for a primeira vez rodando, pode ser necessario baixar deps: `go mod download`.
+- O backend responde CORS/preflight com base nas variaveis `CORS_*` e expoe `X-Request-Id` para diagnostico no frontend.

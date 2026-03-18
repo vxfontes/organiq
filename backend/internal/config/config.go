@@ -14,6 +14,11 @@ type Config struct {
 	Env                          string
 	Port                         int
 	RequestIDHeader              string
+	CORSAllowedOrigins           []string
+	CORSAllowedMethods           []string
+	CORSAllowedHeaders           []string
+	CORSExposeHeaders            []string
+	CORSAllowCredentials         bool
 	LogLevel                     string
 	DatabaseURL                  string
 	GoogleApplicationCredentials string
@@ -42,6 +47,11 @@ func Load() (Config, error) {
 		Env:                          getEnv("APP_ENV", "dev"),
 		Port:                         getEnvInt("PORT", 8080),
 		RequestIDHeader:              getEnv("REQUEST_ID_HEADER", "X-Request-Id"),
+		CORSAllowedOrigins:           getEnvCSV("CORS_ALLOWED_ORIGINS", []string{"http://localhost:3000", "http://127.0.0.1:3000"}),
+		CORSAllowedMethods:           getEnvCSV("CORS_ALLOWED_METHODS", []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"}),
+		CORSAllowedHeaders:           getEnvCSV("CORS_ALLOWED_HEADERS", []string{"Authorization", "Content-Type", "X-Request-Id"}),
+		CORSExposeHeaders:            getEnvCSV("CORS_EXPOSE_HEADERS", []string{"X-Request-Id"}),
+		CORSAllowCredentials:         getEnvBool("CORS_ALLOW_CREDENTIALS", false),
 		LogLevel:                     strings.ToLower(getEnv("LOG_LEVEL", "info")),
 		DatabaseURL:                  getEnv("DATABASE_URL", ""),
 		GoogleApplicationCredentials: getEnv("GOOGLE_APPLICATION_CREDENTIALS", ""),
@@ -115,6 +125,27 @@ func getEnvBool(key string, def bool) bool {
 		return def
 	}
 	return parsed
+}
+
+func getEnvCSV(key string, def []string) []string {
+	v := strings.TrimSpace(os.Getenv(key))
+	if v == "" {
+		return append([]string(nil), def...)
+	}
+
+	parts := strings.Split(v, ",")
+	out := make([]string, 0, len(parts))
+	for _, part := range parts {
+		trimmed := strings.TrimSpace(part)
+		if trimmed == "" {
+			continue
+		}
+		out = append(out, trimmed)
+	}
+	if len(out) == 0 {
+		return append([]string(nil), def...)
+	}
+	return out
 }
 
 // Addr returns server address based on Port.

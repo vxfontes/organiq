@@ -17,6 +17,13 @@ import (
 func NewRouter(cfg config.Config, log *slog.Logger, authHandler *handler.AuthHandler, apiHandlers *handler.APIHandlers, readinessCheckers ...handler.Checker) *gin.Engine {
 	engine := gin.New()
 	engine.Use(gin.Recovery())
+	engine.Use(middleware.CORS(middleware.CORSConfig{
+		AllowedOrigins:   cfg.CORSAllowedOrigins,
+		AllowedMethods:   cfg.CORSAllowedMethods,
+		AllowedHeaders:   cfg.CORSAllowedHeaders,
+		ExposeHeaders:    cfg.CORSExposeHeaders,
+		AllowCredentials: cfg.CORSAllowCredentials,
+	}))
 	engine.Use(middleware.RequestID(cfg.RequestIDHeader))
 	engine.Use(middleware.Logging(log))
 
