@@ -9,6 +9,7 @@ import 'package:organiq/presentation/screens/settings_module/components/settings
 import 'package:organiq/presentation/screens/settings_module/components/settings_notifications_quiet_hours_content.dart';
 import 'package:organiq/presentation/screens/settings_module/components/settings_notifications_daily_digest_content.dart';
 import 'package:organiq/presentation/screens/settings_module/components/settings_notifications_daily_summary_token_content.dart';
+import 'package:organiq/presentation/screens/settings_module/components/settings_notifications_device_content.dart';
 import 'package:organiq/presentation/screens/settings_module/controller/settings_notifications_controller.dart';
 import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/state/oq_state.dart';
@@ -114,29 +115,8 @@ class _SettingsNotificationsPageState
                   ..._buildModuleSections(prefs),
                   _buildQuietHoursSection(prefs),
                   _buildDailyDigestSection(prefs),
+                  _buildDeviceSection(),
                   _buildDailySummaryTokenSection(),
-                  // _buildDeviceSection(),
-                  // const SizedBox(height: 24),
-                  // ValueListenableBuilder<bool>(
-                  //   valueListenable: controller.sendingTest,
-                  //   builder: (_, sending, _) {
-                  //     return OQButton(
-                  //       label: 'Enviar notificação de teste',
-                  //       loading: sending,
-                  //       onPressed: () async {
-                  //         final success = await controller
-                  //             .sendTestNotification();
-                  //         if (success && mounted) {
-                  //           OQSnackBar.success(
-                  //             this.context,
-                  //             'Notificação de teste enviada!',
-                  //           );
-                  //         }
-                  //       },
-                  //       variant: OQButtonVariant.secondary,
-                  //     );
-                  //   },
-                  // ),
                 ],
               ),
             );
@@ -268,6 +248,34 @@ class _SettingsNotificationsPageState
             loading: controller.loadingDailySummaryToken.value,
             onRefresh: () => unawaited(controller.fetchDailySummaryToken()),
             onRotate: controller.rotateDailySummaryToken,
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildDeviceSection() {
+    return SettingsAccordionSection(
+      title: 'Dispositivo',
+      subtitle: 'Sincronização e teste de push deste aparelho.',
+      collapsedSummary: 'Sincronizar e enviar teste',
+      icon: OQIcon.notificationsActiveRounded,
+      isExpanded: _isExpanded(SettingsNotificationsSection.device),
+      onTap: () => _toggleSection(SettingsNotificationsSection.device),
+      child: ValueListenableBuilder<bool>(
+        valueListenable: controller.sendingTest,
+        builder: (context, sending, _) {
+          return SettingsNotificationsDeviceContent(
+            onSendTest: () async {
+              final success = await controller.sendTestNotification();
+              if (success && mounted) {
+                OQSnackBar.success(
+                  this.context,
+                  'Notificação de teste enviada!',
+                );
+              }
+            },
+            sendingTest: sending,
           );
         },
       ),
