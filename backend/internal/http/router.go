@@ -2,6 +2,7 @@ package http
 
 import (
 	"log/slog"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -19,6 +20,10 @@ func NewRouter(cfg config.Config, log *slog.Logger, authHandler *handler.AuthHan
 	engine.Use(middleware.RequestID(cfg.RequestIDHeader))
 	engine.Use(middleware.Logging(log))
 
+	engine.GET("/", handler.HealthHandler)
+	engine.HEAD("/", func(c *gin.Context) {
+		c.Status(http.StatusOK)
+	})
 	engine.GET("/healthz", handler.HealthHandler)
 	engine.GET("/readyz", handler.ReadinessHandler(readinessCheckers...))
 	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
