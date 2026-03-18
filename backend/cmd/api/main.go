@@ -288,6 +288,9 @@ func main() {
 		IdleTimeout:  cfg.IdleTimeout,
 	}
 
+	shutdown := make(chan os.Signal, 1)
+	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
+
 	go func() {
 		log.Info("server_start_attempt", slog.String("addr", cfg.Addr()))
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -303,8 +306,6 @@ func main() {
 	time.Sleep(100 * time.Millisecond)
 	log.Info("server_listening", slog.String("addr", cfg.Addr()))
 
-	shutdown := make(chan os.Signal, 1)
-	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
 	<-shutdown
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
