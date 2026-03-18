@@ -14,6 +14,6 @@ type NotificationLogRepository interface {
 	ListByUserID(ctx context.Context, userID string, limit, offset int) ([]domain.NotificationLog, error)
 	MarkAsRead(ctx context.Context, id, userID string) error
 	MarkAllAsRead(ctx context.Context, userID string) error
-	Exists(ctx context.Context, referenceID string, leadMins *int) (bool, error)
+	Exists(ctx context.Context, nType domain.NotificationType, referenceID string, leadMins *int, scheduledFor time.Time) (bool, error)
 	UpdateScheduledFor(ctx context.Context, id string, scheduledFor time.Time) error
 }

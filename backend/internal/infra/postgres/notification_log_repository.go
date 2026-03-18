@@ -69,7 +69,7 @@ func (r *NotificationLogRepository) ListByUserID(ctx context.Context, userID str
 		SELECT id, user_id, type, reference_id, title, body, lead_mins, status, scheduled_for, sent_at, read_at, error_msg, created_at
 		FROM organiq.notification_log
 		WHERE user_id = $1
-		  AND status IN ('sent', 'delivered', 'read', 'failed')
+		  AND status IN ('pending', 'sent', 'delivered', 'read', 'failed')
 		ORDER BY sent_at DESC NULLS LAST, created_at DESC, id DESC
 		LIMIT $2 OFFSET $3
 	`, userID, limit, offset)
@@ -110,15 +110,18 @@ func (r *NotificationLogRepository) MarkAllAsRead(ctx context.Context, userID st
 	return err
 }
 
-func (r *NotificationLogRepository) Exists(ctx context.Context, referenceID string, leadMins *int) (bool, error) {
+func (r *NotificationLogRepository) Exists(ctx context.Context, nType domain.NotificationType, referenceID string, leadMins *int, scheduledFor time.Time) (bool, error) {
 	var exists bool
 	err := r.db.QueryRowContext(ctx, `
-		SELECT EXISTS(
-			SELECT 1 FROM organiq.notification_log
-			WHERE reference_id = $1 AND (lead_mins = $2 OR (lead_mins IS NULL AND $2 IS NULL))
-			AND status IN ('pending', 'sent', 'delivered')
-		)
-	`, referenceID, leadMins).Scan(&exists)
+			SELECT EXISTS(
+				SELECT 1 FROM organiq.notification_log
+				WHERE type = $1
+				AND reference_id = $2
+				AND (lead_mins = $3 OR (lead_mins IS NULL AND $3 IS NULL))
+				AND scheduled_for = $4
+				AND status IN ('pending', 'sent', 'delivered')
+			)
+		`, nType, referenceID, leadMins, scheduledFor).Scan(&exists)
 	return exists, err
 }
 
