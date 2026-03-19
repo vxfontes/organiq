@@ -13,12 +13,13 @@ import (
 )
 
 type RoutineUsecase struct {
-	Routines    repository.RoutineRepository
-	Exceptions  repository.RoutineExceptionRepository
-	Completions repository.RoutineCompletionRepository
-	Users       repository.UserRepository
-	Flags       repository.FlagRepository
-	Subflags    repository.SubflagRepository
+	Routines        repository.RoutineRepository
+	Exceptions      repository.RoutineExceptionRepository
+	Completions     repository.RoutineCompletionRepository
+	Users           repository.UserRepository
+	Flags           repository.FlagRepository
+	Subflags        repository.SubflagRepository
+	NotificationLog repository.NotificationLogRepository
 }
 
 type RoutineInput struct {
@@ -280,7 +281,14 @@ func (uc *RoutineUsecase) Delete(ctx context.Context, userID, id string) error {
 	if userID == "" || id == "" {
 		return ErrMissingRequiredFields
 	}
-	return uc.Routines.Delete(ctx, userID, id)
+	if err := uc.Routines.Delete(ctx, userID, id); err != nil {
+		return err
+	}
+	// Cancel pending notifications for this routine
+	if uc.NotificationLog != nil {
+		_ = uc.NotificationLog.CancelPendingByReferenceID(ctx, id)
+	}
+	return nil
 }
 
 func (uc *RoutineUsecase) Get(ctx context.Context, userID, id string) (domain.Routine, error) {

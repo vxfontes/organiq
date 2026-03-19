@@ -16,4 +16,5 @@ type NotificationLogRepository interface {
 	MarkAllAsRead(ctx context.Context, userID string) error
 	Exists(ctx context.Context, nType domain.NotificationType, referenceID string, leadMins *int, scheduledFor time.Time) (bool, error)
 	UpdateScheduledFor(ctx context.Context, id string, scheduledFor time.Time) error
+	CancelPendingByReferenceID(ctx context.Context, referenceID string) error
 }

@@ -11,9 +11,10 @@ import (
 )
 
 type TaskUsecase struct {
-	Tasks    repository.TaskRepository
-	Flags    repository.FlagRepository
-	Subflags repository.SubflagRepository
+	Tasks           repository.TaskRepository
+	Flags           repository.FlagRepository
+	Subflags        repository.SubflagRepository
+	NotificationLog repository.NotificationLogRepository
 }
 
 type TaskUpdateInput struct {
@@ -110,7 +111,14 @@ func (uc *TaskUsecase) Delete(ctx context.Context, userID, id string) error {
 	if userID == "" || id == "" {
 		return ErrMissingRequiredFields
 	}
-	return uc.Tasks.Delete(ctx, userID, id)
+	if err := uc.Tasks.Delete(ctx, userID, id); err != nil {
+		return err
+	}
+	// Cancel pending notifications for this task
+	if uc.NotificationLog != nil {
+		_ = uc.NotificationLog.CancelPendingByReferenceID(ctx, id)
+	}
+	return nil
 }
 
 func (uc *TaskUsecase) Get(ctx context.Context, userID, id string) (domain.Task, error) {

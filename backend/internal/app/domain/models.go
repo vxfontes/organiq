@@ -263,6 +263,7 @@ const (
 	NotificationStatusFailed    NotificationStatus = "failed"
 	NotificationStatusDelivered NotificationStatus = "delivered"
 	NotificationStatusRead      NotificationStatus = "read"
+	NotificationStatusCancelled NotificationStatus = "cancelled"
 )
 
 type NotificationType string

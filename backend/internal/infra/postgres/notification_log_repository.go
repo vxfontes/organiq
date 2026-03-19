@@ -133,3 +133,12 @@ func (r *NotificationLogRepository) UpdateScheduledFor(ctx context.Context, id s
 	`, scheduledFor, id)
 	return err
 }
+
+func (r *NotificationLogRepository) CancelPendingByReferenceID(ctx context.Context, referenceID string) error {
+	_, err := r.db.ExecContext(ctx, `
+		UPDATE organiq.notification_log
+		SET status = 'cancelled'
+		WHERE reference_id = $1 AND status = 'pending'
+	`, referenceID)
+	return err
+}
