@@ -105,26 +105,34 @@ func main() {
 		flagUC := &usecase.FlagUsecase{Flags: flagRepo}
 		subflagUC := &usecase.SubflagUsecase{Subflags: subflagRepo, Flags: flagRepo}
 		ruleUC := &usecase.ContextRuleUsecase{Rules: ruleRepo, Flags: flagRepo, Subflags: subflagRepo}
-		taskUC := &usecase.TaskUsecase{Tasks: taskRepo, Flags: flagRepo, Subflags: subflagRepo}
+		taskUC := &usecase.TaskUsecase{
+			Tasks:           taskRepo,
+			Flags:           flagRepo,
+			Subflags:        subflagRepo,
+			NotificationLog: notificationLogRepo,
+		}
 		reminderUC := &usecase.ReminderUsecase{
-			Reminders: reminderRepo,
-			Flags:     flagRepo,
-			Subflags:  subflagRepo,
+			Reminders:       reminderRepo,
+			Flags:           flagRepo,
+			Subflags:        subflagRepo,
+			NotificationLog: notificationLogRepo,
 		}
 		eventUC := &usecase.EventUsecase{
-			Events:   eventRepo,
-			Flags:    flagRepo,
-			Subflags: subflagRepo,
+			Events:          eventRepo,
+			Flags:           flagRepo,
+			Subflags:        subflagRepo,
+			NotificationLog: notificationLogRepo,
 		}
 		shoppingListUC := &usecase.ShoppingListUsecase{Lists: shoppingListRepo}
 		shoppingItemUC := &usecase.ShoppingItemUsecase{Items: shoppingItemRepo}
 		routineUC := &usecase.RoutineUsecase{
-			Routines:    routineRepo,
-			Exceptions:  routineExceptionRepo,
-			Completions: routineCompletionRepo,
-			Users:       userRepo,
-			Flags:       flagRepo,
-			Subflags:    subflagRepo,
+			Routines:        routineRepo,
+			Exceptions:      routineExceptionRepo,
+			Completions:     routineCompletionRepo,
+			Users:           userRepo,
+			Flags:           flagRepo,
+			Subflags:        subflagRepo,
+			NotificationLog: notificationLogRepo,
 		}
 		agendaUC := usecase.NewAgendaUsecase(agendaRepo)
 		homeUC := &usecase.HomeUsecase{
