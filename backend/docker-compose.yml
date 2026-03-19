@@ -16,11 +16,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: ${APP_ENV}
     container_name: organiq_api
     env_file:
       - ./.env
     environment:
-      APP_ENV: dev
+      APP_ENV: ${APP_ENV}
       PORT: 8080
       DATABASE_URL: ${DATABASE_URL}
       GOOGLE_APPLICATION_CREDENTIALS: /config/firebase-admin.json
