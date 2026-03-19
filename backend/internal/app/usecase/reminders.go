@@ -11,9 +11,10 @@ import (
 )
 
 type ReminderUsecase struct {
-	Reminders repository.ReminderRepository
-	Flags     repository.FlagRepository
-	Subflags  repository.SubflagRepository
+	Reminders       repository.ReminderRepository
+	Flags           repository.FlagRepository
+	Subflags        repository.SubflagRepository
+	NotificationLog repository.NotificationLogRepository
 }
 
 type ReminderUpdateInput struct {
@@ -105,7 +106,14 @@ func (uc *ReminderUsecase) Delete(ctx context.Context, userID, id string) error 
 	if userID == "" || id == "" {
 		return ErrMissingRequiredFields
 	}
-	return uc.Reminders.Delete(ctx, userID, id)
+	if err := uc.Reminders.Delete(ctx, userID, id); err != nil {
+		return err
+	}
+	// Cancel pending notifications for this reminder
+	if uc.NotificationLog != nil {
+		_ = uc.NotificationLog.CancelPendingByReferenceID(ctx, id)
+	}
+	return nil
 }
 
 func (uc *ReminderUsecase) Get(ctx context.Context, userID, id string) (domain.Reminder, error) {

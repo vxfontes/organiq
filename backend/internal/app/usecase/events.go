@@ -11,9 +11,10 @@ import (
 )
 
 type EventUsecase struct {
-	Events   repository.EventRepository
-	Flags    repository.FlagRepository
-	Subflags repository.SubflagRepository
+	Events          repository.EventRepository
+	Flags           repository.FlagRepository
+	Subflags        repository.SubflagRepository
+	NotificationLog repository.NotificationLogRepository
 }
 
 type EventUpdateInput struct {
@@ -113,7 +114,14 @@ func (uc *EventUsecase) Delete(ctx context.Context, userID, id string) error {
 	if userID == "" || id == "" {
 		return ErrMissingRequiredFields
 	}
-	return uc.Events.Delete(ctx, userID, id)
+	if err := uc.Events.Delete(ctx, userID, id); err != nil {
+		return err
+	}
+	// Cancel pending notifications for this event
+	if uc.NotificationLog != nil {
+		_ = uc.NotificationLog.CancelPendingByReferenceID(ctx, id)
+	}
+	return nil
 }
 
 func (uc *EventUsecase) Get(ctx context.Context, userID, id string) (domain.Event, error) {
