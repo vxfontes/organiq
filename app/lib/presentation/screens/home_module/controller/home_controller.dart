@@ -459,6 +459,8 @@ class HomeController implements OQController {
   }
 
   Future<void> load() async {
+    // First, consume any tasks completed via widgets since last app open
+    await _consumeWidgetCompletedTasks();
     await _fetch(initialLoad: true);
   }
 
@@ -1056,6 +1058,9 @@ class HomeController implements OQController {
   Future<void> _syncWidgetData() async {
     final bridge = WidgetBridgeService.instance;
 
+    // Tasks
+    await bridge.syncTasks(agenda.value.tasks);
+
     // Day progress
     await bridge.syncDayProgress(
       percent: dayProgressPercent,
@@ -1066,6 +1071,21 @@ class HomeController implements OQController {
       remindersDone: remindersDoneToday,
       remindersTotal: remindersTotalToday,
     );
+
+    // Build color cache for timeline items (performance optimization)
+    final colorCache = <String, String?>{};
+    for (final task in agenda.value.tasks) {
+      colorCache[task.id] = task.subflagColor ?? task.flagColor;
+    }
+    for (final event in agenda.value.events) {
+      colorCache[event.id] = event.subflagColor ?? event.flagColor;
+    }
+    for (final reminder in agenda.value.reminders) {
+      colorCache[reminder.id] = reminder.subflagColor ?? reminder.flagColor;
+    }
+    for (final routine in routines.value) {
+      colorCache[routine.id] = routine.subflagColor ?? routine.flagColor ?? routine.color;
+    }
 
     // Next actions timeline
     final actionItems = widgetNextActionsTimeline.take(8).map((item) {
@@ -1082,7 +1102,7 @@ class HomeController implements OQController {
       if (subtitle != null && subtitle.isNotEmpty) {
         mapped['subtitle'] = subtitle;
       }
-      final accentColor = _timelineAccentColor(item);
+      final accentColor = colorCache[item.id];
       if (accentColor != null && accentColor.trim().isNotEmpty) {
         mapped['accentColor'] = accentColor.trim();
       }
@@ -1094,32 +1114,43 @@ class HomeController implements OQController {
     await bridge.syncReminders(upcomingReminders);
   }
 
-  String? _timelineAccentColor(TimelineItem item) {
-    switch (item.type) {
-      case TimelineItemType.task:
-        for (final task in agenda.value.tasks) {
-          if (task.id != item.id) continue;
-          return task.subflagColor ?? task.flagColor;
-        }
-        return null;
-      case TimelineItemType.reminder:
-        for (final reminder in agenda.value.reminders) {
-          if (reminder.id != item.id) continue;
-          return reminder.subflagColor ?? reminder.flagColor;
-        }
-        return null;
-      case TimelineItemType.event:
-        for (final event in agenda.value.events) {
-          if (event.id != item.id) continue;
-          return event.subflagColor ?? event.flagColor;
-        }
-        return null;
-      case TimelineItemType.routine:
-        for (final routine in routines.value) {
-          if (routine.id != item.id) continue;
-          return routine.subflagColor ?? routine.flagColor ?? routine.color;
-        }
-        return null;
+  /// Processes tasks completed via iOS widgets and syncs them back to the server.
+  Future<void> _consumeWidgetCompletedTasks() async {
+    final bridge = WidgetBridgeService.instance;
+    final completedIds = await bridge.consumeCompletedTaskIds();
+
+    for (final id in completedIds) {
+      // Find the task in current agenda
+      final task = agenda.value.tasks.firstWhere(
+        (t) => t.id == id,
+        orElse: () => TaskOutput(
+          id: '',
+          title: '',
+          isDone: false,
+          createdAt: DateTime.now(),
+        ),
+      );
+
+      if (task.id.isEmpty) continue;
+
+      // Mark as done
+      await _updateTaskUsecase(
+        TaskUpdateInput(id: id, status: 'done'),
+      ).then((result) {
+        result.fold(
+          (failure) {
+            if (kDebugMode) {
+              debugPrint('Failed to sync widget-completed task $id: ${failure.message}');
+            }
+          },
+          (_) => null,
+        );
+      });
+    }
+
+    // Refresh data after syncing
+    if (completedIds.isNotEmpty) {
+      await fetchData();
     }
   }
 

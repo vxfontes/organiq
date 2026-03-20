@@ -89,10 +89,15 @@ import WidgetKit
       return mapped
     }
 
-    guard let data = try? JSONSerialization.data(withJSONObject: tasks) else { return false }
-    defaults.set(data, forKey: tasksKey)
-    reloadAllWidgetTimelines()
-    return true
+    do {
+      let data = try JSONSerialization.data(withJSONObject: tasks)
+      defaults.set(data, forKey: tasksKey)
+      reloadAllWidgetTimelines()
+      return true
+    } catch {
+      print("WidgetBridge.syncTasks serialization failed: \(error)")
+      return false
+    }
   }
 
   private func consumeCompletedTaskIDs() -> [String] {
@@ -122,10 +127,15 @@ import WidgetKit
       "remindersTotal":arguments["remindersTotal"]as? Int    ?? 0,
     ]
 
-    guard let data = try? JSONSerialization.data(withJSONObject: payload) else { return false }
-    defaults.set(data, forKey: dayProgressKey)
-    reloadAllWidgetTimelines()
-    return true
+    do {
+      let data = try JSONSerialization.data(withJSONObject: payload)
+      defaults.set(data, forKey: dayProgressKey)
+      reloadAllWidgetTimelines()
+      return true
+    } catch {
+      print("WidgetBridge.syncDayProgress serialization failed: \(error)")
+      return false
+    }
   }
 
   // MARK: - Next Actions
@@ -158,10 +168,15 @@ import WidgetKit
       return mapped
     }
 
-    guard let data = try? JSONSerialization.data(withJSONObject: items) else { return false }
-    defaults.set(data, forKey: nextActionsKey)
-    reloadAllWidgetTimelines()
-    return true
+    do {
+      let data = try JSONSerialization.data(withJSONObject: items)
+      defaults.set(data, forKey: nextActionsKey)
+      reloadAllWidgetTimelines()
+      return true
+    } catch {
+      print("WidgetBridge.syncNextActions serialization failed: \(error)")
+      return false
+    }
   }
 
   // MARK: - Reminders
@@ -184,10 +199,15 @@ import WidgetKit
       return mapped
     }
 
-    guard let data = try? JSONSerialization.data(withJSONObject: reminders) else { return false }
-    defaults.set(data, forKey: remindersKey)
-    reloadAllWidgetTimelines()
-    return true
+    do {
+      let data = try JSONSerialization.data(withJSONObject: reminders)
+      defaults.set(data, forKey: remindersKey)
+      reloadAllWidgetTimelines()
+      return true
+    } catch {
+      print("WidgetBridge.syncReminders serialization failed: \(error)")
+      return false
+    }
   }
 
   // MARK: - Helpers

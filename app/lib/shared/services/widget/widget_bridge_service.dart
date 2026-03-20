@@ -4,6 +4,19 @@ import 'package:flutter/services.dart';
 import 'package:organiq/modules/reminders/data/models/reminder_output.dart';
 import 'package:organiq/modules/tasks/data/models/task_output.dart';
 
+/// Widget limits for iOS home screen widgets.
+class _WidgetLimits {
+  static const tasks = 10;
+  static const nextActions = 8;
+  static const reminders = 5;
+}
+
+/// Bridge service for syncing data to iOS home screen widgets.
+///
+/// This service communicates with native iOS widgets via MethodChannel,
+/// storing data in a shared UserDefaults container (App Group).
+///
+/// All methods gracefully fail on non-iOS platforms or when bridge is unavailable.
 class WidgetBridgeService {
   WidgetBridgeService._();
 
@@ -16,6 +29,12 @@ class WidgetBridgeService {
 
   // ─── Tasks ────────────────────────────────────────────────────────────────
 
+  /// Syncs tasks to iOS widgets.
+  ///
+  /// Only incomplete tasks are sent, ordered by priority (overdue → today → future).
+  /// Maximum of [_WidgetLimits.tasks] tasks are kept in the widget store.
+  ///
+  /// Called automatically by [HomeController] after data refresh.
   Future<void> syncTasks(List<TaskOutput> tasks) async {
     if (!_isSupported) return;
 
@@ -57,7 +76,7 @@ class WidgetBridgeService {
       });
 
     final payload = ordered
-        .take(10)
+        .take(_WidgetLimits.tasks)
         .map(
           (task) => <String, dynamic>{
             'id': task.id,
@@ -72,11 +91,19 @@ class WidgetBridgeService {
 
     try {
       await _channel.invokeMethod<bool>('syncTasks', {'tasks': payload});
-    } on PlatformException {
-      // Silently ignore bridge failures to avoid breaking core app flows.
+    } on PlatformException catch (e) {
+      if (kDebugMode) {
+        debugPrint('WidgetBridge.syncTasks failed: ${e.code} ${e.message}');
+      }
     }
   }
 
+  /// Consumes and clears the list of task IDs completed via widgets.
+  ///
+  /// Returns a list of task IDs that were marked as done in iOS widgets
+  /// since the last call. The native side clears the list after returning.
+  ///
+  /// Should be called when the app resumes or after syncing tasks.
   Future<List<String>> consumeCompletedTaskIds() async {
     if (!_isSupported) return const <String>[];
 
@@ -99,6 +126,10 @@ class WidgetBridgeService {
 
   // ─── Day Progress ─────────────────────────────────────────────────────────
 
+  /// Syncs daily progress metrics to iOS widgets.
+  ///
+  /// Sends aggregated completion stats for tasks, routines, and reminders.
+  /// The [percent] value should be between 0.0 and 1.0.
   Future<void> syncDayProgress({
     required double percent,
     required int tasksDone,
@@ -120,38 +151,51 @@ class WidgetBridgeService {
         'remindersDone': remindersDone,
         'remindersTotal': remindersTotal,
       });
-    } on PlatformException {
-      // Silently ignore.
+    } on PlatformException catch (e) {
+      if (kDebugMode) {
+        debugPrint('WidgetBridge.syncDayProgress failed: ${e.code} ${e.message}');
+      }
     }
   }
 
   // ─── Next Actions ─────────────────────────────────────────────────────────
 
-  /// [items] is a list of maps with keys:
-  /// id, title, type (event|reminder|routine|task),
-  /// scheduledTime (ISO8601 or null), endScheduledTime (ISO8601 or null),
-  /// isCompleted, isOverdue, subtitle (optional), accentColor (optional).
+  /// Syncs upcoming timeline items to iOS widgets.
+  ///
+  /// [items] should contain maps with keys:
+  /// - id, title, type (event|reminder|routine|task)
+  /// - scheduledTime (ISO8601 or null), endScheduledTime (ISO8601 or null)
+  /// - isCompleted, isOverdue
+  /// - subtitle (optional), accentColor (optional)
+  ///
+  /// Maximum of [_WidgetLimits.nextActions] items are sent.
   Future<void> syncNextActions(List<Map<String, dynamic>> items) async {
     if (!_isSupported) return;
 
     try {
       await _channel.invokeMethod<void>(
         'syncNextActions',
-        {'items': items.take(8).toList(growable: false)},
+        {'items': items.take(_WidgetLimits.nextActions).toList(growable: false)},
       );
-    } on PlatformException {
-      // Silently ignore.
+    } on PlatformException catch (e) {
+      if (kDebugMode) {
+        debugPrint('WidgetBridge.syncNextActions failed: ${e.code} ${e.message}');
+      }
     }
   }
 
   // ─── Reminders ────────────────────────────────────────────────────────────
 
+  /// Syncs upcoming reminders to iOS widgets.
+  ///
+  /// Only incomplete reminders are sent.
+  /// Maximum of [_WidgetLimits.reminders] reminders are kept.
   Future<void> syncReminders(List<ReminderOutput> reminders) async {
     if (!_isSupported) return;
 
     final payload = reminders
         .where((r) => !r.isDone && r.id.trim().isNotEmpty)
-        .take(5)
+        .take(_WidgetLimits.reminders)
         .map(
           (r) => {
             'id': r.id,
@@ -166,8 +210,14 @@ class WidgetBridgeService {
         'syncReminders',
         {'reminders': payload},
       );
-    } on PlatformException {
-      // Silently ignore.
+    } on PlatformException catch (e) {
+      if (kDebugMode) {
+        debugPrint('WidgetBridge.syncReminders failed: ${e.code} ${e.message}');
+      }
     }
   }
+
+  /// Helper to validate non-empty trimmed strings.
+  bool _isValidId(String? value) =>
+      value?.trim().isNotEmpty ?? false;
 }
