@@ -4,11 +4,20 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="97263e04-66bb-432b-b882-aae4b962cb83" name="Changes" comment="- ajuste de widget a seguir">
+    <list default="true" id="97263e04-66bb-432b-b882-aae4b962cb83" name="Changes" comment="- ajustes encryption">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/ios/OrganiqWidget/DayProgressWidget.swift" beforeDir="false" afterPath="$PROJECT_DIR$/app/ios/OrganiqWidget/DayProgressWidget.swift" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/ios/OrganiqWidget/NextActionsWidget.swift" beforeDir="false" afterPath="$PROJECT_DIR$/app/ios/OrganiqWidget/NextActionsWidget.swift" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/ios/OrganiqWidget/OrganiqWidget.swift" beforeDir="false" afterPath="$PROJECT_DIR$/app/ios/OrganiqWidget/OrganiqWidget.swift" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/ios/OrganiqWidget/OrganiqWidgetBundle.swift" beforeDir="false" afterPath="$PROJECT_DIR$/app/ios/OrganiqWidget/OrganiqWidgetBundle.swift" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/ios/OrganiqWidget/OrganiqWidgetSharedStore.swift" beforeDir="false" afterPath="$PROJECT_DIR$/app/ios/OrganiqWidget/OrganiqWidgetSharedStore.swift" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/ios/OrganiqWidget/RemindersWidget.swift" beforeDir="false" afterPath="$PROJECT_DIR$/app/ios/OrganiqWidget/RemindersWidget.swift" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/ios/Runner.xcodeproj/project.pbxproj" beforeDir="false" afterPath="$PROJECT_DIR$/app/ios/Runner.xcodeproj/project.pbxproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/ios/Runner/AppDelegate.swift" beforeDir="false" afterPath="$PROJECT_DIR$/app/ios/Runner/AppDelegate.swift" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/lib/presentation/screens/home_module/controller/home_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/app/lib/presentation/screens/home_module/controller/home_controller.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/lib/shared/components/oq_lib/oq_next_action_card.dart" beforeDir="false" afterPath="$PROJECT_DIR$/app/lib/shared/components/oq_lib/oq_next_action_card.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/lib/shared/services/http/app_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/app/lib/shared/services/http/app_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/lib/shared/services/widget/widget_bridge_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/app/lib/shared/services/widget/widget_bridge_service.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,6 +44,14 @@
             <RecentBranchesForRepo>
               <option name="branches">
                 <list>
+                  <RecentBranch>
+                    <option name="branchName" value="fix/melhorias_widgets" />
+                    <option name="lastUsedInstant" value="1774019676" />
+                  </RecentBranch>
+                  <RecentBranch>
+                    <option name="branchName" value="rc/0.5.0" />
+                    <option name="lastUsedInstant" value="1774019650" />
+                  </RecentBranch>
                   <RecentBranch>
                     <option name="branchName" value="main" />
                     <option name="lastUsedInstant" value="1773973328" />
@@ -68,11 +85,10 @@
     "RunOnceActivity.cidr.known.project.marker": "true",
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.readMode.enableVisualFormatting": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "dart.analysis.tool.window.visible": "false",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "fix/melhorias__widgets",
     "io.flutter.reload.alreadyRun": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "/Users/vanessa/Desktop/coding/personal/organiq",
@@ -110,13 +126,31 @@
       <option name="project" value="LOCAL" />
       <updated>1773974362934</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="- ajustes da home">
+      <option name="closed" value="true" />
+      <created>1773974717392</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1773974717392</updated>
+    </task>
+    <task id="LOCAL-00004" summary="- ajustes encryption">
+      <option name="closed" value="true" />
+      <created>1774019583430</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1774019583430</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="- ajuste de tasks com subflags e home bugada" />
     <MESSAGE value="- ajuste de widget a seguir" />
-    <option name="LAST_COMMIT_MESSAGE" value="- ajuste de widget a seguir" />
+    <MESSAGE value="- ajustes da home" />
+    <MESSAGE value="- ajustes encryption" />
+    <option name="LAST_COMMIT_MESSAGE" value="- ajustes encryption" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

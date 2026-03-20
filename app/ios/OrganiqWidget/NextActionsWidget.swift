@@ -7,7 +7,7 @@ struct NextActionsEntry: TimelineEntry {
 
   static var placeholder: NextActionsEntry {
     NextActionsEntry(date: Date(), items: [
-      NextActionData(id: "1", title: "Reuniao com time", type: "event",
+      NextActionData(id: "1", title: "Reunião com time", type: "event",
                      scheduledTime: nil, endScheduledTime: nil, isCompleted: false, isOverdue: false),
       NextActionData(id: "2", title: "Pagar aluguel", type: "reminder",
                      scheduledTime: nil, endScheduledTime: nil, isCompleted: false, isOverdue: false),
@@ -39,8 +39,15 @@ struct NextActionsWidgetView: View {
   @Environment(\.self) private var env
 
   private var isLarge: Bool { family == .systemLarge }
-  private var maxItems: Int { isLarge ? 6 : 4 }
+  private var maxItems: Int {
+    switch family {
+    case .systemLarge: return 6
+    case .systemMedium: return 2
+    default: return 2
+    }
+  }
   private var rowSpacing: CGFloat { isLarge ? 5 : 4 }
+  private var accentRailHeight: CGFloat { isLarge ? 26 : 22 }
   private var displayedItems: ArraySlice<NextActionData> { orderedItems.prefix(maxItems) }
   private var hiddenCount: Int { max(orderedItems.count - maxItems, 0) }
   private var widgetBackgroundColor: Color { isAccentedRendering ? .black : .organiqBackground }
@@ -126,7 +133,7 @@ struct NextActionsWidgetView: View {
       Text("Tudo certo!")
         .font(.system(size: isLarge ? 13 : 12, weight: .semibold))
         .foregroundColor(.organiqText)
-      Text("Nenhuma acao pendente")
+      Text("Nenhuma ação pendente")
         .font(.system(size: isLarge ? 11 : 10))
         .foregroundColor(.organiqTextMuted)
       Spacer()
@@ -137,7 +144,7 @@ struct NextActionsWidgetView: View {
   private var footerRow: some View {
     HStack(spacing: 6) {
       if let first = displayedItems.first, let end = timeLabel(for: first.endScheduledTime) {
-        Text("termina as \(end)")
+        Text("termina às \(end)")
           .font(.system(size: 9, weight: .medium))
           .foregroundColor(.organiqTextMuted)
       }
@@ -219,9 +226,9 @@ struct NextActionsWidgetView: View {
     .overlay(alignment: .leading) {
       RoundedRectangle(cornerRadius: 2, style: .continuous)
         .fill(accent)
-        .frame(width: 4)
+        .frame(width: 4, height: accentRailHeight)
         .padding(.leading, 1)
-        .padding(.vertical, 1)
+        .padding(.top, isLarge ? 8 : 7)
     }
     .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
   }
@@ -271,9 +278,9 @@ struct NextActionsWidgetView: View {
     .overlay(alignment: .leading) {
       RoundedRectangle(cornerRadius: 2, style: .continuous)
         .fill(accent.opacity(0.3))
-        .frame(width: 4)
+        .frame(width: 4, height: accentRailHeight)
         .padding(.leading, 1)
-        .padding(.vertical, 1)
+        .padding(.top, isLarge ? 8 : 7)
     }
     .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
   }
@@ -322,7 +329,7 @@ struct NextActionsWidgetView: View {
       return subtitle
     }
     if let end = timeLabel(for: item.endScheduledTime) {
-      return "Termino: \(end)"
+      return "Término: \(end)"
     }
     return nil
   }
@@ -381,8 +388,8 @@ struct NextActionsWidget: Widget {
       NextActionsWidgetView(entry: entry)
     }
     .containerBackgroundRemovable(false)
-    .configurationDisplayName("Proximas Acoes")
-    .description("Sua timeline de acoes de hoje.")
+    .configurationDisplayName("Próximas Ações")
+    .description("Sua timeline de ações de hoje.")
     .supportedFamilies([.systemMedium, .systemLarge])
   }
 }

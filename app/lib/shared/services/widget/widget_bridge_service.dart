@@ -128,7 +128,7 @@ class WidgetBridgeService {
 
   /// Syncs daily progress metrics to iOS widgets.
   ///
-  /// Sends aggregated completion stats for tasks, routines, and reminders.
+  /// Sends aggregated completion stats for tasks, routines, reminders e eventos.
   /// The [percent] value should be between 0.0 and 1.0.
   Future<void> syncDayProgress({
     required double percent,
@@ -136,8 +136,11 @@ class WidgetBridgeService {
     required int tasksTotal,
     required int routinesDone,
     required int routinesTotal,
+    required int routinesOverdue,
     required int remindersDone,
     required int remindersTotal,
+    required int eventsDone,
+    required int eventsTotal,
   }) async {
     if (!_isSupported) return;
 
@@ -148,8 +151,11 @@ class WidgetBridgeService {
         'tasksTotal': tasksTotal,
         'routinesDone': routinesDone,
         'routinesTotal': routinesTotal,
+        'routinesOverdue': routinesOverdue,
         'remindersDone': remindersDone,
         'remindersTotal': remindersTotal,
+        'eventsDone': eventsDone,
+        'eventsTotal': eventsTotal,
       });
     } on PlatformException catch (e) {
       if (kDebugMode) {
@@ -184,9 +190,31 @@ class WidgetBridgeService {
     }
   }
 
+  // ─── Now Playing ───────────────────────────────────────────────────────────
+
+  /// Syncs "Acontecendo agora" payload to iOS widgets.
+  ///
+  /// Expected payload:
+  /// {
+  ///   "current": { ...timeline item map... } | null,
+  ///   "next":    { ...timeline item map... } | null,
+  ///   "upcoming": [ ...timeline item map..., ... ] // up to 2 items
+  /// }
+  Future<void> syncNowPlaying(Map<String, dynamic> payload) async {
+    if (!_isSupported) return;
+
+    try {
+      await _channel.invokeMethod<void>('syncNowPlaying', payload);
+    } on PlatformException catch (e) {
+      if (kDebugMode) {
+        debugPrint('WidgetBridge.syncNowPlaying failed: ${e.code} ${e.message}');
+      }
+    }
+  }
+
   // ─── Reminders ────────────────────────────────────────────────────────────
 
-  /// Syncs upcoming reminders to iOS widgets.
+  /// Syncs reminders (incluindo atrasados) to iOS widgets.
   ///
   /// Only incomplete reminders are sent.
   /// Maximum of [_WidgetLimits.reminders] reminders are kept.
@@ -217,7 +245,4 @@ class WidgetBridgeService {
     }
   }
 
-  /// Helper to validate non-empty trimmed strings.
-  bool _isValidId(String? value) =>
-      value?.trim().isNotEmpty ?? false;
 }

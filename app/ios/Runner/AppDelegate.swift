@@ -13,6 +13,7 @@ import WidgetKit
   private let dayProgressKey             = "widget_day_progress_v1"
   private let nextActionsKey             = "widget_next_actions_v1"
   private let remindersKey               = "widget_reminders_v1"
+  private let nowPlayingKey              = "widget_now_playing_v1"
 
   override func application(
     _ application: UIApplication,
@@ -56,6 +57,9 @@ import WidgetKit
 
       case "syncReminders":
         result(self.syncWidgetReminders(arguments: call.arguments))
+
+      case "syncNowPlaying":
+        result(self.syncWidgetNowPlaying(arguments: call.arguments))
 
       default:
         result(FlutterMethodNotImplemented)
@@ -123,8 +127,11 @@ import WidgetKit
       "tasksTotal":    arguments["tasksTotal"]    as? Int    ?? 0,
       "routinesDone":  arguments["routinesDone"]  as? Int    ?? 0,
       "routinesTotal": arguments["routinesTotal"] as? Int    ?? 0,
+      "routinesOverdue": arguments["routinesOverdue"] as? Int ?? 0,
       "remindersDone": arguments["remindersDone"] as? Int    ?? 0,
       "remindersTotal":arguments["remindersTotal"]as? Int    ?? 0,
+      "eventsDone": arguments["eventsDone"] as? Int ?? 0,
+      "eventsTotal": arguments["eventsTotal"] as? Int ?? 0,
     ]
 
     do {
@@ -206,6 +213,25 @@ import WidgetKit
       return true
     } catch {
       print("WidgetBridge.syncReminders serialization failed: \(error)")
+      return false
+    }
+  }
+
+  // MARK: - Now Playing
+
+  private func syncWidgetNowPlaying(arguments: Any?) -> Bool {
+    guard
+      let arguments = arguments as? [String: Any],
+      let defaults = UserDefaults(suiteName: appGroupID)
+    else { return false }
+
+    do {
+      let data = try JSONSerialization.data(withJSONObject: arguments)
+      defaults.set(data, forKey: nowPlayingKey)
+      reloadAllWidgetTimelines()
+      return true
+    } catch {
+      print("WidgetBridge.syncNowPlaying serialization failed: \(error)")
       return false
     }
   }

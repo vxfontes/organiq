@@ -42,9 +42,8 @@ struct RemindersWidgetView: View {
   @Environment(\.widgetFamily) var family
   @Environment(\.self) private var env
 
-  private var isSmall: Bool { family == .systemSmall }
-  private var maxItems: Int { family == .systemMedium ? 3 : 2 }
-  private var rowSpacing: CGFloat { isSmall ? 4 : 5 }
+  private let maxItems: Int = 3
+  private let rowSpacing: CGFloat = 5
   private var widgetBackgroundColor: Color { isAccentedRendering ? .black : .organiqBackground }
   private var cardBackgroundColor: Color { isAccentedRendering ? Color.white.opacity(0.12) : .organiqSurface }
   private var cardBorderColor: Color { isAccentedRendering ? Color.white.opacity(0.22) : .organiqBorder }
@@ -70,9 +69,9 @@ struct RemindersWidgetView: View {
   private var mainView: some View {
     VStack(spacing: 0) {
       headerRow
-        .padding(.horizontal, isSmall ? 10 : 14)
-        .padding(.top, isSmall ? 10 : 12)
-        .padding(.bottom, isSmall ? 6 : 8)
+        .padding(.horizontal, 14)
+        .padding(.top, 12)
+        .padding(.bottom, 8)
 
       if entry.reminders.isEmpty {
         emptyState
@@ -82,8 +81,8 @@ struct RemindersWidgetView: View {
             reminderRow(reminder)
           }
         }
-        .padding(.horizontal, isSmall ? 8 : 12)
-        .padding(.bottom, isSmall ? 6 : 8)
+        .padding(.horizontal, 12)
+        .padding(.bottom, 8)
         Spacer(minLength: 0)
       }
     }
@@ -102,91 +101,87 @@ struct RemindersWidgetView: View {
         Text("Lembretes")
           .font(.system(size: 13, weight: .bold))
           .foregroundColor(.organiqText)
+          .lineLimit(1)
+          .minimumScaleFactor(0.85)
       }
       Spacer()
       if let next = entry.reminders.first, let cd = countdownText(for: next) {
-        if isSmall {
+        HStack(spacing: 3) {
+          Text("próximo")
+            .font(.system(size: 10))
+            .foregroundColor(.organiqTextMuted)
           Text(cd)
             .font(.system(size: 10, weight: .semibold))
             .foregroundColor(urgencyColor(for: next))
-        } else {
-          HStack(spacing: 3) {
-            Text("proximo")
-              .font(.system(size: 10))
-              .foregroundColor(.organiqTextMuted)
-            Text(cd)
-              .font(.system(size: 10, weight: .semibold))
-              .foregroundColor(urgencyColor(for: next))
-          }
         }
       }
     }
+  }
+
+  private func reminderRow(_ reminder: ReminderWidgetData) -> some View {
+    let accent = urgencyColor(for: reminder)
+    return HStack(spacing: 8) {
+      ZStack {
+        Circle().fill(accent.opacity(0.12)).frame(width: 28, height: 28)
+        Image(systemName: "bell.fill")
+          .font(.system(size: 11))
+          .foregroundColor(accent)
+      }
+
+      VStack(alignment: .leading, spacing: 2) {
+        Text(reminder.title)
+          .font(.system(size: 12, weight: .medium))
+          .foregroundColor(.organiqText)
+          .lineLimit(1)
+          .minimumScaleFactor(0.9)
+        if let cd = countdownText(for: reminder) {
+          Text(cd)
+            .font(.system(size: 10, weight: .medium))
+            .foregroundColor(accent)
+            .lineLimit(1)
+            .minimumScaleFactor(0.85)
+        }
+      }
+
+      Spacer()
+
+      if let diff = reminderTimeDiff(for: reminder) {
+        urgencyBadge(diff: diff, color: accent)
+      }
+    }
+    .padding(.leading, 10)
+    .padding(.trailing, 10)
+    .padding(.vertical, 8)
+    .background(cardBackgroundColor)
+    .overlay(
+      RoundedRectangle(cornerRadius: 10, style: .continuous)
+        .stroke(cardBorderColor, lineWidth: 0.5)
+    )
+    .overlay(alignment: .leading) {
+      RoundedRectangle(cornerRadius: 2, style: .continuous)
+        .fill(accent)
+        .frame(width: 3)
+        .padding(.leading, 1)
+        .padding(.vertical, 1)
+    }
+    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
   }
 
   private var emptyState: some View {
     VStack(spacing: 6) {
       Spacer()
       Image(systemName: "bell.slash.fill")
-        .font(.system(size: isSmall ? 24 : 28))
+        .font(.system(size: 28))
         .foregroundColor(.organiqTextMuted.opacity(0.5))
       Text("Sem lembretes")
-        .font(.system(size: isSmall ? 12 : 13, weight: .semibold))
+        .font(.system(size: 13, weight: .semibold))
         .foregroundColor(.organiqText)
       Text("Aproveite seu dia!")
-        .font(.system(size: isSmall ? 10 : 11))
+        .font(.system(size: 11))
         .foregroundColor(.organiqTextMuted)
       Spacer()
     }
     .frame(maxWidth: .infinity)
-  }
-
-  private func reminderRow(_ reminder: ReminderWidgetData) -> some View {
-    let accent = urgencyColor(for: reminder)
-    return HStack(spacing: 0) {
-      Rectangle()
-        .fill(accent)
-        .frame(width: 3)
-        .frame(height: isSmall ? 34 : 40)
-        .clipShape(RoundedRectangle(cornerRadius: 2))
-
-      HStack(spacing: isSmall ? 6 : 8) {
-        ZStack {
-          Circle().fill(accent.opacity(0.12)).frame(width: isSmall ? 24 : 28, height: isSmall ? 24 : 28)
-          Image(systemName: "bell.fill")
-            .font(.system(size: isSmall ? 10 : 11))
-            .foregroundColor(accent)
-        }
-
-        VStack(alignment: .leading, spacing: 2) {
-          Text(reminder.title)
-            .font(.system(size: isSmall ? 11 : 12, weight: .medium))
-            .foregroundColor(.organiqText)
-            .lineLimit(1)
-            .minimumScaleFactor(0.9)
-          if let cd = countdownText(for: reminder) {
-            Text(cd)
-              .font(.system(size: isSmall ? 9 : 10, weight: .medium))
-              .foregroundColor(accent)
-              .lineLimit(1)
-              .minimumScaleFactor(0.85)
-          }
-        }
-
-        Spacer()
-
-        if !isSmall, let diff = reminderTimeDiff(for: reminder) {
-          urgencyBadge(diff: diff, color: accent)
-        }
-      }
-      .padding(.leading, isSmall ? 6 : 8)
-      .padding(.trailing, isSmall ? 8 : 10)
-      .padding(.vertical, isSmall ? 6 : 8)
-      .background(cardBackgroundColor)
-      .overlay(
-        RoundedRectangle(cornerRadius: isSmall ? 8 : 10, style: .continuous)
-          .stroke(cardBorderColor, lineWidth: 0.5)
-      )
-    }
   }
 
   private func urgencyBadge(diff: TimeInterval, color: Color) -> some View {
@@ -254,7 +249,7 @@ struct RemindersWidgetView: View {
       let fmt = DateFormatter()
       fmt.dateFormat = "HH:mm"
       fmt.timeZone = .current
-      return "amanha as \(fmt.string(from: target))"
+      return "amanhã às \(fmt.string(from: target))"
     }
     return "em \(days) dias"
   }
@@ -291,25 +286,21 @@ struct RemindersWidget: Widget {
     }
     .containerBackgroundRemovable(false)
     .configurationDisplayName("Lembretes")
-    .description("Seus proximos lembretes com countdown.")
+    .description("Seus próximos lembretes com countdown.")
     .supportedFamilies(supportedFamilies)
   }
 
   private var supportedFamilies: [WidgetFamily] {
     if #available(iOSApplicationExtension 16.0, *) {
-      return [.systemSmall, .systemMedium, .accessoryRectangular]
+      return [.systemMedium, .accessoryRectangular]
     }
-    return [.systemSmall, .systemMedium]
+    return [.systemMedium]
   }
 }
 
 struct RemindersWidget_Previews: PreviewProvider {
   static var previews: some View {
-    Group {
-      RemindersWidgetView(entry: .placeholder)
-        .previewContext(WidgetPreviewContext(family: .systemSmall))
-      RemindersWidgetView(entry: .placeholder)
-        .previewContext(WidgetPreviewContext(family: .systemMedium))
-    }
+    RemindersWidgetView(entry: .placeholder)
+      .previewContext(WidgetPreviewContext(family: .systemMedium))
   }
 }
