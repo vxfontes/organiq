@@ -164,106 +164,118 @@ struct NextActionsWidgetView: View {
   }
 
   private func activeRow(_ item: NextActionData, accent: Color) -> some View {
-    HStack(spacing: 0) {
+    let cornerRadius = isLarge ? 10.0 : 8.0
+    return VStack(alignment: .leading, spacing: 3) {
+      HStack(spacing: 6) {
+        Text(timeRangeLabel(for: item))
+          .font(.system(size: isLarge ? 10 : 9, weight: .medium, design: .monospaced))
+          .foregroundColor(item.isOverdue ? .organiqRed500 : .organiqTextMuted)
+        if item.isOverdue {
+          Text("atrasado")
+            .font(.system(size: 8, weight: .semibold))
+            .foregroundColor(.white)
+            .padding(.horizontal, 5)
+            .padding(.vertical, 2)
+            .background(Capsule().fill(Color.organiqRed500))
+        }
+        Spacer(minLength: 0)
+        HStack(spacing: 3) {
+          Image(systemName: typeIcon(item.type))
+            .font(.system(size: 8))
+          Text(typeName(item.type))
+            .font(.system(size: 9))
+        }
+        .foregroundColor(accent)
+      }
+
+      HStack(spacing: 0) {
+        Text(item.title)
+          .font(.system(size: isLarge ? 12 : 11, weight: .medium))
+          .foregroundColor(.organiqText)
+          .lineLimit(1)
+          .minimumScaleFactor(0.9)
+        Spacer(minLength: 0)
+      }
+
+      if let subtitle = normalizedSubtitle(for: item) {
+        Text(subtitle)
+          .font(.system(size: 9, weight: .medium))
+          .foregroundColor(.organiqTextMuted)
+          .lineLimit(1)
+          .minimumScaleFactor(0.8)
+      }
+    }
+    .padding(.leading, 10)
+    .padding(.trailing, isLarge ? 10 : 8)
+    .padding(.vertical, isLarge ? 7 : 6)
+    .background(
+      RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+        .fill(cardBackgroundColor)
+    )
+    .overlay(
+      RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+        .stroke(cardBorderColor, lineWidth: 0.5)
+    )
+    .overlay(alignment: .leading) {
       RoundedRectangle(cornerRadius: 2, style: .continuous)
         .fill(accent)
         .frame(width: 4)
-
-      VStack(alignment: .leading, spacing: 3) {
-        HStack(spacing: 6) {
-          Text(timeRangeLabel(for: item))
-            .font(.system(size: isLarge ? 10 : 9, weight: .medium, design: .monospaced))
-            .foregroundColor(item.isOverdue ? .organiqRed500 : .organiqTextMuted)
-          if item.isOverdue {
-            Text("atrasado")
-              .font(.system(size: 8, weight: .semibold))
-              .foregroundColor(.white)
-              .padding(.horizontal, 5)
-              .padding(.vertical, 2)
-              .background(Capsule().fill(Color.organiqRed500))
-          }
-          Spacer(minLength: 0)
-          HStack(spacing: 3) {
-            Image(systemName: typeIcon(item.type))
-              .font(.system(size: 8))
-            Text(typeName(item.type))
-              .font(.system(size: 9))
-          }
-          .foregroundColor(accent)
-        }
-
-        HStack(spacing: 0) {
-          Text(item.title)
-            .font(.system(size: isLarge ? 12 : 11, weight: .medium))
-            .foregroundColor(.organiqText)
-            .lineLimit(1)
-            .minimumScaleFactor(0.9)
-          Spacer(minLength: 0)
-        }
-
-        if let subtitle = normalizedSubtitle(for: item) {
-          Text(subtitle)
-            .font(.system(size: 9, weight: .medium))
-            .foregroundColor(.organiqTextMuted)
-            .lineLimit(1)
-            .minimumScaleFactor(0.8)
-        }
-      }
-      .padding(.leading, 8)
-      .padding(.trailing, isLarge ? 10 : 8)
-      .padding(.vertical, isLarge ? 7 : 6)
-      .background(cardBackgroundColor)
-      .overlay(
-        RoundedRectangle(cornerRadius: isLarge ? 10 : 8, style: .continuous)
-          .stroke(cardBorderColor, lineWidth: 0.5)
-      )
+        .padding(.leading, 1)
+        .padding(.vertical, 1)
     }
+    .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
   }
 
   private func completedRow(_ item: NextActionData, accent: Color) -> some View {
-    HStack(spacing: 0) {
+    let cornerRadius = isLarge ? 10.0 : 8.0
+    return VStack(alignment: .leading, spacing: 3) {
+      HStack(spacing: 6) {
+        Text(timeRangeLabel(for: item))
+          .font(.system(size: isLarge ? 10 : 9, weight: .medium, design: .monospaced))
+          .foregroundColor(.organiqTextMuted)
+        Spacer(minLength: 0)
+        Image(systemName: "checkmark.circle.fill")
+          .font(.system(size: 13))
+          .foregroundColor(.organiqSuccess600)
+      }
+
+      HStack(spacing: 0) {
+        Text(item.title)
+          .font(.system(size: isLarge ? 12 : 11, weight: .medium))
+          .foregroundColor(.organiqTextMuted)
+          .strikethrough(true, color: .organiqTextMuted)
+          .lineLimit(1)
+          .minimumScaleFactor(0.9)
+        Spacer(minLength: 0)
+      }
+
+      if let subtitle = normalizedSubtitle(for: item) {
+        Text(subtitle)
+          .font(.system(size: 9, weight: .medium))
+          .foregroundColor(.organiqTextMuted)
+          .lineLimit(1)
+          .minimumScaleFactor(0.8)
+      }
+    }
+    .padding(.leading, 10)
+    .padding(.trailing, isLarge ? 10 : 8)
+    .padding(.vertical, isLarge ? 7 : 6)
+    .background(
+      RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+        .fill(doneCardBackgroundColor)
+    )
+    .overlay(
+      RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+        .stroke(cardBorderColor.opacity(0.8), lineWidth: 0.5)
+    )
+    .overlay(alignment: .leading) {
       RoundedRectangle(cornerRadius: 2, style: .continuous)
         .fill(accent.opacity(0.3))
         .frame(width: 4)
-
-      VStack(alignment: .leading, spacing: 3) {
-        HStack(spacing: 6) {
-          Text(timeRangeLabel(for: item))
-            .font(.system(size: isLarge ? 10 : 9, weight: .medium, design: .monospaced))
-            .foregroundColor(.organiqTextMuted)
-          Spacer(minLength: 0)
-          Image(systemName: "checkmark.circle.fill")
-            .font(.system(size: 13))
-            .foregroundColor(.organiqSuccess600)
-        }
-
-        HStack(spacing: 0) {
-          Text(item.title)
-            .font(.system(size: isLarge ? 12 : 11, weight: .medium))
-            .foregroundColor(.organiqTextMuted)
-            .strikethrough(true, color: .organiqTextMuted)
-            .lineLimit(1)
-            .minimumScaleFactor(0.9)
-          Spacer(minLength: 0)
-        }
-
-        if let subtitle = normalizedSubtitle(for: item) {
-          Text(subtitle)
-            .font(.system(size: 9, weight: .medium))
-            .foregroundColor(.organiqTextMuted)
-            .lineLimit(1)
-            .minimumScaleFactor(0.8)
-        }
-      }
-      .padding(.leading, 8)
-      .padding(.trailing, isLarge ? 10 : 8)
-      .padding(.vertical, isLarge ? 7 : 6)
-      .background(doneCardBackgroundColor)
-      .overlay(
-        RoundedRectangle(cornerRadius: isLarge ? 10 : 8, style: .continuous)
-          .stroke(cardBorderColor.opacity(0.8), lineWidth: 0.5)
-      )
+        .padding(.leading, 1)
+        .padding(.vertical, 1)
     }
+    .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
   }
 
   private func sortItems(_ items: [NextActionData]) -> [NextActionData] {
