@@ -10,6 +10,8 @@ class OQTodoItemData {
     this.id,
     required this.title,
     this.subtitle,
+    this.subtitleTagLabel,
+    this.subtitleTagColor,
     this.done = false,
     this.isOverdue = false,
   });
@@ -17,6 +19,8 @@ class OQTodoItemData {
   final String? id;
   final String title;
   final String? subtitle;
+  final String? subtitleTagLabel;
+  final Color? subtitleTagColor;
   final bool done;
   final bool isOverdue;
 }
@@ -196,6 +200,9 @@ class _OQTodoRow extends StatelessWidget {
       decoration: done ? TextDecoration.lineThrough : TextDecoration.none,
       decorationColor: AppColors.textMuted,
     );
+    final hasSubtitleTag =
+        item.subtitleTagLabel != null &&
+        item.subtitleTagLabel!.trim().isNotEmpty;
 
     return InkWell(
       onTap: onTap,
@@ -258,11 +265,25 @@ class _OQTodoRow extends StatelessWidget {
                         ),
                         if (item.subtitle != null) ...[
                           const SizedBox(height: 4),
-                          Text(
-                            item.subtitle!,
-                            style: subtitleStyle,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                          Row(
+                            children: [
+                              if (hasSubtitleTag) ...[
+                                OQTagChip(
+                                  label: item.subtitleTagLabel!.trim(),
+                                  color: item.subtitleTagColor,
+                                  isSmall: true,
+                                ),
+                                const SizedBox(width: 8),
+                              ],
+                              Expanded(
+                                child: Text(
+                                  item.subtitle!,
+                                  style: subtitleStyle,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ],

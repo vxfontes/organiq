@@ -1120,37 +1120,17 @@ class HomeController implements OQController {
     final completedIds = await bridge.consumeCompletedTaskIds();
 
     for (final id in completedIds) {
-      // Find the task in current agenda
-      final task = agenda.value.tasks.firstWhere(
-        (t) => t.id == id,
-        orElse: () => TaskOutput(
-          id: '',
-          title: '',
-          isDone: false,
-          createdAt: DateTime.now(),
-        ),
+      final result = await _updateTaskUsecase.call(
+        TaskUpdateInput(id: id, status: 'DONE'),
       );
-
-      if (task.id.isEmpty) continue;
-
-      // Mark as done
-      await _updateTaskUsecase(
-        TaskUpdateInput(id: id, status: 'done'),
-      ).then((result) {
-        result.fold(
-          (failure) {
-            if (kDebugMode) {
-              debugPrint('Failed to sync widget-completed task $id: ${failure.message}');
-            }
-          },
-          (_) => null,
-        );
-      });
-    }
-
-    // Refresh data after syncing
-    if (completedIds.isNotEmpty) {
-      await fetchData();
+      result.fold(
+        (failure) {
+          debugPrint(
+            'Failed to sync widget-completed task $id: ${failure.message}',
+          );
+        },
+        (_) => null,
+      );
     }
   }
 

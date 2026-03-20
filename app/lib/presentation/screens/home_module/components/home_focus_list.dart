@@ -37,6 +37,11 @@ class HomeFocusList extends StatelessWidget {
                   id: task.id,
                   title: task.title,
                   subtitle: _subtitleFor(task),
+                  subtitleTagLabel: _normalize(task.subflagName),
+                  subtitleTagColor: _parseHexColor(
+                    task.subflagColor ?? task.flagColor,
+                    fallback: AppColors.ai600,
+                  ),
                   done: task.isDone,
                   isOverdue: _isOverdue(task),
                 ),
@@ -106,5 +111,24 @@ class HomeFocusList extends StatelessWidget {
 
   DateTime _startOfDay(DateTime value) {
     return DateTime(value.year, value.month, value.day);
+  }
+
+  String? _normalize(String? value) {
+    final normalized = value?.trim();
+    if (normalized == null || normalized.isEmpty) return null;
+    return normalized;
+  }
+
+  Color _parseHexColor(String? value, {required Color fallback}) {
+    final raw = value?.trim() ?? '';
+    if (raw.isEmpty) return fallback;
+
+    var hex = raw.toUpperCase().replaceAll('#', '');
+    if (hex.length == 6) hex = 'FF$hex';
+    if (hex.length != 8) return fallback;
+
+    final parsed = int.tryParse(hex, radix: 16);
+    if (parsed == null) return fallback;
+    return Color(parsed);
   }
 }

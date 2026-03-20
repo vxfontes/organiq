@@ -132,6 +132,11 @@ class _RemindersPageState extends OQState<RemindersPage, RemindersController> {
               id: task.id,
               title: task.title,
               subtitle: RemindersFormat.taskSubtitle(task),
+              subtitleTagLabel: _normalize(task.subflagName),
+              subtitleTagColor: _parseHexColor(
+                task.subflagColor ?? task.flagColor,
+                fallback: AppColors.ai600,
+              ),
               done: task.isDone,
             ),
           )
@@ -276,11 +281,32 @@ class _RemindersPageState extends OQState<RemindersPage, RemindersController> {
         loadingListenable: controller.loading,
         errorListenable: controller.error,
         flagsListenable: controller.flags,
+        subflagsByFlagListenable: controller.subflagsByFlag,
+        onLoadSubflags: controller.loadSubflags,
         onCreateTask: controller.createTask,
         pickTaskDate: _pickTaskDate,
         formatTaskDate: _formatTaskDate,
       ),
     );
+  }
+
+  String? _normalize(String? value) {
+    final normalized = value?.trim();
+    if (normalized == null || normalized.isEmpty) return null;
+    return normalized;
+  }
+
+  Color _parseHexColor(String? value, {required Color fallback}) {
+    final raw = value?.trim() ?? '';
+    if (raw.isEmpty) return fallback;
+
+    var hex = raw.toUpperCase().replaceAll('#', '');
+    if (hex.length == 6) hex = 'FF$hex';
+    if (hex.length != 8) return fallback;
+
+    final parsed = int.tryParse(hex, radix: 16);
+    if (parsed == null) return fallback;
+    return Color(parsed);
   }
 
   Future<void> _openCreateReminder() async {

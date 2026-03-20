@@ -189,6 +189,7 @@ class RemindersController implements OQController {
     String? description,
     DateTime? data,
     String? flagId,
+    String? subflagId,
   }) async {
     if (loading.value) return false;
     final trimmed = title.trim();
@@ -207,6 +208,7 @@ class RemindersController implements OQController {
         status: 'OPEN',
         dueAt: data,
         flagId: flagId,
+        subflagId: subflagId,
       ),
     );
 

@@ -5,22 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="97263e04-66bb-432b-b882-aae4b962cb83" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/organiq.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/copilot.data.migration.agent.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/copilot.data.migration.ask.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/copilot.data.migration.edit.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/git_toolbox_prj.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inbota.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/lib/modules/tasks/data/models/task_create_input.dart" beforeDir="false" afterPath="$PROJECT_DIR$/app/lib/modules/tasks/data/models/task_create_input.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/lib/presentation/screens/home_module/components/home_focus_list.dart" beforeDir="false" afterPath="$PROJECT_DIR$/app/lib/presentation/screens/home_module/components/home_focus_list.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/lib/presentation/screens/home_module/controller/home_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/app/lib/presentation/screens/home_module/controller/home_controller.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/lib/presentation/screens/settings_module/pages/settings_notifications_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/app/lib/presentation/screens/settings_module/pages/settings_notifications_page.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/lib/presentation/screens/reminders_module/components/create_todo_bottom_sheet.dart" beforeDir="false" afterPath="$PROJECT_DIR$/app/lib/presentation/screens/reminders_module/components/create_todo_bottom_sheet.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/lib/presentation/screens/reminders_module/controller/reminders_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/app/lib/presentation/screens/reminders_module/controller/reminders_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/lib/presentation/screens/reminders_module/pages/reminders_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/app/lib/presentation/screens/reminders_module/pages/reminders_page.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/lib/shared/components/oq_lib/oq_tag_chip.dart" beforeDir="false" afterPath="$PROJECT_DIR$/app/lib/shared/components/oq_lib/oq_tag_chip.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/lib/shared/components/oq_lib/oq_todo_list.dart" beforeDir="false" afterPath="$PROJECT_DIR$/app/lib/shared/components/oq_lib/oq_todo_list.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/lib/shared/services/http/app_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/app/lib/shared/services/http/app_service.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/lib/shared/services/push/push_notification_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/app/lib/shared/services/push/push_notification_service.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/app/pubspec.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/internal/http/handler/devices.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/http/handler/devices.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,10 +31,36 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="UPDATE_TYPE" value="REBASE" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 6
-}]]></component>
+  <component name="GitToolBoxStore">
+    <option name="recentBranches">
+      <RecentBranches>
+        <option name="branchesForRepo">
+          <list>
+            <RecentBranchesForRepo>
+              <option name="branches">
+                <list>
+                  <RecentBranch>
+                    <option name="branchName" value="main" />
+                    <option name="lastUsedInstant" value="1773973328" />
+                  </RecentBranch>
+                  <RecentBranch>
+                    <option name="branchName" value="feat/novos-widgets" />
+                    <option name="lastUsedInstant" value="1773973327" />
+                  </RecentBranch>
+                </list>
+              </option>
+              <option name="repositoryRootUrl" value="file://$PROJECT_DIR$" />
+            </RecentBranchesForRepo>
+          </list>
+        </option>
+      </RecentBranches>
+    </option>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 6
+}</component>
   <component name="ProjectId" id="3B8UZxwkQRGga2wowDG27eUm6hh" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -48,6 +68,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Flutter.main.executor": "Debug",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.cidr.known.project.marker": "true",
@@ -58,6 +79,7 @@
     "cidr.known.project.marker": "true",
     "dart.analysis.tool.window.visible": "false",
     "git-widget-placeholder": "main",
+    "io.flutter.reload.alreadyRun": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "/Users/vanessa/Desktop/coding/personal/organiq",
     "settings.editor.selected.configurable": "dart.settings",
@@ -79,6 +101,13 @@
       <updated>1773870249540</updated>
     </task>
     <servers />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <default-breakpoints>
+        <breakpoint type="dart-exception" />
+      </default-breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>
