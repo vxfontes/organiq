@@ -286,10 +286,38 @@ class HomeController implements OQController {
     final dashboardTimeline = _dashboardTimelineForNextActions;
     if (dashboardTimeline.isEmpty) return const [];
     final now = DateTimeUtils.nowInUserTimezone();
-    return dashboardTimeline
-        .where((item) => !item.scheduledTime.isBefore(now))
-        .take(10)
+    final startToday = DateTimeUtils.startOfDay(now);
+    final startTomorrow = startToday.add(const Duration(days: 1));
+
+    bool isToday(TimelineItem item) {
+      final when = item.scheduledTime;
+      return !when.isBefore(startToday) && when.isBefore(startTomorrow);
+    }
+
+    bool canBeCompleted(TimelineItem item) {
+      return item.type == TimelineItemType.task ||
+          item.type == TimelineItemType.reminder ||
+          item.type == TimelineItemType.routine;
+    }
+
+    final overdueToday = dashboardTimeline
+        .where(
+          (item) =>
+              canBeCompleted(item) &&
+              !item.isCompleted &&
+              isToday(item) &&
+              item.scheduledTime.isBefore(now),
+        )
         .toList(growable: false);
+
+    final upcoming = dashboardTimeline
+        .where((item) => !item.scheduledTime.isBefore(now))
+        .toList(growable: false);
+
+    return <TimelineItem>[
+      ...overdueToday,
+      ...upcoming,
+    ].take(10).toList(growable: false);
   }
 
   List<TimelineItem> get widgetNextActionsTimeline {
@@ -327,7 +355,9 @@ class HomeController implements OQController {
       }
     }
 
-    final items = dashboardTimeline.where(shouldInclude).toList(growable: false);
+    final items = dashboardTimeline
+        .where(shouldInclude)
+        .toList(growable: false);
     items.sort((a, b) {
       final aPast = a.scheduledTime.isBefore(now);
       final bPast = b.scheduledTime.isBefore(now);
@@ -344,8 +374,13 @@ class HomeController implements OQController {
     final dashboardTimeline = _dashboardTimelineForInsights;
     if (dashboardTimeline.isEmpty) return const [];
     final now = DateTimeUtils.nowInUserTimezone();
+    final startToday = DateTimeUtils.startOfDay(now);
     return dashboardTimeline
-        .where((item) => item.scheduledTime.isBefore(now))
+        .where(
+          (item) =>
+              item.scheduledTime.isBefore(now) &&
+              item.scheduledTime.isBefore(startToday),
+        )
         .toList(growable: false);
   }
 
@@ -1088,26 +1123,31 @@ class HomeController implements OQController {
     }
 
     // Next actions timeline
-    final actionItems = widgetNextActionsTimeline.take(8).map((item) {
-      final mapped = <String, dynamic>{
-        'id': item.id,
-        'title': item.title,
-        'type': item.type.name,
-        'scheduledTime': item.scheduledTime.toUtc().toIso8601String(),
-        'endScheduledTime': item.endScheduledTime?.toUtc().toIso8601String(),
-        'isCompleted': item.isCompleted,
-        'isOverdue': item.isOverdue,
-      };
-      final subtitle = item.subtitle?.trim();
-      if (subtitle != null && subtitle.isNotEmpty) {
-        mapped['subtitle'] = subtitle;
-      }
-      final accentColor = colorCache[item.id];
-      if (accentColor != null && accentColor.trim().isNotEmpty) {
-        mapped['accentColor'] = accentColor.trim();
-      }
-      return mapped;
-    }).toList(growable: false);
+    final actionItems = widgetNextActionsTimeline
+        .take(8)
+        .map((item) {
+          final mapped = <String, dynamic>{
+            'id': item.id,
+            'title': item.title,
+            'type': item.type.name,
+            'scheduledTime': item.scheduledTime.toUtc().toIso8601String(),
+            'endScheduledTime': item.endScheduledTime
+                ?.toUtc()
+                .toIso8601String(),
+            'isCompleted': item.isCompleted,
+            'isOverdue': item.isOverdue,
+          };
+          final subtitle = item.subtitle?.trim();
+          if (subtitle != null && subtitle.isNotEmpty) {
+            mapped['subtitle'] = subtitle;
+          }
+          final accentColor = colorCache[item.id];
+          if (accentColor != null && accentColor.trim().isNotEmpty) {
+            mapped['accentColor'] = accentColor.trim();
+          }
+          return mapped;
+        })
+        .toList(growable: false);
     await bridge.syncNextActions(actionItems);
 
     // Reminders
@@ -1123,14 +1163,11 @@ class HomeController implements OQController {
       final result = await _updateTaskUsecase.call(
         TaskUpdateInput(id: id, status: 'DONE'),
       );
-      result.fold(
-        (failure) {
-          debugPrint(
-            'Failed to sync widget-completed task $id: ${failure.message}',
-          );
-        },
-        (_) => null,
-      );
+      result.fold((failure) {
+        debugPrint(
+          'Failed to sync widget-completed task $id: ${failure.message}',
+        );
+      }, (_) => null);
     }
   }
 

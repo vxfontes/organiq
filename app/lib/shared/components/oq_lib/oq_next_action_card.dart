@@ -49,6 +49,21 @@ class OQNextActionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = _paletteFor(item.type);
+    final now = DateTime.now();
+    final isTimeOverdue =
+        item.type != OQNextActionType.event &&
+        !item.isCompleted &&
+        item.scheduledTime.isBefore(now);
+    final isActiveOverdue = item.isOverdue || isTimeOverdue;
+    const alertColor = AppColors.danger600;
+    final cardColor = isActiveOverdue
+        ? Color.alphaBlend(
+            alertColor.withValues(alpha: 0.06),
+            palette.background,
+          )
+        : palette.background;
+    final leadingColor = isActiveOverdue ? alertColor : palette.accent;
+    final timeColor = isActiveOverdue ? alertColor : AppColors.text;
     final completionColor = item.type == OQNextActionType.reminder
         ? AppColors.warning600
         : AppColors.primary700;
@@ -68,9 +83,13 @@ class OQNextActionCard extends StatelessWidget {
         height: height,
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: palette.background,
+          color: cardColor,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: palette.accent.withValues(alpha: 0.22)),
+          border: Border.all(
+            color: isActiveOverdue
+                ? AppColors.danger600.withValues(alpha: 0.65)
+                : palette.accent.withValues(alpha: 0.22),
+          ),
         ),
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -78,15 +97,14 @@ class OQNextActionCard extends StatelessWidget {
             final subtitle = item.subtitle?.trim();
             final showSubtitle =
                 subtitle != null && subtitle.isNotEmpty && !compact;
-            final showOverdueBadge =
-                item.isOverdue && !item.isCompleted && !compact;
+            final showOverdueBadge = isActiveOverdue && !compact;
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    OQIcon(palette.icon, size: 16, color: palette.accent),
+                    OQIcon(palette.icon, size: 16, color: leadingColor),
                     const SizedBox(width: 6),
                     Expanded(
                       child:
@@ -98,7 +116,7 @@ class OQNextActionCard extends StatelessWidget {
                                 context: context,
                               ).label
                               .weight(FontWeight.w700)
-                              .color(AppColors.text)
+                              .color(timeColor)
                               .maxLines(1)
                               .build(),
                     ),

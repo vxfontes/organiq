@@ -27,6 +27,26 @@ class OQDayProgressCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final overallDone = routinesDone + tasksDone + remindersDone;
     final overallTotal = routinesTotal + tasksTotal + remindersTotal;
+    final categories = <_CategoryProgressData>[
+      _CategoryProgressData(
+        label: 'Rotinas',
+        done: routinesDone,
+        total: routinesTotal,
+        color: AppColors.primary600,
+      ),
+      _CategoryProgressData(
+        label: 'Tarefas',
+        done: tasksDone,
+        total: tasksTotal,
+        color: AppColors.ai500,
+      ),
+      _CategoryProgressData(
+        label: 'Lembretes',
+        done: remindersDone,
+        total: remindersTotal,
+        color: AppColors.warning500,
+      ),
+    ].where((item) => item.total > 0 || item.done > 0).toList(growable: false);
     final safeProgress = overallTotal == 0
         ? progressPercent.clamp(0.0, 1.0).toDouble()
         : (overallDone / overallTotal).clamp(0.0, 1.0).toDouble();
@@ -70,31 +90,36 @@ class OQDayProgressCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 14),
-          _CategoryProgressLine(
-            label: 'Rotinas',
-            done: routinesDone,
-            total: routinesTotal,
-            color: AppColors.primary600,
-          ),
-          const SizedBox(height: 8),
-          _CategoryProgressLine(
-            label: 'Tarefas',
-            done: tasksDone,
-            total: tasksTotal,
-            color: AppColors.ai500,
-          ),
-          const SizedBox(height: 8),
-          _CategoryProgressLine(
-            label: 'Lembretes',
-            done: remindersDone,
-            total: remindersTotal,
-            color: AppColors.warning500,
-          ),
+          if (categories.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            for (var i = 0; i < categories.length; i++) ...[
+              _CategoryProgressLine(
+                label: categories[i].label,
+                done: categories[i].done,
+                total: categories[i].total,
+                color: categories[i].color,
+              ),
+              if (i != categories.length - 1) const SizedBox(height: 8),
+            ],
+          ],
         ],
       ),
     );
   }
+}
+
+class _CategoryProgressData {
+  const _CategoryProgressData({
+    required this.label,
+    required this.done,
+    required this.total,
+    required this.color,
+  });
+
+  final String label;
+  final int done;
+  final int total;
+  final Color color;
 }
 
 class _AnimatedProgressRing extends StatelessWidget {
