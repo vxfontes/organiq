@@ -292,6 +292,54 @@ class HomeController implements OQController {
         .toList(growable: false);
   }
 
+  List<TimelineItem> get widgetNextActionsTimeline {
+    final dashboardTimeline = _dashboardTimelineForInsights;
+    if (dashboardTimeline.isEmpty) return const [];
+
+    final now = DateTimeUtils.nowInUserTimezone();
+    final startToday = DateTimeUtils.startOfDay(now);
+    final startTomorrow = startToday.add(const Duration(days: 1));
+
+    bool isToday(TimelineItem item) {
+      final when = item.scheduledTime;
+      return !when.isBefore(startToday) && when.isBefore(startTomorrow);
+    }
+
+    bool hasExplicitTime(DateTime value) {
+      return value.hour != 0 ||
+          value.minute != 0 ||
+          value.second != 0 ||
+          value.millisecond != 0 ||
+          value.microsecond != 0;
+    }
+
+    bool shouldInclude(TimelineItem item) {
+      switch (item.type) {
+        case TimelineItemType.event:
+          return isToday(item);
+        case TimelineItemType.task:
+        case TimelineItemType.reminder:
+          return !item.isCompleted &&
+              isToday(item) &&
+              hasExplicitTime(item.scheduledTime);
+        case TimelineItemType.routine:
+          return !item.isCompleted && !item.scheduledTime.isBefore(now);
+      }
+    }
+
+    final items = dashboardTimeline.where(shouldInclude).toList(growable: false);
+    items.sort((a, b) {
+      final aPast = a.scheduledTime.isBefore(now);
+      final bPast = b.scheduledTime.isBefore(now);
+      if (aPast != bPast) return aPast ? 1 : -1;
+
+      final byTime = a.scheduledTime.compareTo(b.scheduledTime);
+      if (byTime != 0) return byTime;
+      return a.title.toLowerCase().compareTo(b.title.toLowerCase());
+    });
+    return items.take(10).toList(growable: false);
+  }
+
   List<TimelineItem> get pastActionsToday {
     final dashboardTimeline = _dashboardTimelineForInsights;
     if (dashboardTimeline.isEmpty) return const [];
@@ -411,6 +459,8 @@ class HomeController implements OQController {
   }
 
   Future<void> load() async {
+    // First, consume any tasks completed via widgets since last app open
+    await _consumeWidgetCompletedTasks();
     await _fetch(initialLoad: true);
   }
 
@@ -1008,6 +1058,9 @@ class HomeController implements OQController {
   Future<void> _syncWidgetData() async {
     final bridge = WidgetBridgeService.instance;
 
+    // Tasks
+    await bridge.syncTasks(agenda.value.tasks);
+
     // Day progress
     await bridge.syncDayProgress(
       percent: dayProgressPercent,
@@ -1019,9 +1072,24 @@ class HomeController implements OQController {
       remindersTotal: remindersTotalToday,
     );
 
+    // Build color cache for timeline items (performance optimization)
+    final colorCache = <String, String?>{};
+    for (final task in agenda.value.tasks) {
+      colorCache[task.id] = task.subflagColor ?? task.flagColor;
+    }
+    for (final event in agenda.value.events) {
+      colorCache[event.id] = event.subflagColor ?? event.flagColor;
+    }
+    for (final reminder in agenda.value.reminders) {
+      colorCache[reminder.id] = reminder.subflagColor ?? reminder.flagColor;
+    }
+    for (final routine in routines.value) {
+      colorCache[routine.id] = routine.subflagColor ?? routine.flagColor ?? routine.color;
+    }
+
     // Next actions timeline
-    final actionItems = nextActionsTimeline.take(8).map((item) {
-      return <String, dynamic>{
+    final actionItems = widgetNextActionsTimeline.take(8).map((item) {
+      final mapped = <String, dynamic>{
         'id': item.id,
         'title': item.title,
         'type': item.type.name,
@@ -1030,11 +1098,60 @@ class HomeController implements OQController {
         'isCompleted': item.isCompleted,
         'isOverdue': item.isOverdue,
       };
+      final subtitle = item.subtitle?.trim();
+      if (subtitle != null && subtitle.isNotEmpty) {
+        mapped['subtitle'] = subtitle;
+      }
+      final accentColor = colorCache[item.id];
+      if (accentColor != null && accentColor.trim().isNotEmpty) {
+        mapped['accentColor'] = accentColor.trim();
+      }
+      return mapped;
     }).toList(growable: false);
     await bridge.syncNextActions(actionItems);
 
     // Reminders
     await bridge.syncReminders(upcomingReminders);
+  }
+
+  /// Processes tasks completed via iOS widgets and syncs them back to the server.
+  Future<void> _consumeWidgetCompletedTasks() async {
+    final bridge = WidgetBridgeService.instance;
+    final completedIds = await bridge.consumeCompletedTaskIds();
+
+    for (final id in completedIds) {
+      // Find the task in current agenda
+      final task = agenda.value.tasks.firstWhere(
+        (t) => t.id == id,
+        orElse: () => TaskOutput(
+          id: '',
+          title: '',
+          isDone: false,
+          createdAt: DateTime.now(),
+        ),
+      );
+
+      if (task.id.isEmpty) continue;
+
+      // Mark as done
+      await _updateTaskUsecase(
+        TaskUpdateInput(id: id, status: 'done'),
+      ).then((result) {
+        result.fold(
+          (failure) {
+            if (kDebugMode) {
+              debugPrint('Failed to sync widget-completed task $id: ${failure.message}');
+            }
+          },
+          (_) => null,
+        );
+      });
+    }
+
+    // Refresh data after syncing
+    if (completedIds.isNotEmpty) {
+      await fetchData();
+    }
   }
 
   @override
