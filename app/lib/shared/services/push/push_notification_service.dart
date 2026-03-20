@@ -55,6 +55,13 @@ class PushNotificationService {
 
   static final PushNotificationService instance = PushNotificationService._();
   static const String _deviceIdStorageKey = 'push_device_id';
+  static const List<Duration> _pushTokenRetryDelays = [
+    Duration(seconds: 5),
+    Duration(seconds: 15),
+    Duration(seconds: 30),
+    Duration(minutes: 1),
+    Duration(minutes: 2),
+  ];
 
   final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
@@ -77,6 +84,8 @@ class PushNotificationService {
   StreamSubscription<RemoteMessage>? _onMessageOpenedAppSubscription;
   StreamSubscription<String>? _onTokenRefreshSubscription;
   AppLifecycleListener? _lifecycleListener;
+  Timer? _pushTokenRetryTimer;
+  int _pushTokenRetryAttempt = 0;
 
   String? get currentPushToken => _pushTokenNotifier.value;
   ValueListenable<String?> get pushTokenListenable => _pushTokenNotifier;
@@ -253,8 +262,11 @@ class PushNotificationService {
 
       if (token != null) {
         await registerDevice(forceRefresh: true, pushTokenOverride: token);
+      } else {
+        _schedulePushTokenRetry();
       }
     } catch (e) {
+      _schedulePushTokenRetry();
       if (kDebugMode) {
         print('PushNotificationService: getToken error=$e');
       }
@@ -280,7 +292,13 @@ class PushNotificationService {
         final token = await _resolvePushToken();
         _updatePushTokenLocally(token);
         await registerDevice(forceRefresh: true, pushTokenOverride: token);
+        if (token != null && token.isNotEmpty) {
+          _resetPushTokenRetry();
+        } else {
+          _schedulePushTokenRetry();
+        }
       } catch (e) {
+        _schedulePushTokenRetry();
         if (kDebugMode) {
           print('PushNotificationService: force getToken error=$e');
         }
@@ -317,6 +335,7 @@ class PushNotificationService {
     if (forceRefresh || token == null || token.isEmpty) {
       token = await _resolvePushToken();
       if (token == null || token.isEmpty) {
+        _schedulePushTokenRetry();
         return PushDeviceSyncResult.failure(
           PushDeviceSyncErrorCode.tokenUnavailable,
         );
@@ -411,6 +430,7 @@ class PushNotificationService {
 
     final pushToken = pushTokenOverride ?? _pushTokenNotifier.value;
     if (pushToken == null || pushToken.isEmpty) {
+      _schedulePushTokenRetry();
       return PushDeviceSyncResult.failure(
         PushDeviceSyncErrorCode.tokenUnavailable,
       );
@@ -437,6 +457,7 @@ class PushNotificationService {
           );
         },
         (_) {
+          _resetPushTokenRetry();
           if (forceRefresh) {
             _updatePushTokenLocally(pushToken);
           }
@@ -593,6 +614,8 @@ class PushNotificationService {
     await _onMessageSubscription?.cancel();
     await _onMessageOpenedAppSubscription?.cancel();
     await _onTokenRefreshSubscription?.cancel();
+    _pushTokenRetryTimer?.cancel();
+    _pushTokenRetryTimer = null;
     _onMessageSubscription = null;
     _onMessageOpenedAppSubscription = null;
     _onTokenRefreshSubscription = null;
@@ -604,6 +627,7 @@ class PushNotificationService {
     _registering = false;
     _permissionsRequested = false;
     _firebaseListenersAttached = false;
+    _pushTokenRetryAttempt = 0;
     _deviceId = null;
     _deviceName = null;
     _pendingClickUrl = null;
@@ -620,5 +644,34 @@ class PushNotificationService {
     final deviceId = 'organiq_${seed}_$ts$entropyA$entropyB';
     await _secureStorage.write(key: _deviceIdStorageKey, value: deviceId);
     return deviceId;
+  }
+
+  void _schedulePushTokenRetry() {
+    if (_pushTokenRetryAttempt >= _pushTokenRetryDelays.length) {
+      return;
+    }
+    if (_pushTokenRetryTimer?.isActive == true) {
+      return;
+    }
+
+    final delay = _pushTokenRetryDelays[_pushTokenRetryAttempt];
+    _pushTokenRetryAttempt += 1;
+
+    if (kDebugMode) {
+      print(
+        'PushNotificationService: scheduling token retry attempt=$_pushTokenRetryAttempt delay=${delay.inSeconds}s',
+      );
+    }
+
+    _pushTokenRetryTimer = Timer(delay, () {
+      _pushTokenRetryTimer = null;
+      unawaited(ensurePushToken(forceRefresh: true));
+    });
+  }
+
+  void _resetPushTokenRetry() {
+    _pushTokenRetryTimer?.cancel();
+    _pushTokenRetryTimer = null;
+    _pushTokenRetryAttempt = 0;
   }
 }

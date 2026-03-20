@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log/slog"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -59,9 +60,22 @@ func (h *DevicesHandler) RegisterToken(c *gin.Context) {
 		appVersion,
 	)
 	if err != nil {
+		slog.Warn("device_token_register_failed",
+			slog.String("user_id", userID),
+			slog.String("device_id", req.DeviceID),
+			slog.String("platform", req.Platform),
+			slog.String("error", err.Error()),
+		)
 		writeUsecaseError(c, err)
 		return
 	}
+
+	slog.Info("device_token_registered",
+		slog.String("user_id", userID),
+		slog.String("device_id", req.DeviceID),
+		slog.String("platform", req.Platform),
+		slog.String("app_version", appVersion),
+	)
 
 	c.JSON(http.StatusOK, dto.RegisterTokenResponse{Status: "ok"})
 }
