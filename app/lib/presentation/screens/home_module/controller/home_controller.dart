@@ -292,6 +292,54 @@ class HomeController implements OQController {
         .toList(growable: false);
   }
 
+  List<TimelineItem> get widgetNextActionsTimeline {
+    final dashboardTimeline = _dashboardTimelineForInsights;
+    if (dashboardTimeline.isEmpty) return const [];
+
+    final now = DateTimeUtils.nowInUserTimezone();
+    final startToday = DateTimeUtils.startOfDay(now);
+    final startTomorrow = startToday.add(const Duration(days: 1));
+
+    bool isToday(TimelineItem item) {
+      final when = item.scheduledTime;
+      return !when.isBefore(startToday) && when.isBefore(startTomorrow);
+    }
+
+    bool hasExplicitTime(DateTime value) {
+      return value.hour != 0 ||
+          value.minute != 0 ||
+          value.second != 0 ||
+          value.millisecond != 0 ||
+          value.microsecond != 0;
+    }
+
+    bool shouldInclude(TimelineItem item) {
+      switch (item.type) {
+        case TimelineItemType.event:
+          return isToday(item);
+        case TimelineItemType.task:
+        case TimelineItemType.reminder:
+          return !item.isCompleted &&
+              isToday(item) &&
+              hasExplicitTime(item.scheduledTime);
+        case TimelineItemType.routine:
+          return !item.isCompleted && !item.scheduledTime.isBefore(now);
+      }
+    }
+
+    final items = dashboardTimeline.where(shouldInclude).toList(growable: false);
+    items.sort((a, b) {
+      final aPast = a.scheduledTime.isBefore(now);
+      final bPast = b.scheduledTime.isBefore(now);
+      if (aPast != bPast) return aPast ? 1 : -1;
+
+      final byTime = a.scheduledTime.compareTo(b.scheduledTime);
+      if (byTime != 0) return byTime;
+      return a.title.toLowerCase().compareTo(b.title.toLowerCase());
+    });
+    return items.take(10).toList(growable: false);
+  }
+
   List<TimelineItem> get pastActionsToday {
     final dashboardTimeline = _dashboardTimelineForInsights;
     if (dashboardTimeline.isEmpty) return const [];
@@ -1020,8 +1068,8 @@ class HomeController implements OQController {
     );
 
     // Next actions timeline
-    final actionItems = nextActionsTimeline.take(8).map((item) {
-      return <String, dynamic>{
+    final actionItems = widgetNextActionsTimeline.take(8).map((item) {
+      final mapped = <String, dynamic>{
         'id': item.id,
         'title': item.title,
         'type': item.type.name,
@@ -1030,11 +1078,49 @@ class HomeController implements OQController {
         'isCompleted': item.isCompleted,
         'isOverdue': item.isOverdue,
       };
+      final subtitle = item.subtitle?.trim();
+      if (subtitle != null && subtitle.isNotEmpty) {
+        mapped['subtitle'] = subtitle;
+      }
+      final accentColor = _timelineAccentColor(item);
+      if (accentColor != null && accentColor.trim().isNotEmpty) {
+        mapped['accentColor'] = accentColor.trim();
+      }
+      return mapped;
     }).toList(growable: false);
     await bridge.syncNextActions(actionItems);
 
     // Reminders
     await bridge.syncReminders(upcomingReminders);
+  }
+
+  String? _timelineAccentColor(TimelineItem item) {
+    switch (item.type) {
+      case TimelineItemType.task:
+        for (final task in agenda.value.tasks) {
+          if (task.id != item.id) continue;
+          return task.subflagColor ?? task.flagColor;
+        }
+        return null;
+      case TimelineItemType.reminder:
+        for (final reminder in agenda.value.reminders) {
+          if (reminder.id != item.id) continue;
+          return reminder.subflagColor ?? reminder.flagColor;
+        }
+        return null;
+      case TimelineItemType.event:
+        for (final event in agenda.value.events) {
+          if (event.id != item.id) continue;
+          return event.subflagColor ?? event.flagColor;
+        }
+        return null;
+      case TimelineItemType.routine:
+        for (final routine in routines.value) {
+          if (routine.id != item.id) continue;
+          return routine.subflagColor ?? routine.flagColor ?? routine.color;
+        }
+        return null;
+    }
   }
 
   @override

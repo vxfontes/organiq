@@ -2,20 +2,10 @@ import SwiftUI
 import WidgetKit
 import AppIntents
 
-// MARK: - Models
-
 struct OrganiqWidgetEntry: TimelineEntry {
   let date: Date
   let tasks: [OrganiqWidgetTask]
 }
-
-struct OrganiqWidgetTask: Codable, Identifiable {
-  let id: String
-  let title: String
-  var done: Bool
-}
-
-// MARK: - Provider
 
 struct OrganiqWidgetTimelineProvider: TimelineProvider {
   func placeholder(in context: Context) -> OrganiqWidgetEntry {
@@ -37,72 +27,335 @@ struct OrganiqWidgetTimelineProvider: TimelineProvider {
   }
 }
 
-// MARK: - Views
-
 struct OrganiqWidgetEntryView: View {
   var entry: OrganiqWidgetEntry
   @Environment(\.widgetFamily) var family
+  @Environment(\.self) private var env
+
+  private var maxTasks: Int {
+    switch family {
+    case .systemLarge: return 4
+    case .systemMedium: return 2
+    default: return 2
+    }
+  }
+
+  private var isSmall: Bool { family == .systemSmall }
+  private var rowSpacing: CGFloat { isSmall ? 4 : 5 }
+  private var rowVerticalPadding: CGFloat { isSmall ? 6 : 7 }
+
+  private var pendingCount: Int { entry.tasks.filter { !$0.done }.count }
+  private var prioritizedTasks: [OrganiqWidgetTask] { sortTasks(entry.tasks.filter { !$0.done }) }
+  private var visibleTasks: ArraySlice<OrganiqWidgetTask> { prioritizedTasks.prefix(maxTasks) }
+  private var hiddenCount: Int { max(prioritizedTasks.count - maxTasks, 0) }
+  private var widgetBackgroundColor: Color { isAccentedRendering ? .black : .organiqBackground }
+  private var cardBackgroundColor: Color { isAccentedRendering ? Color.white.opacity(0.12) : .organiqSurface }
+  private var doneCardBackgroundColor: Color { isAccentedRendering ? Color.white.opacity(0.08) : Color.organiqSurface.opacity(0.6) }
+  private var cardBorderColor: Color { isAccentedRendering ? Color.white.opacity(0.22) : .organiqBorder }
+  private var strokeColor: Color { isAccentedRendering ? Color.white.opacity(0.24) : .organiqBorder }
+
+  private var isAccentedRendering: Bool {
+    if #available(iOSApplicationExtension 16.0, *) {
+      return env.widgetRenderingMode == .accented
+    }
+    return false
+  }
 
   var body: some View {
     switch family {
     case .systemLarge:
-      tasksView(maxTasks: 8)
-        .organiqWidgetBackground(Color.organiqBackground)
-
+      largeView
+        .organiqWidgetBackground(widgetBackgroundColor)
     default:
       if #available(iOSApplicationExtension 16.0, *), family == .accessoryRectangular {
         accessoryRectangularView
           .organiqWidgetBackground(Color.clear)
       } else {
-        // systemSmall + systemMedium
-        tasksView(maxTasks: family == .systemMedium ? 6 : 4)
-          .organiqWidgetBackground(Color.organiqBackground)
+        standardView
+          .organiqWidgetBackground(widgetBackgroundColor)
       }
     }
   }
 
-  // MARK: Standard list (small / medium / large)
-
-  private func tasksView(maxTasks: Int) -> some View {
-    VStack(alignment: .leading, spacing: 8) {
-      HStack {
-        Text("Organiq")
-          .font(.system(size: 13, weight: .bold))
-          .foregroundColor(.organiqText)
-        Spacer()
-        Text("tasks")
-          .font(.system(size: 10))
-          .foregroundColor(.organiqTextMuted)
-      }
+  private var standardView: some View {
+    VStack(spacing: 0) {
+      headerRow
+        .padding(.horizontal, isSmall ? 10 : 14)
+        .padding(.top, isSmall ? 10 : 12)
+        .padding(.bottom, isSmall ? 6 : 8)
 
       if entry.tasks.isEmpty {
-        Spacer()
-        Text("Sem tarefas pendentes")
-          .font(.system(size: 12, weight: .medium))
-          .foregroundColor(.organiqPrimary700)
-          .padding(.horizontal, 10)
-          .padding(.vertical, 8)
-          .background(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-              .fill(Color.organiqPrimary200)
-          )
-        Spacer()
+        emptyState
       } else {
-        ForEach(entry.tasks.prefix(maxTasks)) { task in
-          taskRow(task)
+        VStack(spacing: rowSpacing) {
+          ForEach(visibleTasks) { task in
+            taskRow(task)
+          }
+          if hiddenCount > 0, !isSmall {
+            Text("+\(hiddenCount) tarefas")
+              .font(.system(size: 10, weight: .medium))
+              .foregroundColor(.organiqTextMuted)
+              .frame(maxWidth: .infinity, alignment: .leading)
+              .padding(.horizontal, 2)
+          }
         }
+        .padding(.horizontal, isSmall ? 8 : 12)
+        .padding(.bottom, isSmall ? 6 : 8)
+        Spacer(minLength: 0)
       }
-
-      Spacer(minLength: 0)
     }
-    .padding(14)
     .overlay(
-      RoundedRectangle(cornerRadius: 14, style: .continuous)
-        .stroke(Color.organiqBorder, lineWidth: 1)
+      RoundedRectangle(cornerRadius: 16, style: .continuous)
+        .stroke(strokeColor, lineWidth: 1)
     )
   }
 
-  // MARK: accessoryRectangular (Lock Screen)
+  private var largeView: some View {
+    VStack(spacing: 0) {
+      headerRow
+        .padding(.horizontal, 16)
+        .padding(.top, 14)
+        .padding(.bottom, 10)
+
+      if entry.tasks.isEmpty {
+        emptyState
+      } else {
+        VStack(spacing: 6) {
+          ForEach(visibleTasks) { task in
+            taskRow(task)
+          }
+          if hiddenCount > 0 {
+            Text("+\(hiddenCount) tarefas")
+              .font(.system(size: 10, weight: .medium))
+              .foregroundColor(.organiqTextMuted)
+              .frame(maxWidth: .infinity, alignment: .leading)
+              .padding(.horizontal, 2)
+          }
+        }
+        .padding(.horizontal, 14)
+        .padding(.bottom, 12)
+        Spacer(minLength: 0)
+      }
+    }
+    .overlay(
+      RoundedRectangle(cornerRadius: 16, style: .continuous)
+        .stroke(strokeColor, lineWidth: 1)
+    )
+  }
+
+  private var headerRow: some View {
+    HStack {
+      HStack(spacing: 5) {
+        Image(systemName: "checklist")
+          .font(.system(size: 10))
+          .foregroundColor(.organiqPrimary600)
+        Text("Tasks")
+          .font(.system(size: 13, weight: .bold))
+          .foregroundColor(.organiqText)
+      }
+      Spacer()
+      if !entry.tasks.isEmpty {
+        if isSmall {
+          if pendingCount > 0, let first = prioritizedTasks.first {
+            Text(urgencyBadgeText(for: first))
+              .font(.system(size: 11, weight: .semibold))
+              .foregroundColor(urgencyBadgeColor(for: first))
+              .lineLimit(1)
+              .minimumScaleFactor(0.8)
+          } else {
+            Image(systemName: "checkmark.circle.fill")
+              .font(.system(size: 12))
+              .foregroundColor(.organiqSuccess600)
+          }
+        } else {
+          HStack(spacing: 4) {
+            if pendingCount > 0 {
+              Text("\(pendingCount)")
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundColor(.organiqPrimary700)
+              Text("pendentes")
+                .font(.system(size: 11))
+                .foregroundColor(.organiqTextMuted)
+            } else {
+              Text("todas concluidas")
+                .font(.system(size: 11))
+                .foregroundColor(.organiqSuccess600)
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private var emptyState: some View {
+    VStack(spacing: 6) {
+      Spacer()
+      Image(systemName: "checkmark.circle.fill")
+        .font(.system(size: isSmall ? 24 : 28))
+        .foregroundColor(.organiqSuccess600.opacity(0.6))
+      Text("Sem tarefas pendentes")
+        .font(.system(size: isSmall ? 12 : 13, weight: .semibold))
+        .foregroundColor(.organiqText)
+        .padding(.horizontal, isSmall ? 8 : 10)
+        .padding(.vertical, isSmall ? 5 : 6)
+        .background(
+          RoundedRectangle(cornerRadius: 8)
+            .fill(Color.organiqSuccess100)
+        )
+      Spacer()
+    }
+    .frame(maxWidth: .infinity)
+  }
+
+  @ViewBuilder
+  private func taskRow(_ task: OrganiqWidgetTask) -> some View {
+    HStack(spacing: 0) {
+      if #available(iOS 17.0, *) {
+        Button(intent: CompleteTaskIntent(taskID: task.id)) {
+          checkboxView(task)
+        }
+        .buttonStyle(.plain)
+      } else {
+        checkboxView(task)
+      }
+    }
+  }
+
+  private func checkboxView(_ task: OrganiqWidgetTask) -> some View {
+    VStack(alignment: .leading, spacing: isSmall ? 3 : 4) {
+      HStack(spacing: 8) {
+        Image(systemName: task.done ? "checkmark.circle.fill" : "circle")
+          .font(.system(size: isSmall ? 16 : 18, weight: .semibold))
+          .foregroundColor(task.done ? .organiqSuccess600 : .organiqPrimary600)
+
+        Text(task.title)
+          .font(.system(size: isSmall ? 12 : 13, weight: .medium))
+          .foregroundColor(task.done ? .organiqTextMuted : .organiqText)
+          .strikethrough(task.done, color: .organiqTextMuted)
+          .lineLimit(1)
+          .minimumScaleFactor(0.9)
+
+        Spacer(minLength: 0)
+
+        if isSmall {
+          Text(urgencyBadgeText(for: task))
+            .font(.system(size: 8, weight: .semibold))
+            .foregroundColor(urgencyBadgeColor(for: task))
+            .lineLimit(1)
+            .minimumScaleFactor(0.75)
+        }
+      }
+
+      if !isSmall {
+        HStack(spacing: 6) {
+          if let flagName = task.flagName, !flagName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            HStack(spacing: 4) {
+              Circle()
+                .fill(Color.organiqHex(task.flagColor) ?? .organiqPrimary600)
+                .frame(width: 6, height: 6)
+              Text(flagName)
+                .font(.system(size: 9, weight: .semibold))
+                .foregroundColor(.organiqTextMuted)
+                .lineLimit(1)
+            }
+          }
+          Text(urgencyDetailText(for: task))
+            .font(.system(size: 9, weight: .medium))
+            .foregroundColor(urgencyBadgeColor(for: task))
+            .lineLimit(1)
+            .minimumScaleFactor(0.8)
+          Spacer(minLength: 0)
+        }
+      }
+    }
+    .padding(.horizontal, isSmall ? 8 : 10)
+    .padding(.vertical, rowVerticalPadding)
+    .background(
+      RoundedRectangle(cornerRadius: isSmall ? 8 : 10, style: .continuous)
+        .fill(task.done ? doneCardBackgroundColor : cardBackgroundColor)
+    )
+    .overlay(
+      RoundedRectangle(cornerRadius: isSmall ? 8 : 10, style: .continuous)
+        .stroke(task.done ? cardBorderColor.opacity(0.8) : cardBorderColor, lineWidth: 1)
+    )
+  }
+
+  private func sortTasks(_ tasks: [OrganiqWidgetTask]) -> [OrganiqWidgetTask] {
+    tasks.sorted { a, b in
+      let rankA = urgencyRank(for: a)
+      let rankB = urgencyRank(for: b)
+      if rankA != rankB { return rankA < rankB }
+
+      let dueA = taskDate(a)
+      let dueB = taskDate(b)
+      switch (dueA, dueB) {
+      case let (lhs?, rhs?):
+        if lhs != rhs { return lhs < rhs }
+      case (_?, nil):
+        return true
+      case (nil, _?):
+        return false
+      default:
+        break
+      }
+      return a.title.localizedCaseInsensitiveCompare(b.title) == .orderedAscending
+    }
+  }
+
+  private func urgencyRank(for task: OrganiqWidgetTask) -> Int {
+    guard let due = taskDate(task) else { return 2 } // sem data
+    let todayStart = Calendar.current.startOfDay(for: Date())
+    if Calendar.current.isDate(due, inSameDayAs: todayStart) { return 0 } // hoje
+    if due < todayStart { return 1 } // atrasada
+    return 3 // futura
+  }
+
+  private func urgencyBadgeText(for task: OrganiqWidgetTask) -> String {
+    guard let due = taskDate(task) else { return "sem data" }
+    let todayStart = Calendar.current.startOfDay(for: Date())
+    if Calendar.current.isDate(due, inSameDayAs: todayStart) { return "hoje" }
+    if due < todayStart {
+      let days = max(todayStart.timeIntervalSince(Calendar.current.startOfDay(for: due)) / 86400, 1)
+      return "atras. \(Int(days))d"
+    }
+    let fmt = DateFormatter()
+    fmt.dateFormat = "dd/MM"
+    fmt.timeZone = .current
+    return fmt.string(from: due)
+  }
+
+  private func urgencyDetailText(for task: OrganiqWidgetTask) -> String {
+    guard let due = taskDate(task) else { return "Sem data definida" }
+    let now = Date()
+    let todayStart = Calendar.current.startOfDay(for: now)
+    if Calendar.current.isDate(due, inSameDayAs: todayStart) { return "Hoje" }
+    if due < todayStart {
+      let days = max(todayStart.timeIntervalSince(Calendar.current.startOfDay(for: due)) / 86400, 1)
+      if Int(days) <= 1 { return "Venceu ha 1 dia" }
+      return "Venceu ha \(Int(days)) dias"
+    }
+    let fmt = DateFormatter()
+    fmt.dateFormat = "dd/MM"
+    fmt.timeZone = .current
+    return "Prazo: \(fmt.string(from: due))"
+  }
+
+  private func urgencyBadgeColor(for task: OrganiqWidgetTask) -> Color {
+    guard let due = taskDate(task) else { return .organiqTextMuted }
+    let todayStart = Calendar.current.startOfDay(for: Date())
+    if Calendar.current.isDate(due, inSameDayAs: todayStart) { return .organiqAmber500 }
+    if due < todayStart { return .organiqRed500 }
+    return .organiqPrimary700
+  }
+
+  private func taskDate(_ task: OrganiqWidgetTask) -> Date? {
+    guard let iso = task.dueAt else { return nil }
+    let fmt = ISO8601DateFormatter()
+    fmt.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+    if let date = fmt.date(from: iso) { return date }
+    fmt.formatOptions = [.withInternetDateTime]
+    return fmt.date(from: iso)
+  }
 
   @ViewBuilder
   private var accessoryRectangularView: some View {
@@ -112,7 +365,7 @@ struct OrganiqWidgetEntryView: View {
           Label("Sem tarefas", systemImage: "checkmark.circle")
             .font(.system(size: 11))
         } else {
-          ForEach(entry.tasks.prefix(2)) { task in
+          ForEach(entry.tasks.prefix(3)) { task in
             HStack(spacing: 4) {
               Image(systemName: task.done ? "checkmark.circle.fill" : "circle")
                 .font(.system(size: 10))
@@ -122,8 +375,8 @@ struct OrganiqWidgetEntryView: View {
                 .lineLimit(1)
             }
           }
-          if entry.tasks.count > 2 {
-            Text("+ \(entry.tasks.count - 2) tarefas")
+          if entry.tasks.count > 3 {
+            Text("+ \(entry.tasks.count - 3) tarefas")
               .font(.system(size: 9))
               .foregroundColor(.secondary)
           }
@@ -132,47 +385,7 @@ struct OrganiqWidgetEntryView: View {
       .frame(maxWidth: .infinity, alignment: .leading)
     }
   }
-
-  // MARK: Task row (interactive on iOS 17+)
-
-  @ViewBuilder
-  private func taskRow(_ task: OrganiqWidgetTask) -> some View {
-    HStack(spacing: 8) {
-      if #available(iOS 17.0, *) {
-        Button(intent: CompleteTaskIntent(taskID: task.id)) {
-          Image(systemName: task.done ? "checkmark.circle.fill" : "circle")
-            .font(.system(size: 16, weight: .semibold))
-            .foregroundColor(task.done ? .organiqSuccess600 : .organiqPrimary700)
-        }
-        .buttonStyle(.plain)
-      } else {
-        Image(systemName: task.done ? "checkmark.circle.fill" : "circle")
-          .font(.system(size: 16, weight: .semibold))
-          .foregroundColor(task.done ? .organiqSuccess600 : .organiqPrimary700)
-      }
-
-      Text(task.title)
-        .font(.system(size: 13, weight: .medium))
-        .foregroundColor(task.done ? .organiqTextMuted : .organiqText)
-        .strikethrough(task.done, color: .organiqTextMuted)
-        .lineLimit(1)
-
-      Spacer(minLength: 0)
-    }
-    .padding(.horizontal, 10)
-    .padding(.vertical, 7)
-    .background(
-      RoundedRectangle(cornerRadius: 10, style: .continuous)
-        .fill(Color.organiqSurface)
-    )
-    .overlay(
-      RoundedRectangle(cornerRadius: 10, style: .continuous)
-        .stroke(Color.organiqBorder, lineWidth: 1)
-    )
-  }
 }
-
-// MARK: - Widget
 
 struct OrganiqWidget: Widget {
   let kind: String = "OrganiqWidget"
@@ -181,6 +394,7 @@ struct OrganiqWidget: Widget {
     StaticConfiguration(kind: kind, provider: OrganiqWidgetTimelineProvider()) { entry in
       OrganiqWidgetEntryView(entry: entry)
     }
+    .containerBackgroundRemovable(false)
     .configurationDisplayName("Tasks")
     .description("Suas tarefas pendentes com checkbox interativo.")
     .supportedFamilies(supportedFamilies)
@@ -193,8 +407,6 @@ struct OrganiqWidget: Widget {
     return [.systemSmall, .systemMedium, .systemLarge]
   }
 }
-
-// MARK: - Intent (iOS 17+)
 
 @available(iOS 17.0, *)
 struct CompleteTaskIntent: AppIntent {
@@ -213,8 +425,6 @@ struct CompleteTaskIntent: AppIntent {
     return .result()
   }
 }
-
-// MARK: - Preview
 
 struct OrganiqWidget_Previews: PreviewProvider {
   static var previews: some View {

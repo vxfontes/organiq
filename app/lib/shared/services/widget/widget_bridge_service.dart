@@ -19,11 +19,54 @@ class WidgetBridgeService {
   Future<void> syncTasks(List<TaskOutput> tasks) async {
     if (!_isSupported) return;
 
-    final payload = tasks
-        .where((task) => task.id.trim().isNotEmpty)
-        .take(8)
+    final now = DateTime.now().toLocal();
+    final todayStart = DateTime(now.year, now.month, now.day);
+    final tomorrowStart = todayStart.add(const Duration(days: 1));
+
+    int priority(TaskOutput task) {
+      final due = task.dueAt?.toLocal();
+      if (due == null) return 2; // sem data
+      if (!due.isBefore(todayStart) && due.isBefore(tomorrowStart)) return 0; // hoje
+      if (due.isBefore(todayStart)) return 1; // atrasada
+      return 3; // futura com data
+    }
+
+    final ordered = tasks
+        .where(
+          (task) =>
+              task.id.trim().isNotEmpty &&
+              task.title.trim().isNotEmpty &&
+              !task.isDone,
+        )
+        .toList(growable: false)
+      ..sort((a, b) {
+        final byPriority = priority(a).compareTo(priority(b));
+        if (byPriority != 0) return byPriority;
+
+        final aDue = a.dueAt?.toLocal();
+        final bDue = b.dueAt?.toLocal();
+        if (aDue == null && bDue == null) {
+          return a.title.toLowerCase().compareTo(b.title.toLowerCase());
+        }
+        if (aDue == null) return 1;
+        if (bDue == null) return -1;
+
+        final byDate = aDue.compareTo(bDue);
+        if (byDate != 0) return byDate;
+        return a.title.toLowerCase().compareTo(b.title.toLowerCase());
+      });
+
+    final payload = ordered
+        .take(10)
         .map(
-          (task) => {'id': task.id, 'title': task.title, 'done': task.isDone},
+          (task) => <String, dynamic>{
+            'id': task.id,
+            'title': task.title,
+            'done': task.isDone,
+            'dueAt': task.dueAt?.toUtc().toIso8601String(),
+            'flagName': task.subflagName ?? task.flagName,
+            'flagColor': task.subflagColor ?? task.flagColor,
+          },
         )
         .toList(growable: false);
 
@@ -87,7 +130,7 @@ class WidgetBridgeService {
   /// [items] is a list of maps with keys:
   /// id, title, type (event|reminder|routine|task),
   /// scheduledTime (ISO8601 or null), endScheduledTime (ISO8601 or null),
-  /// isCompleted, isOverdue.
+  /// isCompleted, isOverdue, subtitle (optional), accentColor (optional).
   Future<void> syncNextActions(List<Map<String, dynamic>> items) async {
     if (!_isSupported) return;
 

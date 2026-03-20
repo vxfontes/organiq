@@ -77,7 +77,16 @@ import WidgetKit
         let id = item["id"] as? String, !id.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
         let title = item["title"] as? String, !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
       else { return nil }
-      return ["id": id, "title": title, "done": item["done"] as? Bool ?? false]
+
+      var mapped: [String: Any] = [
+        "id": id,
+        "title": title,
+        "done": item["done"] as? Bool ?? false,
+      ]
+      if let dueAt = item["dueAt"] as? String { mapped["dueAt"] = dueAt }
+      if let flagName = item["flagName"] as? String { mapped["flagName"] = flagName }
+      if let flagColor = item["flagColor"] as? String { mapped["flagColor"] = flagColor }
+      return mapped
     }
 
     guard let data = try? JSONSerialization.data(withJSONObject: tasks) else { return false }
@@ -144,6 +153,8 @@ import WidgetKit
       ]
       if let t = item["scheduledTime"]    as? String { mapped["scheduledTime"]    = t }
       if let t = item["endScheduledTime"] as? String { mapped["endScheduledTime"] = t }
+      if let subtitle = item["subtitle"] as? String { mapped["subtitle"] = subtitle }
+      if let accentColor = item["accentColor"] as? String { mapped["accentColor"] = accentColor }
       return mapped
     }
 

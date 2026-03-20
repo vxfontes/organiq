@@ -1,7 +1,30 @@
 import Foundation
 import WidgetKit
 
-// MARK: - Shared Data Models
+struct OrganiqWidgetTask: Codable, Identifiable {
+  let id: String
+  let title: String
+  var done: Bool
+  let dueAt: String?
+  let flagName: String?
+  let flagColor: String?
+
+  init(
+    id: String,
+    title: String,
+    done: Bool,
+    dueAt: String? = nil,
+    flagName: String? = nil,
+    flagColor: String? = nil
+  ) {
+    self.id = id
+    self.title = title
+    self.done = done
+    self.dueAt = dueAt
+    self.flagName = flagName
+    self.flagColor = flagColor
+  }
+}
 
 struct DayProgressData: Codable {
   let percent: Double
@@ -16,51 +39,70 @@ struct DayProgressData: Codable {
 struct NextActionData: Codable, Identifiable {
   let id: String
   let title: String
-  let type: String            // "event" | "reminder" | "routine" | "task"
-  let scheduledTime: String?  // ISO8601 UTC
+  let type: String
+  let scheduledTime: String?
   let endScheduledTime: String?
+  let subtitle: String?
+  let accentColor: String?
   let isCompleted: Bool
   let isOverdue: Bool
+
+  init(
+    id: String,
+    title: String,
+    type: String,
+    scheduledTime: String?,
+    endScheduledTime: String?,
+    subtitle: String? = nil,
+    accentColor: String? = nil,
+    isCompleted: Bool,
+    isOverdue: Bool
+  ) {
+    self.id = id
+    self.title = title
+    self.type = type
+    self.scheduledTime = scheduledTime
+    self.endScheduledTime = endScheduledTime
+    self.subtitle = subtitle
+    self.accentColor = accentColor
+    self.isCompleted = isCompleted
+    self.isOverdue = isOverdue
+  }
 }
 
 struct ReminderWidgetData: Codable, Identifiable {
   let id: String
   let title: String
-  let remindAt: String?  // ISO8601 UTC
+  let remindAt: String?
 }
-
-// MARK: - Shared Store
 
 enum OrganiqWidgetSharedStore {
   static let appGroupID = "group.vxfontes.organiq"
 
-  private static let tasksKey                   = "widget_tasks_v1"
-  private static let pendingCompletedTaskIDsKey  = "widget_pending_completed_task_ids_v1"
+  private static let tasksKey                    = "widget_tasks_v1"
+  private static let pendingCompletedTaskIDsKey = "widget_pending_completed_task_ids_v1"
   private static let dayProgressKey             = "widget_day_progress_v1"
   private static let nextActionsKey             = "widget_next_actions_v1"
   private static let remindersKey               = "widget_reminders_v1"
 
   static var defaults: UserDefaults? { UserDefaults(suiteName: appGroupID) }
 
-  // MARK: Tasks
-
   static func loadTasks() -> [OrganiqWidgetTask] {
-    guard
-      let defaults,
-      let data = defaults.data(forKey: tasksKey),
-      let decoded = try? JSONDecoder().decode([OrganiqWidgetTask].self, from: data)
+    guard let defaults = defaults,
+          let data = defaults.data(forKey: tasksKey),
+          let decoded = try? JSONDecoder().decode([OrganiqWidgetTask].self, from: data)
     else { return [] }
     return decoded
   }
 
   static func saveTasks(_ tasks: [OrganiqWidgetTask]) {
-    guard let defaults, let data = try? JSONEncoder().encode(tasks) else { return }
+    guard let defaults = defaults, let data = try? JSONEncoder().encode(tasks) else { return }
     defaults.set(data, forKey: tasksKey)
   }
 
   static func markTaskAsDone(taskID: String) {
     let clean = taskID.trimmingCharacters(in: .whitespacesAndNewlines)
-    guard let defaults, !clean.isEmpty else { return }
+    guard let defaults = defaults, !clean.isEmpty else { return }
 
     var tasks = loadTasks()
     guard let index = tasks.firstIndex(where: { $0.id == clean }) else { return }
@@ -75,7 +117,7 @@ enum OrganiqWidgetSharedStore {
   }
 
   static func consumeCompletedTaskIDs() -> [String] {
-    guard let defaults else { return [] }
+    guard let defaults = defaults else { return [] }
     let ids = (defaults.stringArray(forKey: pendingCompletedTaskIDsKey) ?? [])
       .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
       .filter { !$0.isEmpty }
@@ -83,59 +125,46 @@ enum OrganiqWidgetSharedStore {
     return ids
   }
 
-  // MARK: Day Progress
-
   static func loadDayProgress() -> DayProgressData? {
-    guard
-      let defaults,
-      let data = defaults.data(forKey: dayProgressKey),
-      let decoded = try? JSONDecoder().decode(DayProgressData.self, from: data)
+    guard let defaults = defaults,
+          let data = defaults.data(forKey: dayProgressKey),
+          let decoded = try? JSONDecoder().decode(DayProgressData.self, from: data)
     else { return nil }
     return decoded
   }
 
   static func saveDayProgress(_ progress: DayProgressData) {
-    guard let defaults, let data = try? JSONEncoder().encode(progress) else { return }
+    guard let defaults = defaults, let data = try? JSONEncoder().encode(progress) else { return }
     defaults.set(data, forKey: dayProgressKey)
   }
 
-  // MARK: Next Actions
-
   static func loadNextActions() -> [NextActionData] {
-    guard
-      let defaults,
-      let data = defaults.data(forKey: nextActionsKey),
-      let decoded = try? JSONDecoder().decode([NextActionData].self, from: data)
+    guard let defaults = defaults,
+          let data = defaults.data(forKey: nextActionsKey),
+          let decoded = try? JSONDecoder().decode([NextActionData].self, from: data)
     else { return [] }
     return decoded
   }
 
   static func saveNextActions(_ items: [NextActionData]) {
-    guard let defaults, let data = try? JSONEncoder().encode(items) else { return }
+    guard let defaults = defaults, let data = try? JSONEncoder().encode(items) else { return }
     defaults.set(data, forKey: nextActionsKey)
   }
 
-  // MARK: Reminders
-
   static func loadReminders() -> [ReminderWidgetData] {
-    guard
-      let defaults,
-      let data = defaults.data(forKey: remindersKey),
-      let decoded = try? JSONDecoder().decode([ReminderWidgetData].self, from: data)
+    guard let defaults = defaults,
+          let data = defaults.data(forKey: remindersKey),
+          let decoded = try? JSONDecoder().decode([ReminderWidgetData].self, from: data)
     else { return [] }
     return decoded
   }
 
   static func saveReminders(_ items: [ReminderWidgetData]) {
-    guard let defaults, let data = try? JSONEncoder().encode(items) else { return }
+    guard let defaults = defaults, let data = try? JSONEncoder().encode(items) else { return }
     defaults.set(data, forKey: remindersKey)
   }
 
-  // MARK: Reload
-
   static func reloadAll() {
-    if #available(iOS 14.0, *) {
-      WidgetCenter.shared.reloadAllTimelines()
-    }
+    WidgetCenter.shared.reloadAllTimelines()
   }
 }

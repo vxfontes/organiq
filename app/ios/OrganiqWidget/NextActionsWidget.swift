@@ -1,15 +1,13 @@
 import SwiftUI
 import WidgetKit
 
-// MARK: - Entry
-
 struct NextActionsEntry: TimelineEntry {
   let date: Date
   let items: [NextActionData]
 
   static var placeholder: NextActionsEntry {
     NextActionsEntry(date: Date(), items: [
-      NextActionData(id: "1", title: "Reuniao time", type: "event",
+      NextActionData(id: "1", title: "Reuniao com time", type: "event",
                      scheduledTime: nil, endScheduledTime: nil, isCompleted: false, isOverdue: false),
       NextActionData(id: "2", title: "Pagar aluguel", type: "reminder",
                      scheduledTime: nil, endScheduledTime: nil, isCompleted: false, isOverdue: false),
@@ -20,8 +18,6 @@ struct NextActionsEntry: TimelineEntry {
     ])
   }
 }
-
-// MARK: - Provider
 
 struct NextActionsProvider: TimelineProvider {
   func placeholder(in context: Context) -> NextActionsEntry { .placeholder }
@@ -37,105 +33,286 @@ struct NextActionsProvider: TimelineProvider {
   }
 }
 
-// MARK: - Main View
-
 struct NextActionsWidgetView: View {
   var entry: NextActionsEntry
   @Environment(\.widgetFamily) var family
+  @Environment(\.self) private var env
 
-  private var maxItems: Int { family == .systemLarge ? 7 : 4 }
+  private var isLarge: Bool { family == .systemLarge }
+  private var maxItems: Int { isLarge ? 6 : 4 }
+  private var rowSpacing: CGFloat { isLarge ? 5 : 4 }
+  private var displayedItems: ArraySlice<NextActionData> { orderedItems.prefix(maxItems) }
+  private var hiddenCount: Int { max(orderedItems.count - maxItems, 0) }
+  private var widgetBackgroundColor: Color { isAccentedRendering ? .black : .organiqBackground }
+  private var cardBackgroundColor: Color { isAccentedRendering ? Color.white.opacity(0.12) : .organiqSurface }
+  private var doneCardBackgroundColor: Color { isAccentedRendering ? Color.white.opacity(0.08) : Color.organiqSurface.opacity(0.6) }
+  private var cardBorderColor: Color { isAccentedRendering ? Color.white.opacity(0.22) : .organiqBorder }
+  private var strokeColor: Color { isAccentedRendering ? Color.white.opacity(0.24) : .organiqBorder }
+  private var orderedItems: [NextActionData] { sortItems(entry.items) }
+
+  private var isAccentedRendering: Bool {
+    if #available(iOSApplicationExtension 16.0, *) {
+      return env.widgetRenderingMode == .accented
+    }
+    return false
+  }
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 8) {
-      // Header
-      HStack {
+    VStack(spacing: 0) {
+      headerRow
+        .padding(.horizontal, isLarge ? 14 : 12)
+        .padding(.top, isLarge ? 12 : 10)
+        .padding(.bottom, isLarge ? 8 : 6)
+
+      if entry.items.isEmpty {
+        emptyState
+      } else {
+        VStack(spacing: rowSpacing) {
+          ForEach(displayedItems) { item in
+            actionRow(item)
+          }
+          footerRow
+        }
+        .padding(.horizontal, isLarge ? 12 : 10)
+        .padding(.bottom, isLarge ? 8 : 6)
+      }
+    }
+    .overlay(
+      RoundedRectangle(cornerRadius: 16, style: .continuous)
+        .stroke(strokeColor, lineWidth: 1)
+    )
+    .organiqWidgetBackground(widgetBackgroundColor)
+  }
+
+  private var headerRow: some View {
+    HStack {
+      HStack(spacing: 5) {
+        Image(systemName: "clock.fill")
+          .font(.system(size: 10))
+          .foregroundColor(.organiqPrimary600)
         Text("A seguir")
-          .font(.system(size: 14, weight: .bold))
+          .font(.system(size: 13, weight: .bold))
           .foregroundColor(.organiqText)
-        Spacer()
+      }
+      Spacer()
+      if isLarge {
+        HStack(spacing: 4) {
+          Text("\(entry.items.count)")
+            .font(.system(size: 11, weight: .semibold))
+            .foregroundColor(.organiqPrimary700)
+          Text("itens")
+            .font(.system(size: 11))
+            .foregroundColor(.organiqTextMuted)
+        }
+        Text("·")
+          .foregroundColor(.organiqTextMuted)
         Text(todayLabel)
           .font(.system(size: 11))
           .foregroundColor(.organiqTextMuted)
-      }
-
-      if entry.items.isEmpty {
-        Spacer()
-        Text("Nenhuma acao proxima")
-          .font(.system(size: 12))
-          .foregroundColor(.organiqTextMuted)
-          .frame(maxWidth: .infinity, alignment: .center)
-        Spacer()
       } else {
-        ForEach(entry.items.prefix(maxItems)) { item in
-          actionRow(item)
-        }
+        Text("\(entry.items.count)")
+          .font(.system(size: 11, weight: .semibold))
+          .foregroundColor(.organiqPrimary700)
       }
-
-      Spacer(minLength: 0)
     }
-    .padding(14)
-    .overlay(
-      RoundedRectangle(cornerRadius: 14, style: .continuous)
-        .stroke(Color.organiqBorder, lineWidth: 1)
-    )
-    .organiqWidgetBackground(Color.organiqBackground)
   }
 
-  // MARK: Row
+  private var emptyState: some View {
+    VStack(spacing: 6) {
+      Spacer()
+      Image(systemName: "checkmark.circle.fill")
+        .font(.system(size: isLarge ? 28 : 24))
+        .foregroundColor(.organiqSuccess600.opacity(0.6))
+      Text("Tudo certo!")
+        .font(.system(size: isLarge ? 13 : 12, weight: .semibold))
+        .foregroundColor(.organiqText)
+      Text("Nenhuma acao pendente")
+        .font(.system(size: isLarge ? 11 : 10))
+        .foregroundColor(.organiqTextMuted)
+      Spacer()
+    }
+    .frame(maxWidth: .infinity)
+  }
+
+  private var footerRow: some View {
+    HStack(spacing: 6) {
+      if let first = displayedItems.first, let end = timeLabel(for: first.endScheduledTime) {
+        Text("termina as \(end)")
+          .font(.system(size: 9, weight: .medium))
+          .foregroundColor(.organiqTextMuted)
+      }
+      Spacer()
+      if hiddenCount > 0 {
+        Text("+\(hiddenCount) depois")
+          .font(.system(size: 9, weight: .medium))
+          .foregroundColor(.organiqTextMuted)
+      }
+    }
+    .padding(.horizontal, 2)
+    .padding(.top, 2)
+  }
 
   private func actionRow(_ item: NextActionData) -> some View {
-    HStack(spacing: 8) {
-      // Time
-      Text(timeLabel(for: item))
-        .font(.system(size: 10, weight: .medium, design: .monospaced))
-        .foregroundColor(item.isOverdue ? .organiqRed500 : .organiqTextMuted)
-        .frame(width: 36, alignment: .trailing)
-
-      // Color stripe by type
-      RoundedRectangle(cornerRadius: 2)
-        .fill(typeColor(item.type))
-        .frame(width: 3, height: 30)
-
-      // Content
-      VStack(alignment: .leading, spacing: 2) {
-        Text(item.title)
-          .font(.system(size: 12, weight: .medium))
-          .foregroundColor(item.isCompleted ? .organiqTextMuted : .organiqText)
-          .strikethrough(item.isCompleted, color: .organiqTextMuted)
-          .lineLimit(1)
-        Text(typeName(item.type))
-          .font(.system(size: 9))
-          .foregroundColor(.organiqTextMuted)
-      }
-
-      Spacer(minLength: 0)
-
+    let accent = accentColor(for: item)
+    return HStack(spacing: 0) {
       if item.isCompleted {
-        Image(systemName: "checkmark.circle.fill")
-          .font(.system(size: 12))
-          .foregroundColor(.organiqSuccess600)
+        completedRow(item, accent: accent)
+      } else {
+        activeRow(item, accent: accent)
       }
     }
-    .padding(.horizontal, 8)
-    .padding(.vertical, 6)
-    .background(
-      RoundedRectangle(cornerRadius: 8, style: .continuous)
-        .fill(Color.organiqSurface)
-    )
-    .overlay(
-      RoundedRectangle(cornerRadius: 8, style: .continuous)
-        .stroke(Color.organiqBorder, lineWidth: 0.5)
-    )
   }
 
-  // MARK: Helpers
+  private func activeRow(_ item: NextActionData, accent: Color) -> some View {
+    HStack(spacing: 0) {
+      RoundedRectangle(cornerRadius: 2, style: .continuous)
+        .fill(accent)
+        .frame(width: 4)
 
-  private func timeLabel(for item: NextActionData) -> String {
-    guard let iso = item.scheduledTime, let date = isoDate(iso) else { return "--:--" }
+      VStack(alignment: .leading, spacing: 3) {
+        HStack(spacing: 6) {
+          Text(timeRangeLabel(for: item))
+            .font(.system(size: isLarge ? 10 : 9, weight: .medium, design: .monospaced))
+            .foregroundColor(item.isOverdue ? .organiqRed500 : .organiqTextMuted)
+          if item.isOverdue {
+            Text("atrasado")
+              .font(.system(size: 8, weight: .semibold))
+              .foregroundColor(.white)
+              .padding(.horizontal, 5)
+              .padding(.vertical, 2)
+              .background(Capsule().fill(Color.organiqRed500))
+          }
+          Spacer(minLength: 0)
+          HStack(spacing: 3) {
+            Image(systemName: typeIcon(item.type))
+              .font(.system(size: 8))
+            Text(typeName(item.type))
+              .font(.system(size: 9))
+          }
+          .foregroundColor(accent)
+        }
+
+        HStack(spacing: 0) {
+          Text(item.title)
+            .font(.system(size: isLarge ? 12 : 11, weight: .medium))
+            .foregroundColor(.organiqText)
+            .lineLimit(1)
+            .minimumScaleFactor(0.9)
+          Spacer(minLength: 0)
+        }
+
+        if let subtitle = normalizedSubtitle(for: item) {
+          Text(subtitle)
+            .font(.system(size: 9, weight: .medium))
+            .foregroundColor(.organiqTextMuted)
+            .lineLimit(1)
+            .minimumScaleFactor(0.8)
+        }
+      }
+      .padding(.leading, 8)
+      .padding(.trailing, isLarge ? 10 : 8)
+      .padding(.vertical, isLarge ? 7 : 6)
+      .background(cardBackgroundColor)
+      .overlay(
+        RoundedRectangle(cornerRadius: isLarge ? 10 : 8, style: .continuous)
+          .stroke(cardBorderColor, lineWidth: 0.5)
+      )
+    }
+  }
+
+  private func completedRow(_ item: NextActionData, accent: Color) -> some View {
+    HStack(spacing: 0) {
+      RoundedRectangle(cornerRadius: 2, style: .continuous)
+        .fill(accent.opacity(0.3))
+        .frame(width: 4)
+
+      VStack(alignment: .leading, spacing: 3) {
+        HStack(spacing: 6) {
+          Text(timeRangeLabel(for: item))
+            .font(.system(size: isLarge ? 10 : 9, weight: .medium, design: .monospaced))
+            .foregroundColor(.organiqTextMuted)
+          Spacer(minLength: 0)
+          Image(systemName: "checkmark.circle.fill")
+            .font(.system(size: 13))
+            .foregroundColor(.organiqSuccess600)
+        }
+
+        HStack(spacing: 0) {
+          Text(item.title)
+            .font(.system(size: isLarge ? 12 : 11, weight: .medium))
+            .foregroundColor(.organiqTextMuted)
+            .strikethrough(true, color: .organiqTextMuted)
+            .lineLimit(1)
+            .minimumScaleFactor(0.9)
+          Spacer(minLength: 0)
+        }
+
+        if let subtitle = normalizedSubtitle(for: item) {
+          Text(subtitle)
+            .font(.system(size: 9, weight: .medium))
+            .foregroundColor(.organiqTextMuted)
+            .lineLimit(1)
+            .minimumScaleFactor(0.8)
+        }
+      }
+      .padding(.leading, 8)
+      .padding(.trailing, isLarge ? 10 : 8)
+      .padding(.vertical, isLarge ? 7 : 6)
+      .background(doneCardBackgroundColor)
+      .overlay(
+        RoundedRectangle(cornerRadius: isLarge ? 10 : 8, style: .continuous)
+          .stroke(cardBorderColor.opacity(0.8), lineWidth: 0.5)
+      )
+    }
+  }
+
+  private func sortItems(_ items: [NextActionData]) -> [NextActionData] {
+    items.sorted { a, b in
+      let aDate = a.scheduledTime.flatMap(isoDate)
+      let bDate = b.scheduledTime.flatMap(isoDate)
+      switch (aDate, bDate) {
+      case let (lhs?, rhs?):
+        if lhs != rhs { return lhs < rhs }
+      case (_?, nil):
+        return true
+      case (nil, _?):
+        return false
+      default:
+        break
+      }
+      return a.title.localizedCaseInsensitiveCompare(b.title) == .orderedAscending
+    }
+  }
+
+  private func accentColor(for item: NextActionData) -> Color {
+    if let byTag = Color.organiqHex(item.accentColor) {
+      return byTag
+    }
+    return typeColor(item.type)
+  }
+
+  private func timeLabel(for isoString: String?) -> String? {
+    guard let isoString, let date = isoDate(isoString) else { return nil }
     let fmt = DateFormatter()
     fmt.dateFormat = "HH:mm"
     fmt.timeZone = .current
     return fmt.string(from: date)
+  }
+
+  private func timeRangeLabel(for item: NextActionData) -> String {
+    let start = timeLabel(for: item.scheduledTime) ?? "--:--"
+    guard let end = timeLabel(for: item.endScheduledTime) else { return start }
+    return "\(start) - \(end)"
+  }
+
+  private func normalizedSubtitle(for item: NextActionData) -> String? {
+    if let subtitle = item.subtitle?.trimmingCharacters(in: .whitespacesAndNewlines), !subtitle.isEmpty {
+      return subtitle
+    }
+    if let end = timeLabel(for: item.endScheduledTime) {
+      return "Termino: \(end)"
+    }
+    return nil
   }
 
   private func typeColor(_ type: String) -> Color {
@@ -143,7 +320,18 @@ struct NextActionsWidgetView: View {
     case "event":    return .organiqIndigo500
     case "reminder": return .organiqAmber500
     case "routine":  return .organiqPrimary600
+    case "task":     return .organiqSuccess600
     default:         return .organiqTextMuted
+    }
+  }
+
+  private func typeIcon(_ type: String) -> String {
+    switch type {
+    case "event":    return "calendar"
+    case "reminder": return "bell"
+    case "routine":  return "figure.run"
+    case "task":     return "checklist"
+    default:         return "circle"
     }
   }
 
@@ -173,8 +361,6 @@ struct NextActionsWidgetView: View {
   }
 }
 
-// MARK: - Widget
-
 struct NextActionsWidget: Widget {
   let kind = "NextActionsWidget"
 
@@ -182,13 +368,12 @@ struct NextActionsWidget: Widget {
     StaticConfiguration(kind: kind, provider: NextActionsProvider()) { entry in
       NextActionsWidgetView(entry: entry)
     }
+    .containerBackgroundRemovable(false)
     .configurationDisplayName("Proximas Acoes")
     .description("Sua timeline de acoes de hoje.")
     .supportedFamilies([.systemMedium, .systemLarge])
   }
 }
-
-// MARK: - Preview
 
 struct NextActionsWidget_Previews: PreviewProvider {
   static var previews: some View {
