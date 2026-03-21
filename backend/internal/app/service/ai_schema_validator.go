@@ -59,6 +59,7 @@ type RoutinePayload struct {
 	EndTime        string  `json:"endTime"`
 	RecurrenceType string  `json:"recurrenceType"`
 	WeekOfMonth    *int    `json:"weekOfMonth,omitempty"`
+	DayOfMonth     *int    `json:"dayOfMonth,omitempty"`
 	StartsOn       *string `json:"startsOn,omitempty"`
 	EndsOn         *string `json:"endsOn,omitempty"`
 }
@@ -214,6 +215,7 @@ func normalizeOutputAliases(raw []byte) []byte {
 			renameKey(payloadMap, "end_time", "endTime")
 			renameKey(payloadMap, "recurrence_type", "recurrenceType")
 			renameKey(payloadMap, "week_of_month", "weekOfMonth")
+			renameKey(payloadMap, "day_of_month", "dayOfMonth")
 			renameKey(payloadMap, "starts_on", "startsOn")
 			renameKey(payloadMap, "ends_on", "endsOn")
 		}
@@ -522,15 +524,12 @@ func parseRoutinePayload(payload json.RawMessage) (RoutinePayload, error) {
 		EndTime        string  `json:"endTime"`
 		RecurrenceType string  `json:"recurrenceType"`
 		WeekOfMonth    *int    `json:"weekOfMonth"`
+		DayOfMonth     *int    `json:"dayOfMonth"`
 		StartsOn       *string `json:"startsOn"`
 		EndsOn         *string `json:"endsOn"`
 	}
 	if err := decodeStrict(payload, &raw); err != nil {
 		return RoutinePayload{}, err
-	}
-
-	if len(raw.Weekdays) == 0 {
-		return RoutinePayload{}, fmt.Errorf("%w: routine_weekdays_required", ErrAISchemaInvalid)
 	}
 	if raw.StartTime == "" {
 		return RoutinePayload{}, fmt.Errorf("%w: routine_start_time_required", ErrAISchemaInvalid)
@@ -544,12 +543,26 @@ func parseRoutinePayload(payload json.RawMessage) (RoutinePayload, error) {
 		"biweekly":     true,
 		"triweekly":    true,
 		"monthly_week": true,
+		"monthly_day":  true,
 	}
 	if raw.RecurrenceType == "" {
 		raw.RecurrenceType = "weekly"
 	}
 	if !validRecurrenceTypes[raw.RecurrenceType] {
 		return RoutinePayload{}, fmt.Errorf("%w: routine_invalid_recurrence_type", ErrAISchemaInvalid)
+	}
+	if raw.RecurrenceType != "monthly_day" && len(raw.Weekdays) == 0 {
+		return RoutinePayload{}, fmt.Errorf("%w: routine_weekdays_required", ErrAISchemaInvalid)
+	}
+	if raw.RecurrenceType == "monthly_week" {
+		if raw.WeekOfMonth == nil || *raw.WeekOfMonth < 1 || *raw.WeekOfMonth > 5 {
+			return RoutinePayload{}, fmt.Errorf("%w: routine_week_of_month_required", ErrAISchemaInvalid)
+		}
+	}
+	if raw.RecurrenceType == "monthly_day" {
+		if raw.DayOfMonth == nil || *raw.DayOfMonth < 1 || *raw.DayOfMonth > 31 {
+			return RoutinePayload{}, fmt.Errorf("%w: routine_day_of_month_required", ErrAISchemaInvalid)
+		}
 	}
 
 	return RoutinePayload{
@@ -558,6 +571,7 @@ func parseRoutinePayload(payload json.RawMessage) (RoutinePayload, error) {
 		EndTime:        raw.EndTime,
 		RecurrenceType: raw.RecurrenceType,
 		WeekOfMonth:    raw.WeekOfMonth,
+		DayOfMonth:     raw.DayOfMonth,
 		StartsOn:       raw.StartsOn,
 		EndsOn:         raw.EndsOn,
 	}, nil

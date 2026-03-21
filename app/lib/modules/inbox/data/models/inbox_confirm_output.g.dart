@@ -34,3 +34,14 @@ InboxConfirmOutput _$InboxConfirmOutputFromJson(Map<String, dynamic> json) =>
               .toList() ??
           const <ShoppingItemOutput>[],
     );
+
+Map<String, dynamic> _$InboxConfirmOutputToJson(InboxConfirmOutput instance) =>
+    <String, dynamic>{
+      'type': instance.type,
+      'task': instance.task,
+      'reminder': instance.reminder,
+      'event': instance.event,
+      'routine': instance.routine,
+      'shoppingList': instance.shoppingList,
+      'shoppingItems': instance.shoppingItems,
+    };

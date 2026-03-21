@@ -278,6 +278,11 @@ func toShoppingItemResponse(item domain.ShoppingItem, list *domain.ShoppingList)
 }
 
 func toRoutineResponse(routine domain.Routine, flag *domain.Flag, subflag *domain.Subflag) dto.RoutineResponse {
+	weekdays := routine.Weekdays
+	if weekdays == nil {
+		weekdays = []int{}
+	}
+
 	var flagObj *dto.FlagObject
 	if flag != nil {
 		obj := toFlagObject(*flag)
@@ -293,10 +298,11 @@ func toRoutineResponse(routine domain.Routine, flag *domain.Flag, subflag *domai
 		Title:            routine.Title,
 		Description:      routine.Description,
 		RecurrenceType:   routine.RecurrenceType,
-		Weekdays:         routine.Weekdays,
+		Weekdays:         weekdays,
 		StartTime:        routine.StartTime,
 		EndTime:          routine.EndTime,
 		WeekOfMonth:      routine.WeekOfMonth,
+		DayOfMonth:       routine.DayOfMonth,
 		StartsOn:         routine.StartsOn,
 		EndsOn:           routine.EndsOn,
 		Color:            routine.Color,

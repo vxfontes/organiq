@@ -10,9 +10,9 @@ struct OrganiqWidgetEntry: TimelineEntry {
 struct OrganiqWidgetTimelineProvider: TimelineProvider {
   func placeholder(in context: Context) -> OrganiqWidgetEntry {
     OrganiqWidgetEntry(date: Date(), tasks: [
-      OrganiqWidgetTask(id: "1", title: "Comprar pao",        done: false),
+      OrganiqWidgetTask(id: "1", title: "Comprar pão",        done: false),
       OrganiqWidgetTask(id: "2", title: "Pagar conta",         done: false),
-      OrganiqWidgetTask(id: "3", title: "Ligar para clinica",  done: true),
+      OrganiqWidgetTask(id: "3", title: "Ligar para clínica",  done: true),
     ])
   }
 
@@ -46,6 +46,8 @@ struct OrganiqWidgetEntryView: View {
 
   private var pendingCount: Int { entry.tasks.filter { !$0.done }.count }
   private var prioritizedTasks: [OrganiqWidgetTask] { sortTasks(entry.tasks.filter { !$0.done }) }
+  private var overduePendingCount: Int { prioritizedTasks.filter { urgencyRank(for: $0) == 1 }.count }
+  private var todayPendingCount: Int { prioritizedTasks.filter { urgencyRank(for: $0) == 0 }.count }
   private var visibleTasks: ArraySlice<OrganiqWidgetTask> { prioritizedTasks.prefix(maxTasks) }
   private var hiddenCount: Int { max(prioritizedTasks.count - maxTasks, 0) }
   private var widgetBackgroundColor: Color { isAccentedRendering ? .black : .organiqBackground }
@@ -101,7 +103,9 @@ struct OrganiqWidgetEntryView: View {
         }
         .padding(.horizontal, isSmall ? 8 : 12)
         .padding(.bottom, isSmall ? 6 : 8)
-        Spacer(minLength: 0)
+        if !isSmall {
+          Spacer(minLength: 0)
+        }
       }
     }
     .overlay(
@@ -152,16 +156,24 @@ struct OrganiqWidgetEntryView: View {
         Text("Tasks")
           .font(.system(size: 13, weight: .bold))
           .foregroundColor(.organiqText)
+          .lineLimit(1)
+          .minimumScaleFactor(0.85)
       }
       Spacer()
       if !entry.tasks.isEmpty {
         if isSmall {
-          if pendingCount > 0, let first = prioritizedTasks.first {
-            Text(urgencyBadgeText(for: first))
-              .font(.system(size: 11, weight: .semibold))
-              .foregroundColor(urgencyBadgeColor(for: first))
+          if pendingCount > 0 {
+            Text(smallHeaderBadgeText)
+              .font(.system(size: 9, weight: .semibold))
+              .foregroundColor(smallHeaderBadgeTextColor)
               .lineLimit(1)
-              .minimumScaleFactor(0.8)
+              .minimumScaleFactor(0.75)
+              .padding(.horizontal, 7)
+              .padding(.vertical, 3)
+              .background(
+                Capsule()
+                  .fill(smallHeaderBadgeBackgroundColor)
+              )
           } else {
             Image(systemName: "checkmark.circle.fill")
               .font(.system(size: 12))
@@ -177,7 +189,7 @@ struct OrganiqWidgetEntryView: View {
                 .font(.system(size: 11))
                 .foregroundColor(.organiqTextMuted)
             } else {
-              Text("todas concluidas")
+              Text("todas concluídas")
                 .font(.system(size: 11))
                 .foregroundColor(.organiqSuccess600)
             }
@@ -236,17 +248,18 @@ struct OrganiqWidgetEntryView: View {
           .minimumScaleFactor(0.9)
 
         Spacer(minLength: 0)
-
-        if isSmall {
-          Text(urgencyBadgeText(for: task))
-            .font(.system(size: 8, weight: .semibold))
-            .foregroundColor(urgencyBadgeColor(for: task))
-            .lineLimit(1)
-            .minimumScaleFactor(0.75)
-        }
       }
 
-      if !isSmall {
+      if isSmall {
+        HStack(spacing: 6) {
+          Text(urgencyShortDetailText(for: task))
+            .font(.system(size: 10, weight: .semibold))
+            .foregroundColor(urgencyBadgeColor(for: task))
+            .lineLimit(1)
+            .minimumScaleFactor(0.8)
+          Spacer(minLength: 0)
+        }
+      } else {
         HStack(spacing: 6) {
           if let flagName = task.flagName, !flagName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             HStack(spacing: 4) {
@@ -278,6 +291,24 @@ struct OrganiqWidgetEntryView: View {
       RoundedRectangle(cornerRadius: isSmall ? 8 : 10, style: .continuous)
         .stroke(task.done ? cardBorderColor.opacity(0.8) : cardBorderColor, lineWidth: 1)
     )
+  }
+
+  private var smallHeaderBadgeText: String {
+    if overduePendingCount > 0 { return "\(overduePendingCount) atras." }
+    if todayPendingCount > 0 { return "\(todayPendingCount) hoje" }
+    return "\(pendingCount) pend."
+  }
+
+  private var smallHeaderBadgeTextColor: Color {
+    if overduePendingCount > 0 { return .organiqRed500 }
+    if todayPendingCount > 0 { return .organiqAmber500 }
+    return .organiqPrimary700
+  }
+
+  private var smallHeaderBadgeBackgroundColor: Color {
+    if overduePendingCount > 0 { return .organiqRed100 }
+    if todayPendingCount > 0 { return .organiqAmber100 }
+    return .organiqPrimary100
   }
 
   private func sortTasks(_ tasks: [OrganiqWidgetTask]) -> [OrganiqWidgetTask] {
@@ -331,13 +362,31 @@ struct OrganiqWidgetEntryView: View {
     if Calendar.current.isDate(due, inSameDayAs: todayStart) { return "Hoje" }
     if due < todayStart {
       let days = max(todayStart.timeIntervalSince(Calendar.current.startOfDay(for: due)) / 86400, 1)
-      if Int(days) <= 1 { return "Venceu ha 1 dia" }
-      return "Venceu ha \(Int(days)) dias"
+      if Int(days) <= 1 { return "Venceu há 1 dia" }
+      return "Venceu há \(Int(days)) dias"
     }
     let fmt = DateFormatter()
     fmt.dateFormat = "dd/MM"
     fmt.timeZone = .current
     return "Prazo: \(fmt.string(from: due))"
+  }
+
+  private func urgencyShortDetailText(for task: OrganiqWidgetTask) -> String {
+    guard let due = taskDate(task) else { return "Sem data" }
+    let now = Date()
+    let todayStart = Calendar.current.startOfDay(for: now)
+
+    if Calendar.current.isDate(due, inSameDayAs: todayStart) {
+      return "Hoje"
+    }
+    if due < todayStart {
+      let days = max(todayStart.timeIntervalSince(Calendar.current.startOfDay(for: due)) / 86400, 1)
+      return Int(days) <= 1 ? "Atrasada 1d" : "Atrasada \(Int(days))d"
+    }
+    let fmt = DateFormatter()
+    fmt.dateFormat = "dd/MM"
+    fmt.timeZone = .current
+    return "Prazo \(fmt.string(from: due))"
   }
 
   private func urgencyBadgeColor(for task: OrganiqWidgetTask) -> Color {
@@ -443,7 +492,7 @@ struct OrganiqWidget_Previews: PreviewProvider {
         tasks: [
           OrganiqWidgetTask(id: "1", title: "Deploy v0.3",         done: false),
           OrganiqWidgetTask(id: "2", title: "Revisar PR #42",      done: false),
-          OrganiqWidgetTask(id: "3", title: "Enviar relatorio",    done: true),
+          OrganiqWidgetTask(id: "3", title: "Enviar relatório",    done: true),
           OrganiqWidgetTask(id: "4", title: "Pagar aluguel",       done: false),
           OrganiqWidgetTask(id: "5", title: "Comprar presente",    done: false),
         ]

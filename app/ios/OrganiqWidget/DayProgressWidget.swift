@@ -12,7 +12,9 @@ struct DayProgressEntry: TimelineEntry {
         percent: 0.72,
         tasksDone: 5, tasksTotal: 8,
         routinesDone: 3, routinesTotal: 5,
-        remindersDone: 2, remindersTotal: 4
+        routinesOverdue: 1,
+        remindersDone: 2, remindersTotal: 4,
+        eventsDone: 1, eventsTotal: 2
       )
     )
   }
@@ -58,9 +60,12 @@ struct DayProgressWidgetView: View {
   private var routinesTotal: Int { entry.progress?.routinesTotal ?? 0 }
   private var remindersDone: Int { entry.progress?.remindersDone ?? 0 }
   private var remindersTotal: Int { entry.progress?.remindersTotal ?? 0 }
+  private var eventsDone: Int { entry.progress?.eventsDone ?? 0 }
+  private var eventsTotal: Int { entry.progress?.eventsTotal ?? 0 }
+  private var routinesOverdue: Int { entry.progress?.routinesOverdue ?? 0 }
 
-  private var totalDone: Int { tasksDone + routinesDone + remindersDone }
-  private var totalItems: Int { tasksTotal + routinesTotal + remindersTotal }
+  private var totalDone: Int { tasksDone + routinesDone + remindersDone + eventsDone }
+  private var totalItems: Int { tasksTotal + routinesTotal + remindersTotal + eventsTotal }
   private var totalRemaining: Int { max(totalItems - totalDone, 0) }
 
   var body: some View {
@@ -138,6 +143,7 @@ struct DayProgressWidgetView: View {
             title: "Rotinas",
             done: routinesDone,
             total: routinesTotal,
+            overdue: routinesOverdue,
             color: .organiqIndigo500,
             bg: .organiqIndigo100
           )
@@ -220,7 +226,9 @@ struct DayProgressWidgetView: View {
       statChip(
         icon: "figure.run",
         label: "Rotinas",
-        progress: "\(entry.progress?.routinesDone ?? 0)/\(entry.progress?.routinesTotal ?? 0)",
+        progress: routinesOverdue > 0
+            ? "\(entry.progress?.routinesDone ?? 0)/\(entry.progress?.routinesTotal ?? 0) · \(routinesOverdue) atras."
+            : "\(entry.progress?.routinesDone ?? 0)/\(entry.progress?.routinesTotal ?? 0)",
         color: .organiqIndigo500,
         bg: .organiqIndigo100
       )
@@ -272,10 +280,12 @@ struct DayProgressWidgetView: View {
     title: String,
     done: Int,
     total: Int,
+    overdue: Int = 0,
     color: Color,
     bg: Color
   ) -> some View {
     let remaining = max(total - done, 0)
+    let hasOverdue = overdue > 0 && remaining > 0
     return HStack(spacing: 6) {
       ZStack {
         Circle().fill(bg).frame(width: 20, height: 20)
@@ -288,9 +298,13 @@ struct DayProgressWidgetView: View {
         Text(title)
           .font(.system(size: 10, weight: .semibold))
           .foregroundColor(.organiqText)
-        Text(remaining == 0 ? "concluido" : "faltam \(remaining)")
+        Text(
+          hasOverdue
+              ? "\(overdue) atrasadas"
+              : (remaining == 0 ? "concluído" : "faltam \(remaining)")
+        )
           .font(.system(size: 9))
-          .foregroundColor(.organiqTextMuted)
+          .foregroundColor(hasOverdue ? .organiqRed500 : .organiqTextMuted)
       }
 
       Spacer()
@@ -334,13 +348,13 @@ struct DayProgressWidgetView: View {
   }
 
   private var progressSummary: String {
-    let remaining = (entry.progress?.tasksTotal ?? 0) - (entry.progress?.tasksDone ?? 0)
+    let remaining = totalRemaining
     if remaining <= 0 { return "completo!" }
     return "\(remaining) restantes"
   }
 
   private var progressSummaryCompact: String {
-    let remaining = (entry.progress?.tasksTotal ?? 0) - (entry.progress?.tasksDone ?? 0)
+    let remaining = totalRemaining
     if remaining <= 0 { return "feito" }
     return "\(remaining) faltam"
   }
@@ -360,7 +374,7 @@ struct DayProgressWidget: Widget {
     }
     .containerBackgroundRemovable(false)
     .configurationDisplayName("Progresso do Dia")
-    .description("Anel de progresso com tasks, rotinas e lembretes.")
+    .description("Anel de progresso com tarefas, rotinas, lembretes e eventos.")
     .supportedFamilies(supportedFamilies)
   }
 

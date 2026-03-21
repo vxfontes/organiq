@@ -85,10 +85,13 @@ class ScheduleController implements OQController {
   int _loadRevision = 0;
 
   final TextEditingController createTitleController = TextEditingController();
+  final TextEditingController createDayOfMonthController =
+      TextEditingController(text: DateTime.now().day.toString());
   final ValueNotifier<Set<int>> createSelectedWeekdays = ValueNotifier(<int>{});
   final ValueNotifier<String> createStartTime = ValueNotifier('08:00');
   final ValueNotifier<String?> createEndTime = ValueNotifier(null);
   final ValueNotifier<String> createRecurrenceType = ValueNotifier('weekly');
+  final ValueNotifier<int?> createWeekOfMonth = ValueNotifier(null);
   final ValueNotifier<String?> createSelectedFlagId = ValueNotifier(null);
   final ValueNotifier<String?> createSelectedSubflagId = ValueNotifier(null);
   String? _editingRoutineId;
@@ -148,9 +151,11 @@ class ScheduleController implements OQController {
     createStartTime.dispose();
     createEndTime.dispose();
     createRecurrenceType.dispose();
+    createWeekOfMonth.dispose();
     createSelectedFlagId.dispose();
     createSelectedSubflagId.dispose();
     createTitleController.dispose();
+    createDayOfMonthController.dispose();
   }
 
   int get currentWeekday => DateTime.now().weekday % 7;
@@ -379,12 +384,16 @@ class ScheduleController implements OQController {
   bool isRoutineScheduledFor(RoutineOutput routine, DateTime date) {
     if (!routine.isActive) return false;
 
-    final apiWeekday = date.weekday % 7;
-    if (!routine.weekdays.contains(apiWeekday)) return false;
+    final compareDate = DateTime(date.year, date.month, date.day);
+    final apiWeekday = compareDate.weekday % 7;
+    final recurrenceType = routine.recurrenceType;
+    if (recurrenceType != 'monthly_day' &&
+        !routine.weekdays.contains(apiWeekday)) {
+      return false;
+    }
 
     try {
       final startsOn = DateTime.parse(routine.startsOn);
-      final compareDate = DateTime(date.year, date.month, date.day);
       if (compareDate.isBefore(
         DateTime(startsOn.year, startsOn.month, startsOn.day),
       )) {
@@ -396,7 +405,6 @@ class ScheduleController implements OQController {
     if (routine.endsOn != null) {
       try {
         final endsOn = DateTime.parse(routine.endsOn!);
-        final compareDate = DateTime(date.year, date.month, date.day);
         if (compareDate.isAfter(
           DateTime(endsOn.year, endsOn.month, endsOn.day),
         )) {
@@ -405,14 +413,46 @@ class ScheduleController implements OQController {
       } catch (_) {}
     }
 
-    // Recurrence check (simplified for UI strip)
-    if (routine.recurrenceType == 'weekly' || routine.recurrenceType == '') {
+    // Recurrence check aligned with backend behavior.
+    if (recurrenceType == 'weekly' || recurrenceType.isEmpty) {
       return true;
     }
 
-    // For biweekly/triweekly, we'd need more logic, but for a 7-day strip,
-    // assuming it matches the current week's cycle is usually enough for visual feedback.
-    return true;
+    DateTime startsOnDate;
+    try {
+      final startsOn = DateTime.parse(routine.startsOn);
+      startsOnDate = DateTime(startsOn.year, startsOn.month, startsOn.day);
+    } catch (_) {
+      startsOnDate = compareDate;
+    }
+
+    final startsOnMonday = _mondayOf(startsOnDate);
+    final targetMonday = _mondayOf(compareDate);
+    final weeksDiff = targetMonday.difference(startsOnMonday).inDays ~/ 7;
+
+    switch (recurrenceType) {
+      case 'biweekly':
+        return weeksDiff >= 0 && weeksDiff % 2 == 0;
+      case 'triweekly':
+        return weeksDiff >= 0 && weeksDiff % 3 == 0;
+      case 'monthly_week':
+        final weekOfMonth = routine.weekOfMonth;
+        if (weekOfMonth == null) return true;
+        final targetWeek = ((compareDate.day - 1) ~/ 7) + 1;
+        return targetWeek == weekOfMonth;
+      case 'monthly_day':
+        final dayOfMonth = routine.dayOfMonth;
+        if (dayOfMonth == null) return true;
+        return compareDate.day == dayOfMonth;
+      default:
+        return true;
+    }
+  }
+
+  DateTime _mondayOf(DateTime date) {
+    final weekday = date.weekday;
+    final monday = date.subtract(Duration(days: weekday - 1));
+    return DateTime(monday.year, monday.month, monday.day);
   }
 
   void _groupRoutinesByPeriod() {
@@ -451,10 +491,12 @@ class ScheduleController implements OQController {
   void resetCreateForm() {
     _editingRoutineId = null;
     createTitleController.text = '';
+    createDayOfMonthController.text = DateTime.now().day.toString();
     createSelectedWeekdays.value = <int>{};
     createStartTime.value = '08:00';
     createEndTime.value = null;
     createRecurrenceType.value = 'weekly';
+    createWeekOfMonth.value = null;
     createSelectedFlagId.value = null;
     createSelectedSubflagId.value = null;
     error.value = null;
@@ -464,10 +506,13 @@ class ScheduleController implements OQController {
     _editingRoutineId = routine.id;
     error.value = null;
     createTitleController.text = routine.title;
+    createDayOfMonthController.text = (routine.dayOfMonth ?? DateTime.now().day)
+        .toString();
     createSelectedWeekdays.value = routine.weekdays.toSet();
     createStartTime.value = _normalizeTimeValue(routine.startTime);
     createEndTime.value = _normalizeTimeValue(routine.endTime);
     createRecurrenceType.value = routine.recurrenceType;
+    createWeekOfMonth.value = routine.weekOfMonth;
     createSelectedFlagId.value = routine.flag?.id;
     createSelectedSubflagId.value = routine.subflag?.id;
     final flagId = routine.flag?.id;
@@ -496,6 +541,21 @@ class ScheduleController implements OQController {
 
   void setCreateRecurrenceType(String value) {
     createRecurrenceType.value = value;
+    if (value == 'monthly_week' && createWeekOfMonth.value == null) {
+      createWeekOfMonth.value = ((DateTime.now().day - 1) ~/ 7) + 1;
+    }
+    if (value == 'monthly_day' &&
+        createDayOfMonthController.text.trim().isEmpty) {
+      createDayOfMonthController.text = DateTime.now().day.toString();
+    }
+  }
+
+  void setCreateDayOfMonth(int value) {
+    createDayOfMonthController.text = value.toString();
+  }
+
+  void setCreateWeekOfMonth(int value) {
+    createWeekOfMonth.value = value;
   }
 
   void setCreateFlagId(String? id) {
@@ -514,10 +574,32 @@ class ScheduleController implements OQController {
       return false;
     }
 
-    final weekdays = createSelectedWeekdays.value.toList()..sort();
-    if (weekdays.isEmpty) {
-      error.value = 'Selecione pelo menos um dia da semana.';
-      return false;
+    final recurrenceType = createRecurrenceType.value;
+    var weekdays = createSelectedWeekdays.value.toList()..sort();
+    int? dayOfMonth;
+    int? weekOfMonth;
+
+    if (recurrenceType == 'monthly_day') {
+      final parsedDay = int.tryParse(createDayOfMonthController.text.trim());
+      if (parsedDay == null || parsedDay < 1 || parsedDay > 31) {
+        error.value = 'Informe um dia do mês entre 1 e 31.';
+        return false;
+      }
+      dayOfMonth = parsedDay;
+      weekdays = <int>[];
+    } else {
+      if (weekdays.isEmpty) {
+        error.value = 'Selecione pelo menos um dia da semana.';
+        return false;
+      }
+    }
+
+    if (recurrenceType == 'monthly_week') {
+      weekOfMonth = createWeekOfMonth.value;
+      if (weekOfMonth == null || weekOfMonth < 1 || weekOfMonth > 5) {
+        error.value = 'Rotina mensal por semana precisa da semana do mês.';
+        return false;
+      }
     }
 
     final startTime = createStartTime.value.trim();
@@ -550,7 +632,9 @@ class ScheduleController implements OQController {
         weekdays: weekdays,
         startTime: startTime,
         endTime: endTime,
-        recurrenceType: createRecurrenceType.value,
+        recurrenceType: recurrenceType,
+        weekOfMonth: weekOfMonth,
+        dayOfMonth: dayOfMonth,
         flagId: createSelectedFlagId.value,
         subflagId: createSelectedSubflagId.value,
       );
@@ -561,7 +645,9 @@ class ScheduleController implements OQController {
       weekdays: weekdays,
       startTime: startTime,
       endTime: endTime,
-      recurrenceType: createRecurrenceType.value,
+      recurrenceType: recurrenceType,
+      weekOfMonth: weekOfMonth,
+      dayOfMonth: dayOfMonth,
       flagId: createSelectedFlagId.value,
       subflagId: createSelectedSubflagId.value,
     );
@@ -609,6 +695,8 @@ class ScheduleController implements OQController {
     required String startTime,
     required String endTime,
     String recurrenceType = 'weekly',
+    int? weekOfMonth,
+    int? dayOfMonth,
     String? flagId,
     String? subflagId,
   }) async {
@@ -619,8 +707,18 @@ class ScheduleController implements OQController {
       return false;
     }
 
-    if (weekdays.isEmpty) {
+    if (recurrenceType != 'monthly_day' && weekdays.isEmpty) {
       error.value = 'Selecione pelo menos um dia da semana.';
+      return false;
+    }
+    if (recurrenceType == 'monthly_week' &&
+        (weekOfMonth == null || weekOfMonth < 1 || weekOfMonth > 5)) {
+      error.value = 'Rotina mensal por semana precisa da semana do mês.';
+      return false;
+    }
+    if (recurrenceType == 'monthly_day' &&
+        (dayOfMonth == null || dayOfMonth < 1 || dayOfMonth > 31)) {
+      error.value = 'Informe um dia do mês entre 1 e 31.';
       return false;
     }
 
@@ -644,6 +742,8 @@ class ScheduleController implements OQController {
         startTime: startTime,
         endTime: endTime,
         recurrenceType: recurrenceType,
+        weekOfMonth: weekOfMonth,
+        dayOfMonth: dayOfMonth,
         flagId: flagId,
         subflagId: subflagId,
       ),
@@ -659,7 +759,8 @@ class ScheduleController implements OQController {
       (created) {
         allRoutines.value = [...allRoutines.value, created];
         if (viewMode.value == ScheduleViewMode.daily) {
-          if (created.weekdays.contains(selectedWeekday.value)) {
+          final selectedDate = currentWeekDays[selectedWeekdayIndex];
+          if (isRoutineScheduledFor(created, selectedDate)) {
             routines.value = [...routines.value, created];
             _groupRoutinesByPeriod();
           }
@@ -678,6 +779,8 @@ class ScheduleController implements OQController {
     required String startTime,
     required String endTime,
     String recurrenceType = 'weekly',
+    int? weekOfMonth,
+    int? dayOfMonth,
     String? flagId,
     String? subflagId,
   }) async {
@@ -694,6 +797,8 @@ class ScheduleController implements OQController {
         startTime: startTime,
         endTime: endTime,
         recurrenceType: recurrenceType,
+        weekOfMonth: weekOfMonth,
+        dayOfMonth: dayOfMonth,
         flagId: flagId,
         subflagId: subflagId,
       ),
@@ -713,7 +818,8 @@ class ScheduleController implements OQController {
 
         if (viewMode.value == ScheduleViewMode.daily) {
           final list = routines.value.where((r) => r.id != updated.id).toList();
-          if (updated.weekdays.contains(selectedWeekday.value)) {
+          final selectedDate = currentWeekDays[selectedWeekdayIndex];
+          if (isRoutineScheduledFor(updated, selectedDate)) {
             list.add(updated);
           }
           routines.value = list;

@@ -30,6 +30,7 @@ type RoutineInput struct {
 	StartTime         string
 	EndTime           string
 	WeekOfMonth       *int
+	DayOfMonth        *int
 	StartsOn          *string
 	EndsOn            *string
 	Color             *string
@@ -46,6 +47,7 @@ type RoutineUpdateInput struct {
 	StartTime      *string
 	EndTime        *string
 	WeekOfMonth    *int
+	DayOfMonth     *int
 	StartsOn       *string
 	EndsOn         *string
 	Color          *string
@@ -61,10 +63,6 @@ func (uc *RoutineUsecase) Create(ctx context.Context, userID string, input Routi
 		return domain.Routine{}, ErrMissingRequiredFields
 	}
 
-	if len(input.Weekdays) == 0 {
-		return domain.Routine{}, ErrMissingRequiredFields
-	}
-
 	if input.StartTime == "" || input.EndTime == "" {
 		return domain.Routine{}, ErrMissingRequiredFields
 	}
@@ -74,12 +72,34 @@ func (uc *RoutineUsecase) Create(ctx context.Context, userID string, input Routi
 		"biweekly":     true,
 		"triweekly":    true,
 		"monthly_week": true,
+		"monthly_day":  true,
 	}
 	if input.RecurrenceType == "" {
 		input.RecurrenceType = "weekly"
 	}
 	if !validRecurrenceTypes[input.RecurrenceType] {
 		return domain.Routine{}, ErrInvalidPayload
+	}
+	if input.RecurrenceType != "monthly_day" && len(input.Weekdays) == 0 {
+		return domain.Routine{}, ErrMissingRequiredFields
+	}
+	if input.RecurrenceType == "monthly_week" {
+		if input.WeekOfMonth == nil || *input.WeekOfMonth < 1 || *input.WeekOfMonth > 5 {
+			return domain.Routine{}, ErrInvalidPayload
+		}
+		input.DayOfMonth = nil
+	}
+	if input.RecurrenceType == "monthly_day" {
+		if input.DayOfMonth == nil || *input.DayOfMonth < 1 || *input.DayOfMonth > 31 {
+			return domain.Routine{}, ErrInvalidPayload
+		}
+		input.WeekOfMonth = nil
+	}
+	if input.RecurrenceType != "monthly_week" {
+		input.WeekOfMonth = nil
+	}
+	if input.RecurrenceType != "monthly_day" {
+		input.DayOfMonth = nil
 	}
 
 	resolvedFlagID, resolvedSubflagID, err := uc.ResolveFlagAndSubflag(ctx, userID, input.FlagID, input.SubflagID)
@@ -88,21 +108,22 @@ func (uc *RoutineUsecase) Create(ctx context.Context, userID string, input Routi
 	}
 
 	now := uc.nowInUserTimezone(ctx, userID)
-	startsOn := computeStartsOn(now, input.Weekdays, input.StartsOn)
+	startsOn := computeStartsOn(now, input.Weekdays, input.StartsOn, input.RecurrenceType != "monthly_day")
 
 	routine := domain.Routine{
-		UserID:         userID,
-		Title:          title,
-		Description:    input.Description,
-		RecurrenceType: input.RecurrenceType,
-		Weekdays:       input.Weekdays,
-		StartTime:      input.StartTime,
-		EndTime:        input.EndTime,
-		WeekOfMonth:    input.WeekOfMonth,
-		StartsOn:       startsOn,
-		EndsOn:         input.EndsOn,
-		Color:          input.Color,
-		IsActive:       true,
+		UserID:            userID,
+		Title:             title,
+		Description:       input.Description,
+		RecurrenceType:    input.RecurrenceType,
+		Weekdays:          input.Weekdays,
+		StartTime:         input.StartTime,
+		EndTime:           input.EndTime,
+		WeekOfMonth:       input.WeekOfMonth,
+		DayOfMonth:        input.DayOfMonth,
+		StartsOn:          startsOn,
+		EndsOn:            input.EndsOn,
+		Color:             input.Color,
+		IsActive:          true,
 		FlagID:            resolvedFlagID,
 		SubflagID:         resolvedSubflagID,
 		SourceInboxItemID: input.SourceInboxItemID,
@@ -143,15 +164,25 @@ func (uc *RoutineUsecase) Update(ctx context.Context, userID, id string, input R
 			"biweekly":     true,
 			"triweekly":    true,
 			"monthly_week": true,
+			"monthly_day":  true,
 		}
 		if !validRecurrenceTypes[*input.RecurrenceType] {
 			return domain.Routine{}, ErrInvalidPayload
 		}
 		routine.RecurrenceType = *input.RecurrenceType
+		switch *input.RecurrenceType {
+		case "monthly_week":
+			routine.DayOfMonth = nil
+		case "monthly_day":
+			routine.WeekOfMonth = nil
+		default:
+			routine.WeekOfMonth = nil
+			routine.DayOfMonth = nil
+		}
 	}
 
 	if input.Weekdays != nil {
-		if len(*input.Weekdays) == 0 {
+		if len(*input.Weekdays) == 0 && routine.RecurrenceType != "monthly_day" {
 			return domain.Routine{}, ErrMissingRequiredFields
 		}
 		routine.Weekdays = *input.Weekdays
@@ -173,6 +204,9 @@ func (uc *RoutineUsecase) Update(ctx context.Context, userID, id string, input R
 
 	if input.WeekOfMonth != nil {
 		routine.WeekOfMonth = input.WeekOfMonth
+	}
+	if input.DayOfMonth != nil {
+		routine.DayOfMonth = input.DayOfMonth
 	}
 
 	if input.StartsOn != nil {
@@ -216,10 +250,6 @@ func (uc *RoutineUsecase) Validate(ctx context.Context, routine domain.Routine) 
 		return ErrMissingRequiredFields
 	}
 
-	if len(routine.Weekdays) == 0 {
-		return ErrMissingRequiredFields
-	}
-
 	if routine.StartTime == "" || routine.EndTime == "" {
 		return ErrMissingRequiredFields
 	}
@@ -229,6 +259,7 @@ func (uc *RoutineUsecase) Validate(ctx context.Context, routine domain.Routine) 
 		"biweekly":     true,
 		"triweekly":    true,
 		"monthly_week": true,
+		"monthly_day":  true,
 	}
 	recurrenceType := routine.RecurrenceType
 	if recurrenceType == "" {
@@ -237,11 +268,20 @@ func (uc *RoutineUsecase) Validate(ctx context.Context, routine domain.Routine) 
 	if !validRecurrenceTypes[recurrenceType] {
 		return ErrInvalidPayload
 	}
-
-	if recurrenceType == "monthly_week" && routine.WeekOfMonth == nil {
-		return ErrInvalidPayload
+	if recurrenceType != "monthly_day" && len(routine.Weekdays) == 0 {
+		return ErrMissingRequiredFields
 	}
 
+	if recurrenceType == "monthly_week" {
+		if routine.WeekOfMonth == nil || *routine.WeekOfMonth < 1 || *routine.WeekOfMonth > 5 {
+			return ErrInvalidPayload
+		}
+	}
+	if recurrenceType == "monthly_day" {
+		if routine.DayOfMonth == nil || *routine.DayOfMonth < 1 || *routine.DayOfMonth > 31 {
+			return ErrInvalidPayload
+		}
+	}
 	return uc.checkOverlap(ctx, routine.UserID, routine.ID, routine.Weekdays, routine.StartTime, routine.EndTime)
 }
 
@@ -407,6 +447,11 @@ func shouldShowRoutineForDate(r domain.Routine, targetDate time.Time) bool {
 		// Logic: (day-1)/7 + 1
 		targetWeek := (targetDate.Day()-1)/7 + 1
 		return targetWeek == *r.WeekOfMonth
+	case "monthly_day":
+		if r.DayOfMonth == nil {
+			return true
+		}
+		return targetDate.Day() == *r.DayOfMonth
 	default:
 		return true
 	}
@@ -446,10 +491,13 @@ func nextOccurrenceDate(from time.Time, weekdays []int) time.Time {
 	return start
 }
 
-func computeStartsOn(now time.Time, weekdays []int, inputStartsOn *string) string {
+func computeStartsOn(now time.Time, weekdays []int, inputStartsOn *string, requireWeekdayMatch bool) string {
 	// Date-only baseline in user's timezone.
 	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-	next := nextOccurrenceDate(today, weekdays)
+	next := today
+	if requireWeekdayMatch {
+		next = nextOccurrenceDate(today, weekdays)
+	}
 
 	// If client didn't send startsOn, default to the next occurrence.
 	if inputStartsOn == nil || strings.TrimSpace(*inputStartsOn) == "" {
@@ -468,7 +516,7 @@ func computeStartsOn(now time.Time, weekdays []int, inputStartsOn *string) strin
 
 	// If the client sends a startsOn that is not one of the selected weekdays
 	// (e.g., routine is "Tuesday" but startsOn is "Wednesday"), sanitize it to the next occurrence.
-	if !routineHasWeekday(weekdays, int(parsed.Weekday())) {
+	if requireWeekdayMatch && !routineHasWeekday(weekdays, int(parsed.Weekday())) {
 		return next.Format("2006-01-02")
 	}
 
@@ -562,7 +610,7 @@ func (uc *RoutineUsecase) GetStreak(ctx context.Context, userID, routineID strin
 
 	now := uc.nowInUserTimezone(ctx, userID)
 	todayStr := now.Format("2006-01-02")
-	
+
 	currentStreak := 0
 	checkDate := now
 	if !completionMap[todayStr] && exceptionMap[todayStr] != "skip" {
@@ -577,7 +625,7 @@ func (uc *RoutineUsecase) GetStreak(ctx context.Context, userID, routineID strin
 		if uc.isScheduledOn(routine, checkDate) {
 			if completionMap[dateStr] {
 				currentStreak++
-			//} else if exceptionMap[dateStr] == "skip" { -> não pula, quebra o streak
+				//} else if exceptionMap[dateStr] == "skip" { -> não pula, quebra o streak
 			} else {
 				break
 			}
@@ -592,7 +640,7 @@ func (uc *RoutineUsecase) GetStreak(ctx context.Context, userID, routineID strin
 
 	sDay := time.Date(startsOn.Year(), startsOn.Month(), startsOn.Day(), 0, 0, 0, 0, now.Location())
 	nDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-	
+
 	daysSinceStart := int(nDay.Sub(sDay).Hours() / 24)
 	if daysSinceStart < 6 {
 		daysSinceStart = 6
@@ -621,18 +669,24 @@ func (uc *RoutineUsecase) GetStreak(ctx context.Context, userID, routineID strin
 	unit := "semana"
 	if routine.RecurrenceType == "weekly" && len(routine.Weekdays) >= 3 {
 		unit = "dia"
+	} else if routine.RecurrenceType == "monthly_week" || routine.RecurrenceType == "monthly_day" {
+		unit = "mês"
 	}
-	
+
 	streakText := ""
 	if currentStreak == 1 {
 		if unit == "dia" {
 			streakText = "1 dia consecutivo"
+		} else if unit == "mês" {
+			streakText = "1 mês consecutivo"
 		} else {
 			streakText = "1 semana consecutiva"
 		}
 	} else if currentStreak > 1 {
 		if unit == "dia" {
 			streakText = fmt.Sprintf("%d dias consecutivos", currentStreak)
+		} else if unit == "mês" {
+			streakText = fmt.Sprintf("%d meses consecutivos", currentStreak)
 		} else {
 			streakText = fmt.Sprintf("%d semanas consecutivas", currentStreak)
 		}
@@ -648,16 +702,18 @@ func (uc *RoutineUsecase) isScheduledOn(r domain.Routine, date time.Time) bool {
 		return false
 	}
 
-	weekday := int(date.Weekday())
-	found := false
-	for _, wd := range r.Weekdays {
-		if wd == weekday {
-			found = true
-			break
+	if r.RecurrenceType != "monthly_day" {
+		weekday := int(date.Weekday())
+		found := false
+		for _, wd := range r.Weekdays {
+			if wd == weekday {
+				found = true
+				break
+			}
 		}
-	}
-	if !found {
-		return false
+		if !found {
+			return false
+		}
 	}
 
 	startsOnStr := r.StartsOn
@@ -689,6 +745,11 @@ func (uc *RoutineUsecase) isScheduledOn(r domain.Routine, date time.Time) bool {
 		}
 		targetWeek := (date.Day()-1)/7 + 1
 		return targetWeek == *r.WeekOfMonth
+	case "monthly_day":
+		if r.DayOfMonth == nil {
+			return true
+		}
+		return date.Day() == *r.DayOfMonth
 	default:
 		return true
 	}

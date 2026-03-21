@@ -156,7 +156,7 @@ class _RoutineDetailBottomSheetState extends State<RoutineDetailBottomSheet> {
               child: _buildCompactInfo(
                 context,
                 'Dias',
-                widget.routine.weekdaysLabel,
+                widget.routine.recurrenceRuleLabel,
                 OQIcon.calendar,
               ),
             ),

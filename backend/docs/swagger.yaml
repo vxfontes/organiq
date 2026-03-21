@@ -293,6 +293,8 @@ definitions:
     properties:
       color:
         type: string
+      dayOfMonth:
+        type: integer
       description:
         type: string
       endTime:
@@ -583,6 +585,15 @@ definitions:
       nextCursor:
         type: string
     type: object
+  dto.ListNotificationDeliveryAttemptsResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/dto.NotificationDeliveryAttemptResponse'
+        type: array
+      nextCursor:
+        type: string
+    type: object
   dto.ListNotificationsResponse:
     properties:
       items:
@@ -644,6 +655,27 @@ definitions:
           $ref: '#/definitions/dto.TaskResponse'
         type: array
       nextCursor:
+        type: string
+    type: object
+  dto.NotificationDeliveryAttemptResponse:
+    properties:
+      attemptNo:
+        type: integer
+      createdAt:
+        type: string
+      deviceId:
+        type: string
+      errorCode:
+        type: string
+      errorMessage:
+        type: string
+      id:
+        type: string
+      notificationLogId:
+        type: string
+      provider:
+        type: string
+      status:
         type: string
     type: object
   dto.NotificationLogResponse:
@@ -815,6 +847,8 @@ definitions:
         type: string
       createdAt:
         type: string
+      dayOfMonth:
+        type: integer
       description:
         type: string
       endTime:
@@ -1069,6 +1103,8 @@ definitions:
     properties:
       color:
         type: string
+      dayOfMonth:
+        type: integer
       description:
         type: string
       endTime:
@@ -2179,6 +2215,37 @@ paths:
       security:
       - BearerAuth: []
       summary: Marcar notificação como lida
+      tags:
+      - Notifications
+  /v1/notifications/delivery-attempts:
+    get:
+      parameters:
+      - description: Filtrar por notification log ID
+        in: query
+        name: notificationLogId
+        type: string
+      - description: Limite
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ListNotificationDeliveryAttemptsResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Listar tentativas de entrega de notificacoes
       tags:
       - Notifications
   /v1/notifications/read-all:

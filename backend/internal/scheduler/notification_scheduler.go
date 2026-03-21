@@ -270,7 +270,7 @@ func (s *NotificationScheduler) scheduleUpcoming(ctx context.Context) {
 		loc := timezoneLocation(user.Timezone, locCache)
 		userNow := now.In(loc)
 
-		if !routineHasWeekday(r.Weekdays, int(userNow.Weekday())) {
+		if r.RecurrenceType != "monthly_day" && !routineHasWeekday(r.Weekdays, int(userNow.Weekday())) {
 			continue
 		}
 		if !shouldShowRoutineForDate(r, userNow) {
@@ -500,6 +500,11 @@ func shouldShowRoutineForDate(r domain.Routine, targetDate time.Time) bool {
 		}
 		targetWeek := (targetDate.Day()-1)/7 + 1
 		return targetWeek == *r.WeekOfMonth
+	case "monthly_day":
+		if r.DayOfMonth == nil {
+			return true
+		}
+		return targetDate.Day() == *r.DayOfMonth
 	default:
 		return true
 	}
