@@ -692,6 +692,20 @@ func (uc *HomeUsecase) buildWeekDensity(ctx context.Context, userID string, now 
 		density[key] = density[key] + 1
 	}
 
+	for i := 0; i < 7; i++ {
+		day := startOfWeek.AddDate(0, 0, i)
+		dayWeekday := int(day.Weekday())
+		dateStr := day.Format("2006-01-02")
+
+		routines, err := uc.Routines.ListByWeekday(ctx, userID, dayWeekday, dateStr)
+		if err != nil {
+			return nil, err
+		}
+
+		key := day.Format("2006-01-02")
+		density[key] = density[key] + len(routines)
+	}
+
 	return density, nil
 }
 
