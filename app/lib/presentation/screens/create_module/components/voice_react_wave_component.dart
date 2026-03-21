@@ -29,28 +29,63 @@ class VoiceReactiveWaveState extends State<VoiceReactiveWave>
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, _) {
-        return SizedBox(
-          height: 26,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: List.generate(22, (index) {
-              final phase = (_controller.value * 2 * math.pi) + (index * 0.55);
-              final amplitude = math.sin(phase).abs();
-              final baseFactor = index.isEven ? 1.0 : 0.65;
-              final height = 4 + (18 * amplitude * baseFactor);
-              final alpha = (0.35 + (0.65 * amplitude)).clamp(0.0, 1.0);
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            const barWidth = 3.0;
+            const barSpacing = 2.0;
+            const minBars = 6;
+            const maxBars = 22;
+            const defaultHeight = 26.0;
+            const barStride = barWidth + barSpacing;
+            final availableWidth = constraints.hasBoundedWidth
+                ? constraints.maxWidth
+                : maxBars * barStride;
+            final waveHeight = constraints.hasBoundedHeight
+                ? constraints.maxHeight
+                : defaultHeight;
 
-              return Container(
-                width: 3,
-                height: height,
-                margin: const EdgeInsets.symmetric(horizontal: 1),
-                decoration: BoxDecoration(
-                  color: widget.color.withAlpha((alpha * 255).round()),
-                  borderRadius: BorderRadius.circular(8),
+            var barCount = (availableWidth / barStride).floor();
+            barCount = math.max(minBars, math.min(maxBars, barCount));
+
+            final minBarHeight = math.max(2.0, waveHeight * 0.16);
+            final maxBarHeight = math.max(minBarHeight + 2.0, waveHeight);
+
+            return ClipRect(
+              child: SizedBox(
+                height: waveHeight,
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: List.generate(barCount, (index) {
+                      final phase =
+                          (_controller.value * 2 * math.pi) + (index * 0.55);
+                      final amplitude = math.sin(phase).abs();
+                      final baseFactor = index.isEven ? 1.0 : 0.65;
+                      final height =
+                          minBarHeight +
+                          ((maxBarHeight - minBarHeight) *
+                              amplitude *
+                              baseFactor);
+                      final alpha = (0.35 + (0.65 * amplitude)).clamp(0.0, 1.0);
+
+                      return Container(
+                        width: barWidth,
+                        height: height,
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: barSpacing / 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: widget.color.withAlpha((alpha * 255).round()),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      );
+                    }),
+                  ),
                 ),
-              );
-            }),
-          ),
+              ),
+            );
+          },
         );
       },
     );

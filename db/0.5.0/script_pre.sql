@@ -93,12 +93,3 @@ ORDER BY r.start_time, r.created_at;
 $$;
 
 commit;
-
-
--- coluna nova existe?
-select column_name
-from information_schema.columns
-where table_schema='organiq' and table_name='routines' and column_name='day_of_month';
-
--- função foi recriada com monthly_day?
-select pg_get_functiondef('organiq.fnc_routine_daily_status(uuid,int,date)'::regprocedure);
