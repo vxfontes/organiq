@@ -440,6 +440,7 @@ type RoutineResponse struct {
 	StartTime        string         `json:"startTime"`
 	EndTime          string         `json:"endTime"`
 	WeekOfMonth      *int           `json:"weekOfMonth,omitempty"`
+	DayOfMonth       *int           `json:"dayOfMonth,omitempty"`
 	StartsOn         string         `json:"startsOn"`
 	EndsOn           *string        `json:"endsOn,omitempty"`
 	Color            *string        `json:"color,omitempty"`
@@ -464,6 +465,7 @@ type CreateRoutineRequest struct {
 	StartTime      string  `json:"startTime"`
 	EndTime        string  `json:"endTime"`
 	WeekOfMonth    *int    `json:"weekOfMonth,omitempty"`
+	DayOfMonth     *int    `json:"dayOfMonth,omitempty"`
 	StartsOn       *string `json:"startsOn,omitempty"`
 	EndsOn         *string `json:"endsOn,omitempty"`
 	Color          *string `json:"color,omitempty"`
@@ -479,6 +481,7 @@ type UpdateRoutineRequest struct {
 	StartTime      *string `json:"startTime,omitempty"`
 	EndTime        *string `json:"endTime,omitempty"`
 	WeekOfMonth    *int    `json:"weekOfMonth,omitempty"`
+	DayOfMonth     *int    `json:"dayOfMonth,omitempty"`
 	StartsOn       *string `json:"startsOn,omitempty"`
 	EndsOn         *string `json:"endsOn,omitempty"`
 	Color          *string `json:"color,omitempty"`

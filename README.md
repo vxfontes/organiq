@@ -138,7 +138,7 @@ npm install -g firebase-tools
 dart pub global activate flutterfire_cli
 firebase login
 export PATH="$PATH:$HOME/.pub-cache/bin"
-cd /Users/vanessa/Desktop/coding/personal/inbota/app
+cd /Users/vanessa/Desktop/coding/personal/organiq/app
 flutterfire configure \
   --project=organiq-app \
   --platforms=android,ios \

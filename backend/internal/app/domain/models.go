@@ -198,6 +198,7 @@ type Routine struct {
 	StartTime         string
 	EndTime           string
 	WeekOfMonth       *int
+	DayOfMonth        *int
 	StartsOn          string
 	EndsOn            *string
 	Color             *string
