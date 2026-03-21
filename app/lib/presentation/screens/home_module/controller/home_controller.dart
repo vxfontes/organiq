@@ -351,7 +351,9 @@ class HomeController implements OQController {
               isToday(item) &&
               hasExplicitTime(item.scheduledTime);
         case TimelineItemType.routine:
-          return !item.isCompleted && !item.scheduledTime.isBefore(now);
+          if (item.isCompleted) return false;
+          if (item.isOverdue) return true;
+          return !item.scheduledTime.isBefore(now);
       }
     }
 
@@ -359,12 +361,18 @@ class HomeController implements OQController {
         .where(shouldInclude)
         .toList(growable: false);
     items.sort((a, b) {
-      final aPast = a.scheduledTime.isBefore(now);
-      final bPast = b.scheduledTime.isBefore(now);
-      if (aPast != bPast) return aPast ? 1 : -1;
+      final aOverdue = a.isOverdue && !a.isCompleted;
+      final bOverdue = b.isOverdue && !b.isCompleted;
+      if (aOverdue != bOverdue) return aOverdue ? -1 : 1;
 
-      final byTime = a.scheduledTime.compareTo(b.scheduledTime);
-      if (byTime != 0) return byTime;
+      if (aOverdue && bOverdue) {
+        final byRecent = b.scheduledTime.compareTo(a.scheduledTime);
+        if (byRecent != 0) return byRecent;
+      } else {
+        final byTime = a.scheduledTime.compareTo(b.scheduledTime);
+        if (byTime != 0) return byTime;
+      }
+
       return a.title.toLowerCase().compareTo(b.title.toLowerCase());
     });
     return items.take(10).toList(growable: false);
@@ -1293,9 +1301,15 @@ class HomeController implements OQController {
       return a.title.toLowerCase().compareTo(b.title.toLowerCase());
     });
 
+    bool isEligibleForNowPlaying(TimelineItem item) {
+      if (item.isCompleted) return false;
+      if (item.type == TimelineItemType.event && item.isOverdue) return false;
+      return true;
+    }
+
     TimelineItem? current;
     for (final item in ordered) {
-      if (item.isCompleted) continue;
+      if (!isEligibleForNowPlaying(item)) continue;
       final start = item.scheduledTime;
       final end = item.endScheduledTime ?? start.add(const Duration(minutes: 45));
       if (!now.isBefore(start) && now.isBefore(end)) {
@@ -1306,8 +1320,10 @@ class HomeController implements OQController {
 
     final futureUpcoming = <TimelineItem>[];
     for (final item in ordered) {
-      if (item.isCompleted) continue;
-      if (current != null && item.id == current.id && item.type == current.type) {
+      if (!isEligibleForNowPlaying(item)) continue;
+      if (current != null &&
+          item.id == current.id &&
+          item.type == current.type) {
         continue;
       }
       if (item.scheduledTime.isAfter(now)) {
@@ -1316,27 +1332,6 @@ class HomeController implements OQController {
     }
 
     final upcoming = <TimelineItem>[...futureUpcoming.take(2)];
-
-    // Se não houver próximos futuros suficientes, completa com pendências mais recentes.
-    if (upcoming.length < 2) {
-      for (final item in ordered.reversed) {
-        if (item.isCompleted) continue;
-        if (current != null &&
-            item.id == current.id &&
-            item.type == current.type) {
-          continue;
-        }
-        if (!item.scheduledTime.isAfter(now)) {
-          final alreadyAdded = upcoming.any(
-            (added) => added.id == item.id && added.type == item.type,
-          );
-          if (!alreadyAdded) {
-            upcoming.add(item);
-          }
-          if (upcoming.length >= 2) break;
-        }
-      }
-    }
 
     final next = upcoming.isNotEmpty ? upcoming.first : null;
 
