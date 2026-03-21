@@ -14,6 +14,7 @@ class RoutineOutput {
     required this.startTime,
     required this.endTime,
     this.weekOfMonth,
+    this.dayOfMonth,
     required this.startsOn,
     this.endsOn,
     this.color,
@@ -33,6 +34,7 @@ class RoutineOutput {
   final String startTime;
   final String endTime;
   final int? weekOfMonth;
+  final int? dayOfMonth;
   final String startsOn;
   final String? endsOn;
   final String? color;
@@ -58,8 +60,37 @@ class RoutineOutput {
         return '3 em 3 semanas';
       case 'monthly_week':
         return 'Mensal';
+      case 'monthly_day':
+        return 'Mensal (dia)';
       default:
         return recurrenceType;
+    }
+  }
+
+  String get recurrenceRuleLabel {
+    if (recurrenceType == 'monthly_day' && dayOfMonth != null) {
+      return 'Dia $dayOfMonth';
+    }
+    if (recurrenceType == 'monthly_week' && weekOfMonth != null) {
+      return '${_weekOfMonthLabel(weekOfMonth!)} • $weekdaysLabel';
+    }
+    return weekdaysLabel;
+  }
+
+  String _weekOfMonthLabel(int value) {
+    switch (value) {
+      case 1:
+        return '1ª semana';
+      case 2:
+        return '2ª semana';
+      case 3:
+        return '3ª semana';
+      case 4:
+        return '4ª semana';
+      case 5:
+        return '5ª semana';
+      default:
+        return '$valueª semana';
     }
   }
 
@@ -99,7 +130,9 @@ class RoutineOutput {
   }
 
   factory RoutineOutput.fromJson(Map<String, dynamic> json) {
-    return _$RoutineOutputFromJson(json);
+    final normalized = Map<String, dynamic>.from(json);
+    normalized['weekdays'] ??= <int>[];
+    return _$RoutineOutputFromJson(normalized);
   }
 
   factory RoutineOutput.fromDynamic(dynamic value) {
@@ -130,6 +163,7 @@ class RoutineOutput {
     String? startTime,
     String? endTime,
     int? weekOfMonth,
+    int? dayOfMonth,
     String? startsOn,
     String? endsOn,
     String? color,
@@ -149,6 +183,7 @@ class RoutineOutput {
       startTime: startTime ?? this.startTime,
       endTime: endTime ?? this.endTime,
       weekOfMonth: weekOfMonth ?? this.weekOfMonth,
+      dayOfMonth: dayOfMonth ?? this.dayOfMonth,
       startsOn: startsOn ?? this.startsOn,
       endsOn: endsOn ?? this.endsOn,
       color: color ?? this.color,

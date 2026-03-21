@@ -12,6 +12,7 @@ class RoutineCreateInput {
     required this.startTime,
     required this.endTime,
     this.weekOfMonth,
+    this.dayOfMonth,
     this.startsOn,
     this.endsOn,
     this.color,
@@ -26,6 +27,7 @@ class RoutineCreateInput {
   final String startTime;
   final String endTime;
   final int? weekOfMonth;
+  final int? dayOfMonth;
   final String? startsOn;
   final String? endsOn;
   final String? color;

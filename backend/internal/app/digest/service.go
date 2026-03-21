@@ -5,10 +5,10 @@ import (
 	"context"
 	"fmt"
 	htmltemplate "html/template"
+	"log/slog"
 	"organiq/backend/internal/app/domain"
 	"organiq/backend/internal/app/repository"
 	"organiq/backend/internal/infra/mailer"
-	"log/slog"
 	"sort"
 	"strconv"
 	"strings"
@@ -432,6 +432,8 @@ func routineRecurrenceLabel(recurrenceType string) string {
 		return "A cada 3 semanas"
 	case "monthly_week":
 		return "Mensal"
+	case "monthly_day":
+		return "Mensal (dia do mês)"
 	default:
 		return recurrenceType
 	}

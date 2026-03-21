@@ -28,10 +28,10 @@ func (r *RoutineRepositoryImpl) Create(ctx context.Context, routine domain.Routi
 	}
 
 	row := r.db.QueryRowContext(ctx, `
-		INSERT INTO organiq.routines (user_id, title, description, recurrence_type, weekdays, start_time, end_time, week_of_month, starts_on, ends_on, color, is_active, flag_id, subflag_id, source_inbox_item_id)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+		INSERT INTO organiq.routines (user_id, title, description, recurrence_type, weekdays, start_time, end_time, week_of_month, day_of_month, starts_on, ends_on, color, is_active, flag_id, subflag_id, source_inbox_item_id)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
 		RETURNING id, created_at, updated_at
-	`, routine.UserID, routine.Title, routine.Description, routine.RecurrenceType, pq.Array(routine.Weekdays), routine.StartTime, nullStringFromStr(routine.EndTime), routine.WeekOfMonth, routine.StartsOn, routine.EndsOn, routine.Color, routine.IsActive, routine.FlagID, routine.SubflagID, routine.SourceInboxItemID)
+	`, routine.UserID, routine.Title, routine.Description, routine.RecurrenceType, pq.Array(routine.Weekdays), routine.StartTime, nullStringFromStr(routine.EndTime), routine.WeekOfMonth, routine.DayOfMonth, routine.StartsOn, routine.EndsOn, routine.Color, routine.IsActive, routine.FlagID, routine.SubflagID, routine.SourceInboxItemID)
 
 	if err := row.Scan(&routine.ID, &routine.CreatedAt, &routine.UpdatedAt); err != nil {
 		return domain.Routine{}, err
@@ -42,10 +42,10 @@ func (r *RoutineRepositoryImpl) Create(ctx context.Context, routine domain.Routi
 func (r *RoutineRepositoryImpl) Update(ctx context.Context, routine domain.Routine) (domain.Routine, error) {
 	row := r.db.QueryRowContext(ctx, `
 		UPDATE organiq.routines
-		SET title = $1, description = $2, recurrence_type = $3, weekdays = $4, start_time = $5, end_time = $6, week_of_month = $7, starts_on = $8, ends_on = $9, color = $10, is_active = $11, flag_id = $12, subflag_id = $13, updated_at = now()
-		WHERE id = $14 AND user_id = $15
+		SET title = $1, description = $2, recurrence_type = $3, weekdays = $4, start_time = $5, end_time = $6, week_of_month = $7, day_of_month = $8, starts_on = $9, ends_on = $10, color = $11, is_active = $12, flag_id = $13, subflag_id = $14, updated_at = now()
+		WHERE id = $15 AND user_id = $16
 		RETURNING created_at, updated_at
-	`, routine.Title, routine.Description, routine.RecurrenceType, pq.Array(routine.Weekdays), routine.StartTime, nullStringFromStr(routine.EndTime), routine.WeekOfMonth, routine.StartsOn, routine.EndsOn, routine.Color, routine.IsActive, routine.FlagID, routine.SubflagID, routine.ID, routine.UserID)
+	`, routine.Title, routine.Description, routine.RecurrenceType, pq.Array(routine.Weekdays), routine.StartTime, nullStringFromStr(routine.EndTime), routine.WeekOfMonth, routine.DayOfMonth, routine.StartsOn, routine.EndsOn, routine.Color, routine.IsActive, routine.FlagID, routine.SubflagID, routine.ID, routine.UserID)
 
 	if err := row.Scan(&routine.CreatedAt, &routine.UpdatedAt); err != nil {
 		if err == sql.ErrNoRows {
@@ -80,7 +80,7 @@ func (r *RoutineRepositoryImpl) Get(ctx context.Context, userID, id string) (dom
 		SELECT id, user_id, title, description, recurrence_type, weekdays,
 			to_char(start_time, 'HH24:MI') as start_time,
 			to_char(end_time, 'HH24:MI') as end_time,
-			week_of_month, starts_on::text, ends_on::text, color, is_active, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
+			week_of_month, day_of_month, starts_on::text, ends_on::text, color, is_active, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
 		FROM organiq.routines
 		WHERE id = $1 AND user_id = $2
 		LIMIT 1
@@ -88,10 +88,10 @@ func (r *RoutineRepositoryImpl) Get(ctx context.Context, userID, id string) (dom
 
 	var routine domain.Routine
 	var description, endTime, endsOn, color, flagID, subflagID, sourceInboxItemID sql.NullString
-	var weekOfMonth sql.NullInt64
+	var weekOfMonth, dayOfMonth sql.NullInt64
 	var weekdays pq.Int64Array
 
-	if err := row.Scan(&routine.ID, &routine.UserID, &routine.Title, &description, &routine.RecurrenceType, &weekdays, &routine.StartTime, &endTime, &weekOfMonth, &routine.StartsOn, &endsOn, &color, &routine.IsActive, &flagID, &subflagID, &sourceInboxItemID, &routine.CreatedAt, &routine.UpdatedAt); err != nil {
+	if err := row.Scan(&routine.ID, &routine.UserID, &routine.Title, &description, &routine.RecurrenceType, &weekdays, &routine.StartTime, &endTime, &weekOfMonth, &dayOfMonth, &routine.StartsOn, &endsOn, &color, &routine.IsActive, &flagID, &subflagID, &sourceInboxItemID, &routine.CreatedAt, &routine.UpdatedAt); err != nil {
 		if err == sql.ErrNoRows {
 			return domain.Routine{}, ErrNotFound
 		}
@@ -107,6 +107,10 @@ func (r *RoutineRepositoryImpl) Get(ctx context.Context, userID, id string) (dom
 	if weekOfMonth.Valid {
 		v := int(weekOfMonth.Int64)
 		routine.WeekOfMonth = &v
+	}
+	if dayOfMonth.Valid {
+		v := int(dayOfMonth.Int64)
+		routine.DayOfMonth = &v
 	}
 	routine.EndsOn = stringPtrFromNull(endsOn)
 	routine.Color = stringPtrFromNull(color)
@@ -134,7 +138,7 @@ func (r *RoutineRepositoryImpl) List(ctx context.Context, userID string, opts re
 		SELECT id, user_id, title, description, recurrence_type, weekdays,
 			to_char(start_time, 'HH24:MI') as start_time,
 			to_char(end_time, 'HH24:MI') as end_time,
-			week_of_month, starts_on::text, ends_on::text, color, is_active, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
+			week_of_month, day_of_month, starts_on::text, ends_on::text, color, is_active, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
 		FROM organiq.routines
 		WHERE user_id = $1 AND is_active = true
 		ORDER BY start_time, created_at
@@ -149,10 +153,10 @@ func (r *RoutineRepositoryImpl) List(ctx context.Context, userID string, opts re
 	for rows.Next() {
 		var routine domain.Routine
 		var description, endTime, endsOn, color, flagID, subflagID, sourceInboxItemID sql.NullString
-		var weekOfMonth sql.NullInt64
+		var weekOfMonth, dayOfMonth sql.NullInt64
 		var weekdays pq.Int64Array
 
-		if err := rows.Scan(&routine.ID, &routine.UserID, &routine.Title, &description, &routine.RecurrenceType, &weekdays, &routine.StartTime, &endTime, &weekOfMonth, &routine.StartsOn, &endsOn, &color, &routine.IsActive, &flagID, &subflagID, &sourceInboxItemID, &routine.CreatedAt, &routine.UpdatedAt); err != nil {
+		if err := rows.Scan(&routine.ID, &routine.UserID, &routine.Title, &description, &routine.RecurrenceType, &weekdays, &routine.StartTime, &endTime, &weekOfMonth, &dayOfMonth, &routine.StartsOn, &endsOn, &color, &routine.IsActive, &flagID, &subflagID, &sourceInboxItemID, &routine.CreatedAt, &routine.UpdatedAt); err != nil {
 			return nil, nil, err
 		}
 
@@ -165,6 +169,10 @@ func (r *RoutineRepositoryImpl) List(ctx context.Context, userID string, opts re
 		if weekOfMonth.Valid {
 			v := int(weekOfMonth.Int64)
 			routine.WeekOfMonth = &v
+		}
+		if dayOfMonth.Valid {
+			v := int(dayOfMonth.Int64)
+			routine.DayOfMonth = &v
 		}
 		routine.EndsOn = stringPtrFromNull(endsOn)
 		routine.Color = stringPtrFromNull(color)
@@ -194,9 +202,9 @@ func (r *RoutineRepositoryImpl) ListByWeekday(ctx context.Context, userID string
 		SELECT id, user_id, title, description, recurrence_type, weekdays,
 			to_char(start_time, 'HH24:MI') as start_time,
 			to_char(end_time, 'HH24:MI') as end_time,
-			week_of_month, starts_on::text, ends_on::text, color, is_active, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
+			week_of_month, day_of_month, starts_on::text, ends_on::text, color, is_active, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
 		FROM organiq.routines
-		WHERE user_id = $1 AND is_active = true AND $2 = ANY(weekdays)
+		WHERE user_id = $1 AND is_active = true AND ($2 = ANY(weekdays) OR recurrence_type = 'monthly_day')
 		ORDER BY start_time, created_at
 	`, userID, weekday)
 	if err != nil {
@@ -208,10 +216,10 @@ func (r *RoutineRepositoryImpl) ListByWeekday(ctx context.Context, userID string
 	for rows.Next() {
 		var routine domain.Routine
 		var description, endTime, endsOn, color, flagID, subflagID, sourceInboxItemID sql.NullString
-		var weekOfMonth sql.NullInt64
+		var weekOfMonth, dayOfMonth sql.NullInt64
 		var weekdays pq.Int64Array
 
-		if err := rows.Scan(&routine.ID, &routine.UserID, &routine.Title, &description, &routine.RecurrenceType, &weekdays, &routine.StartTime, &endTime, &weekOfMonth, &routine.StartsOn, &endsOn, &color, &routine.IsActive, &flagID, &subflagID, &sourceInboxItemID, &routine.CreatedAt, &routine.UpdatedAt); err != nil {
+		if err := rows.Scan(&routine.ID, &routine.UserID, &routine.Title, &description, &routine.RecurrenceType, &weekdays, &routine.StartTime, &endTime, &weekOfMonth, &dayOfMonth, &routine.StartsOn, &endsOn, &color, &routine.IsActive, &flagID, &subflagID, &sourceInboxItemID, &routine.CreatedAt, &routine.UpdatedAt); err != nil {
 			return nil, err
 		}
 
@@ -224,6 +232,10 @@ func (r *RoutineRepositoryImpl) ListByWeekday(ctx context.Context, userID string
 		if weekOfMonth.Valid {
 			v := int(weekOfMonth.Int64)
 			routine.WeekOfMonth = &v
+		}
+		if dayOfMonth.Valid {
+			v := int(dayOfMonth.Int64)
+			routine.DayOfMonth = &v
 		}
 		routine.EndsOn = stringPtrFromNull(endsOn)
 		routine.Color = stringPtrFromNull(color)
@@ -251,7 +263,7 @@ func (r *RoutineRepositoryImpl) ListDailyStatus(ctx context.Context, userID stri
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, user_id, title, description, recurrence_type, weekdays,
 			start_time, end_time,
-			week_of_month, starts_on::text, ends_on::text, color, is_active, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at,
+			week_of_month, day_of_month, starts_on::text, ends_on::text, color, is_active, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at,
 			completed_at, is_completed, exception_action
 		FROM organiq.fnc_routine_daily_status($1, $2, $3::date)
 	`, userID, weekday, date)
@@ -264,12 +276,12 @@ func (r *RoutineRepositoryImpl) ListDailyStatus(ctx context.Context, userID stri
 	for rows.Next() {
 		var item repository.RoutineDailyStatus
 		var description, endTime, endsOn, color, flagID, subflagID, sourceInboxItemID sql.NullString
-		var weekOfMonth sql.NullInt64
+		var weekOfMonth, dayOfMonth sql.NullInt64
 		var weekdays pq.Int64Array
 		var completedAt, exceptionAction sql.NullString
 
 		if err := rows.Scan(
-			&item.ID, &item.UserID, &item.Title, &description, &item.RecurrenceType, &weekdays, &item.StartTime, &endTime, &weekOfMonth, &item.StartsOn, &endsOn, &color, &item.IsActive, &flagID, &subflagID, &sourceInboxItemID, &item.CreatedAt, &item.UpdatedAt,
+			&item.ID, &item.UserID, &item.Title, &description, &item.RecurrenceType, &weekdays, &item.StartTime, &endTime, &weekOfMonth, &dayOfMonth, &item.StartsOn, &endsOn, &color, &item.IsActive, &flagID, &subflagID, &sourceInboxItemID, &item.CreatedAt, &item.UpdatedAt,
 			&completedAt, &item.IsCompleted, &exceptionAction,
 		); err != nil {
 			return nil, err
@@ -284,6 +296,10 @@ func (r *RoutineRepositoryImpl) ListDailyStatus(ctx context.Context, userID stri
 		if weekOfMonth.Valid {
 			v := int(weekOfMonth.Int64)
 			item.WeekOfMonth = &v
+		}
+		if dayOfMonth.Valid {
+			v := int(dayOfMonth.Int64)
+			item.DayOfMonth = &v
 		}
 		item.EndsOn = stringPtrFromNull(endsOn)
 		item.Color = stringPtrFromNull(color)
@@ -574,9 +590,9 @@ func (r *RoutineRepositoryImpl) ListAllByWeekday(ctx context.Context, weekday in
 		SELECT id, user_id, title, description, recurrence_type, weekdays,
 			to_char(start_time, 'HH24:MI') as start_time,
 			to_char(end_time, 'HH24:MI') as end_time,
-			week_of_month, starts_on::text, ends_on::text, color, is_active, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
+			week_of_month, day_of_month, starts_on::text, ends_on::text, color, is_active, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
 		FROM organiq.routines
-		WHERE is_active = true AND $1 = ANY(weekdays)
+		WHERE is_active = true AND ($1 = ANY(weekdays) OR recurrence_type = 'monthly_day')
 		ORDER BY start_time, created_at
 	`, weekday)
 	if err != nil {
@@ -588,10 +604,10 @@ func (r *RoutineRepositoryImpl) ListAllByWeekday(ctx context.Context, weekday in
 	for rows.Next() {
 		var routine domain.Routine
 		var description, endTime, endsOn, color, flagID, subflagID, sourceInboxItemID sql.NullString
-		var weekOfMonth sql.NullInt64
+		var weekOfMonth, dayOfMonth sql.NullInt64
 		var weekdays pq.Int64Array
 
-		if err := rows.Scan(&routine.ID, &routine.UserID, &routine.Title, &description, &routine.RecurrenceType, &weekdays, &routine.StartTime, &endTime, &weekOfMonth, &routine.StartsOn, &endsOn, &color, &routine.IsActive, &flagID, &subflagID, &sourceInboxItemID, &routine.CreatedAt, &routine.UpdatedAt); err != nil {
+		if err := rows.Scan(&routine.ID, &routine.UserID, &routine.Title, &description, &routine.RecurrenceType, &weekdays, &routine.StartTime, &endTime, &weekOfMonth, &dayOfMonth, &routine.StartsOn, &endsOn, &color, &routine.IsActive, &flagID, &subflagID, &sourceInboxItemID, &routine.CreatedAt, &routine.UpdatedAt); err != nil {
 			return nil, err
 		}
 
@@ -604,6 +620,10 @@ func (r *RoutineRepositoryImpl) ListAllByWeekday(ctx context.Context, weekday in
 		if weekOfMonth.Valid {
 			v := int(weekOfMonth.Int64)
 			routine.WeekOfMonth = &v
+		}
+		if dayOfMonth.Valid {
+			v := int(dayOfMonth.Int64)
+			routine.DayOfMonth = &v
 		}
 		routine.EndsOn = stringPtrFromNull(endsOn)
 		routine.Color = stringPtrFromNull(color)

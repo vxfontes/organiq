@@ -28,6 +28,7 @@ class _CreateRoutineBottomSheetState extends State<CreateRoutineBottomSheet> {
         widget.controller.createStartTime,
         widget.controller.createEndTime,
         widget.controller.createRecurrenceType,
+        widget.controller.createWeekOfMonth,
         widget.controller.createSelectedFlagId,
         widget.controller.createSelectedSubflagId,
       ]),
@@ -47,6 +48,9 @@ class _CreateRoutineBottomSheetState extends State<CreateRoutineBottomSheet> {
         final startTime = widget.controller.createStartTime.value;
         final endTime = widget.controller.createEndTime.value ?? '';
         final recurrenceType = widget.controller.createRecurrenceType.value;
+        final isMonthlyDay = recurrenceType == 'monthly_day';
+        final isMonthlyWeek = recurrenceType == 'monthly_week';
+        final selectedWeekOfMonth = widget.controller.createWeekOfMonth.value;
         final selectedFlagId = widget.controller.createSelectedFlagId.value;
         final selectedSubflagId =
             widget.controller.createSelectedSubflagId.value;
@@ -97,22 +101,38 @@ class _CreateRoutineBottomSheetState extends State<CreateRoutineBottomSheet> {
                 enabled: !isLoading,
               ),
               const SizedBox(height: 20),
-              OQText('Dias da semana', context: sheetContext).subtitulo.build(),
-              const SizedBox(height: 12),
-              _buildWeekdayChips(
-                sheetContext,
-                selectedWeekdays,
-                enabled: !isLoading,
-              ),
+              _buildRecurrenceChips(sheetContext, isLoading, recurrenceType),
+              if (isMonthlyWeek) ...[
+                const SizedBox(height: 20),
+                _buildWeekOfMonthChips(
+                  sheetContext,
+                  isLoading,
+                  selectedWeekOfMonth,
+                ),
+              ],
               const SizedBox(height: 20),
+              if (isMonthlyDay) ...[
+                _buildDayOfMonthField(isLoading),
+                const SizedBox(height: 20),
+              ] else ...[
+                OQText(
+                  'Dias da semana',
+                  context: sheetContext,
+                ).subtitulo.build(),
+                const SizedBox(height: 12),
+                _buildWeekdayChips(
+                  sheetContext,
+                  selectedWeekdays,
+                  enabled: !isLoading,
+                ),
+                const SizedBox(height: 20),
+              ],
               _buildTimePickers(
                 sheetContext,
                 startTime,
                 endTime,
                 enabled: !isLoading,
               ),
-              const SizedBox(height: 20),
-              _buildRecurrenceChips(sheetContext, isLoading, recurrenceType),
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
@@ -240,6 +260,7 @@ class _CreateRoutineBottomSheetState extends State<CreateRoutineBottomSheet> {
       _RecurrenceOption('biweekly', 'Quinzenal'),
       _RecurrenceOption('triweekly', '3 em 3 semanas'),
       _RecurrenceOption('monthly_week', 'Mensal'),
+      _RecurrenceOption('monthly_day', 'Mensal (dia)'),
     ];
 
     return Column(
@@ -263,6 +284,60 @@ class _CreateRoutineBottomSheetState extends State<CreateRoutineBottomSheet> {
           }).toList(),
         ),
       ],
+    );
+  }
+
+  Widget _buildWeekOfMonthChips(
+    BuildContext context,
+    bool isLoading,
+    int? selectedWeekOfMonth,
+  ) {
+    const options = [
+      (1, '1ª semana'),
+      (2, '2ª semana'),
+      (3, '3ª semana'),
+      (4, '4ª semana'),
+      (5, '5ª semana'),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        OQText('Semana do mês', context: context).caption.build(),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: options.map((option) {
+            final week = option.$1;
+            final label = option.$2;
+            final isSelected = selectedWeekOfMonth == week;
+            return OQChip(
+              label: label,
+              color: isSelected ? AppColors.primary700 : AppColors.textMuted,
+              onTap: isLoading
+                  ? null
+                  : () => widget.controller.setCreateWeekOfMonth(week),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDayOfMonthField(bool isLoading) {
+    return OQTextField(
+      controller: widget.controller.createDayOfMonthController,
+      label: 'Dia do mês',
+      hint: 'Ex: 10',
+      keyboardType: TextInputType.number,
+      enabled: !isLoading,
+      onChanged: (value) {
+        final parsed = int.tryParse(value.trim());
+        if (parsed == null) return;
+        if (parsed < 1 || parsed > 31) return;
+        widget.controller.setCreateDayOfMonth(parsed);
+      },
     );
   }
 

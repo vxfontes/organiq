@@ -42,10 +42,29 @@ func TestShouldShowRoutineForDate_BiweeklyAnchorsToStartsOnWeek(t *testing.T) {
 
 func TestComputeStartsOn_SanitizesWhenStartsOnIsNotSelectedWeekday(t *testing.T) {
 	now := time.Date(2026, 3, 11, 19, 0, 0, 0, time.UTC) // Wed
-	input := "2026-03-11"                                   // also Wed
+	input := "2026-03-11"                                // also Wed
 
-	startsOn := computeStartsOn(now, []int{int(time.Tuesday)}, &input)
+	startsOn := computeStartsOn(now, []int{int(time.Tuesday)}, &input, true)
 	if startsOn != "2026-03-17" {
 		t.Fatalf("expected startsOn to sanitize to next Tuesday 2026-03-17, got %s", startsOn)
+	}
+}
+
+func TestShouldShowRoutineForDate_MonthlyDayMatchesCalendarDay(t *testing.T) {
+	day := 10
+	r := domain.Routine{
+		RecurrenceType: "monthly_day",
+		DayOfMonth:     &day,
+		StartsOn:       "2026-03-01",
+	}
+
+	onDay := time.Date(2026, 4, 10, 12, 0, 0, 0, time.UTC)
+	if !shouldShowRoutineForDate(r, onDay) {
+		t.Fatalf("expected monthly-day routine to show on day 10")
+	}
+
+	offDay := time.Date(2026, 4, 11, 12, 0, 0, 0, time.UTC)
+	if shouldShowRoutineForDate(r, offDay) {
+		t.Fatalf("expected monthly-day routine to hide on non-matching day")
 	}
 }

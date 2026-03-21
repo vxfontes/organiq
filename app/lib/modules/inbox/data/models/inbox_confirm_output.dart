@@ -8,7 +8,7 @@ import 'package:organiq/modules/tasks/data/models/task_output.dart';
 
 part 'inbox_confirm_output.g.dart';
 
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 class InboxConfirmOutput {
   const InboxConfirmOutput({
     required this.type,
@@ -35,6 +35,8 @@ class InboxConfirmOutput {
   factory InboxConfirmOutput.fromDynamic(dynamic value) {
     return InboxConfirmOutput.fromJson(_asMap(value));
   }
+
+  Map<String, dynamic> toJson() => _$InboxConfirmOutputToJson(this);
 
   static Map<String, dynamic> _asMap(dynamic data) {
     if (data is Map<String, dynamic>) return data;

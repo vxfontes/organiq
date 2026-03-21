@@ -1549,6 +1549,56 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/notifications/delivery-attempts": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Listar tentativas de entrega de notificacoes",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filtrar por notification log ID",
+                        "name": "notificationLogId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Limite",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ListNotificationDeliveryAttemptsResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/notifications/read-all": {
             "patch": {
                 "security": [
@@ -3761,6 +3811,9 @@ const docTemplate = `{
                 "color": {
                     "type": "string"
                 },
+                "dayOfMonth": {
+                    "type": "integer"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -4206,6 +4259,20 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.ListNotificationDeliveryAttemptsResponse": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.NotificationDeliveryAttemptResponse"
+                    }
+                },
+                "nextCursor": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.ListNotificationsResponse": {
             "type": "object",
             "properties": {
@@ -4300,6 +4367,38 @@ const docTemplate = `{
                     }
                 },
                 "nextCursor": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.NotificationDeliveryAttemptResponse": {
+            "type": "object",
+            "properties": {
+                "attemptNo": {
+                    "type": "integer"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deviceId": {
+                    "type": "string"
+                },
+                "errorCode": {
+                    "type": "string"
+                },
+                "errorMessage": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "notificationLogId": {
+                    "type": "string"
+                },
+                "provider": {
+                    "type": "string"
+                },
+                "status": {
                     "type": "string"
                 }
             }
@@ -4558,6 +4657,9 @@ const docTemplate = `{
                 },
                 "createdAt": {
                     "type": "string"
+                },
+                "dayOfMonth": {
+                    "type": "integer"
                 },
                 "description": {
                     "type": "string"
@@ -4947,6 +5049,9 @@ const docTemplate = `{
             "properties": {
                 "color": {
                     "type": "string"
+                },
+                "dayOfMonth": {
+                    "type": "integer"
                 },
                 "description": {
                     "type": "string"
