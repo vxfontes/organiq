@@ -351,7 +351,9 @@ class HomeController implements OQController {
               isToday(item) &&
               hasExplicitTime(item.scheduledTime);
         case TimelineItemType.routine:
-          return !item.isCompleted && !item.scheduledTime.isBefore(now);
+          if (item.isCompleted) return false;
+          if (item.isOverdue) return true;
+          return !item.scheduledTime.isBefore(now);
       }
     }
 
@@ -359,12 +361,18 @@ class HomeController implements OQController {
         .where(shouldInclude)
         .toList(growable: false);
     items.sort((a, b) {
-      final aPast = a.scheduledTime.isBefore(now);
-      final bPast = b.scheduledTime.isBefore(now);
-      if (aPast != bPast) return aPast ? 1 : -1;
+      final aOverdue = a.isOverdue && !a.isCompleted;
+      final bOverdue = b.isOverdue && !b.isCompleted;
+      if (aOverdue != bOverdue) return aOverdue ? -1 : 1;
 
-      final byTime = a.scheduledTime.compareTo(b.scheduledTime);
-      if (byTime != 0) return byTime;
+      if (aOverdue && bOverdue) {
+        final byRecent = b.scheduledTime.compareTo(a.scheduledTime);
+        if (byRecent != 0) return byRecent;
+      } else {
+        final byTime = a.scheduledTime.compareTo(b.scheduledTime);
+        if (byTime != 0) return byTime;
+      }
+
       return a.title.toLowerCase().compareTo(b.title.toLowerCase());
     });
     return items.take(10).toList(growable: false);
@@ -379,7 +387,7 @@ class HomeController implements OQController {
         .where(
           (item) =>
               item.scheduledTime.isBefore(now) &&
-              item.scheduledTime.isBefore(startToday),
+              !item.scheduledTime.isBefore(startToday),
         )
         .toList(growable: false);
   }
@@ -1091,35 +1099,54 @@ class HomeController implements OQController {
   }
 
   Future<void> _syncWidgetData() async {
+    final dashboard = dashboardData.value;
+    if (dashboard == null) return;
+
     final bridge = WidgetBridgeService.instance;
+    final now = DateTimeUtils.nowInUserTimezone();
 
     // Tasks
-    await bridge.syncTasks(agenda.value.tasks);
+    final widgetTasks = _buildWidgetTasksForSync(dashboard);
+    await bridge.syncTasks(widgetTasks);
+
+    final eventProgress = _todayEventProgress(dashboard, now);
+    final routinesOverdue = _overdueRoutinesCount(dashboard);
+    final remindersDone = remindersDoneToday;
+    final remindersTotal = remindersTotalToday;
+    final tasksDoneValue = tasksDone;
+    final tasksTotalValue = tasksTotal;
+    final routinesDoneValue = routinesDone;
+    final routinesTotalValue = routinesTotal;
+
+    final totalDone =
+        tasksDoneValue + routinesDoneValue + remindersDone + eventProgress.done;
+    final totalItems =
+        tasksTotalValue +
+        routinesTotalValue +
+        remindersTotal +
+        eventProgress.total;
+    final computedPercent = totalItems <= 0
+        ? 0.0
+        : (totalDone / totalItems).clamp(0, 1).toDouble();
 
     // Day progress
     await bridge.syncDayProgress(
-      percent: dayProgressPercent,
-      tasksDone: tasksDone,
-      tasksTotal: tasksTotal,
-      routinesDone: routinesDone,
-      routinesTotal: routinesTotal,
-      remindersDone: remindersDoneToday,
-      remindersTotal: remindersTotalToday,
+      percent: computedPercent,
+      tasksDone: tasksDoneValue,
+      tasksTotal: tasksTotalValue,
+      routinesDone: routinesDoneValue,
+      routinesTotal: routinesTotalValue,
+      routinesOverdue: routinesOverdue,
+      remindersDone: remindersDone,
+      remindersTotal: remindersTotal,
+      eventsDone: eventProgress.done,
+      eventsTotal: eventProgress.total,
     );
 
     // Build color cache for timeline items (performance optimization)
     final colorCache = <String, String?>{};
-    for (final task in agenda.value.tasks) {
+    for (final task in widgetTasks) {
       colorCache[task.id] = task.subflagColor ?? task.flagColor;
-    }
-    for (final event in agenda.value.events) {
-      colorCache[event.id] = event.subflagColor ?? event.flagColor;
-    }
-    for (final reminder in agenda.value.reminders) {
-      colorCache[reminder.id] = reminder.subflagColor ?? reminder.flagColor;
-    }
-    for (final routine in routines.value) {
-      colorCache[routine.id] = routine.subflagColor ?? routine.flagColor ?? routine.color;
     }
 
     // Next actions timeline
@@ -1150,8 +1177,191 @@ class HomeController implements OQController {
         .toList(growable: false);
     await bridge.syncNextActions(actionItems);
 
-    // Reminders
-    await bridge.syncReminders(upcomingReminders);
+    // Acontecendo agora
+    final nowAndNextPayload = _buildNowAndNextPayload(
+      items: _dashboardTimelineForInsights,
+      now: now,
+      colorById: colorCache,
+    );
+    await bridge.syncNowPlaying(nowAndNextPayload);
+
+    // Reminders (inclui atrasados)
+    final reminderItems = _buildWidgetRemindersForSync(dashboard);
+    await bridge.syncReminders(reminderItems);
+  }
+
+  List<TaskOutput> _buildWidgetTasksForSync(HomeDashboardOutput dashboard) {
+    final byId = <String, TaskOutput>{};
+
+    for (final task in dashboard.focusTasks) {
+      final id = task.id.trim();
+      final title = task.title.trim();
+      if (id.isEmpty || title.isEmpty || task.isDone) continue;
+      byId[id] = task;
+    }
+
+    for (final item in dashboard.timeline) {
+      if (item.itemType != 'task' || item.isCompleted) continue;
+      final id = item.id.trim();
+      final title = item.title.trim();
+      if (id.isEmpty || title.isEmpty || byId.containsKey(id)) continue;
+      byId[id] = TaskOutput(
+        id: id,
+        title: title,
+        status: 'OPEN',
+        dueAt: item.scheduledTime.toLocal(),
+      );
+    }
+
+    if (byId.isEmpty) {
+      for (final task in agenda.value.tasks) {
+        final id = task.id.trim();
+        final title = task.title.trim();
+        if (id.isEmpty || title.isEmpty || task.isDone) continue;
+        byId[id] = task;
+      }
+    }
+
+    return byId.values.toList(growable: false);
+  }
+
+  List<ReminderOutput> _buildWidgetRemindersForSync(HomeDashboardOutput dashboard) {
+    final now = DateTimeUtils.nowInUserTimezone();
+    var items = dashboard.timeline
+        .where((item) => item.itemType == 'reminder' && !item.isCompleted)
+        .map(
+          (item) => ReminderOutput(
+            id: item.id.trim(),
+            title: item.title.trim(),
+            status: 'OPEN',
+            remindAt: item.scheduledTime.toLocal(),
+          ),
+        )
+        .where((item) => item.id.isNotEmpty && item.title.isNotEmpty)
+        .toList(growable: false);
+
+    if (items.isEmpty) {
+      items = agenda.value.reminders
+          .where((item) => !item.isDone && item.id.trim().isNotEmpty)
+          .toList(growable: false);
+    }
+
+    items.sort((a, b) {
+      final aTime = a.remindAt ?? now;
+      final bTime = b.remindAt ?? now;
+      final aOverdue = aTime.isBefore(now);
+      final bOverdue = bTime.isBefore(now);
+      if (aOverdue != bOverdue) return aOverdue ? -1 : 1;
+      if (aOverdue && bOverdue) {
+        return bTime.compareTo(aTime); // atrasado mais recente primeiro
+      }
+      return aTime.compareTo(bTime);
+    });
+    return items;
+  }
+
+  ({int done, int total}) _todayEventProgress(
+    HomeDashboardOutput dashboard,
+    DateTime now,
+  ) {
+    var done = 0;
+    var total = 0;
+    for (final item in dashboard.timeline) {
+      if (item.itemType != 'event') continue;
+      final start = item.scheduledTime.toLocal();
+      if (!DateTimeUtils.isSameDay(start, now)) continue;
+      total += 1;
+
+      final end = item.endScheduledTime?.toLocal();
+      final isDone = end != null ? !end.isAfter(now) : !start.isAfter(now);
+      if (isDone) done += 1;
+    }
+    return (done: done, total: total);
+  }
+
+  int _overdueRoutinesCount(HomeDashboardOutput dashboard) {
+    var count = 0;
+    for (final item in dashboard.timeline) {
+      if (item.itemType != 'routine') continue;
+      if (item.isCompleted) continue;
+      if (!item.isOverdue) continue;
+      count += 1;
+    }
+    return count;
+  }
+
+  Map<String, dynamic> _buildNowAndNextPayload({
+    required List<TimelineItem> items,
+    required DateTime now,
+    required Map<String, String?> colorById,
+  }) {
+    final ordered = [...items]..sort((a, b) {
+      final byTime = a.scheduledTime.compareTo(b.scheduledTime);
+      if (byTime != 0) return byTime;
+      return a.title.toLowerCase().compareTo(b.title.toLowerCase());
+    });
+
+    bool isEligibleForNowPlaying(TimelineItem item) {
+      if (item.isCompleted) return false;
+      if (item.type == TimelineItemType.event && item.isOverdue) return false;
+      return true;
+    }
+
+    TimelineItem? current;
+    for (final item in ordered) {
+      if (!isEligibleForNowPlaying(item)) continue;
+      final start = item.scheduledTime;
+      final end = item.endScheduledTime ?? start.add(const Duration(minutes: 45));
+      if (!now.isBefore(start) && now.isBefore(end)) {
+        current = item;
+        break;
+      }
+    }
+
+    final futureUpcoming = <TimelineItem>[];
+    for (final item in ordered) {
+      if (!isEligibleForNowPlaying(item)) continue;
+      if (current != null &&
+          item.id == current.id &&
+          item.type == current.type) {
+        continue;
+      }
+      if (item.scheduledTime.isAfter(now)) {
+        futureUpcoming.add(item);
+      }
+    }
+
+    final upcoming = <TimelineItem>[...futureUpcoming.take(2)];
+
+    final next = upcoming.isNotEmpty ? upcoming.first : null;
+
+    Map<String, dynamic>? mapItem(TimelineItem? item) {
+      if (item == null) return null;
+      final mapped = <String, dynamic>{
+        'id': item.id,
+        'title': item.title,
+        'type': item.type.name,
+        'scheduledTime': item.scheduledTime.toUtc().toIso8601String(),
+        'endScheduledTime': item.endScheduledTime?.toUtc().toIso8601String(),
+        'isCompleted': item.isCompleted,
+        'isOverdue': item.isOverdue,
+      };
+      final subtitle = item.subtitle?.trim();
+      if (subtitle != null && subtitle.isNotEmpty) {
+        mapped['subtitle'] = subtitle;
+      }
+      final accent = colorById[item.id];
+      if (accent != null && accent.trim().isNotEmpty) {
+        mapped['accentColor'] = accent.trim();
+      }
+      return mapped;
+    }
+
+    return <String, dynamic>{
+      'current': mapItem(current),
+      'next': mapItem(next),
+      'upcoming': upcoming.map(mapItem).whereType<Map<String, dynamic>>().toList(growable: false),
+    };
   }
 
   /// Processes tasks completed via iOS widgets and syncs them back to the server.

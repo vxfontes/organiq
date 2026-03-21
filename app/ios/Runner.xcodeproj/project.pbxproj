@@ -14,6 +14,7 @@
 		269CB5512F6A369A00CAAA9A /* OrganiqWidgetColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 269CB54C2F6A369A00CAAA9A /* OrganiqWidgetColors.swift */; };
 		269CB5522F6A369A00CAAA9A /* DayProgressWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 269CB54A2F6A369A00CAAA9A /* DayProgressWidget.swift */; };
 		269CB5532F6A369A00CAAA9A /* RemindersWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 269CB54E2F6A369A00CAAA9A /* RemindersWidget.swift */; };
+		6BCF8A4D0A1B2C3D4E5F6071 /* NowPlayingWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BCF8A4D0A1B2C3D4E5F6072 /* NowPlayingWidget.swift */; };
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
 		34BBD00D23F84138CC6A9100 /* libPods-RunnerTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D26DAB140EAD6078A20B2B95 /* libPods-RunnerTests.a */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
@@ -84,6 +85,7 @@
 		4DB259C8C51466397A88EBBB /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
 		596CC8C837385B9B1A95B82B /* OrganiqWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = OrganiqWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		5D897E9C2193FB21BD029D6B /* OrganiqWidgetBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OrganiqWidgetBundle.swift; sourceTree = "<group>"; };
+		6BCF8A4D0A1B2C3D4E5F6072 /* NowPlayingWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlayingWidget.swift; sourceTree = "<group>"; };
 		69489AA69188AFF30E650DCF /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -171,6 +173,7 @@
 				269CB54C2F6A369A00CAAA9A /* OrganiqWidgetColors.swift */,
 				269CB54D2F6A369A00CAAA9A /* OrganiqWidgetSharedStore.swift */,
 				269CB54E2F6A369A00CAAA9A /* RemindersWidget.swift */,
+				6BCF8A4D0A1B2C3D4E5F6072 /* NowPlayingWidget.swift */,
 				0EB86AB0925912600F99FAB2 /* OrganiqWidget.swift */,
 				5D897E9C2193FB21BD029D6B /* OrganiqWidgetBundle.swift */,
 				69489AA69188AFF30E650DCF /* Info.plist */,
@@ -487,6 +490,7 @@
 				269CB5512F6A369A00CAAA9A /* OrganiqWidgetColors.swift in Sources */,
 				269CB5522F6A369A00CAAA9A /* DayProgressWidget.swift in Sources */,
 				269CB5532F6A369A00CAAA9A /* RemindersWidget.swift in Sources */,
+				6BCF8A4D0A1B2C3D4E5F6071 /* NowPlayingWidget.swift in Sources */,
 				D9AD52B54B8554AD267C0E71 /* OrganiqWidget.swift in Sources */,
 				895893E3F2E6141DA3C3010A /* OrganiqWidgetBundle.swift in Sources */,
 			);

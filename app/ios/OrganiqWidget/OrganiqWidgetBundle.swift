@@ -8,6 +8,7 @@ struct OrganiqWidgetBundle: WidgetBundle {
     OrganiqWidget()       // Tasks com checkbox (small, medium, large, lock screen rect)
     DayProgressWidget()   // Anel de progresso (small, lock screen circular)
     NextActionsWidget()   // Timeline do dia (medium, large)
-    RemindersWidget()     // Lembretes com countdown (small, medium, lock screen rect)
+    RemindersWidget()     // Lembretes com countdown (medium, lock screen rect)
+    NowPlayingWidget()    // Acontecendo agora (small, medium)
   }
 }

@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="97263e04-66bb-432b-b882-aae4b962cb83" name="Changes" comment="- ajuste de widget a seguir">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/lib/presentation/screens/home_module/controller/home_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/app/lib/presentation/screens/home_module/controller/home_controller.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/lib/shared/components/oq_lib/oq_next_action_card.dart" beforeDir="false" afterPath="$PROJECT_DIR$/app/lib/shared/components/oq_lib/oq_next_action_card.dart" afterDir="false" />
+    <list default="true" id="97263e04-66bb-432b-b882-aae4b962cb83" name="Changes" comment="- ajustes agenda a seguir">
       <change beforePath="$PROJECT_DIR$/app/lib/shared/services/http/app_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/app/lib/shared/services/http/app_service.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -35,6 +32,14 @@
             <RecentBranchesForRepo>
               <option name="branches">
                 <list>
+                  <RecentBranch>
+                    <option name="branchName" value="fix/melhorias_widgets" />
+                    <option name="lastUsedInstant" value="1774019676" />
+                  </RecentBranch>
+                  <RecentBranch>
+                    <option name="branchName" value="rc/0.5.0" />
+                    <option name="lastUsedInstant" value="1774019650" />
+                  </RecentBranch>
                   <RecentBranch>
                     <option name="branchName" value="main" />
                     <option name="lastUsedInstant" value="1773973328" />
@@ -110,13 +115,49 @@
       <option name="project" value="LOCAL" />
       <updated>1773974362934</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="- ajustes da home">
+      <option name="closed" value="true" />
+      <created>1773974717392</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1773974717392</updated>
+    </task>
+    <task id="LOCAL-00004" summary="- ajustes encryption">
+      <option name="closed" value="true" />
+      <created>1774019583430</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1774019583430</updated>
+    </task>
+    <task id="LOCAL-00005" summary="- ajustes de widgets e novos widgets">
+      <option name="closed" value="true" />
+      <created>1774023962897</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1774023962897</updated>
+    </task>
+    <task id="LOCAL-00006" summary="- ajustes agenda a seguir">
+      <option name="closed" value="true" />
+      <created>1774120155048</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1774120155048</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="- ajuste de tasks com subflags e home bugada" />
     <MESSAGE value="- ajuste de widget a seguir" />
-    <option name="LAST_COMMIT_MESSAGE" value="- ajuste de widget a seguir" />
+    <MESSAGE value="- ajustes da home" />
+    <MESSAGE value="- ajustes encryption" />
+    <MESSAGE value="- ajustes de widgets e novos widgets" />
+    <MESSAGE value="- ajustes agenda a seguir" />
+    <option name="LAST_COMMIT_MESSAGE" value="- ajustes agenda a seguir" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
