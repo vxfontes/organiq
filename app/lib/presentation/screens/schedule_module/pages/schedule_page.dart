@@ -237,7 +237,8 @@ class _SchedulePageState extends OQState<SchedulePage, ScheduleController> {
   Widget _buildRoutineCard(RoutineOutput routine) {
     final cardColor = controller.routineTagColor(routine);
     final recurrenceLabel = routine.recurrenceTypeLabel;
-    final secondaryLabel = '$recurrenceLabel • ${routine.weekdaysLabel}'.trim();
+    final secondaryLabel = '$recurrenceLabel • ${routine.recurrenceRuleLabel}'
+        .trim();
     final conflicts = controller.getConflicts(routine);
 
     final typeLabel = routine.subflagName != null
