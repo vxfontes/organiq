@@ -189,6 +189,77 @@ type ConfirmInboxItemResponse struct {
 	Routine       *RoutineResponse       `json:"routine,omitempty"`
 }
 
+// Suggestions
+
+type SendSuggestionMessageRequest struct {
+	ConversationID *string `json:"conversationId,omitempty"`
+	Message        string  `json:"message"`
+}
+
+type SuggestionBlock struct {
+	ID             string     `json:"id"`
+	Type           string     `json:"type"`
+	Title          string     `json:"title"`
+	Rationale      string     `json:"rationale,omitempty"`
+	StartsAt       *time.Time `json:"startsAt,omitempty"`
+	EndsAt         *time.Time `json:"endsAt,omitempty"`
+	Weekdays       []int      `json:"weekdays,omitempty"`
+	RecurrenceType *string    `json:"recurrenceType,omitempty"`
+	FlagID         *string    `json:"flagId,omitempty"`
+	SubflagID      *string    `json:"subflagId,omitempty"`
+}
+
+type SuggestionMessageResponse struct {
+	ConversationID string            `json:"conversationId"`
+	MessageID      string            `json:"messageId"`
+	Text           string            `json:"text"`
+	Blocks         []SuggestionBlock `json:"blocks,omitempty"`
+}
+
+type AcceptSuggestionBlockRequest struct {
+	Type           string     `json:"type"`
+	Title          string     `json:"title"`
+	Rationale      *string    `json:"rationale,omitempty"`
+	StartsAt       *time.Time `json:"startsAt,omitempty"`
+	EndsAt         *time.Time `json:"endsAt,omitempty"`
+	Weekdays       []int      `json:"weekdays,omitempty"`
+	RecurrenceType *string    `json:"recurrenceType,omitempty"`
+	FlagID         *string    `json:"flagId,omitempty"`
+	SubflagID      *string    `json:"subflagId,omitempty"`
+}
+
+type AcceptSuggestionBlockResponse struct {
+	Type     string `json:"type"`
+	EntityID string `json:"entityId"`
+	Title    string `json:"title"`
+}
+
+type SuggestionConversationResponse struct {
+	ID        string    `json:"id"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+type ListSuggestionConversationsResponse struct {
+	Items      []SuggestionConversationResponse `json:"items"`
+	NextCursor *string                          `json:"nextCursor,omitempty"`
+}
+
+type SuggestionConversationMessage struct {
+	ID        string            `json:"id"`
+	Role      string            `json:"role"`
+	Content   string            `json:"content"`
+	Blocks    []SuggestionBlock `json:"blocks,omitempty"`
+	CreatedAt time.Time         `json:"createdAt"`
+}
+
+type SuggestionConversationDetailResponse struct {
+	ID        string                          `json:"id"`
+	CreatedAt time.Time                       `json:"createdAt"`
+	UpdatedAt time.Time                       `json:"updatedAt"`
+	Messages  []SuggestionConversationMessage `json:"messages"`
+}
+
 // Tasks
 
 type TaskResponse struct {

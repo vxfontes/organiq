@@ -26,6 +26,14 @@ type Config struct {
 	AIFallbackOnNeedsReview      bool
 	AITimeout                    time.Duration
 	AIMaxRetries                 int
+	SuggestionAIProvider         string
+	SuggestionAIAPIKey           string
+	SuggestionAIBaseURL          string
+	SuggestionAIModel            string
+	SuggestionAIFallbackModel    string
+	SuggestionAIFallbackOnReview bool
+	SuggestionAITimeout          time.Duration
+	SuggestionAIMaxRetries       int
 
 	ResendAPIKey      string
 	ResendFrom        string
@@ -54,6 +62,14 @@ func Load() (Config, error) {
 		AIFallbackOnNeedsReview:      getEnvBool("AI_FALLBACK_ON_NEEDS_REVIEW", false),
 		AITimeout:                    getEnvDuration("AI_TIMEOUT", 15*time.Second),
 		AIMaxRetries:                 getEnvInt("AI_MAX_RETRIES", 2),
+		SuggestionAIProvider:         getEnv("SUGGESTION_AI_PROVIDER", ""),
+		SuggestionAIAPIKey:           getEnv("SUGGESTION_AI_API_KEY", ""),
+		SuggestionAIBaseURL:          getEnv("SUGGESTION_AI_BASE_URL", ""),
+		SuggestionAIModel:            getEnv("SUGGESTION_AI_MODEL", ""),
+		SuggestionAIFallbackModel:    getEnv("SUGGESTION_AI_FALLBACK_MODEL", ""),
+		SuggestionAIFallbackOnReview: getEnvBool("SUGGESTION_AI_FALLBACK_ON_NEEDS_REVIEW", false),
+		SuggestionAITimeout:          getEnvDuration("SUGGESTION_AI_TIMEOUT", 30*time.Second),
+		SuggestionAIMaxRetries:       getEnvInt("SUGGESTION_AI_MAX_RETRIES", 2),
 
 		ResendAPIKey:      getEnv("RESEND_API_KEY", ""),
 		ResendFrom:        getEnv("RESEND_FROM", "Organiq <noreply@resend.dev>"),

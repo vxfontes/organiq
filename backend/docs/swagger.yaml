@@ -113,6 +113,38 @@ definitions:
       title:
         type: string
     type: object
+  dto.AcceptSuggestionBlockRequest:
+    properties:
+      endsAt:
+        type: string
+      flagId:
+        type: string
+      rationale:
+        type: string
+      recurrenceType:
+        type: string
+      startsAt:
+        type: string
+      subflagId:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+      weekdays:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.AcceptSuggestionBlockResponse:
+    properties:
+      entityId:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+    type: object
   dto.AgendaResponse:
     properties:
       events:
@@ -648,6 +680,15 @@ definitions:
       nextCursor:
         type: string
     type: object
+  dto.ListSuggestionConversationsResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/dto.SuggestionConversationResponse'
+        type: array
+      nextCursor:
+        type: string
+    type: object
   dto.ListTasksResponse:
     properties:
       items:
@@ -902,6 +943,13 @@ definitions:
       total:
         type: integer
     type: object
+  dto.SendSuggestionMessageRequest:
+    properties:
+      conversationId:
+        type: string
+      message:
+        type: string
+    type: object
   dto.ShoppingItemResponse:
     properties:
       checked:
@@ -969,6 +1017,81 @@ definitions:
       sortOrder:
         type: integer
       updatedAt:
+        type: string
+    type: object
+  dto.SuggestionBlock:
+    properties:
+      endsAt:
+        type: string
+      flagId:
+        type: string
+      id:
+        type: string
+      rationale:
+        type: string
+      recurrenceType:
+        type: string
+      startsAt:
+        type: string
+      subflagId:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+      weekdays:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.SuggestionConversationDetailResponse:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: string
+      messages:
+        items:
+          $ref: '#/definitions/dto.SuggestionConversationMessage'
+        type: array
+      updatedAt:
+        type: string
+    type: object
+  dto.SuggestionConversationMessage:
+    properties:
+      blocks:
+        items:
+          $ref: '#/definitions/dto.SuggestionBlock'
+        type: array
+      content:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: string
+      role:
+        type: string
+    type: object
+  dto.SuggestionConversationResponse:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  dto.SuggestionMessageResponse:
+    properties:
+      blocks:
+        items:
+          $ref: '#/definitions/dto.SuggestionBlock'
+        type: array
+      conversationId:
+        type: string
+      messageId:
+        type: string
+      text:
         type: string
     type: object
   dto.TaskResponse:
@@ -3201,6 +3324,131 @@ paths:
       summary: Atualizar subflag
       tags:
       - Subflags
+  /v1/suggestions/accept:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bloco
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AcceptSuggestionBlockRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AcceptSuggestionBlockResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Aceitar bloco sugerido
+      tags:
+      - Suggestions
+  /v1/suggestions/chat:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Mensagem
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SendSuggestionMessageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SuggestionMessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Enviar mensagem de sugestao
+      tags:
+      - Suggestions
+  /v1/suggestions/conversations:
+    get:
+      parameters:
+      - description: Limite
+        in: query
+        name: limit
+        type: integer
+      - description: Cursor
+        in: query
+        name: cursor
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ListSuggestionConversationsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Listar conversas de sugestao
+      tags:
+      - Suggestions
+  /v1/suggestions/conversations/{id}:
+    get:
+      parameters:
+      - description: Conversation ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SuggestionConversationDetailResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Obter conversa de sugestao
+      tags:
+      - Suggestions
   /v1/tasks:
     get:
       parameters:

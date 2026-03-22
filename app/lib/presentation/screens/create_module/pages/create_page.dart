@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:organiq/modules/inbox/data/models/create_suggestion_item.dart';
+import 'package:organiq/presentation/screens/create_module/components/create_mode_selector.dart';
 import 'package:organiq/presentation/screens/create_module/components/create_done_phase_view.dart';
 import 'package:organiq/presentation/screens/create_module/components/create_edit_suggestion_sheet.dart';
 import 'package:organiq/presentation/screens/create_module/components/create_input_phase_view.dart';
 import 'package:organiq/presentation/screens/create_module/components/create_review_phase_view.dart';
+import 'package:organiq/presentation/screens/create_module/components/suggestion_chat_view.dart';
 import 'package:organiq/presentation/screens/create_module/controller/create_controller.dart';
+import 'package:organiq/presentation/screens/create_module/controller/suggestion_controller.dart';
 import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/state/oq_state.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
@@ -18,23 +22,34 @@ class CreatePage extends StatefulWidget {
 
 class _CreatePageState extends OQState<CreatePage, CreateController> {
   OQAIInputState _inputState = OQAIInputState.idle;
+  late final SuggestionController _suggestionController;
 
   @override
   void initState() {
     super.initState();
+    _suggestionController = Modular.get<SuggestionController>();
     controller.error.addListener(_onErrorChanged);
+    _suggestionController.error.addListener(_onSuggestionErrorChanged);
     controller.inputController.addListener(_onInputChanged);
   }
 
   @override
   void dispose() {
     controller.error.removeListener(_onErrorChanged);
+    _suggestionController.error.removeListener(_onSuggestionErrorChanged);
     controller.inputController.removeListener(_onInputChanged);
     super.dispose();
   }
 
   void _onErrorChanged() {
     final error = controller.error.value;
+    if (error != null && error.isNotEmpty && mounted) {
+      OQSnackBar.error(context, error);
+    }
+  }
+
+  void _onSuggestionErrorChanged() {
+    final error = _suggestionController.error.value;
     if (error != null && error.isNotEmpty && mounted) {
       OQSnackBar.error(context, error);
     }
@@ -68,6 +83,7 @@ class _CreatePageState extends OQState<CreatePage, CreateController> {
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: Listenable.merge([
+        controller.createMode,
         controller.phase,
         controller.loading,
         controller.listening,
@@ -77,9 +93,40 @@ class _CreatePageState extends OQState<CreatePage, CreateController> {
         controller.processingLines,
         controller.suggestions,
         controller.batchResult,
+        _suggestionController.loading,
+        _suggestionController.messages,
+        _suggestionController.acceptedBlockIds,
+        _suggestionController.acceptingBlockIds,
       ]),
       builder: (context, _) {
+        final createMode = controller.createMode.value;
+        if (createMode == 1) {
+          return ColoredBox(
+            color: AppColors.background,
+            child: SuggestionChatView(
+              mode: createMode,
+              onModeChanged: controller.selectCreateMode,
+              messages: _suggestionController.messages.value,
+              loading: _suggestionController.loading.value,
+              inputController: _suggestionController.inputController,
+              acceptedBlockIds: _suggestionController.acceptedBlockIds.value,
+              acceptingBlockIds: _suggestionController.acceptingBlockIds.value,
+              onSendMessage: _suggestionController.sendMessage,
+              onResetConversation: _suggestionController.resetConversation,
+              onAcceptBlock: _suggestionController.acceptBlock,
+            ),
+          );
+        }
+
         final phase = controller.phase.value;
+        final selector = CreateModeSelector(
+          mode: createMode,
+          onModeChanged: controller.selectCreateMode,
+          enabled:
+              !controller.loading.value &&
+              !controller.listening.value &&
+              !controller.voiceProcessing.value,
+        );
 
         return ColoredBox(
           color: AppColors.background,
@@ -104,6 +151,7 @@ class _CreatePageState extends OQState<CreatePage, CreateController> {
                 onTextChanged: _onTextChanged,
                 onReviewSuggestions: controller.goToReview,
                 onGoBackToInput: controller.goBackToInput,
+                modeSelector: selector,
               ),
               CreatePhase.processing => CreateInputPhaseView(
                 key: const ValueKey('create-processing'),
@@ -123,6 +171,7 @@ class _CreatePageState extends OQState<CreatePage, CreateController> {
                 onTextChanged: _onTextChanged,
                 onReviewSuggestions: controller.goToReview,
                 onGoBackToInput: controller.goBackToInput,
+                modeSelector: selector,
               ),
               CreatePhase.review => CreateReviewPhaseView(
                 key: const ValueKey('create-review'),

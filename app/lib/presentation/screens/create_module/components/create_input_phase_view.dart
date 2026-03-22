@@ -26,6 +26,7 @@ class CreateInputPhaseView extends StatelessWidget {
     required this.onTextChanged,
     required this.onReviewSuggestions,
     required this.onGoBackToInput,
+    this.modeSelector,
   });
 
   final bool processingMode;
@@ -44,6 +45,7 @@ class CreateInputPhaseView extends StatelessWidget {
   final ValueChanged<String> onTextChanged;
   final VoidCallback onReviewSuggestions;
   final VoidCallback onGoBackToInput;
+  final Widget? modeSelector;
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +58,10 @@ class CreateInputPhaseView extends StatelessWidget {
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       children: [
         const CreatePageHeader(),
+        if (modeSelector != null) ...[
+          const SizedBox(height: 14),
+          modeSelector!,
+        ],
         const SizedBox(height: 20),
         OQAIInputArea(
           controller: inputController,
