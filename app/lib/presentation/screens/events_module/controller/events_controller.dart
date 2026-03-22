@@ -54,6 +54,7 @@ class EventsController implements OQController {
   ];
 
   final ValueNotifier<bool> loading = ValueNotifier(false);
+  final ValueNotifier<bool> hasLoadedOnce = ValueNotifier(false);
   final ValueNotifier<String?> error = ValueNotifier(null);
   final ValueNotifier<List<FlagOutput>> flags = ValueNotifier([]);
   final ValueNotifier<Map<String, List<SubflagOutput>>> subflagsByFlag =
@@ -77,6 +78,7 @@ class EventsController implements OQController {
   @override
   void dispose() {
     loading.dispose();
+    hasLoadedOnce.dispose();
     error.dispose();
     flags.dispose();
     subflagsByFlag.dispose();
@@ -92,34 +94,37 @@ class EventsController implements OQController {
 
     loading.value = true;
     error.value = null;
+    try {
+      final merged = <EventFeedItem>[];
 
-    final merged = <EventFeedItem>[];
+      final agendaResult = await _getAgendaUsecase.call(limit: 200);
+      agendaResult.fold(
+        (failure) {
+          _setError(failure, fallback: 'Não foi possível carregar agenda.');
+        },
+        (output) {
+          merged.addAll(_eventItems(output.events));
+          merged.addAll(_taskItems(output.tasks));
+          merged.addAll(_reminderItems(output.reminders));
+        },
+      );
 
-    final agendaResult = await _getAgendaUsecase.call(limit: 200);
-    agendaResult.fold(
-      (failure) {
-        _setError(failure, fallback: 'Não foi possível carregar agenda.');
-      },
-      (output) {
-        merged.addAll(_eventItems(output.events));
-        merged.addAll(_taskItems(output.tasks));
-        merged.addAll(_reminderItems(output.reminders));
-      },
-    );
+      merged.sort((a, b) => a.date.compareTo(b.date));
+      allItems.value = merged;
 
-    merged.sort((a, b) => a.date.compareTo(b.date));
-    allItems.value = merged;
+      final flagsResult = await _getFlagsUsecase.call(limit: 100);
+      flagsResult.fold(
+        (failure) =>
+            _setError(failure, fallback: 'Não foi possível carregar flags.'),
+        (data) => flags.value = _safeFlagItems(data.items),
+      );
 
-    final flagsResult = await _getFlagsUsecase.call(limit: 100);
-    flagsResult.fold(
-      (failure) =>
-          _setError(failure, fallback: 'Não foi possível carregar flags.'),
-      (data) => flags.value = _safeFlagItems(data.items),
-    );
-
-    _rebuildCalendarDays();
-    _rebuildVisibleItems();
-    loading.value = false;
+      _rebuildCalendarDays();
+      _rebuildVisibleItems();
+    } finally {
+      loading.value = false;
+      hasLoadedOnce.value = true;
+    }
   }
 
   Future<void> loadSubflags(String flagId) async {

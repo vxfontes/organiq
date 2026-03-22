@@ -43,68 +43,74 @@ class _ShoppingPageState extends OQState<ShoppingPage, ShoppingController> {
     return AnimatedBuilder(
       animation: Listenable.merge([
         controller.loading,
+        controller.hasLoadedOnce,
         controller.visibleShoppingLists,
         controller.itemsByList,
+        controller.loadingListIds,
       ]),
       builder: (context, _) {
-        final loading = controller.loading.value;
+        final hasLoadedOnce = controller.hasLoadedOnce.value;
         final shoppingLists = controller.visibleShoppingLists.value;
         final itemsByList = controller.itemsByList.value;
+        final showInitialLoading = !hasLoadedOnce;
 
-        final showFullLoading = loading && shoppingLists.isEmpty;
-
-        return Stack(
-          children: [
-            ColoredBox(
-              color: AppColors.background,
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-                children: [
-                  _buildHeader(context),
-                  const SizedBox(height: 18),
-                  if (shoppingLists.isEmpty)
-                    const OQCard(
-                      child: OQEmptyState(
-                        title: 'Sem listas de compras',
-                        subtitle:
-                            'Quando você confirmar uma lista pelo inbox, ela aparecerá aqui.',
-                        icon: OQHugeIcon.shoppingBag,
-                      ),
-                    )
-                  else
-                    ...shoppingLists.map((shoppingList) {
-                      final items = itemsByList[shoppingList.id] ?? const [];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 14),
-                        child: Dismissible(
-                          key: ValueKey('shopping-list-${shoppingList.id}'),
-                          direction: DismissDirection.endToStart,
-                          background: _buildDeleteBackground(),
-                          confirmDismiss: (_) =>
-                              controller.deleteShoppingList(shoppingList.id),
-                          child: _buildShoppingListCard(
-                            context,
-                            shoppingList: shoppingList,
-                            items: items,
-                          ),
-                        ),
-                      );
-                    }),
-                ],
-              ),
-            ),
-            if (showFullLoading)
-              const Positioned.fill(
-                child: ColoredBox(
-                  color: AppColors.background,
-                  child: Center(
-                    child: OQLoader(label: 'Carregando listas de compras...'),
+        return ColoredBox(
+          color: AppColors.background,
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+            children: [
+              _buildHeader(context),
+              const SizedBox(height: 18),
+              if (showInitialLoading)
+                _buildLoadingSkeleton()
+              else if (shoppingLists.isEmpty)
+                const OQCard(
+                  child: OQEmptyState(
+                    title: 'Sem listas de compras',
+                    subtitle:
+                        'Quando você confirmar uma lista pelo inbox, ela aparecerá aqui.',
+                    icon: OQHugeIcon.shoppingBag,
                   ),
-                ),
-              ),
-          ],
+                )
+              else
+                ...shoppingLists.map((shoppingList) {
+                  final items = itemsByList[shoppingList.id] ?? const [];
+                  final isLoadingItems = controller.isLoadingItemsForList(
+                    shoppingList.id,
+                  );
+
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: Dismissible(
+                      key: ValueKey('shopping-list-${shoppingList.id}'),
+                      direction: DismissDirection.endToStart,
+                      background: _buildDeleteBackground(),
+                      confirmDismiss: (_) =>
+                          controller.deleteShoppingList(shoppingList.id),
+                      child: _buildShoppingListCard(
+                        context,
+                        shoppingList: shoppingList,
+                        items: items,
+                        loadingItems: isLoadingItems,
+                      ),
+                    ),
+                  );
+                }),
+            ],
+          ),
         );
       },
+    );
+  }
+
+  Widget _buildLoadingSkeleton() {
+    return Column(
+      children: List.generate(2, (index) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 14),
+          child: _buildShoppingListLoadingCard('Carregando lista...'),
+        );
+      }),
     );
   }
 
@@ -142,7 +148,12 @@ class _ShoppingPageState extends OQState<ShoppingPage, ShoppingController> {
     BuildContext context, {
     required ShoppingListOutput shoppingList,
     required List<ShoppingItemOutput> items,
+    required bool loadingItems,
   }) {
+    if (loadingItems && items.isEmpty) {
+      return _buildShoppingListLoadingCard(shoppingList.title);
+    }
+
     final doneCount = items.where((item) => item.isDone).length;
     final pendingCount = items.length - doneCount;
     final canConclude =
@@ -192,6 +203,25 @@ class _ShoppingPageState extends OQState<ShoppingPage, ShoppingController> {
         controller.toggleItemAt(shoppingList.id, index, done);
       },
       onDelete: (index) => controller.deleteItemAt(shoppingList.id, index),
+    );
+  }
+
+  Widget _buildShoppingListLoadingCard(String title) {
+    return OQCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          OQText(title, context: context).subtitulo.build(),
+          const SizedBox(height: 4),
+          OQText('Carregando itens...', context: context).muted.build(),
+          const SizedBox(height: 14),
+          const OQSkeleton(height: 12, width: double.infinity),
+          const SizedBox(height: 10),
+          const OQSkeleton(height: 12, width: 220),
+          const SizedBox(height: 10),
+          const OQSkeleton(height: 12, width: double.infinity),
+        ],
+      ),
     );
   }
 

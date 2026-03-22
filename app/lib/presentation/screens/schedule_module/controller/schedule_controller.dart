@@ -60,6 +60,7 @@ class ScheduleController implements OQController {
   final CreateRoutineExceptionUsecase _createRoutineExceptionUsecase;
 
   final ValueNotifier<bool> loading = ValueNotifier(false);
+  final ValueNotifier<bool> hasLoadedOnce = ValueNotifier(false);
   final ValueNotifier<bool> detailsLoading = ValueNotifier(false);
   final ValueNotifier<ScheduleViewMode> viewMode = ValueNotifier(
     ScheduleViewMode.daily,
@@ -134,6 +135,7 @@ class ScheduleController implements OQController {
   @override
   void dispose() {
     loading.dispose();
+    hasLoadedOnce.dispose();
     detailsLoading.dispose();
     viewMode.dispose();
     error.dispose();
@@ -191,7 +193,7 @@ class ScheduleController implements OQController {
 
   bool get hasRoutines =>
       routinesByPeriod.value.values.any((list) => list.isNotEmpty);
-  bool get shouldShowLoadingOverlay => loading.value && routines.value.isEmpty;
+  bool get shouldShowLoadingOverlay => !hasLoadedOnce.value;
   bool get isEditing => _editingRoutineId != null;
   String get formTitle => isEditing ? 'Editar Rotina' : 'Nova Rotina';
   String get formPrimaryLabel =>
@@ -233,19 +235,21 @@ class ScheduleController implements OQController {
     if (loading.value) return;
     loading.value = true;
     error.value = null;
+    try {
+      selectedWeekday.value = currentWeekday;
 
-    selectedWeekday.value = currentWeekday;
+      await _loadFlags();
+      await _loadAllRoutines();
 
-    await _loadFlags();
-    await _loadAllRoutines();
-
-    if (viewMode.value == ScheduleViewMode.daily) {
-      await loadRoutinesForWeekday(selectedWeekday.value);
-    } else {
-      await loadFullWeek();
+      if (viewMode.value == ScheduleViewMode.daily) {
+        await loadRoutinesForWeekday(selectedWeekday.value);
+      } else {
+        await loadFullWeek();
+      }
+    } finally {
+      loading.value = false;
+      hasLoadedOnce.value = true;
     }
-
-    loading.value = false;
   }
 
   Future<void> _loadAllRoutines() async {
