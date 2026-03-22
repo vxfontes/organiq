@@ -15,6 +15,7 @@ import 'package:organiq/modules/tasks/domain/usecases/delete_task_usecase.dart';
 import 'package:organiq/presentation/screens/events_module/components/event_feed_item.dart';
 import 'package:organiq/shared/errors/failures.dart';
 import 'package:organiq/shared/state/oq_state.dart';
+import 'package:organiq/shared/utils/date_time.dart';
 import 'package:organiq/shared/utils/text_utils.dart';
 
 class EventsController implements OQController {
@@ -53,6 +54,7 @@ class EventsController implements OQController {
   ];
 
   final ValueNotifier<bool> loading = ValueNotifier(false);
+  final ValueNotifier<bool> hasLoadedOnce = ValueNotifier(false);
   final ValueNotifier<String?> error = ValueNotifier(null);
   final ValueNotifier<List<FlagOutput>> flags = ValueNotifier([]);
   final ValueNotifier<Map<String, List<SubflagOutput>>> subflagsByFlag =
@@ -61,7 +63,7 @@ class EventsController implements OQController {
     EventFeedFilter.all,
   );
   final ValueNotifier<DateTime> selectedDate = ValueNotifier(
-    _startOfDay(DateTime.now()),
+    _startOfDay(DateTimeUtils.nowInUserTimezone()),
   );
   final ValueNotifier<List<DateTime>> calendarDays = ValueNotifier(
     const <DateTime>[],
@@ -76,6 +78,7 @@ class EventsController implements OQController {
   @override
   void dispose() {
     loading.dispose();
+    hasLoadedOnce.dispose();
     error.dispose();
     flags.dispose();
     subflagsByFlag.dispose();
@@ -91,34 +94,37 @@ class EventsController implements OQController {
 
     loading.value = true;
     error.value = null;
+    try {
+      final merged = <EventFeedItem>[];
 
-    final merged = <EventFeedItem>[];
+      final agendaResult = await _getAgendaUsecase.call(limit: 200);
+      agendaResult.fold(
+        (failure) {
+          _setError(failure, fallback: 'Não foi possível carregar agenda.');
+        },
+        (output) {
+          merged.addAll(_eventItems(output.events));
+          merged.addAll(_taskItems(output.tasks));
+          merged.addAll(_reminderItems(output.reminders));
+        },
+      );
 
-    final agendaResult = await _getAgendaUsecase.call(limit: 200);
-    agendaResult.fold(
-      (failure) {
-        _setError(failure, fallback: 'Não foi possível carregar agenda.');
-      },
-      (output) {
-        merged.addAll(_eventItems(output.events));
-        merged.addAll(_taskItems(output.tasks));
-        merged.addAll(_reminderItems(output.reminders));
-      },
-    );
+      merged.sort((a, b) => a.date.compareTo(b.date));
+      allItems.value = merged;
 
-    merged.sort((a, b) => a.date.compareTo(b.date));
-    allItems.value = merged;
+      final flagsResult = await _getFlagsUsecase.call(limit: 100);
+      flagsResult.fold(
+        (failure) =>
+            _setError(failure, fallback: 'Não foi possível carregar flags.'),
+        (data) => flags.value = _safeFlagItems(data.items),
+      );
 
-    final flagsResult = await _getFlagsUsecase.call(limit: 100);
-    flagsResult.fold(
-      (failure) =>
-          _setError(failure, fallback: 'Não foi possível carregar flags.'),
-      (data) => flags.value = _safeFlagItems(data.items),
-    );
-
-    _rebuildCalendarDays();
-    _rebuildVisibleItems();
-    loading.value = false;
+      _rebuildCalendarDays();
+      _rebuildVisibleItems();
+    } finally {
+      loading.value = false;
+      hasLoadedOnce.value = true;
+    }
   }
 
   Future<void> loadSubflags(String flagId) async {
@@ -190,12 +196,17 @@ class EventsController implements OQController {
   }
 
   EventFeedItem _eventItem(EventOutput event) {
+    final startAt = DateTimeUtils.toUserTimezone(event.startAt!);
+    final endAt = event.endAt == null
+        ? null
+        : DateTimeUtils.toUserTimezone(event.endAt!);
+
     return EventFeedItem(
       id: event.id,
       type: EventFeedItemType.event,
       title: event.title,
-      date: event.startAt!.toLocal(),
-      endDate: event.endAt?.toLocal(),
+      date: startAt,
+      endDate: endAt,
       secondary: event.location,
       flagLabel: TextUtils.normalize(event.flagName),
       subflagLabel: TextUtils.normalize(event.subflagName),
@@ -208,21 +219,22 @@ class EventsController implements OQController {
   List<EventFeedItem> _taskItems(List<TaskOutput> tasks) {
     return tasks
         .where((task) => task.id.isNotEmpty && task.dueAt != null)
-        .map(
-          (task) => EventFeedItem(
+        .map((task) {
+          final dueAt = DateTimeUtils.toUserTimezone(task.dueAt!);
+          return EventFeedItem(
             id: task.id,
             type: EventFeedItemType.todo,
             title: task.title,
-            date: task.dueAt!.toLocal(),
+            date: dueAt,
             secondary: task.description,
             flagLabel: TextUtils.normalize(task.flagName),
             subflagLabel: TextUtils.normalize(task.subflagName),
             flagColor: TextUtils.normalize(task.flagColor),
             subflagColor: TextUtils.normalize(task.subflagColor),
             done: task.isDone,
-            allDay: task.dueAt!.hour == 0 && task.dueAt!.minute == 0,
-          ),
-        )
+            allDay: dueAt.hour == 0 && dueAt.minute == 0,
+          );
+        })
         .toList(growable: false);
   }
 
@@ -231,21 +243,21 @@ class EventsController implements OQController {
         .where(
           (reminder) => reminder.id.isNotEmpty && reminder.remindAt != null,
         )
-        .map(
-          (reminder) => EventFeedItem(
+        .map((reminder) {
+          final remindAt = DateTimeUtils.toUserTimezone(reminder.remindAt!);
+          return EventFeedItem(
             id: reminder.id,
             type: EventFeedItemType.reminder,
             title: reminder.title,
-            date: reminder.remindAt!.toLocal(),
+            date: remindAt,
             done: reminder.isDone,
-            allDay:
-                reminder.remindAt!.hour == 0 && reminder.remindAt!.minute == 0,
+            allDay: remindAt.hour == 0 && remindAt.minute == 0,
             flagLabel: TextUtils.normalize(reminder.flagName),
             subflagLabel: TextUtils.normalize(reminder.subflagName),
             flagColor: TextUtils.normalize(reminder.flagColor),
             subflagColor: TextUtils.normalize(reminder.subflagColor),
-          ),
-        )
+          );
+        })
         .toList(growable: false);
   }
 
@@ -308,7 +320,7 @@ class EventsController implements OQController {
   }
 
   void _rebuildCalendarDays() {
-    final now = _startOfDay(DateTime.now());
+    final now = _startOfDay(DateTimeUtils.nowInUserTimezone());
 
     DateTime start = now.subtract(const Duration(days: 5));
     DateTime end = now.add(const Duration(days: 21));

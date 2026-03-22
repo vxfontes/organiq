@@ -20,6 +20,7 @@ import 'package:organiq/modules/routines/domain/usecases/delete_routine_usecase.
 import 'package:organiq/modules/shopping/domain/usecases/delete_shopping_list_usecase.dart';
 import 'package:organiq/modules/tasks/domain/usecases/delete_task_usecase.dart';
 import 'package:organiq/shared/errors/failures.dart';
+import 'package:organiq/shared/services/app_config/app_config_service.dart';
 import 'package:organiq/shared/services/speech/speech_transcription_service.dart';
 import 'package:organiq/shared/state/oq_state.dart';
 
@@ -60,6 +61,7 @@ class CreateController implements OQController {
     this._deleteEventUsecase,
     this._deleteShoppingListUsecase,
     this._deleteRoutineUsecase,
+    this._appConfigService,
   );
 
   final CreateInboxItemUsecase _createInboxItemUsecase;
@@ -71,8 +73,10 @@ class CreateController implements OQController {
   final DeleteEventUsecase _deleteEventUsecase;
   final DeleteShoppingListUsecase _deleteShoppingListUsecase;
   final DeleteRoutineUsecase _deleteRoutineUsecase;
+  final IAppConfigService _appConfigService;
 
   final TextEditingController inputController = TextEditingController();
+  final ValueNotifier<int> createMode = ValueNotifier(0);
   final ValueNotifier<bool> loading = ValueNotifier(false);
   final ValueNotifier<bool> listening = ValueNotifier(false);
   final ValueNotifier<bool> voiceProcessing = ValueNotifier(false);
@@ -86,6 +90,8 @@ class CreateController implements OQController {
   final ValueNotifier<List<CreateSuggestionItem>> suggestions = ValueNotifier(
     const <CreateSuggestionItem>[],
   );
+  final ValueNotifier<bool> createAiEnabled = ValueNotifier(true);
+  final ValueNotifier<bool> suggestionAiEnabled = ValueNotifier(true);
 
   String? _voiceBaseText;
   String _latestRecognizedText = '';
@@ -108,6 +114,7 @@ class CreateController implements OQController {
     unawaited(_speechTranscriptionService.cancelListening());
     _recordingTimer?.cancel();
     inputController.dispose();
+    createMode.dispose();
     loading.dispose();
     listening.dispose();
     voiceProcessing.dispose();
@@ -118,6 +125,8 @@ class CreateController implements OQController {
     phase.dispose();
     processingLines.dispose();
     suggestions.dispose();
+    createAiEnabled.dispose();
+    suggestionAiEnabled.dispose();
   }
 
   void clearInput() {
@@ -128,6 +137,34 @@ class CreateController implements OQController {
     }
     inputController.clear();
     error.value = null;
+  }
+
+  void selectCreateMode(int mode) {
+    if (mode != 0 && mode != 1) return;
+    if (createMode.value == mode) return;
+    createMode.value = mode;
+    error.value = null;
+  }
+
+  Future<void> loadAIConfig() async {
+    final config = await _appConfigService.getAIConfig();
+    createAiEnabled.value = config.createAiEnabled;
+    suggestionAiEnabled.value = config.suggestionAiEnabled;
+    _syncModeWithAIAvailability();
+  }
+
+  void _syncModeWithAIAvailability() {
+    final createEnabled = createAiEnabled.value;
+    final suggestionEnabled = suggestionAiEnabled.value;
+
+    if (createMode.value == 0 && !createEnabled && suggestionEnabled) {
+      createMode.value = 1;
+      return;
+    }
+
+    if (createMode.value == 1 && !suggestionEnabled && createEnabled) {
+      createMode.value = 0;
+    }
   }
 
   Future<void> toggleVoiceInput() async {

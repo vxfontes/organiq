@@ -31,8 +31,7 @@ class _SettingsNotificationsPageState
   @override
   void initState() {
     super.initState();
-    controller.fetchPreferences();
-    controller.fetchDailySummaryToken();
+    unawaited(controller.load());
     controller.error.addListener(_onErrorChanged);
   }
 
@@ -64,7 +63,11 @@ class _SettingsNotificationsPageState
       appBar: const OQLightAppBar(title: 'Notificações'),
       body: SafeArea(
         child: AnimatedBuilder(
-          animation: Listenable.merge([controller.loading, controller.prefs]),
+          animation: Listenable.merge([
+            controller.loading,
+            controller.prefs,
+            controller.showAdminNotificationSections,
+          ]),
           builder: (context, _) {
             final loading = controller.loading.value;
             final prefs = controller.prefs.value;
@@ -90,8 +93,7 @@ class _SettingsNotificationsPageState
                         child: OQButton(
                           label: 'Tentar novamente',
                           variant: OQButtonVariant.secondary,
-                          onPressed: () =>
-                              unawaited(controller.fetchPreferences()),
+                          onPressed: () => unawaited(controller.load()),
                         ),
                       ),
                     ],
@@ -101,7 +103,7 @@ class _SettingsNotificationsPageState
             }
 
             return RefreshIndicator(
-              onRefresh: controller.fetchPreferences,
+              onRefresh: controller.load,
               child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
@@ -114,9 +116,11 @@ class _SettingsNotificationsPageState
                   const SizedBox(height: 12),
                   ..._buildModuleSections(prefs),
                   _buildQuietHoursSection(prefs),
-                  _buildDailyDigestSection(prefs),
-                  _buildDeviceSection(),
-                  _buildDailySummaryTokenSection(),
+                  if (controller.showAdminNotificationSections.value) ...[
+                    _buildDailyDigestSection(prefs),
+                    _buildDailySummaryTokenSection(),
+                    _buildDeviceSection(),
+                  ],
                 ],
               ),
             );

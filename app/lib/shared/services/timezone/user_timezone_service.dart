@@ -40,6 +40,23 @@ class UserTimezoneService {
     );
   }
 
+  DateTime toUserTimezone(DateTime value) {
+    final offset = _offsetMinutes;
+    if (offset == null) return value.toLocal();
+
+    final shifted = value.toUtc().add(Duration(minutes: offset));
+    return DateTime(
+      shifted.year,
+      shifted.month,
+      shifted.day,
+      shifted.hour,
+      shifted.minute,
+      shifted.second,
+      shifted.millisecond,
+      shifted.microsecond,
+    );
+  }
+
   int? _parseOffsetMinutes(String value) {
     final normalized = value.trim();
     final upper = normalized.toUpperCase();
@@ -49,7 +66,19 @@ class UserTimezoneService {
       'GMT': 0,
       'ETC/UTC': 0,
       'BRT': -180,
+      'AMERICA/BAHIA': -180,
+      'AMERICA/BELEM': -180,
+      'AMERICA/FORTALEZA': -180,
+      'AMERICA/MACEIO': -180,
+      'AMERICA/RECIFE': -180,
       'AMERICA/SAO_PAULO': -180,
+      'AMERICA/ARAGUAINA': -180,
+      'AMERICA/CUIABA': -240,
+      'AMERICA/MANAUS': -240,
+      'AMERICA/CAMPO_GRANDE': -240,
+      'AMERICA/PORTO_VELHO': -240,
+      'AMERICA/BOA_VISTA': -240,
+      'AMERICA/RIO_BRANCO': -300,
     };
     final aliasOffset = aliases[upper];
     if (aliasOffset != null) return aliasOffset;

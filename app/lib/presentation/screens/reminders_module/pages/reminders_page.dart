@@ -43,6 +43,7 @@ class _RemindersPageState extends OQState<RemindersPage, RemindersController> {
     return AnimatedBuilder(
       animation: Listenable.merge([
         controller.loading,
+        controller.hasLoadedOnce,
         controller.visibleTasks,
         controller.reminders,
       ]),
@@ -50,36 +51,67 @@ class _RemindersPageState extends OQState<RemindersPage, RemindersController> {
         final tasks = controller.visibleTasks.value;
         final reminders = controller.reminders.value;
         final loading = controller.loading.value;
-        final showFullLoading = loading;
-        final loadingLabel = tasks.isEmpty && reminders.isEmpty
-            ? 'Carregando...'
-            : 'Atualizando...';
+        final hasLoadedOnce = controller.hasLoadedOnce.value;
+        final showInitialLoading = !hasLoadedOnce;
+        final showRefreshing = loading && hasLoadedOnce;
 
-        return Stack(
-          children: [
-            ColoredBox(
-              color: AppColors.background,
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-                children: [
-                  _buildHeader(context),
-                  const SizedBox(height: 20),
-                  _buildTodoSection(context, tasks),
-                  _buildTodaySection(context, reminders),
-                  _buildUpcomingSection(context, reminders),
-                ],
-              ),
-            ),
-            if (showFullLoading)
-              Positioned.fill(
-                child: ColoredBox(
-                  color: AppColors.background,
-                  child: Center(child: OQLoader(label: loadingLabel)),
+        return ColoredBox(
+          color: AppColors.background,
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+            children: [
+              _buildHeader(context),
+              const SizedBox(height: 20),
+              if (showRefreshing) ...[
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(999),
+                  child: const LinearProgressIndicator(minHeight: 3),
                 ),
-              ),
-          ],
+                const SizedBox(height: 16),
+              ],
+              if (showInitialLoading)
+                _buildLoadingSkeleton()
+              else ...[
+                _buildTodoSection(context, tasks),
+                _buildTodaySection(context, reminders),
+                _buildUpcomingSection(context, reminders),
+              ],
+            ],
+          ),
         );
       },
+    );
+  }
+
+  Widget _buildLoadingSkeleton() {
+    return const Column(
+      children: [
+        OQCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              OQSkeleton(height: 18, width: 120),
+              SizedBox(height: 14),
+              OQSkeleton(height: 14, width: double.infinity),
+              SizedBox(height: 10),
+              OQSkeleton(height: 14, width: 200),
+            ],
+          ),
+        ),
+        SizedBox(height: 18),
+        OQCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              OQSkeleton(height: 16, width: 96),
+              SizedBox(height: 12),
+              OQSkeleton(height: 12, width: double.infinity),
+              SizedBox(height: 8),
+              OQSkeleton(height: 12, width: 180),
+            ],
+          ),
+        ),
+      ],
     );
   }
 

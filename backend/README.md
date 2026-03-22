@@ -13,6 +13,9 @@ Copie os exemplos de env e preencha as credenciais:
   - `JWT_SECRET`
   - `AI_PROVIDER`
   - `AI_API_KEY`
+  - `AI_FALLBACK_API_KEY`
+  - `SUGGESTION_AI_API_KEY`
+  - `SUGGESTION_AI_FALLBACK_API_KEY`
   - `AI_BASE_URL`
   - `AI_MODEL`
   - `AI_TIMEOUT`

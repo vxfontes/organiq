@@ -20,12 +20,22 @@ type Config struct {
 	JWTSecret                    string
 	AIProvider                   string
 	AIAPIKey                     string
+	AIFallbackAPIKey             string
 	AIBaseURL                    string
 	AIModel                      string
 	AIFallbackModel              string
 	AIFallbackOnNeedsReview      bool
 	AITimeout                    time.Duration
 	AIMaxRetries                 int
+	SuggestionAIProvider         string
+	SuggestionAIAPIKey           string
+	SuggestionAIFallbackAPIKey   string
+	SuggestionAIBaseURL          string
+	SuggestionAIModel            string
+	SuggestionAIFallbackModel    string
+	SuggestionAIFallbackOnReview bool
+	SuggestionAITimeout          time.Duration
+	SuggestionAIMaxRetries       int
 
 	ResendAPIKey      string
 	ResendFrom        string
@@ -48,12 +58,22 @@ func Load() (Config, error) {
 		JWTSecret:                    getEnv("JWT_SECRET", ""),
 		AIProvider:                   getEnv("AI_PROVIDER", ""),
 		AIAPIKey:                     getEnv("AI_API_KEY", ""),
+		AIFallbackAPIKey:             getEnv("AI_FALLBACK_API_KEY", ""),
 		AIBaseURL:                    getEnv("AI_BASE_URL", ""),
 		AIModel:                      getEnv("AI_MODEL", ""),
 		AIFallbackModel:              getEnv("AI_FALLBACK_MODEL", ""),
 		AIFallbackOnNeedsReview:      getEnvBool("AI_FALLBACK_ON_NEEDS_REVIEW", false),
 		AITimeout:                    getEnvDuration("AI_TIMEOUT", 15*time.Second),
 		AIMaxRetries:                 getEnvInt("AI_MAX_RETRIES", 2),
+		SuggestionAIProvider:         getEnv("SUGGESTION_AI_PROVIDER", ""),
+		SuggestionAIAPIKey:           getEnv("SUGGESTION_AI_API_KEY", ""),
+		SuggestionAIFallbackAPIKey:   getEnv("SUGGESTION_AI_FALLBACK_API_KEY", ""),
+		SuggestionAIBaseURL:          getEnv("SUGGESTION_AI_BASE_URL", ""),
+		SuggestionAIModel:            getEnv("SUGGESTION_AI_MODEL", ""),
+		SuggestionAIFallbackModel:    getEnv("SUGGESTION_AI_FALLBACK_MODEL", ""),
+		SuggestionAIFallbackOnReview: getEnvBool("SUGGESTION_AI_FALLBACK_ON_NEEDS_REVIEW", false),
+		SuggestionAITimeout:          getEnvDuration("SUGGESTION_AI_TIMEOUT", 30*time.Second),
+		SuggestionAIMaxRetries:       getEnvInt("SUGGESTION_AI_MAX_RETRIES", 2),
 
 		ResendAPIKey:      getEnv("RESEND_API_KEY", ""),
 		ResendFrom:        getEnv("RESEND_FROM", "Organiq <noreply@resend.dev>"),

@@ -41,6 +41,7 @@ class _EventsPageState extends OQState<EventsPage, EventsController> {
     return AnimatedBuilder(
       animation: Listenable.merge([
         controller.loading,
+        controller.hasLoadedOnce,
         controller.calendarDays,
         controller.selectedDate,
         controller.selectedFilter,
@@ -48,10 +49,13 @@ class _EventsPageState extends OQState<EventsPage, EventsController> {
       ]),
       builder: (context, _) {
         final loading = controller.loading.value;
+        final hasLoadedOnce = controller.hasLoadedOnce.value;
         final days = controller.calendarDays.value;
         final selectedDate = controller.selectedDate.value;
         final selectedFilter = controller.selectedFilter.value;
         final items = controller.visibleItems.value;
+        final showInitialLoading = !hasLoadedOnce;
+        final showRefreshing = loading && hasLoadedOnce;
 
         return ColoredBox(
           color: AppColors.background,
@@ -74,11 +78,15 @@ class _EventsPageState extends OQState<EventsPage, EventsController> {
                 onSelect: controller.selectFilter,
               ),
               const SizedBox(height: 16),
-              if (loading)
-                const Padding(
-                  padding: EdgeInsets.only(top: 24),
-                  child: Center(child: OQLoader(label: 'Carregando agenda...')),
-                )
+              if (showRefreshing) ...[
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(999),
+                  child: const LinearProgressIndicator(minHeight: 3),
+                ),
+                const SizedBox(height: 16),
+              ],
+              if (showInitialLoading)
+                _buildLoadingSkeleton()
               else if (items.isEmpty)
                 const OQCard(
                   child: OQEmptyState(
@@ -125,6 +133,28 @@ class _EventsPageState extends OQState<EventsPage, EventsController> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildLoadingSkeleton() {
+    return Column(
+      children: List.generate(4, (index) {
+        return const Padding(
+          padding: EdgeInsets.only(bottom: 12),
+          child: OQCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                OQSkeleton(height: 16, width: 160),
+                SizedBox(height: 10),
+                OQSkeleton(height: 12, width: double.infinity),
+                SizedBox(height: 8),
+                OQSkeleton(height: 12, width: 180),
+              ],
+            ),
+          ),
+        );
+      }),
     );
   }
 

@@ -91,6 +91,8 @@ func main() {
 		ruleRepo := postgres.NewContextRuleRepository(db)
 		inboxRepo := postgres.NewInboxRepository(db)
 		suggestionRepo := postgres.NewAiSuggestionRepository(db)
+		suggestionConversationRepo := postgres.NewSuggestionConversationRepository(db)
+		suggestionMessageRepo := postgres.NewSuggestionMessageRepository(db)
 		taskRepo := postgres.NewTaskRepository(db)
 		reminderRepo := postgres.NewReminderRepository(db)
 		eventRepo := postgres.NewEventRepository(db)
@@ -142,10 +144,11 @@ func main() {
 			Users:    userRepo,
 		}
 		deviceTokenUC := &usecase.DeviceTokenUsecase{DeviceTokens: deviceTokenRepo}
+		appConfigUC := &usecase.AppConfigUsecase{Config: appConfigRepo}
 		txRunner := postgres.NewTxRunner(db)
 
 		var aiClient service.AIClient
-		if cfg.AIAPIKey != "" || cfg.AIBaseURL != "" || cfg.AIModel != "" || cfg.AIProvider != "" {
+		if cfg.AIAPIKey != "" || cfg.AIFallbackAPIKey != "" || cfg.AIBaseURL != "" || cfg.AIModel != "" || cfg.AIProvider != "" {
 			client, err := ai.NewClient(cfg)
 			if err != nil {
 				log.Error("ai_client_error", slog.String("error", err.Error()))
@@ -157,6 +160,23 @@ func main() {
 				}
 				log.Info("ai_client_ready", slog.String("provider", provider), slog.String("model", cfg.AIModel))
 			}
+		}
+		var suggestionAIClient service.AIClient
+		if cfg.SuggestionAIAPIKey != "" || cfg.SuggestionAIFallbackAPIKey != "" || cfg.SuggestionAIBaseURL != "" || cfg.SuggestionAIModel != "" || cfg.SuggestionAIProvider != "" {
+			client, err := ai.NewSuggestionClient(cfg)
+			if err != nil {
+				log.Error("suggestion_ai_client_error", slog.String("error", err.Error()))
+			} else {
+				suggestionAIClient = client
+				provider := cfg.SuggestionAIProvider
+				if provider == "" {
+					provider = ai.ProviderGroq
+				}
+				log.Info("suggestion_ai_client_ready", slog.String("provider", provider), slog.String("model", cfg.SuggestionAIModel))
+			}
+		}
+		if suggestionAIClient == nil {
+			suggestionAIClient = aiClient
 		}
 
 		inboxUC := &usecase.InboxUsecase{
@@ -180,6 +200,22 @@ func main() {
 			SchemaValidator:  service.NewAiSchemaValidator(),
 			RuleMatcher:      service.NewContextRuleMatcher(),
 			TxRunner:         txRunner,
+		}
+		suggestionUC := &usecase.SuggestionUsecase{
+			Users:           userRepo,
+			Conversations:   suggestionConversationRepo,
+			Messages:        suggestionMessageRepo,
+			Tasks:           taskRepo,
+			Reminders:       reminderRepo,
+			Events:          eventRepo,
+			Routines:        routineRepo,
+			Flags:           flagRepo,
+			Subflags:        subflagRepo,
+			TasksUsecase:    taskUC,
+			EventsUsecase:   eventUC,
+			RoutinesUsecase: routineUC,
+			PromptBuilder:   service.NewSuggestionPromptBuilder(),
+			AIClient:        suggestionAIClient,
 		}
 
 		var fcmClient *push.FCMClient
@@ -283,6 +319,8 @@ func main() {
 			Devices:       handler.NewDevicesHandler(deviceTokenUC),
 			Notifications: handler.NewNotificationsHandler(notificationUC),
 			Digest:        digestHandler,
+			Suggestions:   handler.NewSuggestionsHandler(suggestionUC),
+			AppConfig:     handler.NewAppConfigHandler(appConfigUC),
 		}
 	}
 

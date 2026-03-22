@@ -39,6 +39,7 @@ class ShoppingController implements OQController {
   final DeleteShoppingItemUsecase _deleteShoppingItemUsecase;
 
   final ValueNotifier<bool> loading = ValueNotifier(false);
+  final ValueNotifier<bool> hasLoadedOnce = ValueNotifier(false);
   final ValueNotifier<String?> error = ValueNotifier(null);
   final ValueNotifier<List<ShoppingListOutput>> shoppingLists = ValueNotifier(
     const [],
@@ -47,16 +48,19 @@ class ShoppingController implements OQController {
       ValueNotifier(const []);
   final ValueNotifier<Map<String, List<ShoppingItemOutput>>> itemsByList =
       ValueNotifier(const {});
+  final ValueNotifier<Set<String>> loadingListIds = ValueNotifier(<String>{});
 
   final Set<String> _updatingItemIds = <String>{};
 
   @override
   void dispose() {
     loading.dispose();
+    hasLoadedOnce.dispose();
     error.dispose();
     shoppingLists.dispose();
     visibleShoppingLists.dispose();
     itemsByList.dispose();
+    loadingListIds.dispose();
   }
 
   Future<void> load() async {
@@ -64,62 +68,66 @@ class ShoppingController implements OQController {
 
     loading.value = true;
     error.value = null;
+    _setLoadingListIds(const <String>{});
 
-    final listsResult = await _getShoppingListsUsecase.call(limit: 50);
+    try {
+      final listsResult = await _getShoppingListsUsecase.call(limit: 50);
 
-    List<ShoppingListOutput> loadedLists = const [];
-    final hasListFailure = listsResult.fold(
-      (failure) {
-        _setError(
-          failure,
-          fallback: 'Não foi possível carregar suas listas de compras.',
-        );
-        return true;
-      },
-      (data) {
-        loadedLists = _safeLists(data.items);
-        return false;
-      },
-    );
-
-    if (hasListFailure) {
-      loading.value = false;
-      return;
-    }
-
-    _setShoppingLists(loadedLists);
-
-    final visibleLists = visibleShoppingLists.value;
-    if (visibleLists.isEmpty) {
-      itemsByList.value = const {};
-      loading.value = false;
-      return;
-    }
-
-    final nextItemsByList = <String, List<ShoppingItemOutput>>{};
-
-    for (final list in visibleLists) {
-      final itemsResult = await _getShoppingItemsUsecase.call(
-        listId: list.id,
-        limit: 200,
-      );
-
-      itemsResult.fold(
+      List<ShoppingListOutput> loadedLists = const [];
+      final hasListFailure = listsResult.fold(
         (failure) {
           _setError(
             failure,
-            fallback: 'Não foi possível carregar todos os itens de compras.',
+            fallback: 'Não foi possível carregar suas listas de compras.',
           );
-          nextItemsByList[list.id] = const [];
+          return true;
         },
-        (output) {
-          nextItemsByList[list.id] = _safeItems(output.items);
+        (data) {
+          loadedLists = _safeLists(data.items);
+          return false;
         },
       );
-    }
 
-    itemsByList.value = nextItemsByList;
-    loading.value = false;
+      if (hasListFailure) return;
+
+      _setShoppingLists(loadedLists);
+
+      final visibleLists = visibleShoppingLists.value;
+      if (visibleLists.isEmpty) {
+        itemsByList.value = const {};
+        return;
+      }
+
+      _setLoadingListIds(visibleLists.map((list) => list.id).toSet());
+      final nextItemsByList = <String, List<ShoppingItemOutput>>{};
+
+      for (final list in visibleLists) {
+        final itemsResult = await _getShoppingItemsUsecase.call(
+          listId: list.id,
+          limit: 200,
+        );
+
+        itemsResult.fold(
+          (failure) {
+            _setError(
+              failure,
+              fallback: 'Não foi possível carregar todos os itens de compras.',
+            );
+            nextItemsByList[list.id] = const [];
+          },
+          (output) {
+            nextItemsByList[list.id] = _safeItems(output.items);
+          },
+        );
+        _setListLoading(list.id, false);
+      }
+
+      itemsByList.value = nextItemsByList;
+    } finally {
+      _setLoadingListIds(const <String>{});
+      loading.value = false;
+      hasLoadedOnce.value = true;
+    }
   }
 
   Future<bool> toggleItemAt(String listId, int index, bool checked) async {
@@ -350,6 +358,7 @@ class ShoppingController implements OQController {
   }
 
   Future<void> _refreshItemsForList(String listId) async {
+    _setListLoading(listId, true);
     final result = await _getShoppingItemsUsecase.call(
       listId: listId,
       limit: 200,
@@ -362,6 +371,11 @@ class ShoppingController implements OQController {
       nextMap[listId] = _safeItems(output.items);
       itemsByList.value = nextMap;
     });
+    _setListLoading(listId, false);
+  }
+
+  bool isLoadingItemsForList(String listId) {
+    return loadingListIds.value.contains(listId);
   }
 
   void _setShoppingLists(List<ShoppingListOutput> lists) {
@@ -377,6 +391,20 @@ class ShoppingController implements OQController {
 
   List<ShoppingItemOutput> _safeItems(List<ShoppingItemOutput> items) {
     return items.where((item) => item.id.isNotEmpty).toList(growable: false);
+  }
+
+  void _setLoadingListIds(Set<String> listIds) {
+    loadingListIds.value = Set<String>.from(listIds);
+  }
+
+  void _setListLoading(String listId, bool isLoading) {
+    final next = Set<String>.from(loadingListIds.value);
+    if (isLoading) {
+      next.add(listId);
+    } else {
+      next.remove(listId);
+    }
+    loadingListIds.value = next;
   }
 
   void _setError(Failure failure, {required String fallback}) {

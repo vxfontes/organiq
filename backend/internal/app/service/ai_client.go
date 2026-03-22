@@ -38,6 +38,7 @@ type AIClientConfig struct {
 	Provider              string
 	BaseURL               string
 	APIKey                string
+	FallbackAPIKey        string
 	Model                 string
 	FallbackModel         string
 	FallbackOnNeedsReview bool
@@ -48,7 +49,7 @@ type AIClientConfig struct {
 type HTTPAIClient struct {
 	provider              string
 	baseURL               string
-	apiKey                string
+	apiKeys               []string
 	model                 string
 	fallbackModel         string
 	fallbackOnNeedsReview bool
@@ -60,7 +61,8 @@ func NewHTTPAIClient(cfg AIClientConfig) (*HTTPAIClient, error) {
 	if cfg.BaseURL == "" {
 		return nil, ErrAIProviderNotConfigured
 	}
-	if cfg.APIKey == "" {
+	apiKeys := uniqueNonEmptyStrings(cfg.APIKey, cfg.FallbackAPIKey)
+	if len(apiKeys) == 0 {
 		return nil, ErrAIProviderNotConfigured
 	}
 	if cfg.Model == "" {
@@ -77,7 +79,7 @@ func NewHTTPAIClient(cfg AIClientConfig) (*HTTPAIClient, error) {
 	return &HTTPAIClient{
 		provider:              cfg.Provider,
 		baseURL:               cfg.BaseURL,
-		apiKey:                cfg.APIKey,
+		apiKeys:               apiKeys,
 		model:                 cfg.Model,
 		fallbackModel:         strings.TrimSpace(cfg.FallbackModel),
 		fallbackOnNeedsReview: cfg.FallbackOnNeedsReview,
@@ -107,6 +109,26 @@ func (c *HTTPAIClient) FallbackOnNeedsReview() bool {
 }
 
 func (c *HTTPAIClient) complete(ctx context.Context, prompt, model string) (AICompletion, error) {
+	var lastErr error
+	for _, apiKey := range c.apiKeys {
+		completion, err := c.completeWithAPIKey(ctx, prompt, model, apiKey)
+		if err == nil {
+			return completion, nil
+		}
+		lastErr = err
+		// If caller context is done, do not keep trying secondary keys.
+		if ctx.Err() != nil {
+			return AICompletion{}, err
+		}
+	}
+
+	if lastErr == nil {
+		lastErr = ErrAIInvalidResponse
+	}
+	return AICompletion{}, lastErr
+}
+
+func (c *HTTPAIClient) completeWithAPIKey(ctx context.Context, prompt, model, apiKey string) (AICompletion, error) {
 	payload := chatCompletionRequest{
 		Model: model,
 		Messages: []chatMessage{
@@ -132,7 +154,7 @@ func (c *HTTPAIClient) complete(ctx context.Context, prompt, model string) (AICo
 			return AICompletion{}, err
 		}
 		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Authorization", "Bearer "+c.apiKey)
+		req.Header.Set("Authorization", "Bearer "+apiKey)
 
 		resp, err := c.client.Do(req)
 		if err != nil {
@@ -175,6 +197,26 @@ func (c *HTTPAIClient) complete(ctx context.Context, prompt, model string) (AICo
 		lastErr = ErrAIInvalidResponse
 	}
 	return AICompletion{}, lastErr
+}
+
+func uniqueNonEmptyStrings(values ...string) []string {
+	if len(values) == 0 {
+		return nil
+	}
+	seen := make(map[string]struct{}, len(values))
+	out := make([]string, 0, len(values))
+	for _, value := range values {
+		trimmed := strings.TrimSpace(value)
+		if trimmed == "" {
+			continue
+		}
+		if _, ok := seen[trimmed]; ok {
+			continue
+		}
+		seen[trimmed] = struct{}{}
+		out = append(out, trimmed)
+	}
+	return out
 }
 
 type chatCompletionRequest struct {

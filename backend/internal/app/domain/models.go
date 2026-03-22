@@ -35,6 +35,13 @@ const (
 	AiSuggestionTypeRoutine  AiSuggestionType = "routine"
 )
 
+type SuggestionMessageRole string
+
+const (
+	SuggestionMessageRoleUser      SuggestionMessageRole = "user"
+	SuggestionMessageRoleAssistant SuggestionMessageRole = "assistant"
+)
+
 type TaskStatus string
 
 const (
@@ -122,6 +129,22 @@ type AiSuggestion struct {
 	NeedsReview bool
 	PayloadJSON json.RawMessage
 	CreatedAt   time.Time
+}
+
+type SuggestionConversation struct {
+	ID        string
+	UserID    string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+type SuggestionMessage struct {
+	ID               string
+	ConversationID   string
+	Role             SuggestionMessageRole
+	Content          string
+	StructuredBlocks json.RawMessage
+	CreatedAt        time.Time
 }
 
 type Task struct {
