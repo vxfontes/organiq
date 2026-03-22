@@ -174,14 +174,43 @@ func (uc *SuggestionUsecase) AcceptBlock(ctx context.Context, userID string, inp
 
 	switch blockType {
 	case "task":
+		// If the suggestion has a concrete start time, persist it as an event.
+		// This avoids losing schedule semantics in task.due_at.
+		if input.StartsAt != nil && uc.EventsUsecase != nil {
+			endAt := input.EndsAt
+			if endAt != nil && endAt.Before(*input.StartsAt) {
+				endAt = nil
+			}
+			event, err := uc.EventsUsecase.Create(
+				ctx,
+				userID,
+				title,
+				input.StartsAt,
+				endAt,
+				nil,
+				nil,
+				flagID,
+				subflagID,
+				nil,
+			)
+			if err != nil {
+				return AcceptSuggestionBlockResult{}, err
+			}
+			return AcceptSuggestionBlockResult{
+				Type:     "event",
+				EntityID: event.ID,
+				Title:    event.Title,
+			}, nil
+		}
+
 		if uc.TasksUsecase == nil {
 			return AcceptSuggestionBlockResult{}, ErrDependencyMissing
 		}
 		var dueAt *time.Time
-		if input.EndsAt != nil {
-			dueAt = input.EndsAt
-		} else {
+		if input.StartsAt != nil {
 			dueAt = input.StartsAt
+		} else {
+			dueAt = input.EndsAt
 		}
 		task, err := uc.TasksUsecase.Create(ctx, userID, title, nil, nil, dueAt, flagID, subflagID, nil)
 		if err != nil {

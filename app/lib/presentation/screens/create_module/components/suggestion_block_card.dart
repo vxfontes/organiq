@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:organiq/modules/suggestions/data/models/suggestion_block.dart';
 import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
+import 'package:organiq/shared/utils/date_time.dart';
 
 class SuggestionBlockCard extends StatelessWidget {
   const SuggestionBlockCard({
@@ -114,8 +115,14 @@ class SuggestionBlockCard extends StatelessWidget {
   String _scheduleText(SuggestionBlock block) {
     if (block.isRoutine) {
       final weekdays = block.weekdays.map(_weekdayLabel).join(', ');
-      final start = block.startsAt != null ? _hhmm(block.startsAt!) : null;
-      final end = block.endsAt != null ? _hhmm(block.endsAt!) : null;
+      final startAt = block.startsAt == null
+          ? null
+          : DateTimeUtils.toUserTimezone(block.startsAt!);
+      final endAt = block.endsAt == null
+          ? null
+          : DateTimeUtils.toUserTimezone(block.endsAt!);
+      final start = startAt != null ? _hhmm(startAt) : null;
+      final end = endAt != null ? _hhmm(endAt) : null;
       final hourText = switch ((start, end)) {
         (String s, String e) => '$s - $e',
         (String s, null) => s,
@@ -127,8 +134,12 @@ class SuggestionBlockCard extends StatelessWidget {
       return '$weekdays • $hourText';
     }
 
-    final start = block.startsAt;
-    final end = block.endsAt;
+    final start = block.startsAt == null
+        ? null
+        : DateTimeUtils.toUserTimezone(block.startsAt!);
+    final end = block.endsAt == null
+        ? null
+        : DateTimeUtils.toUserTimezone(block.endsAt!);
     if (start == null && end == null) return '';
     if (start != null && end != null) {
       return '${_dateLabel(start)} ${_hhmm(start)} - ${_hhmm(end)}';
