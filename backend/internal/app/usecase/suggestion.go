@@ -105,6 +105,20 @@ func (uc *SuggestionUsecase) SendMessage(ctx context.Context, userID string, inp
 		return SendSuggestionMessageResult{}, err
 	}
 
+	// Load history before persisting the incoming message so it is not duplicated
+	// both in Messages[] and IncomingMessage in the prompt input.
+	recentMessages, err := uc.Messages.ListRecentByConversation(ctx, userID, conversation.ID, suggestionPromptHistoryLimit)
+	if err != nil {
+		return SendSuggestionMessageResult{}, err
+	}
+
+	promptInput, err := uc.buildPromptInput(ctx, userID, message, recentMessages)
+	if err != nil {
+		return SendSuggestionMessageResult{}, err
+	}
+
+	// Persist the user message only after building the prompt, to avoid it
+	// being loaded twice into the prompt history.
 	userMessage := domain.SuggestionMessage{
 		ConversationID: conversation.ID,
 		Role:           domain.SuggestionMessageRoleUser,
@@ -117,12 +131,7 @@ func (uc *SuggestionUsecase) SendMessage(ctx context.Context, userID string, inp
 		return SendSuggestionMessageResult{}, err
 	}
 
-	recentMessages, err := uc.Messages.ListRecentByConversation(ctx, userID, conversation.ID, suggestionPromptHistoryLimit)
-	if err != nil {
-		return SendSuggestionMessageResult{}, err
-	}
-
-	promptInput, err := uc.buildPromptInput(ctx, userID, message, recentMessages)
+	text, blocks := uc.generateAssistantReply(ctx, promptInput)
 	if err != nil {
 		return SendSuggestionMessageResult{}, err
 	}

@@ -123,5 +123,7 @@ func nullableRawJSON(raw []byte) any {
 	if len(raw) == 0 {
 		return nil
 	}
-	return raw
+	// structured_blocks is a JSONB column; passing []byte would be sent as
+	// bytea by the driver. Cast to string so Postgres can coerce text → jsonb.
+	return string(raw)
 }

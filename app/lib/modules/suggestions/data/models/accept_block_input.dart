@@ -32,16 +32,15 @@ class AcceptBlockInput {
   final String? subflagId;
 
   factory AcceptBlockInput.fromBlock(SuggestionBlock block) {
-    final normalizedStartsAt = (block.startsAt ?? block.endsAt)?.toLocal();
-    final normalizedEndsAt = block.startsAt == null ? null : block.endsAt?.toLocal();
-    final normalizedType = normalizedStartsAt != null ? 'event' : block.type;
-
+    // Preserve the semantic type and timestamps exactly as provided by the
+    // suggestion block. The backend already contains the logic to convert
+    // certain task suggestions into events when appropriate.
     return AcceptBlockInput(
-      type: normalizedType,
+      type: block.type,
       title: block.title,
       rationale: block.rationale,
-      startsAt: normalizedStartsAt,
-      endsAt: normalizedEndsAt,
+      startsAt: block.startsAt,
+      endsAt: block.endsAt,
       weekdays: block.weekdays,
       recurrenceType: block.recurrenceType,
       flagId: block.flagId,
