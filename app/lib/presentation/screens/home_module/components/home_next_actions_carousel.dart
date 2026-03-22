@@ -28,7 +28,12 @@ class _HomeNextActionsCarouselState extends State<HomeNextActionsCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    final allItems = <TimelineItem>[...widget.nextItems, ...widget.pastItems];
+    final nextItems = _dedupe(widget.nextItems);
+    final nextKeys = nextItems.map((item) => item.stableKey).toSet();
+    final pastItems = _dedupe(
+      widget.pastItems.where((item) => !nextKeys.contains(item.stableKey)),
+    );
+    final allItems = <TimelineItem>[...nextItems, ...pastItems];
 
     if (allItems.isEmpty) {
       return const SizedBox.shrink();
@@ -60,7 +65,7 @@ class _HomeNextActionsCarouselState extends State<HomeNextActionsCarousel> {
               separatorBuilder: (_, __) => const SizedBox(width: 10),
               itemBuilder: (_, index) {
                 final item = allItems[index];
-                final isPast = index >= widget.nextItems.length;
+                final isPast = index >= nextItems.length;
                 final isCompleting = _completingIds.contains(item.stableKey);
 
                 return AnimatedSize(
@@ -88,6 +93,17 @@ class _HomeNextActionsCarouselState extends State<HomeNextActionsCarousel> {
         ],
       );
     }
+  }
+
+  List<TimelineItem> _dedupe(Iterable<TimelineItem> items) {
+    final seen = <String>{};
+    final out = <TimelineItem>[];
+    for (final item in items) {
+      if (seen.add(item.stableKey)) {
+        out.add(item);
+      }
+    }
+    return out;
   }
 
   Future<void> _handleComplete(TimelineItem item) async {
