@@ -5,10 +5,12 @@ class AppAIConfig {
   const AppAIConfig({
     required this.createAiEnabled,
     required this.suggestionAiEnabled,
+    required this.settingsNotificationsAdminEmails,
   });
 
   final bool createAiEnabled;
   final bool suggestionAiEnabled;
+  final List<String> settingsNotificationsAdminEmails;
 }
 
 abstract class IAppConfigService {
@@ -21,6 +23,7 @@ class AppConfigService implements IAppConfigService {
   static const AppAIConfig _defaultAIConfig = AppAIConfig(
     createAiEnabled: true,
     suggestionAiEnabled: true,
+    settingsNotificationsAdminEmails: <String>[],
   );
 
   final IHttpClient _httpClient;
@@ -37,6 +40,9 @@ class AppConfigService implements IAppConfigService {
       suggestionAiEnabled: _parseBool(
         payload['suggestionAiEnabled'],
         fallback: true,
+      ),
+      settingsNotificationsAdminEmails: _parseEmailList(
+        payload['settingsNotificationsAdminEmails'],
       ),
     );
   }
@@ -83,5 +89,22 @@ class AppConfigService implements IAppConfigService {
       default:
         return fallback;
     }
+  }
+
+  List<String> _parseEmailList(dynamic value) {
+    final rawList = switch (value) {
+      List<dynamic>() => value,
+      _ => const <dynamic>[],
+    };
+
+    final seen = <String>{};
+    final out = <String>[];
+    for (final item in rawList) {
+      final email = item.toString().trim().toLowerCase();
+      if (email.isEmpty || !email.contains('@')) continue;
+      if (!seen.add(email)) continue;
+      out.add(email);
+    }
+    return out;
   }
 }

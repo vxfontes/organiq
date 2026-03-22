@@ -719,6 +719,7 @@ type ListNotificationDeliveryAttemptsResponse struct {
 
 // App config
 type AppConfigAIResponse struct {
-	CreateAIEnabled     bool `json:"createAiEnabled"`
-	SuggestionAIEnabled bool `json:"suggestionAiEnabled"`
+	CreateAIEnabled                  bool     `json:"createAiEnabled"`
+	SuggestionAIEnabled              bool     `json:"suggestionAiEnabled"`
+	SettingsNotificationsAdminEmails []string `json:"settingsNotificationsAdminEmails"`
 }

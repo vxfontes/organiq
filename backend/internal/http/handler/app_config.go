@@ -41,7 +41,8 @@ func (h *AppConfigHandler) GetAIConfig(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, dto.AppConfigAIResponse{
-		CreateAIEnabled:     cfg.CreateEnabled,
-		SuggestionAIEnabled: cfg.SuggestionEnabled,
+		CreateAIEnabled:                  cfg.CreateEnabled,
+		SuggestionAIEnabled:              cfg.SuggestionEnabled,
+		SettingsNotificationsAdminEmails: cfg.SettingsAdminEmails,
 	})
 }
