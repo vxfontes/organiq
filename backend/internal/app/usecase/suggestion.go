@@ -132,10 +132,6 @@ func (uc *SuggestionUsecase) SendMessage(ctx context.Context, userID string, inp
 	}
 
 	text, blocks := uc.generateAssistantReply(ctx, promptInput)
-	if err != nil {
-		return SendSuggestionMessageResult{}, err
-	}
-	text, blocks := uc.generateAssistantReply(ctx, promptInput)
 
 	blocksJSON, err := marshalSuggestionBlocks(blocks)
 	if err != nil {

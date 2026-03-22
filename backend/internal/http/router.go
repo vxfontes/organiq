@@ -148,6 +148,9 @@ func NewRouter(cfg config.Config, log *slog.Logger, authHandler *handler.AuthHan
 			authGroup.GET("/suggestions/conversations", apiHandlers.Suggestions.ListConversations)
 			authGroup.GET("/suggestions/conversations/:id", apiHandlers.Suggestions.GetConversation)
 		}
+		if apiHandlers.AppConfig != nil {
+			authGroup.GET("/app-config/ai", apiHandlers.AppConfig.GetAIConfig)
+		}
 	}
 
 	return engine

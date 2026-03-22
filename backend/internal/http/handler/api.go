@@ -19,4 +19,5 @@ type APIHandlers struct {
 	Notifications *NotificationsHandler
 	Digest        *DigestHandler
 	Suggestions   *SuggestionsHandler
+	AppConfig     *AppConfigHandler
 }

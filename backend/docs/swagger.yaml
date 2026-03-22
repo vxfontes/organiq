@@ -181,6 +181,13 @@ definitions:
       type:
         type: string
     type: object
+  dto.AppConfigAIResponse:
+    properties:
+      createAiEnabled:
+        type: boolean
+      suggestionAiEnabled:
+        type: boolean
+    type: object
   dto.AuthResponse:
     properties:
       token:
@@ -1404,6 +1411,24 @@ paths:
       summary: Listar agenda consolidada
       tags:
       - Agenda
+  /v1/app-config/ai:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AppConfigAIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Obter configuração de IA do app
+      tags:
+      - AppConfig
   /v1/auth/login:
     post:
       consumes:

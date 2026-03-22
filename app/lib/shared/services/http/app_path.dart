@@ -90,5 +90,9 @@ class AppPath {
   static const String suggestionsChat = '$suggestions/chat';
   static const String suggestionsAccept = '$suggestions/accept';
   static const String suggestionsConversations = '$suggestions/conversations';
-  static String suggestionsConversationById(String id) => '$suggestionsConversations/$id';
+  static String suggestionsConversationById(String id) =>
+      '$suggestionsConversations/$id';
+
+  // App config
+  static const String appConfigAI = '/app-config/ai';
 }

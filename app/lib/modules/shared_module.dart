@@ -11,6 +11,7 @@ import 'package:organiq/modules/shopping/shopping_module.dart';
 import 'package:organiq/modules/splash/splash_module.dart';
 import 'package:organiq/modules/suggestions/suggestions_module.dart';
 import 'package:organiq/modules/tasks/tasks_module.dart';
+import 'package:organiq/shared/services/app_config/app_config_service.dart';
 import 'package:organiq/shared/services/http/dio_http_client.dart';
 import 'package:organiq/shared/services/http/http_client.dart';
 import 'package:organiq/shared/services/speech/speech_transcription_service.dart';
@@ -27,6 +28,7 @@ class SharedModule extends Module {
     i.addLazySingleton<IHttpClient>(
       () => DioHttpClient(Profile.DEV, tokenStore: i.get<AuthTokenStore>()),
     );
+    i.addLazySingleton<IAppConfigService>(AppConfigService.new);
     i.addLazySingleton<ISpeechTranscriptionService>(
       SpeechTranscriptionService.new,
     );

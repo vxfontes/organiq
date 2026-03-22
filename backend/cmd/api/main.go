@@ -144,6 +144,7 @@ func main() {
 			Users:    userRepo,
 		}
 		deviceTokenUC := &usecase.DeviceTokenUsecase{DeviceTokens: deviceTokenRepo}
+		appConfigUC := &usecase.AppConfigUsecase{Config: appConfigRepo}
 		txRunner := postgres.NewTxRunner(db)
 
 		var aiClient service.AIClient
@@ -319,6 +320,7 @@ func main() {
 			Notifications: handler.NewNotificationsHandler(notificationUC),
 			Digest:        digestHandler,
 			Suggestions:   handler.NewSuggestionsHandler(suggestionUC),
+			AppConfig:     handler.NewAppConfigHandler(appConfigUC),
 		}
 	}
 
