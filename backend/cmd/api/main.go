@@ -148,7 +148,7 @@ func main() {
 		txRunner := postgres.NewTxRunner(db)
 
 		var aiClient service.AIClient
-		if cfg.AIAPIKey != "" || cfg.AIBaseURL != "" || cfg.AIModel != "" || cfg.AIProvider != "" {
+		if cfg.AIAPIKey != "" || cfg.AIFallbackAPIKey != "" || cfg.AIBaseURL != "" || cfg.AIModel != "" || cfg.AIProvider != "" {
 			client, err := ai.NewClient(cfg)
 			if err != nil {
 				log.Error("ai_client_error", slog.String("error", err.Error()))
@@ -162,7 +162,7 @@ func main() {
 			}
 		}
 		var suggestionAIClient service.AIClient
-		if cfg.SuggestionAIAPIKey != "" || cfg.SuggestionAIBaseURL != "" || cfg.SuggestionAIModel != "" || cfg.SuggestionAIProvider != "" {
+		if cfg.SuggestionAIAPIKey != "" || cfg.SuggestionAIFallbackAPIKey != "" || cfg.SuggestionAIBaseURL != "" || cfg.SuggestionAIModel != "" || cfg.SuggestionAIProvider != "" {
 			client, err := ai.NewSuggestionClient(cfg)
 			if err != nil {
 				log.Error("suggestion_ai_client_error", slog.String("error", err.Error()))

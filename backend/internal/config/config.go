@@ -20,6 +20,7 @@ type Config struct {
 	JWTSecret                    string
 	AIProvider                   string
 	AIAPIKey                     string
+	AIFallbackAPIKey             string
 	AIBaseURL                    string
 	AIModel                      string
 	AIFallbackModel              string
@@ -28,6 +29,7 @@ type Config struct {
 	AIMaxRetries                 int
 	SuggestionAIProvider         string
 	SuggestionAIAPIKey           string
+	SuggestionAIFallbackAPIKey   string
 	SuggestionAIBaseURL          string
 	SuggestionAIModel            string
 	SuggestionAIFallbackModel    string
@@ -56,6 +58,7 @@ func Load() (Config, error) {
 		JWTSecret:                    getEnv("JWT_SECRET", ""),
 		AIProvider:                   getEnv("AI_PROVIDER", ""),
 		AIAPIKey:                     getEnv("AI_API_KEY", ""),
+		AIFallbackAPIKey:             getEnv("AI_FALLBACK_API_KEY", ""),
 		AIBaseURL:                    getEnv("AI_BASE_URL", ""),
 		AIModel:                      getEnv("AI_MODEL", ""),
 		AIFallbackModel:              getEnv("AI_FALLBACK_MODEL", ""),
@@ -64,6 +67,7 @@ func Load() (Config, error) {
 		AIMaxRetries:                 getEnvInt("AI_MAX_RETRIES", 2),
 		SuggestionAIProvider:         getEnv("SUGGESTION_AI_PROVIDER", ""),
 		SuggestionAIAPIKey:           getEnv("SUGGESTION_AI_API_KEY", ""),
+		SuggestionAIFallbackAPIKey:   getEnv("SUGGESTION_AI_FALLBACK_API_KEY", ""),
 		SuggestionAIBaseURL:          getEnv("SUGGESTION_AI_BASE_URL", ""),
 		SuggestionAIModel:            getEnv("SUGGESTION_AI_MODEL", ""),
 		SuggestionAIFallbackModel:    getEnv("SUGGESTION_AI_FALLBACK_MODEL", ""),
