@@ -45,6 +45,7 @@ class _SchedulePageState extends OQState<SchedulePage, ScheduleController> {
     return AnimatedBuilder(
       animation: Listenable.merge([
         controller.loading,
+        controller.hasLoadedOnce,
         controller.viewMode,
         controller.routinesByPeriod,
         controller.selectedWeekday,
@@ -288,7 +289,7 @@ class _SchedulePageState extends OQState<SchedulePage, ScheduleController> {
       confirmDismiss: (direction) async {
         if (direction == DismissDirection.startToEnd) {
           final success = await controller.skipToday(routine);
-          if (success) {
+          if (success && mounted) {
             OQSnackBar.success(
               context,
               'Rotina "${routine.title}" pulada hoje.',

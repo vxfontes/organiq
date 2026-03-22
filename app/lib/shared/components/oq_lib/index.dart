@@ -23,6 +23,7 @@ export 'oq_reminder_row.dart';
 export 'oq_scaffold.dart';
 export 'oq_snackbar.dart';
 export 'oq_shopping_banner.dart';
+export 'oq_skeleton.dart';
 export 'oq_stat_card.dart';
 export 'oq_tag_chip.dart';
 export 'oq_text.dart';

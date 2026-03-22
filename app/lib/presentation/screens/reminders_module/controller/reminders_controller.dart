@@ -45,6 +45,7 @@ class RemindersController implements OQController {
   final CreateReminderUsecase _createReminderUsecase;
 
   final ValueNotifier<bool> loading = ValueNotifier(false);
+  final ValueNotifier<bool> hasLoadedOnce = ValueNotifier(false);
   final ValueNotifier<String?> error = ValueNotifier(null);
   final ValueNotifier<List<TaskOutput>> tasks = ValueNotifier([]);
   final ValueNotifier<List<TaskOutput>> visibleTasks = ValueNotifier([]);
@@ -62,6 +63,7 @@ class RemindersController implements OQController {
     }
     _hideDoneTaskTimers.clear();
     loading.dispose();
+    hasLoadedOnce.dispose();
     error.dispose();
     tasks.dispose();
     visibleTasks.dispose();
@@ -74,30 +76,35 @@ class RemindersController implements OQController {
     if (loading.value) return;
     loading.value = true;
     error.value = null;
-    await _applyWidgetCompletedTasks();
+    try {
+      await _applyWidgetCompletedTasks();
 
-    final taskResult = await _getTasksUsecase.call(limit: 50);
-    taskResult.fold(
-      (failure) =>
-          _setError(failure, fallback: 'Não foi possível carregar tarefas.'),
-      (data) => _setTasks(_safeTaskItems(data)),
-    );
+      final taskResult = await _getTasksUsecase.call(limit: 50);
+      taskResult.fold(
+        (failure) =>
+            _setError(failure, fallback: 'Não foi possível carregar tarefas.'),
+        (data) => _setTasks(_safeTaskItems(data)),
+      );
 
-    final reminderResult = await _getRemindersUsecase.call(limit: 50);
-    reminderResult.fold(
-      (failure) =>
-          _setError(failure, fallback: 'Não foi possível carregar lembretes.'),
-      (data) => reminders.value = _safeReminderItems(data),
-    );
+      final reminderResult = await _getRemindersUsecase.call(limit: 50);
+      reminderResult.fold(
+        (failure) => _setError(
+          failure,
+          fallback: 'Não foi possível carregar lembretes.',
+        ),
+        (data) => reminders.value = _safeReminderItems(data),
+      );
 
-    final flagsResult = await _getFlagsUsecase.call(limit: 100);
-    flagsResult.fold(
-      (failure) =>
-          _setError(failure, fallback: 'Não foi possível carregar flags.'),
-      (data) => flags.value = _safeFlagItems(data.items),
-    );
-
-    loading.value = false;
+      final flagsResult = await _getFlagsUsecase.call(limit: 100);
+      flagsResult.fold(
+        (failure) =>
+            _setError(failure, fallback: 'Não foi possível carregar flags.'),
+        (data) => flags.value = _safeFlagItems(data.items),
+      );
+    } finally {
+      loading.value = false;
+      hasLoadedOnce.value = true;
+    }
   }
 
   Future<void> loadSubflags(String flagId) async {
