@@ -716,3 +716,9 @@ type ListNotificationDeliveryAttemptsResponse struct {
 	Items      []NotificationDeliveryAttemptResponse `json:"items"`
 	NextCursor *string                               `json:"nextCursor,omitempty"`
 }
+
+// App config
+type AppConfigAIResponse struct {
+	CreateAIEnabled     bool `json:"createAiEnabled"`
+	SuggestionAIEnabled bool `json:"suggestionAiEnabled"`
+}

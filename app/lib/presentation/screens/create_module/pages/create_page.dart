@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:organiq/modules/inbox/data/models/create_suggestion_item.dart';
+import 'package:organiq/presentation/screens/create_module/components/create_ai_maintenance_view.dart';
 import 'package:organiq/presentation/screens/create_module/components/create_mode_selector.dart';
 import 'package:organiq/presentation/screens/create_module/components/create_done_phase_view.dart';
 import 'package:organiq/presentation/screens/create_module/components/create_edit_suggestion_sheet.dart';
@@ -31,6 +32,7 @@ class _CreatePageState extends OQState<CreatePage, CreateController> {
     controller.error.addListener(_onErrorChanged);
     _suggestionController.error.addListener(_onSuggestionErrorChanged);
     controller.inputController.addListener(_onInputChanged);
+    controller.loadAIConfig();
   }
 
   @override
@@ -93,6 +95,8 @@ class _CreatePageState extends OQState<CreatePage, CreateController> {
         controller.processingLines,
         controller.suggestions,
         controller.batchResult,
+        controller.createAiEnabled,
+        controller.suggestionAiEnabled,
         _suggestionController.loading,
         _suggestionController.messages,
         _suggestionController.acceptedBlockIds,
@@ -100,6 +104,30 @@ class _CreatePageState extends OQState<CreatePage, CreateController> {
       ]),
       builder: (context, _) {
         final createMode = controller.createMode.value;
+        final createAiEnabled = controller.createAiEnabled.value;
+        final suggestionAiEnabled = controller.suggestionAiEnabled.value;
+        final selectedModeDisabled =
+            (createMode == 0 && !createAiEnabled) ||
+            (createMode == 1 && !suggestionAiEnabled);
+        final selectorEnabled =
+            !controller.loading.value &&
+            !controller.listening.value &&
+            !controller.voiceProcessing.value &&
+            !_suggestionController.loading.value;
+
+        if (selectedModeDisabled) {
+          return ColoredBox(
+            color: AppColors.background,
+            child: CreateAIMaintenanceView(
+              mode: createMode,
+              onModeChanged: controller.selectCreateMode,
+              createAiEnabled: createAiEnabled,
+              suggestionAiEnabled: suggestionAiEnabled,
+              selectorEnabled: selectorEnabled,
+            ),
+          );
+        }
+
         if (createMode == 1) {
           return ColoredBox(
             color: AppColors.background,
@@ -122,10 +150,7 @@ class _CreatePageState extends OQState<CreatePage, CreateController> {
         final selector = CreateModeSelector(
           mode: createMode,
           onModeChanged: controller.selectCreateMode,
-          enabled:
-              !controller.loading.value &&
-              !controller.listening.value &&
-              !controller.voiceProcessing.value,
+          enabled: selectorEnabled,
         );
 
         return ColoredBox(

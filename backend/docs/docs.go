@@ -97,6 +97,36 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/app-config/ai": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AppConfig"
+                ],
+                "summary": "Obter configuração de IA do app",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.AppConfigAIResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/auth/login": {
             "post": {
                 "consumes": [
@@ -3836,6 +3866,17 @@ const docTemplate = `{
                 },
                 "type": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.AppConfigAIResponse": {
+            "type": "object",
+            "properties": {
+                "createAiEnabled": {
+                    "type": "boolean"
+                },
+                "suggestionAiEnabled": {
+                    "type": "boolean"
                 }
             }
         },

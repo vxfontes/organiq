@@ -320,8 +320,7 @@ class _OQChatInputAreaState extends State<_OQChatInputArea>
                         valueListenable: widget.controller,
                         builder: (context, value, _) {
                           final canSend =
-                              !widget.loading &&
-                              value.text.trim().isNotEmpty;
+                              !widget.loading && value.text.trim().isNotEmpty;
                           return AnimatedContainer(
                             duration: const Duration(milliseconds: 200),
                             width: 40,
@@ -335,9 +334,7 @@ class _OQChatInputAreaState extends State<_OQChatInputArea>
                             child: Material(
                               color: Colors.transparent,
                               child: InkWell(
-                                onTap: canSend
-                                    ? widget.onSendMessage
-                                    : null,
+                                onTap: canSend ? widget.onSendMessage : null,
                                 borderRadius: BorderRadius.circular(12),
                                 child: Center(
                                   child: widget.loading
@@ -345,22 +342,22 @@ class _OQChatInputAreaState extends State<_OQChatInputArea>
                                           width: 16,
                                           height: 16,
                                           child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                                color: AppColors.surface,
-                                              ),
-                                            )
-                                          : const Icon(
-                                              Icons.send_rounded,
-                                              color: AppColors.surface,
-                                              size: 18,
-                                            ),
-                                    ),
-                                  ),
+                                            strokeWidth: 2,
+                                            color: AppColors.surface,
+                                          ),
+                                        )
+                                      : const Icon(
+                                          Icons.send_rounded,
+                                          color: AppColors.surface,
+                                          size: 18,
+                                        ),
                                 ),
-                              );
-                            },
-                          ),
+                              ),
+                            ),
+                          );
+                        },
                       ),
+                    ),
                   ],
                 ),
               ),
