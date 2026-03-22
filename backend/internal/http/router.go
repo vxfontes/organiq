@@ -142,6 +142,12 @@ func NewRouter(cfg config.Config, log *slog.Logger, authHandler *handler.AuthHan
 		if apiHandlers.Digest != nil {
 			authGroup.POST("/digest/test", apiHandlers.Digest.SendTestEmail)
 		}
+		if apiHandlers.Suggestions != nil {
+			authGroup.POST("/suggestions/chat", apiHandlers.Suggestions.Chat)
+			authGroup.POST("/suggestions/accept", apiHandlers.Suggestions.Accept)
+			authGroup.GET("/suggestions/conversations", apiHandlers.Suggestions.ListConversations)
+			authGroup.GET("/suggestions/conversations/:id", apiHandlers.Suggestions.GetConversation)
+		}
 	}
 
 	return engine

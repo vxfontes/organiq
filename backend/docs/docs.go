@@ -3155,6 +3155,207 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/suggestions/accept": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Suggestions"
+                ],
+                "summary": "Aceitar bloco sugerido",
+                "parameters": [
+                    {
+                        "description": "Bloco",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AcceptSuggestionBlockRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.AcceptSuggestionBlockResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/suggestions/chat": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Suggestions"
+                ],
+                "summary": "Enviar mensagem de sugestao",
+                "parameters": [
+                    {
+                        "description": "Mensagem",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.SendSuggestionMessageRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.SuggestionMessageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/suggestions/conversations": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Suggestions"
+                ],
+                "summary": "Listar conversas de sugestao",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Limite",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Cursor",
+                        "name": "cursor",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ListSuggestionConversationsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/suggestions/conversations/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Suggestions"
+                ],
+                "summary": "Obter conversa de sugestao",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Conversation ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.SuggestionConversationDetailResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/tasks": {
             "get": {
                 "security": [
@@ -3530,6 +3731,55 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.AcceptSuggestionBlockRequest": {
+            "type": "object",
+            "properties": {
+                "endsAt": {
+                    "type": "string"
+                },
+                "flagId": {
+                    "type": "string"
+                },
+                "rationale": {
+                    "type": "string"
+                },
+                "recurrenceType": {
+                    "type": "string"
+                },
+                "startsAt": {
+                    "type": "string"
+                },
+                "subflagId": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "weekdays": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "dto.AcceptSuggestionBlockResponse": {
+            "type": "object",
+            "properties": {
+                "entityId": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
                     "type": "string"
                 }
             }
@@ -4357,6 +4607,20 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.ListSuggestionConversationsResponse": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.SuggestionConversationResponse"
+                    }
+                },
+                "nextCursor": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.ListTasksResponse": {
             "type": "object",
             "properties": {
@@ -4742,6 +5006,17 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.SendSuggestionMessageRequest": {
+            "type": "object",
+            "properties": {
+                "conversationId": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.ShoppingItemResponse": {
             "type": "object",
             "properties": {
@@ -4844,6 +5119,121 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.SuggestionBlock": {
+            "type": "object",
+            "properties": {
+                "endsAt": {
+                    "type": "string"
+                },
+                "flagId": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "rationale": {
+                    "type": "string"
+                },
+                "recurrenceType": {
+                    "type": "string"
+                },
+                "startsAt": {
+                    "type": "string"
+                },
+                "subflagId": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "weekdays": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "dto.SuggestionConversationDetailResponse": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "messages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.SuggestionConversationMessage"
+                    }
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.SuggestionConversationMessage": {
+            "type": "object",
+            "properties": {
+                "blocks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.SuggestionBlock"
+                    }
+                },
+                "content": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.SuggestionConversationResponse": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.SuggestionMessageResponse": {
+            "type": "object",
+            "properties": {
+                "blocks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.SuggestionBlock"
+                    }
+                },
+                "conversationId": {
+                    "type": "string"
+                },
+                "messageId": {
+                    "type": "string"
+                },
+                "text": {
                     "type": "string"
                 }
             }

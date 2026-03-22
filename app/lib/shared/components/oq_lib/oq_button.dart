@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:organiq/shared/components/oq_lib/oq_text.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
-enum OQButtonVariant { primary, secondary, ghost }
+enum OQButtonVariant { primary, secondary, ghost, ghostAi }
 
 class OQButton extends StatelessWidget {
   const OQButton({
@@ -111,6 +111,32 @@ class OQButton extends StatelessWidget {
                   label,
                   context: context,
                 ).label.color(AppColors.primary700).build(),
+        );
+      case OQButtonVariant.ghostAi:
+        return TextButton(
+          onPressed: isDisabled ? null : onPressed,
+          style: TextButton.styleFrom(
+            foregroundColor: AppColors.ai600,
+            padding: padding,
+            minimumSize: minimumSize,
+            shape: shape,
+            disabledForegroundColor: AppColors.ai600.withAlpha(
+              (0.6 * 255).round(),
+            ),
+          ),
+          child: loading
+              ? const SizedBox(
+                  height: 18,
+                  width: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.ai600,
+                  ),
+                )
+              : OQText(
+                  label,
+                  context: context,
+                ).label.color(AppColors.ai600).build(),
         );
     }
   }

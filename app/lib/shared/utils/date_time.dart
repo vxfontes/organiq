@@ -7,6 +7,10 @@ class DateTimeUtils {
     return UserTimezoneService.instance.now();
   }
 
+  static DateTime toUserTimezone(DateTime value) {
+    return UserTimezoneService.instance.toUserTimezone(value);
+  }
+
   static DateTime startOfDay(DateTime value) {
     return DateTime(value.year, value.month, value.day);
   }
@@ -25,7 +29,7 @@ class DateTimeUtils {
 
     final parsed = DateTime.tryParse(normalized);
     if (parsed == null) return null;
-    return startOfDay(parsed.toLocal());
+    return startOfDay(toUserTimezone(parsed));
   }
 
   static String dateParamYmd(DateTime now) {
@@ -37,10 +41,10 @@ class DateTimeUtils {
   }
 
   static String eventStatus(EventOutput event, {DateTime? now}) {
-    final start = event.startAt?.toLocal();
+    final start = event.startAt == null ? null : toUserTimezone(event.startAt!);
     if (start == null) return 'SEM DATA';
 
-    final base = (now ?? DateTime.now()).toLocal();
+    final base = now ?? nowInUserTimezone();
     final today = DateTime(base.year, base.month, base.day);
     final eventDay = DateTime(start.year, start.month, start.day);
     final diff = eventDay.difference(today).inDays;
@@ -52,8 +56,8 @@ class DateTimeUtils {
 
   static String relativeDateTimeLabel(DateTime? date, {DateTime? now}) {
     if (date == null) return 'Sem horario';
-    final local = date.toLocal();
-    final base = (now ?? DateTime.now()).toLocal();
+    final local = toUserTimezone(date);
+    final base = now ?? nowInUserTimezone();
     final today = DateTime(base.year, base.month, base.day);
     final target = DateTime(local.year, local.month, local.day);
     final diff = target.difference(today).inDays;
@@ -69,7 +73,7 @@ class DateTimeUtils {
   }
 
   static String eventSubtitle(EventOutput event) {
-    final start = event.startAt?.toLocal();
+    final start = event.startAt == null ? null : toUserTimezone(event.startAt!);
     if (start == null) return 'Sem data definida';
 
     final day = start.day.toString().padLeft(2, '0');
@@ -80,7 +84,7 @@ class DateTimeUtils {
     }
 
     final startTime = formatHourMinute(start);
-    final end = event.endAt?.toLocal();
+    final end = event.endAt == null ? null : toUserTimezone(event.endAt!);
     if (end == null) return '$day/$month · $startTime';
 
     final endTime = formatHourMinute(end);

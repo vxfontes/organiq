@@ -73,6 +73,7 @@ class CreateController implements OQController {
   final DeleteRoutineUsecase _deleteRoutineUsecase;
 
   final TextEditingController inputController = TextEditingController();
+  final ValueNotifier<int> createMode = ValueNotifier(0);
   final ValueNotifier<bool> loading = ValueNotifier(false);
   final ValueNotifier<bool> listening = ValueNotifier(false);
   final ValueNotifier<bool> voiceProcessing = ValueNotifier(false);
@@ -108,6 +109,7 @@ class CreateController implements OQController {
     unawaited(_speechTranscriptionService.cancelListening());
     _recordingTimer?.cancel();
     inputController.dispose();
+    createMode.dispose();
     loading.dispose();
     listening.dispose();
     voiceProcessing.dispose();
@@ -127,6 +129,13 @@ class CreateController implements OQController {
       return;
     }
     inputController.clear();
+    error.value = null;
+  }
+
+  void selectCreateMode(int mode) {
+    if (mode != 0 && mode != 1) return;
+    if (createMode.value == mode) return;
+    createMode.value = mode;
     error.value = null;
   }
 

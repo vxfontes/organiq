@@ -18,4 +18,5 @@ type APIHandlers struct {
 	Devices       *DevicesHandler
 	Notifications *NotificationsHandler
 	Digest        *DigestHandler
+	Suggestions   *SuggestionsHandler
 }
