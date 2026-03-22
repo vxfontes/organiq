@@ -32,7 +32,7 @@ class SuggestionMessageBubble extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: isUser ? AppColors.primary100 : AppColors.surfaceSoft,
+            color: isUser ? AppColors.primary100 : AppColors.surfaceAi,
             borderRadius: BorderRadius.circular(14),
             border: isUser ? null : Border.all(color: AppColors.ai200),
           ),
@@ -43,7 +43,7 @@ class SuggestionMessageBubble extends StatelessWidget {
                 OQText(
                   message.content.trim(),
                   context: context,
-                ).label.color(AppColors.text).build(),
+                ).body.color(AppColors.text).build(),
               if (!isUser && message.blocks.isNotEmpty) ...[
                 if (message.content.trim().isNotEmpty)
                   const SizedBox(height: 10),

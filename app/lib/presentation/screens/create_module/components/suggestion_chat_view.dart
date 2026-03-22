@@ -72,7 +72,10 @@ class _SuggestionChatViewState extends State<SuggestionChatView> {
             controller: _scrollController,
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
             children: [
-              const CreatePageHeader(),
+              const CreatePageHeader(
+                subtitle:
+                    'Converse com a IA para receber sugestões com base no seu horário.',
+              ),
               const SizedBox(height: 14),
               CreateModeSelector(
                 mode: widget.mode,
@@ -105,7 +108,7 @@ class _SuggestionChatViewState extends State<SuggestionChatView> {
             ],
           ),
         ),
-        _ChatInputBar(
+        _OQChatInputArea(
           controller: widget.inputController,
           loading: widget.loading,
           onSendMessage: widget.onSendMessage,
@@ -114,6 +117,10 @@ class _SuggestionChatViewState extends State<SuggestionChatView> {
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Welcome card
+// ---------------------------------------------------------------------------
 
 class _WelcomeCard extends StatelessWidget {
   const _WelcomeCard({required this.onResetConversation});
@@ -125,7 +132,7 @@ class _WelcomeCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.surfaceSoft,
+        color: AppColors.surfaceAi,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.ai200),
       ),
@@ -140,7 +147,7 @@ class _WelcomeCard extends StatelessWidget {
           OQText(
             'Me conte sobre horários livres, metas ou prioridades.',
             context: context,
-          ).label.color(AppColors.textMuted).build(),
+          ).body.color(AppColors.textMuted).build(),
           const SizedBox(height: 8),
           OQText(
             'Exemplos:',
@@ -154,12 +161,10 @@ class _WelcomeCard extends StatelessWidget {
             context: context,
           ).caption.color(AppColors.textMuted).build(),
           const SizedBox(height: 10),
-          TextButton(
+          OQButton(
+            label: 'Limpar conversa',
+            variant: OQButtonVariant.ghostAi,
             onPressed: onResetConversation,
-            child: OQText(
-              'Limpar conversa',
-              context: context,
-            ).caption.color(AppColors.ai600).build(),
           ),
         ],
       ),
@@ -167,8 +172,12 @@ class _WelcomeCard extends StatelessWidget {
   }
 }
 
-class _ChatInputBar extends StatelessWidget {
-  const _ChatInputBar({
+// ---------------------------------------------------------------------------
+// Chat input — mesmo DNA visual do OQAIInputArea, adaptado para chat
+// ---------------------------------------------------------------------------
+
+class _OQChatInputArea extends StatefulWidget {
+  const _OQChatInputArea({
     required this.controller,
     required this.loading,
     required this.onSendMessage,
@@ -179,80 +188,184 @@ class _ChatInputBar extends StatelessWidget {
   final Future<bool> Function() onSendMessage;
 
   @override
+  State<_OQChatInputArea> createState() => _OQChatInputAreaState();
+}
+
+class _OQChatInputAreaState extends State<_OQChatInputArea>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulseController = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1500),
+  );
+  late final Animation<double> _pulseAnimation = Tween<double>(
+    begin: 0.0,
+    end: 1.0,
+  ).animate(CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut));
+
+  bool _hasText = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addListener(_onTextChanged);
+    _hasText = widget.controller.text.trim().isNotEmpty;
+  }
+
+  void _onTextChanged() {
+    final hasText = widget.controller.text.trim().isNotEmpty;
+    if (hasText != _hasText) {
+      setState(() => _hasText = hasText);
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _OQChatInputArea oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.loading && !oldWidget.loading) {
+      _pulseController.repeat(reverse: true);
+    } else if (!widget.loading && oldWidget.loading) {
+      _pulseController.stop();
+      _pulseController.reset();
+    }
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    widget.controller.removeListener(_onTextChanged);
+    super.dispose();
+  }
+
+  Color get _borderColor {
+    if (widget.loading || _hasText) return AppColors.ai600;
+    return AppColors.ai200;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SafeArea(
       top: false,
-      child: Container(
+      child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          border: Border(top: BorderSide(color: AppColors.border)),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: controller,
-                minLines: 1,
-                maxLines: 4,
-                textCapitalization: TextCapitalization.sentences,
-                decoration: InputDecoration(
-                  hintText: 'Escreva sua mensagem...',
-                  filled: true,
-                  fillColor: AppColors.surfaceSoft,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 10,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.border),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.border),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.ai300),
+        child: AnimatedBuilder(
+          animation: _pulseAnimation,
+          builder: (context, _) {
+            final glowOpacity = widget.loading
+                ? 0.25 + (_pulseAnimation.value * 0.15)
+                : 0.0;
+
+            return Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: widget.loading
+                    ? [
+                        BoxShadow(
+                          color: AppColors.ai600.withAlpha(
+                            (glowOpacity * 255).round(),
+                          ),
+                          blurRadius: 14,
+                          spreadRadius: 2,
+                        ),
+                      ]
+                    : null,
+              ),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: _borderColor,
+                    width: widget.loading ? 1.5 : 1,
                   ),
                 ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            const IconButton(
-              tooltip: 'Microfone (em breve)',
-              onPressed: null,
-              icon: Icon(Icons.mic_rounded, color: AppColors.textMuted),
-            ),
-            const SizedBox(width: 4),
-            ValueListenableBuilder<TextEditingValue>(
-              valueListenable: controller,
-              builder: (context, value, _) {
-                final canSend = !loading && value.text.trim().isNotEmpty;
-                return IconButton.filled(
-                  onPressed: canSend ? onSendMessage : null,
-                  style: IconButton.styleFrom(
-                    backgroundColor: AppColors.ai600,
-                    disabledBackgroundColor: AppColors.ai200,
-                  ),
-                  icon: loading
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppColors.surface,
-                          ),
-                        )
-                      : const Icon(
-                          Icons.send_rounded,
-                          color: AppColors.surface,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: widget.controller,
+                        enabled: !widget.loading,
+                        minLines: 1,
+                        maxLines: 4,
+                        textCapitalization: TextCapitalization.sentences,
+                        onTapOutside: (_) =>
+                            FocusManager.instance.primaryFocus?.unfocus(),
+                        keyboardType: TextInputType.multiline,
+                        style: const TextStyle(
+                          color: AppColors.text,
+                          fontSize: 15,
+                          height: 1.55,
                         ),
-                );
-              },
-            ),
-          ],
+                        decoration: const InputDecoration(
+                          hintText: 'Escreva sua mensagem...',
+                          hintStyle: TextStyle(
+                            color: AppColors.textMuted,
+                            fontSize: 14,
+                            height: 1.55,
+                          ),
+                          filled: true,
+                          fillColor: AppColors.background,
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          disabledBorder: InputBorder.none,
+                          contentPadding: EdgeInsets.fromLTRB(16, 12, 8, 12),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 8, 10, 10),
+                      child: ValueListenableBuilder<TextEditingValue>(
+                        valueListenable: widget.controller,
+                        builder: (context, value, _) {
+                          final canSend =
+                              !widget.loading &&
+                              value.text.trim().isNotEmpty;
+                          return AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: canSend
+                                  ? AppColors.ai600
+                                  : AppColors.ai200,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: canSend
+                                    ? widget.onSendMessage
+                                    : null,
+                                borderRadius: BorderRadius.circular(12),
+                                child: Center(
+                                  child: widget.loading
+                                      ? const SizedBox(
+                                          width: 16,
+                                          height: 16,
+                                          child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                color: AppColors.surface,
+                                              ),
+                                            )
+                                          : const Icon(
+                                              Icons.send_rounded,
+                                              color: AppColors.surface,
+                                              size: 18,
+                                            ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                      ),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ),
     );

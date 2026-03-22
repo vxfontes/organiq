@@ -21,7 +21,9 @@ class SuggestionBlockCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final icon = _iconForType(block.type);
+    final iconColor = _iconColorForType(block.type);
     final schedule = _scheduleText(block);
+    final actionColor = accepted ? AppColors.success600 : AppColors.ai600;
 
     return Container(
       width: double.infinity,
@@ -38,7 +40,7 @@ class SuggestionBlockCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text(icon, style: const TextStyle(fontSize: 16)),
+              Icon(icon, size: 16, color: iconColor),
               const SizedBox(width: 8),
               Expanded(
                 child: OQText(
@@ -69,28 +71,33 @@ class SuggestionBlockCard extends StatelessWidget {
             child: OutlinedButton(
               onPressed: accepted || loading ? null : onAccept,
               style: OutlinedButton.styleFrom(
-                side: BorderSide(
-                  color: accepted ? AppColors.success600 : AppColors.ai600,
+                side: BorderSide(color: actionColor),
+                foregroundColor: actionColor,
+                backgroundColor: actionColor.withAlpha((0.08 * 255).round()),
+                minimumSize: const Size.fromHeight(48),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
                 ),
-                foregroundColor: accepted
-                    ? AppColors.success600
-                    : AppColors.ai600,
-                minimumSize: const Size.fromHeight(40),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                disabledForegroundColor: actionColor.withAlpha(
+                  (0.6 * 255).round(),
                 ),
               ),
               child: loading
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                  ? SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.ai600,
+                      ),
                     )
-                  : OQText(accepted ? 'Criado ✓' : '✚ Criar', context: context)
+                  : OQText(accepted ? 'Criado ✓' : 'Criar', context: context)
                         .label
-                        .color(
-                          accepted ? AppColors.success600 : AppColors.ai600,
-                        )
+                        .color(actionColor)
                         .build(),
             ),
           ),
@@ -99,17 +106,22 @@ class SuggestionBlockCard extends StatelessWidget {
     );
   }
 
-  String _iconForType(String type) {
-    switch (type.toLowerCase()) {
-      case 'task':
-        return '📋';
-      case 'event':
-        return '📅';
-      case 'routine':
-        return '🔄';
-      default:
-        return '✨';
-    }
+  IconData _iconForType(String type) {
+    return switch (type.toLowerCase()) {
+      'task' => Icons.check_circle_outline_rounded,
+      'event' => Icons.calendar_today_rounded,
+      'routine' => Icons.repeat_rounded,
+      _ => Icons.auto_awesome_rounded,
+    };
+  }
+
+  Color _iconColorForType(String type) {
+    return switch (type.toLowerCase()) {
+      'task' => AppColors.primary600,
+      'event' => AppColors.ai600,
+      'routine' => AppColors.success600,
+      _ => AppColors.ai600,
+    };
   }
 
   String _scheduleText(SuggestionBlock block) {
