@@ -38,18 +38,20 @@ struct NextActionsWidgetView: View {
   @Environment(\.widgetFamily) var family
   @Environment(\.self) private var env
 
+  private let hardMaxItems = 6
   private var isLarge: Bool { family == .systemLarge }
-  private var maxItems: Int {
+  private var familyMaxItems: Int {
     switch family {
     case .systemLarge: return 6
     case .systemMedium: return 2
     default: return 2
     }
   }
+  private var visibleLimit: Int { min(familyMaxItems, hardMaxItems) }
   private var rowSpacing: CGFloat { isLarge ? 5 : 4 }
   private var accentRailHeight: CGFloat { isLarge ? 26 : 22 }
-  private var displayedItems: ArraySlice<NextActionData> { orderedItems.prefix(maxItems) }
-  private var hiddenCount: Int { max(orderedItems.count - maxItems, 0) }
+  private var displayedItems: ArraySlice<NextActionData> { orderedItems.prefix(visibleLimit) }
+  private var hiddenCount: Int { max(orderedItems.count - displayedItems.count, 0) }
   private var widgetBackgroundColor: Color { isAccentedRendering ? .black : .organiqBackground }
   private var cardBackgroundColor: Color { isAccentedRendering ? Color.white.opacity(0.12) : .organiqSurface }
   private var doneCardBackgroundColor: Color { isAccentedRendering ? Color.white.opacity(0.08) : Color.organiqSurface.opacity(0.6) }
@@ -150,7 +152,7 @@ struct NextActionsWidgetView: View {
       }
       Spacer()
       if hiddenCount > 0 {
-        Text("+\(hiddenCount) depois")
+        Text(remainingItemsLabel)
           .font(.system(size: 9, weight: .medium))
           .foregroundColor(.organiqTextMuted)
       }
@@ -377,6 +379,11 @@ struct NextActionsWidgetView: View {
     if let d = fmt.date(from: iso) { return d }
     fmt.formatOptions = [.withInternetDateTime]
     return fmt.date(from: iso)
+  }
+
+  private var remainingItemsLabel: String {
+    if hiddenCount == 1 { return "mais 1 atividade" }
+    return "mais \(hiddenCount) atividades"
   }
 }
 
