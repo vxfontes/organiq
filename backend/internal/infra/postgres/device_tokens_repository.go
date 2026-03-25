@@ -15,7 +15,28 @@ func NewDeviceTokenRepository(db *DB) *DeviceTokenRepository {
 }
 
 func (r *DeviceTokenRepository) Upsert(ctx context.Context, dt domain.DeviceToken) error {
-	_, err := r.db.ExecContext(ctx, `
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+
+	// The same APNS/FCM token may be reissued after reinstall/login on another
+	// simulator/device record. Remove stale ownership first so the unique token
+	// index does not raise a 500 for an otherwise valid registration.
+	if _, err = tx.ExecContext(ctx, `
+		DELETE FROM organiq.device_tokens
+		WHERE push_token = $1 AND device_id <> $2
+	`, dt.PushToken, dt.DeviceID); err != nil {
+		return err
+	}
+
+	_, err = tx.ExecContext(ctx, `
 		INSERT INTO organiq.device_tokens (user_id, device_id, push_token, platform, device_name, app_version, is_active, last_seen_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, now())
 		ON CONFLICT (device_id) DO UPDATE SET
@@ -27,6 +48,11 @@ func (r *DeviceTokenRepository) Upsert(ctx context.Context, dt domain.DeviceToke
 			is_active = EXCLUDED.is_active,
 			last_seen_at = now()
 	`, dt.UserID, dt.DeviceID, dt.PushToken, dt.Platform, dt.DeviceName, dt.AppVersion, dt.IsActive)
+	if err != nil {
+		return err
+	}
+
+	err = tx.Commit()
 	return err
 }
 
