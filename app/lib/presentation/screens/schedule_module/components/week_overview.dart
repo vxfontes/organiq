@@ -6,9 +6,14 @@ import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
 class WeekOverview extends StatelessWidget {
-  const WeekOverview({super.key, required this.controller});
+  const WeekOverview({
+    super.key,
+    required this.controller,
+    required this.isRefreshing,
+  });
 
   final ScheduleController controller;
+  final bool isRefreshing;
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +28,16 @@ class WeekOverview extends StatelessWidget {
           children: [
             RoutineWeekSelector(controller: controller),
             const SizedBox(height: 20),
-            if (!hasAnyRoutine)
+            if (isRefreshing && !hasAnyRoutine)
+              const OQCard(
+                child: Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8),
+                    child: OQLoader(label: 'Carregando semana...'),
+                  ),
+                ),
+              )
+            else if (!hasAnyRoutine)
               const OQCard(
                 child: OQEmptyState(
                   title: 'Nenhuma rotina para esta semana',

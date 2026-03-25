@@ -55,6 +55,8 @@ class _SchedulePageState extends OQState<SchedulePage, ScheduleController> {
         final mode = controller.viewMode.value;
         final selectedWeekdayIndex = controller.selectedWeekdayIndex;
         final routineSections = controller.routineSections;
+        final isRefreshing =
+            controller.loading.value && controller.hasLoadedOnce.value;
 
         return Stack(
           children: [
@@ -65,14 +67,24 @@ class _SchedulePageState extends OQState<SchedulePage, ScheduleController> {
                 children: [
                   _buildHeader(context),
                   const SizedBox(height: 16),
+                  if (isRefreshing) ...[
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(999),
+                      child: const LinearProgressIndicator(minHeight: 3),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
                   if (mode == ScheduleViewMode.daily) ...[
                     RoutineWeekSelector(controller: controller),
                     const SizedBox(height: 20),
                     _buildWeekdayTabs(selectedWeekdayIndex),
                     const SizedBox(height: 20),
-                    _buildRoutineList(routineSections),
+                    _buildRoutineList(routineSections, isRefreshing),
                   ] else ...[
-                    WeekOverview(controller: controller),
+                    WeekOverview(
+                      controller: controller,
+                      isRefreshing: isRefreshing,
+                    ),
                   ],
                 ],
               ),
@@ -204,7 +216,18 @@ class _SchedulePageState extends OQState<SchedulePage, ScheduleController> {
     );
   }
 
-  Widget _buildRoutineList(List<RoutineSection> sections) {
+  Widget _buildRoutineList(List<RoutineSection> sections, bool isRefreshing) {
+    if (isRefreshing && !controller.hasRoutines) {
+      return const OQCard(
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: OQLoader(label: 'Carregando rotinas...'),
+          ),
+        ),
+      );
+    }
+
     if (!controller.hasRoutines) {
       return _buildEmptyState();
     }
