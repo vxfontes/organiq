@@ -106,10 +106,7 @@ class SignupController implements OQController {
       origin: 'signup_controller',
     );
     await _monitoringService.identifyUser(userId: session.user.id);
-    await _monitoringService.logEvent(
-      'auth_signup_success',
-      parameters: <String, Object?>{'user_id': session.user.id},
-    );
+    await _monitoringService.logEvent('auth_signup_success');
     return true;
   }
 

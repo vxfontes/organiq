@@ -9,19 +9,29 @@ import '../../../firebase_options.dart';
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   try {
     await FirebaseBootstrap.ensureInitialized();
-    await AppMonitoringService.instance.initialize();
-    await AppMonitoringService.instance.logEvent(
-      'push_background_received',
-      parameters: <String, Object?>{
-        'has_message_id': message.messageId?.isNotEmpty == true,
-      },
-    );
+    try {
+      await AppMonitoringService.instance.initialize();
+      await AppMonitoringService.instance.logEvent(
+        'push_background_received',
+        parameters: <String, Object?>{
+          'has_message_id': message.messageId?.isNotEmpty == true,
+        },
+      );
+    } catch (error) {
+      if (kDebugMode) {
+        debugPrint('Monitoring init error (background): $error');
+      }
+    }
   } catch (error, stackTrace) {
-    await AppMonitoringService.instance.recordError(
-      error,
-      stackTrace,
-      reason: 'firebase_background_message_handler_failed',
-    );
+    try {
+      await AppMonitoringService.instance.recordError(
+        error,
+        stackTrace,
+        reason: 'firebase_background_message_handler_failed',
+      );
+    } catch (_) {
+      // Best-effort monitoring only.
+    }
 
     if (kDebugMode) {
       debugPrint('FCM background handler error: $error');
@@ -45,7 +55,6 @@ class FirebaseBootstrap {
     if (!isSupportedPlatform) return;
 
     await ensureInitialized();
-    await AppMonitoringService.instance.initialize();
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
     await FirebaseMessaging.instance.setAutoInitEnabled(true);
 
@@ -56,6 +65,15 @@ class FirebaseBootstrap {
             badge: true,
             sound: true,
           );
+    }
+
+    // Monitoring must never break push bootstrap.
+    try {
+      await AppMonitoringService.instance.initialize();
+    } catch (error) {
+      if (kDebugMode) {
+        debugPrint('Monitoring init error: $error');
+      }
     }
   }
 

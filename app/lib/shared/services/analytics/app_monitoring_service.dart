@@ -60,7 +60,6 @@ class AppMonitoringService {
     if (!_initialized || _userId == null) return;
 
     await _analytics.setUserId(id: _userId);
-    await _analytics.setUserProperty(name: 'user_id', value: _userId);
     await _crashlytics.setUserIdentifier(_userId!);
     await _crashlytics.setCustomKey('user_id', _userId!);
   }
@@ -70,7 +69,6 @@ class AppMonitoringService {
     if (!_initialized) return;
 
     await _analytics.setUserId(id: null);
-    await _analytics.setUserProperty(name: 'user_id', value: null);
     await _crashlytics.setUserIdentifier('');
     await _crashlytics.setCustomKey('user_id', '');
   }
@@ -249,7 +247,6 @@ class AppMonitoringService {
       'platform': _platformLabel,
       if (_appVersion != null) 'app_version': _appVersion,
       if (_buildNumber != null) 'build_number': _buildNumber,
-      if (_userId != null) 'user_id': _userId,
     };
   }
 

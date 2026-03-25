@@ -88,10 +88,7 @@ class LoginController implements OQController {
       origin: 'login_controller',
     );
     await _monitoringService.identifyUser(userId: session.user.id);
-    await _monitoringService.logEvent(
-      'auth_login_success',
-      parameters: <String, Object?>{'user_id': session.user.id},
-    );
+    await _monitoringService.logEvent('auth_login_success');
     return true;
   }
 

@@ -3,6 +3,7 @@ package http
 import (
 	"log/slog"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -41,7 +42,12 @@ func NewRouter(cfg config.Config, log *slog.Logger, authHandler *handler.AuthHan
 		v1.POST("/auth/login", authHandler.Login)
 	}
 	if apiHandlers != nil && apiHandlers.AppErrorLogs != nil {
-		v1.POST("/app-logs/errors", middleware.OptionalAuth(cfg.JWTSecret), apiHandlers.AppErrorLogs.Create)
+		v1.POST(
+			"/app-logs/errors",
+			middleware.RateLimitByIP(120, time.Minute),
+			middleware.OptionalAuth(cfg.JWTSecret),
+			apiHandlers.AppErrorLogs.Create,
+		)
 	}
 
 	authGroup := v1.Group("", middleware.Auth(cfg.JWTSecret))
