@@ -5945,8 +5945,6 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "API do MVP Organiq.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
-	LeftDelim:        "{{",
-	RightDelim:       "}}",
 }
 
 func init() {
