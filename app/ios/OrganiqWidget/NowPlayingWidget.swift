@@ -82,22 +82,83 @@ struct NowPlayingWidgetView: View {
   @Environment(\.self) private var env
 
   private var isMedium: Bool { family == .systemMedium }
-  private var current: NowPlayingItemData? { entry.payload?.current }
-  private var next: NowPlayingItemData? {
-    if let first = entry.payload?.upcoming.first {
-      return first
-    }
-    return entry.payload?.next
-  }
+  private var current: NowPlayingItemData? { resolvedCurrent }
+  private var next: NowPlayingItemData? { resolvedUpcoming.first }
   private var upcomingMediumSlots: [NowPlayingItemData?] {
-    var upcoming = entry.payload?.upcoming ?? []
-    if upcoming.isEmpty, let next = entry.payload?.next {
-      upcoming = [next]
-    }
+    let upcoming = resolvedUpcoming
     let firstTwo = Array(upcoming.prefix(2)).map { Optional($0) }
     if firstTwo.count == 2 { return firstTwo }
     if firstTwo.count == 1 { return [firstTwo[0], nil] }
     return [nil, nil]
+  }
+
+  private var resolvedCurrent: NowPlayingItemData? {
+    let now = entry.date
+    let activeItems = orderedTimelineItems.compactMap { item -> (item: NowPlayingItemData, start: Date, end: Date)? in
+      guard let start = isoDate(item.scheduledTime) else { return nil }
+      let end = isoDate(item.endScheduledTime) ?? start.addingTimeInterval(45 * 60)
+      guard now >= start && now < end else { return nil }
+      return (item: item, start: start, end: end)
+    }
+
+    let sorted = activeItems.sorted { lhs, rhs in
+      if lhs.start != rhs.start { return lhs.start > rhs.start }
+      if lhs.end != rhs.end { return lhs.end < rhs.end }
+      return lhs.item.title.localizedCaseInsensitiveCompare(rhs.item.title) == .orderedAscending
+    }
+
+    return sorted.first?.item ?? entry.payload?.current
+  }
+
+  private var resolvedUpcoming: [NowPlayingItemData] {
+    let now = entry.date
+    let currentKey = resolvedCurrent.map(stableKey)
+    let futureItems = orderedTimelineItems.compactMap { item -> (item: NowPlayingItemData, start: Date)? in
+      guard let start = isoDate(item.scheduledTime), start > now else { return nil }
+      if let currentKey, stableKey(item) == currentKey { return nil }
+      return (item: item, start: start)
+    }
+
+    if !futureItems.isEmpty {
+      return futureItems
+        .sorted { lhs, rhs in
+          if lhs.start != rhs.start { return lhs.start < rhs.start }
+          return lhs.item.title.localizedCaseInsensitiveCompare(rhs.item.title) == .orderedAscending
+        }
+        .map { $0.item }
+    }
+
+    var fallback: [NowPlayingItemData] = []
+    if let next = entry.payload?.next {
+      fallback.append(next)
+    }
+    fallback.append(contentsOf: entry.payload?.upcoming ?? [])
+    let dedupedFallback = dedupe(items: fallback)
+
+    if let currentKey {
+      return dedupedFallback.filter { stableKey($0) != currentKey }
+    }
+    return dedupedFallback
+  }
+
+  private var orderedTimelineItems: [NowPlayingItemData] {
+    guard let payload = entry.payload else { return [] }
+    let deduped = dedupe(items: [payload.current, payload.next].compactMap { $0 } + payload.upcoming)
+    return deduped.sorted { lhs, rhs in
+      let lhsDate = isoDate(lhs.scheduledTime)
+      let rhsDate = isoDate(rhs.scheduledTime)
+      switch (lhsDate, rhsDate) {
+      case let (l?, r?):
+        if l != r { return l < r }
+      case (_?, nil):
+        return true
+      case (nil, _?):
+        return false
+      default:
+        break
+      }
+      return lhs.title.localizedCaseInsensitiveCompare(rhs.title) == .orderedAscending
+    }
   }
 
   private var isAccentedRendering: Bool {
@@ -390,6 +451,22 @@ struct NowPlayingWidgetView: View {
       return nil
     }
     return subtitle
+  }
+
+  private func dedupe(items: [NowPlayingItemData]) -> [NowPlayingItemData] {
+    var result: [NowPlayingItemData] = []
+    var seen = Set<String>()
+    for item in items {
+      let key = stableKey(item)
+      if seen.contains(key) { continue }
+      seen.insert(key)
+      result.append(item)
+    }
+    return result
+  }
+
+  private func stableKey(_ item: NowPlayingItemData) -> String {
+    "\(item.type)|\(item.id)"
   }
 
   private func isoDate(_ iso: String?) -> Date? {

@@ -361,8 +361,10 @@ class HomeController implements OQController {
         .where(shouldInclude)
         .toList(growable: false);
     items.sort((a, b) {
-      final aOverdue = a.isOverdue && !a.isCompleted;
-      final bOverdue = b.isOverdue && !b.isCompleted;
+      final aOverdue =
+          a.type != TimelineItemType.event && a.isOverdue && !a.isCompleted;
+      final bOverdue =
+          b.type != TimelineItemType.event && b.isOverdue && !b.isCompleted;
       if (aOverdue != bOverdue) return aOverdue ? -1 : 1;
 
       if (aOverdue && bOverdue) {
@@ -1153,6 +1155,9 @@ class HomeController implements OQController {
     final actionItems = widgetNextActionsTimeline
         .take(8)
         .map((item) {
+          final isWidgetOverdue = item.type == TimelineItemType.event
+              ? false
+              : item.isOverdue;
           final mapped = <String, dynamic>{
             'id': item.id,
             'title': item.title,
@@ -1162,7 +1167,7 @@ class HomeController implements OQController {
                 ?.toUtc()
                 .toIso8601String(),
             'isCompleted': item.isCompleted,
-            'isOverdue': item.isOverdue,
+            'isOverdue': isWidgetOverdue,
           };
           final subtitle = item.subtitle?.trim();
           if (subtitle != null && subtitle.isNotEmpty) {
@@ -1225,7 +1230,9 @@ class HomeController implements OQController {
     return byId.values.toList(growable: false);
   }
 
-  List<ReminderOutput> _buildWidgetRemindersForSync(HomeDashboardOutput dashboard) {
+  List<ReminderOutput> _buildWidgetRemindersForSync(
+    HomeDashboardOutput dashboard,
+  ) {
     final now = DateTimeUtils.nowInUserTimezone();
     var items = dashboard.timeline
         .where((item) => item.itemType == 'reminder' && !item.isCompleted)
@@ -1295,15 +1302,15 @@ class HomeController implements OQController {
     required DateTime now,
     required Map<String, String?> colorById,
   }) {
-    final ordered = [...items]..sort((a, b) {
-      final byTime = a.scheduledTime.compareTo(b.scheduledTime);
-      if (byTime != 0) return byTime;
-      return a.title.toLowerCase().compareTo(b.title.toLowerCase());
-    });
+    final ordered = [...items]
+      ..sort((a, b) {
+        final byTime = a.scheduledTime.compareTo(b.scheduledTime);
+        if (byTime != 0) return byTime;
+        return a.title.toLowerCase().compareTo(b.title.toLowerCase());
+      });
 
     bool isEligibleForNowPlaying(TimelineItem item) {
       if (item.isCompleted) return false;
-      if (item.type == TimelineItemType.event && item.isOverdue) return false;
       return true;
     }
 
@@ -1311,7 +1318,8 @@ class HomeController implements OQController {
     for (final item in ordered) {
       if (!isEligibleForNowPlaying(item)) continue;
       final start = item.scheduledTime;
-      final end = item.endScheduledTime ?? start.add(const Duration(minutes: 45));
+      final end =
+          item.endScheduledTime ?? start.add(const Duration(minutes: 45));
       if (!now.isBefore(start) && now.isBefore(end)) {
         current = item;
         break;
@@ -1344,7 +1352,9 @@ class HomeController implements OQController {
         'scheduledTime': item.scheduledTime.toUtc().toIso8601String(),
         'endScheduledTime': item.endScheduledTime?.toUtc().toIso8601String(),
         'isCompleted': item.isCompleted,
-        'isOverdue': item.isOverdue,
+        'isOverdue': item.type == TimelineItemType.event
+            ? false
+            : item.isOverdue,
       };
       final subtitle = item.subtitle?.trim();
       if (subtitle != null && subtitle.isNotEmpty) {
@@ -1360,7 +1370,10 @@ class HomeController implements OQController {
     return <String, dynamic>{
       'current': mapItem(current),
       'next': mapItem(next),
-      'upcoming': upcoming.map(mapItem).whereType<Map<String, dynamic>>().toList(growable: false),
+      'upcoming': upcoming
+          .map(mapItem)
+          .whereType<Map<String, dynamic>>()
+          .toList(growable: false),
     };
   }
 
