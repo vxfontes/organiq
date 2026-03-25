@@ -723,3 +723,65 @@ type AppConfigAIResponse struct {
 	SuggestionAIEnabled              bool     `json:"suggestionAiEnabled"`
 	SettingsNotificationsAdminEmails []string `json:"settingsNotificationsAdminEmails"`
 }
+
+// App logs
+
+type CreateAppScreenLogRequest struct {
+	SessionID         *string         `json:"sessionId,omitempty"`
+	ScreenName        string          `json:"screenName"`
+	RoutePath         string          `json:"routePath"`
+	PreviousRoutePath *string         `json:"previousRoutePath,omitempty"`
+	EventName         *string         `json:"eventName,omitempty"`
+	Platform          *string         `json:"platform,omitempty"`
+	AppVersion        *string         `json:"appVersion,omitempty"`
+	Metadata          json.RawMessage `json:"metadata,omitempty" swaggertype:"object"`
+	OccurredAt        *time.Time      `json:"occurredAt,omitempty"`
+}
+
+type AppScreenLogResponse struct {
+	ID                string          `json:"id"`
+	SessionID         *string         `json:"sessionId,omitempty"`
+	ScreenName        string          `json:"screenName"`
+	RoutePath         string          `json:"routePath"`
+	PreviousRoutePath *string         `json:"previousRoutePath,omitempty"`
+	EventName         string          `json:"eventName"`
+	Platform          *string         `json:"platform,omitempty"`
+	AppVersion        *string         `json:"appVersion,omitempty"`
+	Metadata          json.RawMessage `json:"metadata,omitempty" swaggertype:"object"`
+	OccurredAt        time.Time       `json:"occurredAt"`
+	CreatedAt         time.Time       `json:"createdAt"`
+}
+
+type CreateAppErrorLogRequest struct {
+	SessionID     *string         `json:"sessionId,omitempty"`
+	ScreenName    *string         `json:"screenName,omitempty"`
+	RoutePath     *string         `json:"routePath,omitempty"`
+	Source        string          `json:"source"`
+	ErrorCode     *string         `json:"errorCode,omitempty"`
+	Message       string          `json:"message"`
+	StackTrace    *string         `json:"stackTrace,omitempty"`
+	RequestID     *string         `json:"requestId,omitempty"`
+	RequestPath   *string         `json:"requestPath,omitempty"`
+	RequestMethod *string         `json:"requestMethod,omitempty"`
+	HTTPStatus    *int            `json:"httpStatus,omitempty"`
+	Metadata      json.RawMessage `json:"metadata,omitempty" swaggertype:"object"`
+	OccurredAt    *time.Time      `json:"occurredAt,omitempty"`
+}
+
+type AppErrorLogResponse struct {
+	ID            string          `json:"id"`
+	SessionID     *string         `json:"sessionId,omitempty"`
+	ScreenName    *string         `json:"screenName,omitempty"`
+	RoutePath     *string         `json:"routePath,omitempty"`
+	Source        string          `json:"source"`
+	ErrorCode     *string         `json:"errorCode,omitempty"`
+	Message       string          `json:"message"`
+	StackTrace    *string         `json:"stackTrace,omitempty"`
+	RequestID     *string         `json:"requestId,omitempty"`
+	RequestPath   *string         `json:"requestPath,omitempty"`
+	RequestMethod *string         `json:"requestMethod,omitempty"`
+	HTTPStatus    *int            `json:"httpStatus,omitempty"`
+	Metadata      json.RawMessage `json:"metadata,omitempty" swaggertype:"object"`
+	OccurredAt    time.Time       `json:"occurredAt"`
+	CreatedAt     time.Time       `json:"createdAt"`
+}

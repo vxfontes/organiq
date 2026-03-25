@@ -1,4 +1,5 @@
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:organiq/modules/app_logs/app_logs_module.dart';
 import 'package:organiq/modules/auth/auth_module.dart';
 import 'package:organiq/modules/events/events_module.dart';
 import 'package:organiq/modules/flags/flags_module.dart';
@@ -11,7 +12,11 @@ import 'package:organiq/modules/shopping/shopping_module.dart';
 import 'package:organiq/modules/splash/splash_module.dart';
 import 'package:organiq/modules/suggestions/suggestions_module.dart';
 import 'package:organiq/modules/tasks/tasks_module.dart';
+import 'package:organiq/shared/services/analytics/app_error_log_service.dart';
+import 'package:organiq/shared/services/analytics/app_monitoring_service.dart';
+import 'package:organiq/shared/services/analytics/app_session_service.dart';
 import 'package:organiq/shared/services/app_config/app_config_service.dart';
+import 'package:organiq/shared/services/analytics/screen_log_service.dart';
 import 'package:organiq/shared/services/http/dio_http_client.dart';
 import 'package:organiq/shared/services/http/http_client.dart';
 import 'package:organiq/shared/services/speech/speech_transcription_service.dart';
@@ -25,15 +30,26 @@ class SharedModule extends Module {
     i.addLazySingleton<AuthTokenStore>(
       () => AuthTokenStore(i.get<TokenStorage>()),
     );
+    i.addLazySingleton<AppMonitoringService>(
+      () => AppMonitoringService.instance,
+    );
     i.addLazySingleton<IHttpClient>(
-      () => DioHttpClient(Profile.DEV, tokenStore: i.get<AuthTokenStore>()),
+      () => DioHttpClient(
+        Profile.DEV,
+        tokenStore: i.get<AuthTokenStore>(),
+        monitoringService: i.get<AppMonitoringService>(),
+      ),
     );
     i.addLazySingleton<IAppConfigService>(AppConfigService.new);
+    i.addLazySingleton<AppSessionService>(AppSessionService.new);
+    i.addLazySingleton<AppErrorLogService>(AppErrorLogService.new);
+    i.addLazySingleton<ScreenLogService>(ScreenLogService.new);
     i.addLazySingleton<ISpeechTranscriptionService>(
       SpeechTranscriptionService.new,
     );
 
     // modules
+    AppLogsModule.binds(i);
     AuthModule.binds(i);
     EventsModule.binds(i);
     FlagsModule.binds(i);

@@ -185,8 +185,70 @@ definitions:
     properties:
       createAiEnabled:
         type: boolean
+      settingsNotificationsAdminEmails:
+        items:
+          type: string
+        type: array
       suggestionAiEnabled:
         type: boolean
+    type: object
+  dto.AppErrorLogResponse:
+    properties:
+      createdAt:
+        type: string
+      errorCode:
+        type: string
+      httpStatus:
+        type: integer
+      id:
+        type: string
+      message:
+        type: string
+      metadata:
+        type: object
+      occurredAt:
+        type: string
+      requestId:
+        type: string
+      requestMethod:
+        type: string
+      requestPath:
+        type: string
+      routePath:
+        type: string
+      screenName:
+        type: string
+      sessionId:
+        type: string
+      source:
+        type: string
+      stackTrace:
+        type: string
+    type: object
+  dto.AppScreenLogResponse:
+    properties:
+      appVersion:
+        type: string
+      createdAt:
+        type: string
+      eventName:
+        type: string
+      id:
+        type: string
+      metadata:
+        type: object
+      occurredAt:
+        type: string
+      platform:
+        type: string
+      previousRoutePath:
+        type: string
+      routePath:
+        type: string
+      screenName:
+        type: string
+      sessionId:
+        type: string
     type: object
   dto.AuthResponse:
     properties:
@@ -256,6 +318,56 @@ definitions:
       subflag:
         $ref: '#/definitions/dto.SubflagObject'
       updatedAt:
+        type: string
+    type: object
+  dto.CreateAppErrorLogRequest:
+    properties:
+      errorCode:
+        type: string
+      httpStatus:
+        type: integer
+      message:
+        type: string
+      metadata:
+        type: object
+      occurredAt:
+        type: string
+      requestId:
+        type: string
+      requestMethod:
+        type: string
+      requestPath:
+        type: string
+      routePath:
+        type: string
+      screenName:
+        type: string
+      sessionId:
+        type: string
+      source:
+        type: string
+      stackTrace:
+        type: string
+    type: object
+  dto.CreateAppScreenLogRequest:
+    properties:
+      appVersion:
+        type: string
+      eventName:
+        type: string
+      metadata:
+        type: object
+      occurredAt:
+        type: string
+      platform:
+        type: string
+      previousRoutePath:
+        type: string
+      routePath:
+        type: string
+      screenName:
+        type: string
+      sessionId:
         type: string
     type: object
   dto.CreateContextRuleRequest:
@@ -1429,6 +1541,62 @@ paths:
       summary: Obter configuração de IA do app
       tags:
       - AppConfig
+  /v1/app-logs/errors:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: App error log payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateAppErrorLogRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.AppErrorLogResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Registrar log de erro do app
+      tags:
+      - App Logs
+  /v1/app-logs/screens:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Screen log payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateAppScreenLogRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.AppScreenLogResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Registrar log de tela
+      tags:
+      - App Logs
   /v1/auth/login:
     post:
       consumes:

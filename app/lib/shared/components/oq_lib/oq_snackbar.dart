@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:organiq/shared/services/analytics/app_error_reporter.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 import 'oq_icon.dart';
 import 'oq_text.dart';
@@ -46,6 +47,16 @@ class OQSnackBar {
   }
 
   static void error(BuildContext context, String message) {
+    AppErrorReporter.report(
+      AppErrorReportPayload(
+        source: 'controller',
+        message: message,
+        metadata: const <String, dynamic>{
+          'presentation': 'snackbar',
+          'user_visible': true,
+        },
+      ),
+    );
     show(context, message: message, isError: true);
   }
 

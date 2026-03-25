@@ -6,6 +6,7 @@ var (
 	ErrMissingRequiredFields = errors.New("missing_required_fields")
 	ErrInvalidStatus         = errors.New("invalid_status")
 	ErrInvalidType           = errors.New("invalid_type")
+	ErrInvalidPlatform       = errors.New("invalid_platform")
 	ErrInvalidSource         = errors.New("invalid_source")
 	ErrInvalidPayload        = errors.New("invalid_payload")
 	ErrInvalidTimeRange      = errors.New("invalid_time_range")

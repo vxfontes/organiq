@@ -40,6 +40,9 @@ func NewRouter(cfg config.Config, log *slog.Logger, authHandler *handler.AuthHan
 		v1.POST("/auth/signup", authHandler.Signup)
 		v1.POST("/auth/login", authHandler.Login)
 	}
+	if apiHandlers != nil && apiHandlers.AppErrorLogs != nil {
+		v1.POST("/app-logs/errors", middleware.OptionalAuth(cfg.JWTSecret), apiHandlers.AppErrorLogs.Create)
+	}
 
 	authGroup := v1.Group("", middleware.Auth(cfg.JWTSecret))
 	if apiHandlers != nil {
@@ -150,6 +153,9 @@ func NewRouter(cfg config.Config, log *slog.Logger, authHandler *handler.AuthHan
 		}
 		if apiHandlers.AppConfig != nil {
 			authGroup.GET("/app-config/ai", apiHandlers.AppConfig.GetAIConfig)
+		}
+		if apiHandlers.AppScreenLogs != nil {
+			authGroup.POST("/app-logs/screens", apiHandlers.AppScreenLogs.Create)
 		}
 	}
 

@@ -95,4 +95,8 @@ class AppPath {
 
   // App config
   static const String appConfigAI = '/app-config/ai';
+
+  // App logs
+  static const String appLogsScreens = '/app-logs/screens';
+  static const String appLogsErrors = '/app-logs/errors';
 }

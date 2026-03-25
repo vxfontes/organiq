@@ -3,6 +3,7 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:organiq/presentation/routes/app_navigation.dart';
 import 'package:organiq/presentation/routes/app_routes.dart';
 import 'package:organiq/shared/components/oq_lib/index.dart';
+import 'package:organiq/shared/services/analytics/screen_log_service.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
 class RootPage extends StatefulWidget {
@@ -14,10 +15,12 @@ class RootPage extends StatefulWidget {
 
 class _RootPageState extends State<RootPage> {
   int _currentIndex = 0;
+  late final ScreenLogService _screenLogService;
 
   @override
   void initState() {
     super.initState();
+    _screenLogService = Modular.get<ScreenLogService>();
     _syncIndex();
     AppNavigation.addListener(_handleRouteChange);
     _ensureChildRoute();
@@ -60,23 +63,32 @@ class _RootPageState extends State<RootPage> {
   }
 
   void _onNavTap(int index) {
+    String targetRoute = AppRoutes.rootHome;
     switch (index) {
       case 0:
-        AppNavigation.navigate(AppRoutes.rootHome);
+        targetRoute = AppRoutes.rootHome;
         break;
       case 1:
-        AppNavigation.navigate(AppRoutes.rootSchedule);
+        targetRoute = AppRoutes.rootSchedule;
         break;
       case 2:
-        AppNavigation.navigate(AppRoutes.rootCreate);
+        targetRoute = AppRoutes.rootCreate;
         break;
       case 3:
-        AppNavigation.navigate(AppRoutes.rootShopping);
+        targetRoute = AppRoutes.rootShopping;
         break;
       case 4:
-        AppNavigation.navigate(AppRoutes.rootEvents);
+        targetRoute = AppRoutes.rootEvents;
         break;
     }
+    _screenLogService.logInteraction(
+      action: 'tap_bottom_nav',
+      targetType: 'route',
+      targetId: targetRoute,
+      origin: 'root_bottom_nav',
+      metadata: <String, dynamic>{'index': index},
+    );
+    AppNavigation.navigate(targetRoute);
   }
 
   @override
@@ -87,7 +99,15 @@ class _RootPageState extends State<RootPage> {
         padding: const EdgeInsets.only(left: 12, right: 12),
         actions: [
           IconButton(
-            onPressed: () => AppNavigation.push(AppRoutes.notificationHistory),
+            onPressed: () {
+              _screenLogService.logInteraction(
+                action: 'tap_notifications_history',
+                targetType: 'route',
+                targetId: AppRoutes.notificationHistory,
+                origin: 'root_app_bar',
+              );
+              AppNavigation.push(AppRoutes.notificationHistory);
+            },
             tooltip: 'Histórico de notificações',
             icon: const OQIcon(
               OQIcon.notificationsNoneOutlined,
@@ -97,7 +117,15 @@ class _RootPageState extends State<RootPage> {
             ),
           ),
           IconButton(
-            onPressed: () => AppNavigation.push(AppRoutes.settings),
+            onPressed: () {
+              _screenLogService.logInteraction(
+                action: 'tap_settings',
+                targetType: 'route',
+                targetId: AppRoutes.settings,
+                origin: 'root_app_bar',
+              );
+              AppNavigation.push(AppRoutes.settings);
+            },
             icon: const OQIcon(
               OQIcon.settingsOutlined,
               color: AppColors.surface,

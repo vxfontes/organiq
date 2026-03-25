@@ -189,6 +189,40 @@ type Event struct {
 	UpdatedAt         time.Time
 }
 
+type AppScreenLog struct {
+	ID                string
+	UserID            string
+	SessionID         *string
+	ScreenName        string
+	RoutePath         string
+	PreviousRoutePath *string
+	EventName         string
+	Platform          *string
+	AppVersion        *string
+	Metadata          json.RawMessage
+	OccurredAt        time.Time
+	CreatedAt         time.Time
+}
+
+type AppErrorLog struct {
+	ID            string
+	UserID        *string
+	SessionID     *string
+	ScreenName    *string
+	RoutePath     *string
+	Source        string
+	ErrorCode     *string
+	Message       string
+	StackTrace    *string
+	RequestID     *string
+	RequestPath   *string
+	RequestMethod *string
+	HTTPStatus    *int
+	Metadata      json.RawMessage
+	OccurredAt    time.Time
+	CreatedAt     time.Time
+}
+
 type ShoppingList struct {
 	ID                string
 	UserID            string

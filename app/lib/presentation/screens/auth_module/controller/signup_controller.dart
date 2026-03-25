@@ -2,14 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:organiq/modules/auth/data/models/auth_signup_input.dart';
 import 'package:organiq/modules/auth/domain/usecases/signup_usecase.dart';
 import 'package:organiq/shared/errors/failures.dart';
+import 'package:organiq/shared/services/analytics/app_monitoring_service.dart';
+import 'package:organiq/shared/services/analytics/screen_log_service.dart';
 import 'package:organiq/shared/services/timezone/user_timezone_service.dart';
 import 'package:organiq/shared/state/oq_state.dart';
 import 'package:organiq/shared/utils/validators.dart';
 
 class SignupController implements OQController {
   final SignupUsecase _signupUsecase;
+  final AppMonitoringService _monitoringService;
+  final ScreenLogService _screenLogService;
 
-  SignupController(this._signupUsecase);
+  SignupController(
+    this._signupUsecase,
+    this._monitoringService,
+    this._screenLogService,
+  );
 
   final nameController = TextEditingController();
   final emailController = TextEditingController();
@@ -33,10 +41,24 @@ class SignupController implements OQController {
       timezone: timezone,
     );
     if (validationError != null) {
+      _screenLogService.logFlowStep(
+        flowName: 'auth_signup',
+        flowStep: 'validation_failed',
+        action: 'submit_signup',
+        result: 'failure',
+        origin: 'signup_controller',
+      );
       error.value = validationError;
       return false;
     }
 
+    _screenLogService.logFlowStep(
+      flowName: 'auth_signup',
+      flowStep: 'submit_started',
+      action: 'submit_signup',
+      result: 'started',
+      origin: 'signup_controller',
+    );
     loading.value = true;
     error.value = null;
 
@@ -52,19 +74,43 @@ class SignupController implements OQController {
 
     loading.value = false;
 
-    return result.fold(
-      (failure) {
-        error.value = _failureMessage(
-          failure,
-          fallback: 'Não foi possível criar a conta agora.',
-        );
-        return false;
-      },
-      (session) {
-        UserTimezoneService.instance.setTimezone(session.user.timezone);
-        return true;
-      },
+    if (result.isLeft()) {
+      final failure = result.swap().getOrElse(() => SaveFailure());
+      _screenLogService.logFlowStep(
+        flowName: 'auth_signup',
+        flowStep: 'submit_finished',
+        action: 'submit_signup',
+        result: 'failure',
+        origin: 'signup_controller',
+      );
+      await _monitoringService.logEvent(
+        'auth_signup_failed',
+        parameters: <String, Object?>{
+          'failure_type': failure.runtimeType.toString(),
+        },
+      );
+      error.value = _failureMessage(
+        failure,
+        fallback: 'Não foi possível criar a conta agora.',
+      );
+      return false;
+    }
+
+    final session = result.getOrElse(() => throw StateError('Missing session'));
+    UserTimezoneService.instance.setTimezone(session.user.timezone);
+    _screenLogService.logFlowStep(
+      flowName: 'auth_signup',
+      flowStep: 'submit_finished',
+      action: 'submit_signup',
+      result: 'success',
+      origin: 'signup_controller',
     );
+    await _monitoringService.identifyUser(userId: session.user.id);
+    await _monitoringService.logEvent(
+      'auth_signup_success',
+      parameters: <String, Object?>{'user_id': session.user.id},
+    );
+    return true;
   }
 
   @override
