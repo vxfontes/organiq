@@ -6,6 +6,7 @@ import 'package:organiq/modules/auth/data/models/auth_user_model.dart';
 import 'package:organiq/modules/auth/domain/repositories/i_auth_repository.dart';
 import 'package:organiq/shared/errors/api_error_mapper.dart';
 import 'package:organiq/shared/errors/failures.dart';
+import 'package:organiq/shared/services/analytics/app_session_service.dart';
 import 'package:organiq/shared/services/http/app_path.dart';
 import 'package:organiq/shared/services/http/http_client.dart';
 import 'package:organiq/shared/storage/auth_token_store.dart';
@@ -13,8 +14,9 @@ import 'package:organiq/shared/storage/auth_token_store.dart';
 class AuthRepository implements IAuthRepository {
   final IHttpClient _httpClient;
   final AuthTokenStore _tokenStore;
+  final AppSessionService _sessionService;
 
-  AuthRepository(this._httpClient, this._tokenStore);
+  AuthRepository(this._httpClient, this._tokenStore, this._sessionService);
 
   @override
   Future<Either<Failure, AuthSessionOutput>> login(AuthLoginInput input) async {
@@ -31,6 +33,7 @@ class AuthRepository implements IAuthRepository {
         if (session.token.isEmpty) {
           return Left(GetFailure(message: 'Token inválido'));
         }
+        await _sessionService.refreshSession();
         await _tokenStore.saveToken(session.token);
         return Right(session);
       }
@@ -65,6 +68,7 @@ class AuthRepository implements IAuthRepository {
         if (session.token.isEmpty) {
           return Left(SaveFailure(message: 'Token inválido'));
         }
+        await _sessionService.refreshSession();
         await _tokenStore.saveToken(session.token);
         return Right(session);
       }
@@ -110,6 +114,7 @@ class AuthRepository implements IAuthRepository {
   Future<Either<Failure, void>> logout() async {
     try {
       await _tokenStore.clearToken();
+      await _sessionService.refreshSession();
       return const Right(null);
     } catch (err) {
       return Left(DeleteFailure(message: err.toString()));

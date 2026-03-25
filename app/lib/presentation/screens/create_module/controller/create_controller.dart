@@ -21,6 +21,7 @@ import 'package:organiq/modules/shopping/domain/usecases/delete_shopping_list_us
 import 'package:organiq/modules/tasks/domain/usecases/delete_task_usecase.dart';
 import 'package:organiq/shared/errors/failures.dart';
 import 'package:organiq/shared/services/app_config/app_config_service.dart';
+import 'package:organiq/shared/services/analytics/screen_log_service.dart';
 import 'package:organiq/shared/services/speech/speech_transcription_service.dart';
 import 'package:organiq/shared/state/oq_state.dart';
 
@@ -62,6 +63,7 @@ class CreateController implements OQController {
     this._deleteShoppingListUsecase,
     this._deleteRoutineUsecase,
     this._appConfigService,
+    this._screenLogService,
   );
 
   final CreateInboxItemUsecase _createInboxItemUsecase;
@@ -74,6 +76,7 @@ class CreateController implements OQController {
   final DeleteShoppingListUsecase _deleteShoppingListUsecase;
   final DeleteRoutineUsecase _deleteRoutineUsecase;
   final IAppConfigService _appConfigService;
+  final ScreenLogService _screenLogService;
 
   final TextEditingController inputController = TextEditingController();
   final ValueNotifier<int> createMode = ValueNotifier(0);
@@ -193,6 +196,13 @@ class CreateController implements OQController {
     );
     voiceAvailable.value = ready;
     if (!ready) {
+      _screenLogService.logFlowStep(
+        flowName: 'create',
+        flowStep: 'voice_start_failed',
+        action: 'start_voice_input',
+        result: 'failure',
+        origin: 'create_controller',
+      );
       error.value =
           'Não foi possível acessar o microfone. Verifique as permissões do app.';
       return;
@@ -215,10 +225,24 @@ class CreateController implements OQController {
     if (!started) {
       listening.value = false;
       _recordingTimer?.cancel();
+      _screenLogService.logFlowStep(
+        flowName: 'create',
+        flowStep: 'voice_start_failed',
+        action: 'start_voice_input',
+        result: 'failure',
+        origin: 'create_controller',
+      );
       error.value = 'Não foi possível iniciar a transcrição por voz.';
       return;
     }
 
+    _screenLogService.logFlowStep(
+      flowName: 'create',
+      flowStep: 'voice_started',
+      action: 'start_voice_input',
+      result: 'success',
+      origin: 'create_controller',
+    );
     listening.value = true;
   }
 
@@ -272,6 +296,13 @@ class CreateController implements OQController {
     error.value = message.isNotEmpty
         ? 'Transcrição de voz: $message'
         : 'Falha na transcrição por voz.';
+    _screenLogService.logFlowStep(
+      flowName: 'create',
+      flowStep: 'voice_failed',
+      action: 'process_voice_input',
+      result: 'failure',
+      origin: 'create_controller',
+    );
   }
 
   Future<void> _finalizeVoiceInput() async {
@@ -290,8 +321,23 @@ class CreateController implements OQController {
         text: nextText,
         selection: TextSelection.collapsed(offset: nextText.length),
       );
+      _screenLogService.logFlowStep(
+        flowName: 'create',
+        flowStep: 'voice_transcribed',
+        action: 'process_voice_input',
+        result: 'success',
+        origin: 'create_controller',
+        metadata: <String, dynamic>{'transcript_length': transcript.length},
+      );
     } else if (error.value == null || error.value!.trim().isEmpty) {
       error.value = 'Não foi possível transcrever o audio.';
+      _screenLogService.logFlowStep(
+        flowName: 'create',
+        flowStep: 'voice_transcribed',
+        action: 'process_voice_input',
+        result: 'failure',
+        origin: 'create_controller',
+      );
     }
 
     _clearVoiceSessionState();
@@ -335,10 +381,25 @@ class CreateController implements OQController {
     final rawText = inputController.text;
     final lines = _extractLines(rawText);
     if (lines.isEmpty) {
+      _screenLogService.logFlowStep(
+        flowName: 'create',
+        flowStep: 'process_validation_failed',
+        action: 'process_text',
+        result: 'failure',
+        origin: 'create_controller',
+      );
       error.value = 'Digite algo para processar com IA.';
       return false;
     }
 
+    _screenLogService.logFlowStep(
+      flowName: 'create',
+      flowStep: 'process_started',
+      action: 'process_text',
+      result: 'started',
+      origin: 'create_controller',
+      metadata: <String, dynamic>{'input_count': lines.length},
+    );
     _resetFlowState(keepInput: true);
     _lastTotalInputs = lines.length;
     phase.value = CreatePhase.processing;
@@ -411,6 +472,17 @@ class CreateController implements OQController {
     loading.value = false;
 
     if (reviewSuggestions.isNotEmpty) {
+      _screenLogService.logFlowStep(
+        flowName: 'create',
+        flowStep: 'process_finished',
+        action: 'process_text',
+        result: 'review',
+        origin: 'create_controller',
+        metadata: <String, dynamic>{
+          'suggestions_count': reviewSuggestions.length,
+          'failed_lines': _processingFailedLines,
+        },
+      );
       return true;
     }
 
@@ -428,15 +500,41 @@ class CreateController implements OQController {
 
     if (_processingFailedLines > 0 &&
         _baseLineResults.length == _processingFailedLines) {
+      _screenLogService.logFlowStep(
+        flowName: 'create',
+        flowStep: 'process_finished',
+        action: 'process_text',
+        result: 'failure',
+        origin: 'create_controller',
+        metadata: <String, dynamic>{'failed_lines': _processingFailedLines},
+      );
       error.value = 'Não foi possível processar os textos enviados.';
       return false;
     }
 
+    _screenLogService.logFlowStep(
+      flowName: 'create',
+      flowStep: 'process_finished',
+      action: 'process_text',
+      result: 'success',
+      origin: 'create_controller',
+      metadata: <String, dynamic>{'failed_lines': _processingFailedLines},
+    );
     return true;
   }
 
   void goToReview() {
     if (loading.value || suggestions.value.isEmpty) return;
+    _screenLogService.logFlowStep(
+      flowName: 'create',
+      flowStep: 'review_opened',
+      action: 'open_review',
+      result: 'success',
+      origin: 'create_controller',
+      metadata: <String, dynamic>{
+        'suggestions_count': suggestions.value.length,
+      },
+    );
     phase.value = CreatePhase.review;
   }
 
@@ -450,6 +548,16 @@ class CreateController implements OQController {
     phase.value = CreatePhase.confirming;
     loading.value = true;
     error.value = null;
+    _screenLogService.logFlowStep(
+      flowName: 'create',
+      flowStep: 'confirm_started',
+      action: 'confirm_all',
+      result: 'started',
+      origin: 'create_controller',
+      metadata: <String, dynamic>{
+        'active_suggestions': activeSuggestions.length,
+      },
+    );
 
     var tasks = 0;
     var reminders = 0;
@@ -520,16 +628,45 @@ class CreateController implements OQController {
     phase.value = CreatePhase.done;
 
     if (confirmFailures > 0) {
+      _screenLogService.logFlowStep(
+        flowName: 'create',
+        flowStep: 'confirm_finished',
+        action: 'confirm_all',
+        result: 'partial_failure',
+        origin: 'create_controller',
+        metadata: <String, dynamic>{
+          'confirm_failures': confirmFailures,
+          'active_suggestions': activeSuggestions.length,
+        },
+      );
       error.value = 'Algumas sugestões não puderam ser confirmadas.';
       return false;
     }
 
+    _screenLogService.logFlowStep(
+      flowName: 'create',
+      flowStep: 'confirm_finished',
+      action: 'confirm_all',
+      result: 'success',
+      origin: 'create_controller',
+      metadata: <String, dynamic>{
+        'active_suggestions': activeSuggestions.length,
+      },
+    );
     return true;
   }
 
   void editSuggestion(int index, CreateSuggestionItem edited) {
     final list = List<CreateSuggestionItem>.from(suggestions.value);
     if (index < 0 || index >= list.length) return;
+    _screenLogService.logInteraction(
+      action: 'edit_suggestion',
+      targetType: 'suggestion',
+      targetId: edited.inboxItemId,
+      origin: 'create_controller',
+      flowName: 'create',
+      flowStep: 'review_edit',
+    );
     list[index] = edited;
     suggestions.value = list;
   }
@@ -537,11 +674,28 @@ class CreateController implements OQController {
   void toggleRemoveSuggestion(int index) {
     final list = List<CreateSuggestionItem>.from(suggestions.value);
     if (index < 0 || index >= list.length) return;
-    list[index] = list[index].copyWith(removed: !list[index].removed);
+    final current = list[index];
+    final nextRemoved = !current.removed;
+    _screenLogService.logInteraction(
+      action: nextRemoved ? 'remove_suggestion' : 'restore_suggestion',
+      targetType: 'suggestion',
+      targetId: current.inboxItemId,
+      origin: 'create_controller',
+      flowName: 'create',
+      flowStep: 'review_toggle_suggestion',
+      result: nextRemoved ? 'removed' : 'restored',
+    );
+    list[index] = list[index].copyWith(removed: nextRemoved);
     suggestions.value = list;
   }
 
   void goBackToInput() {
+    _screenLogService.logInteraction(
+      action: 'back_to_input',
+      origin: 'create_controller',
+      flowName: 'create',
+      flowStep: 'back_to_input',
+    );
     phase.value = CreatePhase.input;
     processingLines.value = const <CreateProcessingLine>[];
     suggestions.value = const <CreateSuggestionItem>[];
