@@ -12,6 +12,16 @@ type DeviceTokenUsecase struct {
 }
 
 func (uc *DeviceTokenUsecase) RegisterToken(ctx context.Context, userID, deviceID, pushToken, platform, deviceName, appVersion string) error {
+	if userID == "" || deviceID == "" || pushToken == "" {
+		return ErrMissingRequiredFields
+	}
+
+	switch domain.DevicePlatform(platform) {
+	case domain.DevicePlatformIOS, domain.DevicePlatformAndroid:
+	default:
+		return ErrInvalidPlatform
+	}
+
 	dt := domain.DeviceToken{
 		UserID:     userID,
 		DeviceID:   deviceID,

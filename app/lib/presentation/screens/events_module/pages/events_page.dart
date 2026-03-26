@@ -56,6 +56,7 @@ class _EventsPageState extends OQState<EventsPage, EventsController> {
         final items = controller.visibleItems.value;
         final showInitialLoading = !hasLoadedOnce;
         final showRefreshing = loading && hasLoadedOnce;
+        final showDayLoading = showRefreshing && items.isEmpty;
 
         return ColoredBox(
           color: AppColors.background,
@@ -87,6 +88,15 @@ class _EventsPageState extends OQState<EventsPage, EventsController> {
               ],
               if (showInitialLoading)
                 _buildLoadingSkeleton()
+              else if (showDayLoading)
+                const OQCard(
+                  child: Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8),
+                      child: OQLoader(label: 'Carregando itens do dia...'),
+                    ),
+                  ),
+                )
               else if (items.isEmpty)
                 const OQCard(
                   child: OQEmptyState(

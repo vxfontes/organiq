@@ -54,6 +54,8 @@ func writeUsecaseError(c *gin.Context, err error) {
 		writeError(c, http.StatusBadRequest, "invalid_status")
 	case errors.Is(err, usecase.ErrInvalidType):
 		writeError(c, http.StatusBadRequest, "invalid_type")
+	case errors.Is(err, usecase.ErrInvalidPlatform):
+		writeError(c, http.StatusBadRequest, "invalid_platform")
 	case errors.Is(err, usecase.ErrInvalidSource):
 		writeError(c, http.StatusBadRequest, "invalid_source")
 	case errors.Is(err, usecase.ErrInvalidPayload):

@@ -12,6 +12,7 @@ import 'package:flutter/widgets.dart';
 import 'package:organiq/modules/notifications/domain/repositories/i_notifications_repository.dart';
 import 'package:organiq/presentation/routes/app_navigation.dart';
 import 'package:organiq/presentation/routes/app_routes.dart';
+import 'package:organiq/shared/services/analytics/app_monitoring_service.dart';
 import 'package:organiq/shared/services/push/firebase_bootstrap.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -67,6 +68,7 @@ class PushNotificationService {
       FlutterLocalNotificationsPlugin();
   final DeviceInfoPlugin _deviceInfo = DeviceInfoPlugin();
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+  final AppMonitoringService _monitoringService = AppMonitoringService.instance;
   final ValueNotifier<String?> _pushTokenNotifier = ValueNotifier(null);
   final ValueNotifier<bool> _pushTokenLoadingNotifier = ValueNotifier(false);
 
@@ -146,6 +148,15 @@ class PushNotificationService {
       sound: true,
     );
 
+    unawaited(
+      _monitoringService.logEvent(
+        'notification_permission_status',
+        parameters: <String, Object?>{
+          'status': settings.authorizationStatus.name,
+        },
+      ),
+    );
+
     if (kDebugMode) {
       print(
         'PushNotificationService: notification permission=${settings.authorizationStatus}',
@@ -174,7 +185,14 @@ class PushNotificationService {
           if (data is Map<String, dynamic>) {
             _navigateByData(data);
           }
-        } catch (e) {
+        } catch (e, stackTrace) {
+          unawaited(
+            _monitoringService.recordError(
+              e,
+              stackTrace,
+              reason: 'local_notification_payload_parse_failed',
+            ),
+          );
           if (kDebugMode) {
             print('PushNotificationService: payload parse error=$e');
           }
@@ -267,6 +285,13 @@ class PushNotificationService {
       }
     } catch (e) {
       _schedulePushTokenRetry();
+      unawaited(
+        _monitoringService.recordError(
+          e,
+          StackTrace.current,
+          reason: 'push_token_sync_failed',
+        ),
+      );
       if (kDebugMode) {
         print('PushNotificationService: getToken error=$e');
       }
@@ -299,6 +324,13 @@ class PushNotificationService {
         }
       } catch (e) {
         _schedulePushTokenRetry();
+        unawaited(
+          _monitoringService.recordError(
+            e,
+            StackTrace.current,
+            reason: 'push_token_force_refresh_failed',
+          ),
+        );
         if (kDebugMode) {
           print('PushNotificationService: force getToken error=$e');
         }
@@ -494,6 +526,17 @@ class PushNotificationService {
       return;
     }
 
+    unawaited(
+      _monitoringService.logEvent(
+        'push_foreground_received',
+        parameters: <String, Object?>{
+          'has_message_id': message.messageId?.isNotEmpty == true,
+          'has_click_url':
+              (message.data['click_url'] as String?)?.isNotEmpty == true,
+        },
+      ),
+    );
+
     if (Platform.isIOS) {
       return;
     }
@@ -539,6 +582,16 @@ class PushNotificationService {
   }
 
   void _handleMessageOpenedApp(RemoteMessage message) {
+    unawaited(
+      _monitoringService.logEvent(
+        'push_opened',
+        parameters: <String, Object?>{
+          'has_message_id': message.messageId?.isNotEmpty == true,
+          'has_click_url':
+              (message.data['click_url'] as String?)?.isNotEmpty == true,
+        },
+      ),
+    );
     _navigateByData(Map<String, dynamic>.from(message.data));
   }
 

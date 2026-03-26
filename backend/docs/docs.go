@@ -127,6 +127,95 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/app-logs/errors": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "App Logs"
+                ],
+                "summary": "Registrar log de erro do app",
+                "parameters": [
+                    {
+                        "description": "App error log payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateAppErrorLogRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.AppErrorLogResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/app-logs/screens": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "App Logs"
+                ],
+                "summary": "Registrar log de tela",
+                "parameters": [
+                    {
+                        "description": "Screen log payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateAppScreenLogRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.AppScreenLogResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/auth/login": {
             "post": {
                 "consumes": [
@@ -3875,8 +3964,102 @@ const docTemplate = `{
                 "createAiEnabled": {
                     "type": "boolean"
                 },
+                "settingsNotificationsAdminEmails": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "suggestionAiEnabled": {
                     "type": "boolean"
+                }
+            }
+        },
+        "dto.AppErrorLogResponse": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "errorCode": {
+                    "type": "string"
+                },
+                "httpStatus": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "type": "object"
+                },
+                "occurredAt": {
+                    "type": "string"
+                },
+                "requestId": {
+                    "type": "string"
+                },
+                "requestMethod": {
+                    "type": "string"
+                },
+                "requestPath": {
+                    "type": "string"
+                },
+                "routePath": {
+                    "type": "string"
+                },
+                "screenName": {
+                    "type": "string"
+                },
+                "sessionId": {
+                    "type": "string"
+                },
+                "source": {
+                    "type": "string"
+                },
+                "stackTrace": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.AppScreenLogResponse": {
+            "type": "object",
+            "properties": {
+                "appVersion": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "eventName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "type": "object"
+                },
+                "occurredAt": {
+                    "type": "string"
+                },
+                "platform": {
+                    "type": "string"
+                },
+                "previousRoutePath": {
+                    "type": "string"
+                },
+                "routePath": {
+                    "type": "string"
+                },
+                "screenName": {
+                    "type": "string"
+                },
+                "sessionId": {
+                    "type": "string"
                 }
             }
         },
@@ -3984,6 +4167,82 @@ const docTemplate = `{
                     "$ref": "#/definitions/dto.SubflagObject"
                 },
                 "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.CreateAppErrorLogRequest": {
+            "type": "object",
+            "properties": {
+                "errorCode": {
+                    "type": "string"
+                },
+                "httpStatus": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "type": "object"
+                },
+                "occurredAt": {
+                    "type": "string"
+                },
+                "requestId": {
+                    "type": "string"
+                },
+                "requestMethod": {
+                    "type": "string"
+                },
+                "requestPath": {
+                    "type": "string"
+                },
+                "routePath": {
+                    "type": "string"
+                },
+                "screenName": {
+                    "type": "string"
+                },
+                "sessionId": {
+                    "type": "string"
+                },
+                "source": {
+                    "type": "string"
+                },
+                "stackTrace": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.CreateAppScreenLogRequest": {
+            "type": "object",
+            "properties": {
+                "appVersion": {
+                    "type": "string"
+                },
+                "eventName": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "type": "object"
+                },
+                "occurredAt": {
+                    "type": "string"
+                },
+                "platform": {
+                    "type": "string"
+                },
+                "previousRoutePath": {
+                    "type": "string"
+                },
+                "routePath": {
+                    "type": "string"
+                },
+                "screenName": {
+                    "type": "string"
+                },
+                "sessionId": {
                     "type": "string"
                 }
             }

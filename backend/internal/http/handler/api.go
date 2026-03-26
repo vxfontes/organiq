@@ -20,4 +20,6 @@ type APIHandlers struct {
 	Digest        *DigestHandler
 	Suggestions   *SuggestionsHandler
 	AppConfig     *AppConfigHandler
+	AppScreenLogs *AppScreenLogsHandler
+	AppErrorLogs  *AppErrorLogsHandler
 }

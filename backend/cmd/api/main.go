@@ -103,6 +103,8 @@ func main() {
 		routineCompletionRepo := postgres.NewRoutineCompletionRepository(db)
 		agendaRepo := postgres.NewAgendaRepository(db)
 		homeRepo := postgres.NewHomeRepository(db)
+		appScreenLogRepo := postgres.NewAppScreenLogRepository(db)
+		appErrorLogRepo := postgres.NewAppErrorLogRepository(db)
 
 		flagUC := &usecase.FlagUsecase{Flags: flagRepo}
 		subflagUC := &usecase.SubflagUsecase{Subflags: subflagRepo, Flags: flagRepo}
@@ -145,6 +147,8 @@ func main() {
 		}
 		deviceTokenUC := &usecase.DeviceTokenUsecase{DeviceTokens: deviceTokenRepo}
 		appConfigUC := &usecase.AppConfigUsecase{Config: appConfigRepo}
+		appScreenLogUC := &usecase.AppScreenLogUsecase{Logs: appScreenLogRepo}
+		appErrorLogUC := &usecase.AppErrorLogUsecase{Logs: appErrorLogRepo}
 		txRunner := postgres.NewTxRunner(db)
 
 		var aiClient service.AIClient
@@ -321,6 +325,8 @@ func main() {
 			Digest:        digestHandler,
 			Suggestions:   handler.NewSuggestionsHandler(suggestionUC),
 			AppConfig:     handler.NewAppConfigHandler(appConfigUC),
+			AppScreenLogs: handler.NewAppScreenLogsHandler(appScreenLogUC),
+			AppErrorLogs:  handler.NewAppErrorLogsHandler(appErrorLogUC),
 		}
 	}
 

@@ -3,6 +3,7 @@ package http
 import (
 	"log/slog"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -39,6 +40,14 @@ func NewRouter(cfg config.Config, log *slog.Logger, authHandler *handler.AuthHan
 	if authHandler != nil {
 		v1.POST("/auth/signup", authHandler.Signup)
 		v1.POST("/auth/login", authHandler.Login)
+	}
+	if apiHandlers != nil && apiHandlers.AppErrorLogs != nil {
+		v1.POST(
+			"/app-logs/errors",
+			middleware.RateLimitByIP(120, time.Minute),
+			middleware.OptionalAuth(cfg.JWTSecret),
+			apiHandlers.AppErrorLogs.Create,
+		)
 	}
 
 	authGroup := v1.Group("", middleware.Auth(cfg.JWTSecret))
@@ -150,6 +159,9 @@ func NewRouter(cfg config.Config, log *slog.Logger, authHandler *handler.AuthHan
 		}
 		if apiHandlers.AppConfig != nil {
 			authGroup.GET("/app-config/ai", apiHandlers.AppConfig.GetAIConfig)
+		}
+		if apiHandlers.AppScreenLogs != nil {
+			authGroup.POST("/app-logs/screens", apiHandlers.AppScreenLogs.Create)
 		}
 	}
 
