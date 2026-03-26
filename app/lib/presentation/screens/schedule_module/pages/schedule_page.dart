@@ -55,50 +55,117 @@ class _SchedulePageState extends OQState<SchedulePage, ScheduleController> {
         final mode = controller.viewMode.value;
         final selectedWeekdayIndex = controller.selectedWeekdayIndex;
         final routineSections = controller.routineSections;
-        final isRefreshing =
-            controller.loading.value && controller.hasLoadedOnce.value;
+        final showContentLoading = controller.loading.value;
 
-        return Stack(
-          children: [
-            ColoredBox(
-              color: AppColors.background,
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-                children: [
-                  _buildHeader(context),
-                  const SizedBox(height: 16),
-                  if (isRefreshing) ...[
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(999),
-                      child: const LinearProgressIndicator(minHeight: 3),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-                  if (mode == ScheduleViewMode.daily) ...[
-                    RoutineWeekSelector(controller: controller),
-                    const SizedBox(height: 20),
-                    _buildWeekdayTabs(selectedWeekdayIndex),
-                    const SizedBox(height: 20),
-                    _buildRoutineList(routineSections, isRefreshing),
-                  ] else ...[
-                    WeekOverview(
-                      controller: controller,
-                      isRefreshing: isRefreshing,
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            if (controller.shouldShowLoadingOverlay)
-              const Positioned.fill(
-                child: ColoredBox(
-                  color: AppColors.background,
-                  child: Center(child: OQLoader(label: 'Carregando...')),
+        return ColoredBox(
+          color: AppColors.background,
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+            children: [
+              _buildHeader(context),
+              const SizedBox(height: 16),
+              if (mode == ScheduleViewMode.daily) ...[
+                RoutineWeekSelector(controller: controller),
+                const SizedBox(height: 20),
+                _buildWeekdayTabs(selectedWeekdayIndex),
+                const SizedBox(height: 20),
+                if (showContentLoading)
+                  _buildRoutineContentSkeleton()
+                else
+                  _buildRoutineList(routineSections),
+              ] else ...[
+                WeekOverview(
+                  controller: controller,
+                  showLoadingContent: showContentLoading,
                 ),
-              ),
-          ],
+              ],
+            ],
+          ),
         );
       },
+    );
+  }
+
+  Widget _buildRoutineContentSkeleton() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildPeriodSkeleton(titleWidth: 78, cards: 2),
+        _buildPeriodSkeleton(titleWidth: 66, cards: 1),
+        _buildPeriodSkeleton(titleWidth: 72, cards: 1),
+      ],
+    );
+  }
+
+  Widget _buildPeriodSkeleton({
+    required double titleWidth,
+    required int cards,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 20),
+        OQSkeleton(height: 18, width: titleWidth, radius: 8),
+        const SizedBox(height: 12),
+        ...List.generate(cards, (index) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: _buildRoutineCardSkeleton(),
+          );
+        }),
+      ],
+    );
+  }
+
+  Widget _buildRoutineCardSkeleton() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.text.withValues(alpha: 0.04),
+            blurRadius: 14,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              OQSkeleton(height: 18, width: 78, radius: 9),
+              SizedBox(width: 6),
+              OQSkeleton(height: 18, width: 56, radius: 9),
+              Spacer(),
+              OQSkeleton(height: 18, width: 18, radius: 9),
+            ],
+          ),
+          SizedBox(height: 10),
+          OQSkeleton(height: 16, width: 220),
+          SizedBox(height: 6),
+          OQSkeleton(height: 12, width: 180),
+          SizedBox(height: 10),
+          Row(
+            children: [
+              OQSkeleton(height: 14, width: 14, radius: 7),
+              SizedBox(width: 6),
+              OQSkeleton(height: 12, width: 84),
+            ],
+          ),
+          SizedBox(height: 10),
+          Row(
+            children: [
+              OQSkeleton(height: 20, width: 70, radius: 10),
+              SizedBox(width: 8),
+              OQSkeleton(height: 20, width: 88, radius: 10),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -216,18 +283,7 @@ class _SchedulePageState extends OQState<SchedulePage, ScheduleController> {
     );
   }
 
-  Widget _buildRoutineList(List<RoutineSection> sections, bool isRefreshing) {
-    if (isRefreshing && !controller.hasRoutines) {
-      return const OQCard(
-        child: Center(
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
-            child: OQLoader(label: 'Carregando rotinas...'),
-          ),
-        ),
-      );
-    }
-
+  Widget _buildRoutineList(List<RoutineSection> sections) {
     if (!controller.hasRoutines) {
       return _buildEmptyState();
     }

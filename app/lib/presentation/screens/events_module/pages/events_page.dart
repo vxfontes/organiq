@@ -49,14 +49,10 @@ class _EventsPageState extends OQState<EventsPage, EventsController> {
       ]),
       builder: (context, _) {
         final loading = controller.loading.value;
-        final hasLoadedOnce = controller.hasLoadedOnce.value;
         final days = controller.calendarDays.value;
         final selectedDate = controller.selectedDate.value;
         final selectedFilter = controller.selectedFilter.value;
         final items = controller.visibleItems.value;
-        final showInitialLoading = !hasLoadedOnce;
-        final showRefreshing = loading && hasLoadedOnce;
-        final showDayLoading = showRefreshing && items.isEmpty;
 
         return ColoredBox(
           color: AppColors.background,
@@ -79,24 +75,8 @@ class _EventsPageState extends OQState<EventsPage, EventsController> {
                 onSelect: controller.selectFilter,
               ),
               const SizedBox(height: 16),
-              if (showRefreshing) ...[
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(999),
-                  child: const LinearProgressIndicator(minHeight: 3),
-                ),
-                const SizedBox(height: 16),
-              ],
-              if (showInitialLoading)
-                _buildLoadingSkeleton()
-              else if (showDayLoading)
-                const OQCard(
-                  child: Center(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 8),
-                      child: OQLoader(label: 'Carregando itens do dia...'),
-                    ),
-                  ),
-                )
+              if (loading)
+                _buildContentLoadingSkeleton()
               else if (items.isEmpty)
                 const OQCard(
                   child: OQEmptyState(
@@ -146,9 +126,9 @@ class _EventsPageState extends OQState<EventsPage, EventsController> {
     );
   }
 
-  Widget _buildLoadingSkeleton() {
+  Widget _buildContentLoadingSkeleton() {
     return Column(
-      children: List.generate(4, (index) {
+      children: List.generate(4, (_) {
         return const Padding(
           padding: EdgeInsets.only(bottom: 12),
           child: OQCard(
