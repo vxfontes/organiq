@@ -7,14 +7,16 @@ import (
 
 	"organiq/backend/internal/app/domain"
 	"organiq/backend/internal/app/repository"
+	"organiq/backend/internal/app/service"
 	"organiq/backend/internal/infra/postgres"
 )
 
 type EventUsecase struct {
-	Events          repository.EventRepository
-	Flags           repository.FlagRepository
-	Subflags        repository.SubflagRepository
-	NotificationLog repository.NotificationLogRepository
+	Events           repository.EventRepository
+	Flags            repository.FlagRepository
+	Subflags         repository.SubflagRepository
+	NotificationLog  repository.NotificationLogRepository
+	NotificationCopy *service.NotificationCopyService
 }
 
 type EventUpdateInput struct {
@@ -56,7 +58,23 @@ func (uc *EventUsecase) Create(ctx context.Context, userID, title string, startA
 		event.AllDay = *allDay
 	}
 
-	return uc.Events.Create(ctx, event)
+	item, err := uc.Events.Create(ctx, event)
+	if err != nil {
+		return domain.Event{}, err
+	}
+
+	if uc.NotificationCopy != nil {
+		go func(id, title, desc string) {
+			ctxBg, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			nTitle, nBody, err := uc.NotificationCopy.GenerateCopy(ctxBg, "Event", title, desc)
+			if err == nil && nTitle != "" {
+				_ = uc.Events.UpdateNotificationCopy(ctxBg, id, nTitle, nBody)
+			}
+		}(item.ID, item.Title, "")
+	}
+
+	return item, nil
 }
 
 func (uc *EventUsecase) Update(ctx context.Context, userID, id string, input EventUpdateInput) (domain.Event, error) {
@@ -107,7 +125,23 @@ func (uc *EventUsecase) Update(ctx context.Context, userID, id string, input Eve
 		event.SubflagID = resolvedSubflagID
 	}
 
-	return uc.Events.Update(ctx, event)
+	item, err := uc.Events.Update(ctx, event)
+	if err != nil {
+		return domain.Event{}, err
+	}
+
+	if uc.NotificationCopy != nil {
+		go func(id, title, desc string) {
+			ctxBg, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			nTitle, nBody, err := uc.NotificationCopy.GenerateCopy(ctxBg, "Event", title, desc)
+			if err == nil && nTitle != "" {
+				_ = uc.Events.UpdateNotificationCopy(ctxBg, id, nTitle, nBody)
+			}
+		}(item.ID, item.Title, "")
+	}
+
+	return item, nil
 }
 
 func (uc *EventUsecase) Delete(ctx context.Context, userID, id string) error {

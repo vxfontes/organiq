@@ -14,4 +14,5 @@ type EventRepository interface {
 	Get(ctx context.Context, userID, id string) (domain.Event, error)
 	List(ctx context.Context, userID string, opts ListOptions) ([]domain.Event, *string, error)
 	ListUpcoming(ctx context.Context, start, end time.Time) ([]domain.Event, error)
+	UpdateNotificationCopy(ctx context.Context, id, title, body string) error
 }

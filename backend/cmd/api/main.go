@@ -183,6 +183,12 @@ func main() {
 			suggestionAIClient = aiClient
 		}
 
+		notificationCopySvc := service.NewNotificationCopyService(aiClient)
+		taskUC.NotificationCopy = notificationCopySvc
+		reminderUC.NotificationCopy = notificationCopySvc
+		eventUC.NotificationCopy = notificationCopySvc
+		routineUC.NotificationCopy = notificationCopySvc
+
 		inboxUC := &usecase.InboxUsecase{
 			Users:            userRepo,
 			Inbox:            inboxRepo,
