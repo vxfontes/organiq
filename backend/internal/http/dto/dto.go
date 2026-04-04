@@ -722,6 +722,12 @@ type AppConfigAIResponse struct {
 	CreateAIEnabled                  bool     `json:"createAiEnabled"`
 	SuggestionAIEnabled              bool     `json:"suggestionAiEnabled"`
 	SettingsNotificationsAdminEmails []string `json:"settingsNotificationsAdminEmails"`
+	MustUpdate                       bool     `json:"mustUpdate"`
+	ShouldUpdate                     bool     `json:"shouldUpdate"`
+	MinMandatoryVersion              string   `json:"minMandatoryVersion"`
+	LatestSuggestedVersion           string   `json:"latestSuggestedVersion"`
+	StoreAndroidURL                  string   `json:"storeAndroidUrl"`
+	StoreIosURL                      string   `json:"storeIosUrl"`
 }
 
 // App logs

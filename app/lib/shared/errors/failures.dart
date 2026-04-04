@@ -63,3 +63,9 @@ class TimeoutFailure extends Failure {
 
   TimeoutFailure({this.message}) : super(message: message);
 }
+
+class UpdateRequiredFailure extends Failure {
+  final String? message;
+
+  UpdateRequiredFailure({this.message}) : super(message: message);
+}

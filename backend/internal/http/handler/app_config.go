@@ -26,15 +26,14 @@ func NewAppConfigHandler(uc *usecase.AppConfigUsecase) *AppConfigHandler {
 // @Failure 401 {object} dto.ErrorResponse
 // @Router /v1/app-config/ai [get]
 func (h *AppConfigHandler) GetAIConfig(c *gin.Context) {
-	if _, ok := getUserID(c); !ok {
-		return
-	}
 	if h.Usecase == nil {
 		writeError(c, http.StatusInternalServerError, "dependency_missing")
 		return
 	}
 
-	cfg, err := h.Usecase.GetAIConfig(c.Request.Context())
+	currentVersion := c.GetHeader("X-App-Version")
+
+	cfg, err := h.Usecase.GetAIConfig(c.Request.Context(), currentVersion)
 	if err != nil {
 		writeUsecaseError(c, err)
 		return
@@ -44,5 +43,11 @@ func (h *AppConfigHandler) GetAIConfig(c *gin.Context) {
 		CreateAIEnabled:                  cfg.CreateEnabled,
 		SuggestionAIEnabled:              cfg.SuggestionEnabled,
 		SettingsNotificationsAdminEmails: cfg.SettingsAdminEmails,
+		MustUpdate:                       cfg.MustUpdate,
+		ShouldUpdate:                     cfg.ShouldUpdate,
+		MinMandatoryVersion:              cfg.MinMandatoryVersion,
+		LatestSuggestedVersion:           cfg.LatestVersion,
+		StoreAndroidURL:                  cfg.StoreAndroidURL,
+		StoreIosURL:                      cfg.StoreIosURL,
 	})
 }

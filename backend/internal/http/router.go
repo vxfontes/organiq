@@ -50,6 +50,10 @@ func NewRouter(cfg config.Config, log *slog.Logger, authHandler *handler.AuthHan
 		)
 	}
 
+	if apiHandlers != nil && apiHandlers.AppConfig != nil {
+		v1.GET("/app-config/ai", apiHandlers.AppConfig.GetAIConfig)
+	}
+
 	authGroup := v1.Group("", middleware.Auth(cfg.JWTSecret))
 	if apiHandlers != nil {
 		if apiHandlers.Me != nil {
@@ -156,9 +160,6 @@ func NewRouter(cfg config.Config, log *slog.Logger, authHandler *handler.AuthHan
 			authGroup.POST("/suggestions/accept", apiHandlers.Suggestions.Accept)
 			authGroup.GET("/suggestions/conversations", apiHandlers.Suggestions.ListConversations)
 			authGroup.GET("/suggestions/conversations/:id", apiHandlers.Suggestions.GetConversation)
-		}
-		if apiHandlers.AppConfig != nil {
-			authGroup.GET("/app-config/ai", apiHandlers.AppConfig.GetAIConfig)
 		}
 		if apiHandlers.AppScreenLogs != nil {
 			authGroup.POST("/app-logs/screens", apiHandlers.AppScreenLogs.Create)

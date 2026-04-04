@@ -6,15 +6,27 @@ class AppAIConfig {
     required this.createAiEnabled,
     required this.suggestionAiEnabled,
     required this.settingsNotificationsAdminEmails,
+    required this.minMandatoryVersion,
+    required this.latestSuggestedVersion,
+    required this.storeAndroidUrl,
+    required this.storeIosUrl,
+    required this.mustUpdate,
+    required this.shouldUpdate,
   });
 
   final bool createAiEnabled;
   final bool suggestionAiEnabled;
   final List<String> settingsNotificationsAdminEmails;
+  final String minMandatoryVersion;
+  final String latestSuggestedVersion;
+  final String storeAndroidUrl;
+  final String storeIosUrl;
+  final bool mustUpdate;
+  final bool shouldUpdate;
 }
 
 abstract class IAppConfigService {
-  Future<AppAIConfig> getAIConfig();
+  Future<AppAIConfig> getAIConfig({String? appVersion});
 }
 
 class AppConfigService implements IAppConfigService {
@@ -24,13 +36,22 @@ class AppConfigService implements IAppConfigService {
     createAiEnabled: true,
     suggestionAiEnabled: true,
     settingsNotificationsAdminEmails: <String>[],
+    minMandatoryVersion: '0.0.0',
+    latestSuggestedVersion: '0.0.0',
+    storeAndroidUrl: '',
+    storeIosUrl: '',
+    mustUpdate: false,
+    shouldUpdate: false,
   );
 
   final IHttpClient _httpClient;
 
   @override
-  Future<AppAIConfig> getAIConfig() async {
-    final payload = await _getConfigPayload(AppPath.appConfigAI);
+  Future<AppAIConfig> getAIConfig({String? appVersion}) async {
+    final payload = await _getConfigPayload(
+      AppPath.appConfigAI,
+      appVersion: appVersion,
+    );
     if (payload == null) {
       return _defaultAIConfig;
     }
@@ -44,12 +65,28 @@ class AppConfigService implements IAppConfigService {
       settingsNotificationsAdminEmails: _parseEmailList(
         payload['settingsNotificationsAdminEmails'],
       ),
+      minMandatoryVersion: payload['minMandatoryVersion']?.toString() ?? '0.0.0',
+      latestSuggestedVersion:
+          payload['latestSuggestedVersion']?.toString() ?? '0.0.0',
+      storeAndroidUrl: payload['storeAndroidUrl']?.toString() ?? '',
+      storeIosUrl: payload['storeIosUrl']?.toString() ?? '',
+      mustUpdate: _parseBool(payload['mustUpdate'], fallback: false),
+      shouldUpdate: _parseBool(payload['shouldUpdate'], fallback: false),
     );
   }
 
-  Future<Map<String, dynamic>?> _getConfigPayload(String path) async {
+  Future<Map<String, dynamic>?> _getConfigPayload(
+    String path, {
+    String? appVersion,
+  }) async {
     try {
-      final response = await _httpClient.get(path);
+      final response = await _httpClient.get(
+        path,
+        extra: {
+          'auth': false,
+          if (appVersion != null) 'headers': {'X-App-Version': appVersion},
+        },
+      );
       final statusCode = response.statusCode ?? 0;
       if (statusCode < 200 || statusCode >= 300) {
         return null;
