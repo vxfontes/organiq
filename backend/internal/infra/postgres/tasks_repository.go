@@ -155,7 +155,7 @@ func (r *TaskRepository) List(ctx context.Context, userID string, opts repositor
 
 func (r *TaskRepository) ListUpcoming(ctx context.Context, start, end time.Time) ([]domain.Task, error) {
 	rows, err := r.db.QueryContext(ctx, `
-		SELECT id, user_id, title, description, status, due_at, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
+		SELECT id, user_id, title, description, status, due_at, notification_title, notification_body, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
 		FROM organiq.tasks
 		WHERE status = 'OPEN' AND due_at >= $1 AND due_at <= $2
 	`, start, end)
@@ -168,17 +168,21 @@ func (r *TaskRepository) ListUpcoming(ctx context.Context, start, end time.Time)
 	for rows.Next() {
 		var description sql.NullString
 		var dueAt sql.NullTime
+		var notifTitle sql.NullString
+		var notifBody sql.NullString
 		var flagID sql.NullString
 		var subflagID sql.NullString
 		var sourceInboxID sql.NullString
 		var status string
 		var task domain.Task
-		if err := rows.Scan(&task.ID, &task.UserID, &task.Title, &description, &status, &dueAt, &flagID, &subflagID, &sourceInboxID, &task.CreatedAt, &task.UpdatedAt); err != nil {
+		if err := rows.Scan(&task.ID, &task.UserID, &task.Title, &description, &status, &dueAt, &notifTitle, &notifBody, &flagID, &subflagID, &sourceInboxID, &task.CreatedAt, &task.UpdatedAt); err != nil {
 			return nil, err
 		}
 		task.Description = stringPtrFromNull(description)
 		task.Status = domain.TaskStatus(status)
 		task.DueAt = timePtrFromNull(dueAt)
+		task.NotificationTitle = stringPtrFromNull(notifTitle)
+		task.NotificationBody = stringPtrFromNull(notifBody)
 		task.FlagID = stringPtrFromNull(flagID)
 		task.SubflagID = stringPtrFromNull(subflagID)
 		task.SourceInboxItemID = stringPtrFromNull(sourceInboxID)

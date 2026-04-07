@@ -151,7 +151,7 @@ func (r *ReminderRepository) List(ctx context.Context, userID string, opts repos
 
 func (r *ReminderRepository) ListUpcoming(ctx context.Context, start, end time.Time) ([]domain.Reminder, error) {
 	rows, err := r.db.QueryContext(ctx, `
-		SELECT id, user_id, title, status, remind_at, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
+		SELECT id, user_id, title, status, remind_at, notification_title, notification_body, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
 		FROM organiq.reminders
 		WHERE status = 'OPEN' AND remind_at >= $1 AND remind_at <= $2
 	`, start, end)
@@ -163,16 +163,20 @@ func (r *ReminderRepository) ListUpcoming(ctx context.Context, start, end time.T
 	items := make([]domain.Reminder, 0)
 	for rows.Next() {
 		var remindAt sql.NullTime
+		var notifTitle sql.NullString
+		var notifBody sql.NullString
 		var flagID sql.NullString
 		var subflagID sql.NullString
 		var sourceInboxID sql.NullString
 		var status string
 		var reminder domain.Reminder
-		if err := rows.Scan(&reminder.ID, &reminder.UserID, &reminder.Title, &status, &remindAt, &flagID, &subflagID, &sourceInboxID, &reminder.CreatedAt, &reminder.UpdatedAt); err != nil {
+		if err := rows.Scan(&reminder.ID, &reminder.UserID, &reminder.Title, &status, &remindAt, &notifTitle, &notifBody, &flagID, &subflagID, &sourceInboxID, &reminder.CreatedAt, &reminder.UpdatedAt); err != nil {
 			return nil, err
 		}
 		reminder.Status = domain.ReminderStatus(status)
 		reminder.RemindAt = timePtrFromNull(remindAt)
+		reminder.NotificationTitle = stringPtrFromNull(notifTitle)
+		reminder.NotificationBody = stringPtrFromNull(notifBody)
 		reminder.FlagID = stringPtrFromNull(flagID)
 		reminder.SubflagID = stringPtrFromNull(subflagID)
 		reminder.SourceInboxItemID = stringPtrFromNull(sourceInboxID)

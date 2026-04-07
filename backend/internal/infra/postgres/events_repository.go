@@ -151,7 +151,7 @@ func (r *EventRepository) List(ctx context.Context, userID string, opts reposito
 
 func (r *EventRepository) ListUpcoming(ctx context.Context, start, end time.Time) ([]domain.Event, error) {
 	rows, err := r.db.QueryContext(ctx, `
-		SELECT id, user_id, title, start_at, end_at, all_day, location, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
+		SELECT id, user_id, title, start_at, end_at, all_day, location, notification_title, notification_body, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
 		FROM organiq.events
 		WHERE start_at >= $1 AND start_at <= $2
 	`, start, end)
@@ -165,16 +165,20 @@ func (r *EventRepository) ListUpcoming(ctx context.Context, start, end time.Time
 		var startAt sql.NullTime
 		var endAt sql.NullTime
 		var location sql.NullString
+		var notifTitle sql.NullString
+		var notifBody sql.NullString
 		var flagID sql.NullString
 		var subflagID sql.NullString
 		var sourceInboxID sql.NullString
 		var event domain.Event
-		if err := rows.Scan(&event.ID, &event.UserID, &event.Title, &startAt, &endAt, &event.AllDay, &location, &flagID, &subflagID, &sourceInboxID, &event.CreatedAt, &event.UpdatedAt); err != nil {
+		if err := rows.Scan(&event.ID, &event.UserID, &event.Title, &startAt, &endAt, &event.AllDay, &location, &notifTitle, &notifBody, &flagID, &subflagID, &sourceInboxID, &event.CreatedAt, &event.UpdatedAt); err != nil {
 			return nil, err
 		}
 		event.StartAt = timePtrFromNull(startAt)
 		event.EndAt = timePtrFromNull(endAt)
 		event.Location = stringPtrFromNull(location)
+		event.NotificationTitle = stringPtrFromNull(notifTitle)
+		event.NotificationBody = stringPtrFromNull(notifBody)
 		event.FlagID = stringPtrFromNull(flagID)
 		event.SubflagID = stringPtrFromNull(subflagID)
 		event.SourceInboxItemID = stringPtrFromNull(sourceInboxID)
