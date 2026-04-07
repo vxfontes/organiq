@@ -34,6 +34,32 @@ go run ./cmd/seed
 docker compose run --rm api go run ./cmd/seed
 ```
 
+## Backfill de notificacoes
+Comando para preencher `notification_title` e `notification_body` em:
+- `organiq.tasks`
+- `organiq.events`
+- `organiq.reminders`
+- `organiq.routines`
+
+O comando busca variaveis de ambiente do arquivo `backend/.env`.
+
+Pre-requisitos minimos no `.env`:
+- `DATABASE_URL`
+- `AI_API_KEY` (ou `AI_FALLBACK_API_KEY`)
+- `AI_MODEL`
+
+Rodar local:
+```bash
+cd backend
+go run ./cmd/backfill_notifications
+```
+
+Rodar via Docker:
+```bash
+cd backend
+docker compose run --rm api go run ./cmd/backfill_notifications
+```
+
 ## Rodar com Docker (API + Postgres)
 Dentro de `backend/`:
 ```bash
