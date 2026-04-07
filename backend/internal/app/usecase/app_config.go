@@ -12,19 +12,29 @@ const (
 	appConfigKeyAICreateEnabled     = "ai.create.enabled"
 	appConfigKeyAISuggestionEnabled = "ai.suggestion.enabled"
 	appConfigKeySettingsAdminEmails = "settings.notifications.admin_emails"
+	appConfigKeyMinMandatoryVersion = "app.version.min_mandatory"
+	appConfigKeyLatestVersion       = "app.version.latest_suggested"
+	appConfigKeyStoreAndroidURL     = "app.store.android.url"
+	appConfigKeyStoreIosURL         = "app.store.ios.url"
 )
 
 type AIConfig struct {
 	CreateEnabled       bool
 	SuggestionEnabled   bool
 	SettingsAdminEmails []string
+	MinMandatoryVersion string
+	LatestVersion       string
+	StoreAndroidURL     string
+	StoreIosURL         string
+	MustUpdate          bool
+	ShouldUpdate        bool
 }
 
 type AppConfigUsecase struct {
 	Config repository.AppConfigRepository
 }
 
-func (uc *AppConfigUsecase) GetAIConfig(ctx context.Context) (AIConfig, error) {
+func (uc *AppConfigUsecase) GetAIConfig(ctx context.Context, currentVersion string) (AIConfig, error) {
 	if uc == nil || uc.Config == nil {
 		return AIConfig{}, ErrDependencyMissing
 	}
@@ -34,10 +44,31 @@ func (uc *AppConfigUsecase) GetAIConfig(ctx context.Context) (AIConfig, error) {
 		return AIConfig{}, err
 	}
 
+	minV := values[appConfigKeyMinMandatoryVersion]
+	latestV := values[appConfigKeyLatestVersion]
+
+	must := false
+	should := false
+
+	if currentVersion != "" {
+		if minV != "" && CompareVersions(currentVersion, minV) < 0 {
+			must = true
+		}
+		if latestV != "" && CompareVersions(currentVersion, latestV) < 0 {
+			should = true
+		}
+	}
+
 	return AIConfig{
 		CreateEnabled:       parseConfigBool(values[appConfigKeyAICreateEnabled], true),
 		SuggestionEnabled:   parseConfigBool(values[appConfigKeyAISuggestionEnabled], true),
 		SettingsAdminEmails: parseConfigEmailList(values[appConfigKeySettingsAdminEmails]),
+		MinMandatoryVersion: minV,
+		LatestVersion:       latestV,
+		StoreAndroidURL:     values[appConfigKeyStoreAndroidURL],
+		StoreIosURL:         values[appConfigKeyStoreIosURL],
+		MustUpdate:          must,
+		ShouldUpdate:        should,
 	}, nil
 }
 

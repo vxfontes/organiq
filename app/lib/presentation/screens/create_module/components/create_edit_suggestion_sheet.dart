@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:organiq/modules/inbox/data/models/create_suggestion_item.dart';
+import 'package:organiq/presentation/routes/app_navigation.dart';
 import 'package:organiq/shared/components/oq_lib/index.dart';
 
 class CreateEditSuggestionSheet extends StatefulWidget {
@@ -45,7 +46,7 @@ class _CreateEditSuggestionSheetState extends State<CreateEditSuggestionSheet> {
       primaryLabel: 'Salvar alterações',
       onPrimaryPressed: _onSave,
       secondaryLabel: 'Cancelar',
-      onSecondaryPressed: () => Navigator.of(context).pop(),
+      onSecondaryPressed: () => AppNavigation.pop(null, context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

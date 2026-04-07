@@ -119,6 +119,26 @@ func (s *NotificationScheduler) buildMessage(nType domain.NotificationType, trig
 		vars = map[string]string{}
 	}
 
+	// Dynamic override from entity
+	if baseTitle, ok := vars["base_title"]; ok && baseTitle != "" {
+		title = baseTitle
+		body = vars["base_body"]
+		if body == "" {
+			body = title
+		}
+
+		// Add lead suffix if applicable
+		if triggerKey == "lead_time" || triggerKey == "lead_time_day" {
+			lead := strings.TrimSpace(vars["lead_mins"])
+			if triggerKey == "lead_time" {
+				title += " (em " + humanLeadLabel(lead) + ")"
+			} else {
+				title += " (Amanhã)"
+			}
+		}
+		return title, body
+	}
+
 	cacheKey := string(nType) + "_" + triggerKey
 	vars["title"] = itemTitle
 
@@ -154,17 +174,29 @@ func (s *NotificationScheduler) scheduleUpcoming(ctx context.Context) {
 				continue
 			}
 
+			vars := map[string]string{}
+			if r.NotificationTitle != nil && *r.NotificationTitle != "" {
+				vars["base_title"] = *r.NotificationTitle
+			}
+			if r.NotificationBody != nil && *r.NotificationBody != "" {
+				vars["base_body"] = *r.NotificationBody
+			}
+
 			if prefs.ReminderAtTime {
-				title, body := s.buildMessage(domain.NotificationTypeReminder, "at_time", r.Title, map[string]string{})
+				title, body := s.buildMessage(domain.NotificationTypeReminder, "at_time", r.Title, vars)
 				s.scheduleItem(ctx, r.UserID, domain.NotificationTypeReminder, r.ID, title, body, r.RemindAt, nil)
 			}
 
 			for _, mins := range prefs.ReminderLeadMins {
 				scheduledFor := r.RemindAt.Add(time.Duration(-mins) * time.Minute)
 				if !scheduledFor.Before(nowMinute) {
-					title, body := s.buildMessage(domain.NotificationTypeReminder, "lead_time", r.Title, map[string]string{
+					leadVars := map[string]string{
 						"lead_mins": strconv.Itoa(mins),
-					})
+					}
+					for k, v := range vars {
+						leadVars[k] = v
+					}
+					title, body := s.buildMessage(domain.NotificationTypeReminder, "lead_time", r.Title, leadVars)
 					s.scheduleItem(ctx, r.UserID, domain.NotificationTypeReminder, r.ID, title, body, &scheduledFor, &mins)
 				}
 			}
@@ -182,8 +214,16 @@ func (s *NotificationScheduler) scheduleUpcoming(ctx context.Context) {
 				continue
 			}
 
+			vars := map[string]string{}
+			if e.NotificationTitle != nil && *e.NotificationTitle != "" {
+				vars["base_title"] = *e.NotificationTitle
+			}
+			if e.NotificationBody != nil && *e.NotificationBody != "" {
+				vars["base_body"] = *e.NotificationBody
+			}
+
 			if prefs.EventAtTime {
-				title, body := s.buildMessage(domain.NotificationTypeEvent, "at_time", e.Title, map[string]string{})
+				title, body := s.buildMessage(domain.NotificationTypeEvent, "at_time", e.Title, vars)
 				s.scheduleItem(ctx, e.UserID, domain.NotificationTypeEvent, e.ID, title, body, e.StartAt, nil)
 			}
 
@@ -194,9 +234,13 @@ func (s *NotificationScheduler) scheduleUpcoming(ctx context.Context) {
 					if mins >= dayThreshold {
 						triggerKey = "lead_time_day"
 					}
-					title, body := s.buildMessage(domain.NotificationTypeEvent, triggerKey, e.Title, map[string]string{
+					leadVars := map[string]string{
 						"lead_mins": strconv.Itoa(mins),
-					})
+					}
+					for k, v := range vars {
+						leadVars[k] = v
+					}
+					title, body := s.buildMessage(domain.NotificationTypeEvent, triggerKey, e.Title, leadVars)
 					s.scheduleItem(ctx, e.UserID, domain.NotificationTypeEvent, e.ID, title, body, &scheduledFor, &mins)
 				}
 			}
@@ -214,8 +258,16 @@ func (s *NotificationScheduler) scheduleUpcoming(ctx context.Context) {
 				continue
 			}
 
+			vars := map[string]string{}
+			if t.NotificationTitle != nil && *t.NotificationTitle != "" {
+				vars["base_title"] = *t.NotificationTitle
+			}
+			if t.NotificationBody != nil && *t.NotificationBody != "" {
+				vars["base_body"] = *t.NotificationBody
+			}
+
 			if prefs.TaskAtTime {
-				title, body := s.buildMessage(domain.NotificationTypeTask, "at_time", t.Title, map[string]string{})
+				title, body := s.buildMessage(domain.NotificationTypeTask, "at_time", t.Title, vars)
 				s.scheduleItem(ctx, t.UserID, domain.NotificationTypeTask, t.ID, title, body, t.DueAt, nil)
 			}
 
@@ -226,9 +278,13 @@ func (s *NotificationScheduler) scheduleUpcoming(ctx context.Context) {
 					if mins >= dayThreshold {
 						triggerKey = "lead_time_day"
 					}
-					title, body := s.buildMessage(domain.NotificationTypeTask, triggerKey, t.Title, map[string]string{
+					leadVars := map[string]string{
 						"lead_mins": strconv.Itoa(mins),
-					})
+					}
+					for k, v := range vars {
+						leadVars[k] = v
+					}
+					title, body := s.buildMessage(domain.NotificationTypeTask, triggerKey, t.Title, leadVars)
 					s.scheduleItem(ctx, t.UserID, domain.NotificationTypeTask, t.ID, title, body, &scheduledFor, &mins)
 				}
 			}
@@ -255,6 +311,14 @@ func (s *NotificationScheduler) scheduleUpcoming(ctx context.Context) {
 		prefs, err := s.Prefs.GetByUserID(ctx, r.UserID)
 		if err != nil || !prefs.RoutinesEnabled {
 			continue
+		}
+
+		vars := map[string]string{}
+		if r.NotificationTitle != nil && *r.NotificationTitle != "" {
+			vars["base_title"] = *r.NotificationTitle
+		}
+		if r.NotificationBody != nil && *r.NotificationBody != "" {
+			vars["base_body"] = *r.NotificationBody
 		}
 
 		user, ok := userCache[r.UserID]
@@ -286,7 +350,7 @@ func (s *NotificationScheduler) scheduleUpcoming(ctx context.Context) {
 		scheduledForUTC := scheduledForLocal.UTC()
 
 		if prefs.RoutineAtTime && !scheduledForUTC.Before(nowUTCMinute) {
-			title, body := s.buildMessage(domain.NotificationTypeRoutine, "at_time", r.Title, map[string]string{})
+			title, body := s.buildMessage(domain.NotificationTypeRoutine, "at_time", r.Title, vars)
 			s.scheduleItem(ctx, r.UserID, domain.NotificationTypeRoutine, r.ID, title, body, &scheduledForUTC, nil)
 		}
 
@@ -296,9 +360,13 @@ func (s *NotificationScheduler) scheduleUpcoming(ctx context.Context) {
 			}
 			leadScheduledForUTC := scheduledForUTC.Add(time.Duration(-mins) * time.Minute)
 			if !leadScheduledForUTC.Before(nowUTCMinute) {
-				title, body := s.buildMessage(domain.NotificationTypeRoutine, "lead_time", r.Title, map[string]string{
+				leadVars := map[string]string{
 					"lead_mins": strconv.Itoa(mins),
-				})
+				}
+				for k, v := range vars {
+					leadVars[k] = v
+				}
+				title, body := s.buildMessage(domain.NotificationTypeRoutine, "lead_time", r.Title, leadVars)
 				s.scheduleItem(ctx, r.UserID, domain.NotificationTypeRoutine, r.ID, title, body, &leadScheduledForUTC, &mins)
 			}
 		}

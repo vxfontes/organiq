@@ -76,7 +76,7 @@ func (r *TaskRepository) Delete(ctx context.Context, userID, id string) error {
 
 func (r *TaskRepository) Get(ctx context.Context, userID, id string) (domain.Task, error) {
 	row := r.db.QueryRowContext(ctx, `
-		SELECT id, user_id, title, description, status, due_at, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
+		SELECT id, user_id, title, description, status, due_at, notification_title, notification_body, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
 		FROM organiq.tasks
 		WHERE id = $1 AND user_id = $2
 		LIMIT 1
@@ -84,12 +84,13 @@ func (r *TaskRepository) Get(ctx context.Context, userID, id string) (domain.Tas
 
 	var description sql.NullString
 	var dueAt sql.NullTime
+	var notifTitle, notifBody sql.NullString
 	var flagID sql.NullString
 	var subflagID sql.NullString
 	var sourceInboxID sql.NullString
 	var status string
 	var task domain.Task
-	if err := row.Scan(&task.ID, &task.UserID, &task.Title, &description, &status, &dueAt, &flagID, &subflagID, &sourceInboxID, &task.CreatedAt, &task.UpdatedAt); err != nil {
+	if err := row.Scan(&task.ID, &task.UserID, &task.Title, &description, &status, &dueAt, &notifTitle, &notifBody, &flagID, &subflagID, &sourceInboxID, &task.CreatedAt, &task.UpdatedAt); err != nil {
 		if err == sql.ErrNoRows {
 			return domain.Task{}, ErrNotFound
 		}
@@ -98,6 +99,8 @@ func (r *TaskRepository) Get(ctx context.Context, userID, id string) (domain.Tas
 	task.Description = stringPtrFromNull(description)
 	task.Status = domain.TaskStatus(status)
 	task.DueAt = timePtrFromNull(dueAt)
+	task.NotificationTitle = stringPtrFromNull(notifTitle)
+	task.NotificationBody = stringPtrFromNull(notifBody)
 	task.FlagID = stringPtrFromNull(flagID)
 	task.SubflagID = stringPtrFromNull(subflagID)
 	task.SourceInboxItemID = stringPtrFromNull(sourceInboxID)
@@ -185,4 +188,13 @@ func (r *TaskRepository) ListUpcoming(ctx context.Context, start, end time.Time)
 		return nil, err
 	}
 	return items, nil
+}
+
+func (r *TaskRepository) UpdateNotificationCopy(ctx context.Context, id, title, body string) error {
+	_, err := r.db.ExecContext(ctx, `
+		UPDATE organiq.tasks 
+		SET notification_title = $1, notification_body = $2, updated_at = now() 
+		WHERE id = $3
+	`, title, body, id)
+	return err
 }

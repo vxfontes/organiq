@@ -138,7 +138,7 @@ func (r *RoutineRepositoryImpl) List(ctx context.Context, userID string, opts re
 		SELECT id, user_id, title, description, recurrence_type, weekdays,
 			to_char(start_time, 'HH24:MI') as start_time,
 			to_char(end_time, 'HH24:MI') as end_time,
-			week_of_month, day_of_month, starts_on::text, ends_on::text, color, is_active, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
+			week_of_month, day_of_month, starts_on::text, ends_on::text, color, is_active, notification_title, notification_body, flag_id, subflag_id, source_inbox_item_id, created_at, updated_at
 		FROM organiq.routines
 		WHERE user_id = $1 AND is_active = true
 		ORDER BY start_time, created_at
@@ -152,11 +152,11 @@ func (r *RoutineRepositoryImpl) List(ctx context.Context, userID string, opts re
 	items := make([]domain.Routine, 0)
 	for rows.Next() {
 		var routine domain.Routine
-		var description, endTime, endsOn, color, flagID, subflagID, sourceInboxItemID sql.NullString
+		var description, endTime, endsOn, color, notifTitle, notifBody, flagID, subflagID, sourceInboxItemID sql.NullString
 		var weekOfMonth, dayOfMonth sql.NullInt64
 		var weekdays pq.Int64Array
 
-		if err := rows.Scan(&routine.ID, &routine.UserID, &routine.Title, &description, &routine.RecurrenceType, &weekdays, &routine.StartTime, &endTime, &weekOfMonth, &dayOfMonth, &routine.StartsOn, &endsOn, &color, &routine.IsActive, &flagID, &subflagID, &sourceInboxItemID, &routine.CreatedAt, &routine.UpdatedAt); err != nil {
+		if err := rows.Scan(&routine.ID, &routine.UserID, &routine.Title, &description, &routine.RecurrenceType, &weekdays, &routine.StartTime, &endTime, &weekOfMonth, &dayOfMonth, &routine.StartsOn, &endsOn, &color, &routine.IsActive, &notifTitle, &notifBody, &flagID, &subflagID, &sourceInboxItemID, &routine.CreatedAt, &routine.UpdatedAt); err != nil {
 			return nil, nil, err
 		}
 
@@ -176,6 +176,8 @@ func (r *RoutineRepositoryImpl) List(ctx context.Context, userID string, opts re
 		}
 		routine.EndsOn = stringPtrFromNull(endsOn)
 		routine.Color = stringPtrFromNull(color)
+		routine.NotificationTitle = stringPtrFromNull(notifTitle)
+		routine.NotificationBody = stringPtrFromNull(notifBody)
 		routine.FlagID = stringPtrFromNull(flagID)
 		routine.SubflagID = stringPtrFromNull(subflagID)
 		routine.SourceInboxItemID = stringPtrFromNull(sourceInboxItemID)
@@ -645,4 +647,13 @@ func (r *RoutineRepositoryImpl) ListAllByWeekday(ctx context.Context, weekday in
 	}
 
 	return items, nil
+}
+
+func (r *RoutineRepositoryImpl) UpdateNotificationCopy(ctx context.Context, id, title, body string) error {
+	_, err := r.db.ExecContext(ctx, `
+		UPDATE organiq.routines 
+		SET notification_title = $1, notification_body = $2, updated_at = now() 
+		WHERE id = $3
+	`, title, body, id)
+	return err
 }

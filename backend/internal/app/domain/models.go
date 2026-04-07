@@ -154,6 +154,8 @@ type Task struct {
 	Description       *string
 	Status            TaskStatus
 	DueAt             *time.Time
+	NotificationTitle *string
+	NotificationBody  *string
 	FlagID            *string
 	SubflagID         *string
 	SourceInboxItemID *string
@@ -167,6 +169,8 @@ type Reminder struct {
 	Title             string
 	Status            ReminderStatus
 	RemindAt          *time.Time
+	NotificationTitle *string
+	NotificationBody  *string
 	FlagID            *string
 	SubflagID         *string
 	SourceInboxItemID *string
@@ -182,6 +186,8 @@ type Event struct {
 	EndAt             *time.Time
 	AllDay            bool
 	Location          *string
+	NotificationTitle *string
+	NotificationBody  *string
 	FlagID            *string
 	SubflagID         *string
 	SourceInboxItemID *string
@@ -261,6 +267,8 @@ type Routine struct {
 	Color             *string
 	IsActive          bool
 	IsCompletedToday  bool
+	NotificationTitle *string
+	NotificationBody  *string
 	FlagID            *string
 	SubflagID         *string
 	SourceInboxItemID *string

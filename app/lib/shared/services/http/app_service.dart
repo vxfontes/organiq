@@ -3,6 +3,6 @@ import 'package:organiq/shared/services/http/app_path.dart';
 
 class AppService {
   static String getBackEndBaseUrl() {
-    return '${AppEnv.apiHost}${AppPath.apiPrefix}';
+    return 'http://localhost:8080${AppPath.apiPrefix}';
   }
 }

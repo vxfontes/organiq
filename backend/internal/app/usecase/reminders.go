@@ -7,14 +7,16 @@ import (
 
 	"organiq/backend/internal/app/domain"
 	"organiq/backend/internal/app/repository"
+	"organiq/backend/internal/app/service"
 	"organiq/backend/internal/infra/postgres"
 )
 
 type ReminderUsecase struct {
-	Reminders       repository.ReminderRepository
-	Flags           repository.FlagRepository
-	Subflags        repository.SubflagRepository
-	NotificationLog repository.NotificationLogRepository
+	Reminders        repository.ReminderRepository
+	Flags            repository.FlagRepository
+	Subflags         repository.SubflagRepository
+	NotificationLog  repository.NotificationLogRepository
+	NotificationCopy *service.NotificationCopyService
 }
 
 type ReminderUpdateInput struct {
@@ -53,7 +55,23 @@ func (uc *ReminderUsecase) Create(ctx context.Context, userID, title string, sta
 		reminder.Status = parsed
 	}
 
-	return uc.Reminders.Create(ctx, reminder)
+	item, err := uc.Reminders.Create(ctx, reminder)
+	if err != nil {
+		return domain.Reminder{}, err
+	}
+
+	if uc.NotificationCopy != nil {
+		go func(id, title, desc string) {
+			ctxBg, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			nTitle, nBody, err := uc.NotificationCopy.GenerateCopy(ctxBg, "Reminder", title, desc)
+			if err == nil && nTitle != "" {
+				_ = uc.Reminders.UpdateNotificationCopy(ctxBg, id, nTitle, nBody)
+			}
+		}(item.ID, item.Title, "")
+	}
+
+	return item, nil
 }
 
 func (uc *ReminderUsecase) Update(ctx context.Context, userID, id string, input ReminderUpdateInput) (domain.Reminder, error) {
@@ -99,7 +117,23 @@ func (uc *ReminderUsecase) Update(ctx context.Context, userID, id string, input 
 		reminder.SubflagID = resolvedSubflagID
 	}
 
-	return uc.Reminders.Update(ctx, reminder)
+	item, err := uc.Reminders.Update(ctx, reminder)
+	if err != nil {
+		return domain.Reminder{}, err
+	}
+
+	if uc.NotificationCopy != nil {
+		go func(id, title, desc string) {
+			ctxBg, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			nTitle, nBody, err := uc.NotificationCopy.GenerateCopy(ctxBg, "Reminder", title, desc)
+			if err == nil && nTitle != "" {
+				_ = uc.Reminders.UpdateNotificationCopy(ctxBg, id, nTitle, nBody)
+			}
+		}(item.ID, item.Title, "")
+	}
+
+	return item, nil
 }
 
 func (uc *ReminderUsecase) Delete(ctx context.Context, userID, id string) error {

@@ -7,14 +7,16 @@ import (
 
 	"organiq/backend/internal/app/domain"
 	"organiq/backend/internal/app/repository"
+	"organiq/backend/internal/app/service"
 	"organiq/backend/internal/infra/postgres"
 )
 
 type TaskUsecase struct {
-	Tasks           repository.TaskRepository
-	Flags           repository.FlagRepository
-	Subflags        repository.SubflagRepository
-	NotificationLog repository.NotificationLogRepository
+	Tasks            repository.TaskRepository
+	Flags            repository.FlagRepository
+	Subflags         repository.SubflagRepository
+	NotificationLog  repository.NotificationLogRepository
+	NotificationCopy *service.NotificationCopyService
 }
 
 type TaskUpdateInput struct {
@@ -55,7 +57,27 @@ func (uc *TaskUsecase) Create(ctx context.Context, userID, title string, descrip
 	}
 	task.DueAt = dueAt
 
-	return uc.Tasks.Create(ctx, task)
+	item, err := uc.Tasks.Create(ctx, task)
+	if err != nil {
+		return domain.Task{}, err
+	}
+
+	if uc.NotificationCopy != nil {
+		desc := ""
+		if description != nil {
+			desc = *description
+		}
+		go func(id, title, desc string) {
+			ctxBg, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			nTitle, nBody, err := uc.NotificationCopy.GenerateCopy(ctxBg, "Task", title, desc)
+			if err == nil && nTitle != "" {
+				_ = uc.Tasks.UpdateNotificationCopy(ctxBg, id, nTitle, nBody)
+			}
+		}(item.ID, item.Title, desc)
+	}
+
+	return item, nil
 }
 
 func (uc *TaskUsecase) Update(ctx context.Context, userID, id string, input TaskUpdateInput) (domain.Task, error) {
@@ -104,7 +126,27 @@ func (uc *TaskUsecase) Update(ctx context.Context, userID, id string, input Task
 		task.SubflagID = resolvedSubflagID
 	}
 
-	return uc.Tasks.Update(ctx, task)
+	item, err := uc.Tasks.Update(ctx, task)
+	if err != nil {
+		return domain.Task{}, err
+	}
+
+	if uc.NotificationCopy != nil {
+		desc := ""
+		if item.Description != nil {
+			desc = *item.Description
+		}
+		go func(id, title, desc string) {
+			ctxBg, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			nTitle, nBody, err := uc.NotificationCopy.GenerateCopy(ctxBg, "Task", title, desc)
+			if err == nil && nTitle != "" {
+				_ = uc.Tasks.UpdateNotificationCopy(ctxBg, id, nTitle, nBody)
+			}
+		}(item.ID, item.Title, desc)
+	}
+
+	return item, nil
 }
 
 func (uc *TaskUsecase) Delete(ctx context.Context, userID, id string) error {

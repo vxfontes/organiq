@@ -9,17 +9,19 @@ import (
 
 	"organiq/backend/internal/app/domain"
 	"organiq/backend/internal/app/repository"
+	"organiq/backend/internal/app/service"
 	"organiq/backend/internal/infra/postgres"
 )
 
 type RoutineUsecase struct {
-	Routines        repository.RoutineRepository
-	Exceptions      repository.RoutineExceptionRepository
-	Completions     repository.RoutineCompletionRepository
-	Users           repository.UserRepository
-	Flags           repository.FlagRepository
-	Subflags        repository.SubflagRepository
-	NotificationLog repository.NotificationLogRepository
+	Routines         repository.RoutineRepository
+	Exceptions       repository.RoutineExceptionRepository
+	Completions      repository.RoutineCompletionRepository
+	Users            repository.UserRepository
+	Flags            repository.FlagRepository
+	Subflags         repository.SubflagRepository
+	NotificationLog  repository.NotificationLogRepository
+	NotificationCopy *service.NotificationCopyService
 }
 
 type RoutineInput struct {
@@ -133,7 +135,27 @@ func (uc *RoutineUsecase) Create(ctx context.Context, userID string, input Routi
 		return domain.Routine{}, err
 	}
 
-	return uc.Routines.Create(ctx, routine)
+	item, err := uc.Routines.Create(ctx, routine)
+	if err != nil {
+		return domain.Routine{}, err
+	}
+
+	if uc.NotificationCopy != nil {
+		desc := ""
+		if input.Description != nil {
+			desc = *input.Description
+		}
+		go func(id, title, desc string) {
+			ctxBg, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			nTitle, nBody, err := uc.NotificationCopy.GenerateCopy(ctxBg, "Routine", title, desc)
+			if err == nil && nTitle != "" {
+				_ = uc.Routines.UpdateNotificationCopy(ctxBg, id, nTitle, nBody)
+			}
+		}(item.ID, item.Title, desc)
+	}
+
+	return item, nil
 }
 
 func (uc *RoutineUsecase) Update(ctx context.Context, userID, id string, input RoutineUpdateInput) (domain.Routine, error) {
@@ -242,7 +264,27 @@ func (uc *RoutineUsecase) Update(ctx context.Context, userID, id string, input R
 		return domain.Routine{}, err
 	}
 
-	return uc.Routines.Update(ctx, routine)
+	item, err := uc.Routines.Update(ctx, routine)
+	if err != nil {
+		return domain.Routine{}, err
+	}
+
+	if uc.NotificationCopy != nil {
+		desc := ""
+		if item.Description != nil {
+			desc = *item.Description
+		}
+		go func(id, title, desc string) {
+			ctxBg, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			nTitle, nBody, err := uc.NotificationCopy.GenerateCopy(ctxBg, "Routine", title, desc)
+			if err == nil && nTitle != "" {
+				_ = uc.Routines.UpdateNotificationCopy(ctxBg, id, nTitle, nBody)
+			}
+		}(item.ID, item.Title, desc)
+	}
+
+	return item, nil
 }
 
 func (uc *RoutineUsecase) Validate(ctx context.Context, routine domain.Routine) error {

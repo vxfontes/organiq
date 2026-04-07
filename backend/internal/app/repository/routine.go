@@ -24,6 +24,7 @@ type RoutineRepository interface {
 	ListDailyStatus(ctx context.Context, userID string, weekday int, date string) ([]RoutineDailyStatus, error)
 	Toggle(ctx context.Context, userID, id string, isActive bool) error
 	CheckOverlap(ctx context.Context, userID string, weekdays []int, startTime, endTime string, excludeID *string) (bool, error)
+	UpdateNotificationCopy(ctx context.Context, id, title, body string) error
 }
 
 type RoutineExceptionRepository interface {
