@@ -56,7 +56,12 @@ export async function apiRequest<T>(
 
   if (res.status === 204) return undefined as T;
 
-  const data = (await res.json()) as T & { error?: string };
+  let data: T & { error?: string };
+  try {
+    data = (await res.json()) as T & { error?: string };
+  } catch {
+    throw new Error(`HTTP ${res.status} ${res.statusText}`);
+  }
 
   if (!res.ok) {
     throw new Error(data.error ?? `HTTP ${res.status}`);

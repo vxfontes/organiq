@@ -74,8 +74,9 @@ export const inboxTools: Tool[] = [
   {
     name: 'inbox_confirm',
     description:
-      'Confirms an inbox item, creating the final entity (task, reminder, event, or shopping list). The item status changes to CONFIRMED. ' +
-      'Payload per type — task: { dueAt? }, reminder: { at (required RFC3339) }, event: { start (RFC3339), end?, allDay }, shopping: { items: [{ title, quantity? }] }',
+      'Confirms an inbox item, creating the final entity. The item status changes to CONFIRMED. ' +
+      'Supported types: task, reminder, event, shopping. ' +
+      'Payload per type — task: { dueAt? (RFC3339 with timezone) }, reminder: { at (required RFC3339 with timezone) }, event: { start (RFC3339 with timezone), end?, allDay }, shopping: { items: [{ title, quantity? }] }',
     inputSchema: {
       type: 'object',
       properties: {

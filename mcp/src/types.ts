@@ -123,10 +123,15 @@ export interface AuthResponse {
   user: AuthUser;
 }
 
+export interface MeResponse {
+  user: AuthUser;
+}
+
 export interface ConfirmResponse {
   type: 'task' | 'reminder' | 'event' | 'shopping';
   task?: TaskResponse;
   reminder?: ReminderResponse;
   event?: EventResponse;
   shoppingList?: ShoppingListResponse;
+  shoppingItems?: ShoppingItemResponse[];
 }

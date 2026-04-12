@@ -24,7 +24,7 @@ export const eventTools: Tool[] = [
       type: 'object',
       properties: {
         title: { type: 'string', description: 'Event title' },
-        startAt: { type: 'string', description: 'Start datetime in RFC3339 format (required)' },
+        startAt: { type: 'string', description: 'Start datetime in RFC3339 format with timezone, e.g. 2026-04-15T14:00:00-03:00 (required)' },
         endAt: { type: 'string', description: 'End datetime in RFC3339 format' },
         allDay: { type: 'boolean', description: 'Whether this is an all-day event' },
         location: { type: 'string', description: 'Optional location string' },

@@ -24,7 +24,7 @@ export const reminderTools: Tool[] = [
       type: 'object',
       properties: {
         title: { type: 'string', description: 'Reminder title' },
-        remindAt: { type: 'string', description: 'When to remind, in RFC3339 format (required)' },
+        remindAt: { type: 'string', description: 'When to remind, in RFC3339 format with timezone, e.g. 2026-04-15T09:00:00-03:00 (required)' },
         flagId: { type: 'string', description: 'Optional flag UUID' },
         subflagId: { type: 'string', description: 'Optional subflag UUID' },
       },
@@ -40,7 +40,7 @@ export const reminderTools: Tool[] = [
         id: { type: 'string', description: 'Reminder UUID' },
         title: { type: 'string', description: 'New title' },
         status: { type: 'string', enum: ['OPEN', 'DONE'], description: 'New status' },
-        remindAt: { type: 'string', description: 'New remind datetime (RFC3339)' },
+        remindAt: { type: 'string', description: 'New remind datetime (RFC3339 with timezone)' },
         flagId: { type: 'string', description: 'New flag UUID or null to clear' },
         subflagId: { type: 'string', description: 'New subflag UUID or null to clear' },
       },

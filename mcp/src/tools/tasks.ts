@@ -25,7 +25,7 @@ export const taskTools: Tool[] = [
       properties: {
         title: { type: 'string', description: 'Task title' },
         description: { type: 'string', description: 'Optional task description' },
-        dueAt: { type: 'string', description: 'Optional due date in RFC3339 format' },
+        dueAt: { type: 'string', description: 'Optional due date in RFC3339 format with timezone, e.g. 2026-04-15T09:00:00-03:00' },
         flagId: { type: 'string', description: 'Optional flag UUID' },
         subflagId: { type: 'string', description: 'Optional subflag UUID' },
       },
@@ -43,7 +43,7 @@ export const taskTools: Tool[] = [
         title: { type: 'string', description: 'New title' },
         description: { type: 'string', description: 'New description' },
         status: { type: 'string', enum: ['OPEN', 'DONE'], description: 'New status' },
-        dueAt: { type: 'string', description: 'New due date (RFC3339) or null to clear' },
+        dueAt: { type: 'string', description: 'New due date (RFC3339 with timezone) or null to clear' },
         flagId: { type: 'string', description: 'New flag UUID or null to clear' },
         subflagId: { type: 'string', description: 'New subflag UUID or null to clear' },
       },

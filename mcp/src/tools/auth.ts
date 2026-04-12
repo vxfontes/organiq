@@ -1,6 +1,6 @@
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import { apiRequest, login } from '../client.js';
-import type { AuthResponse } from '../types.js';
+import type { AuthResponse, MeResponse } from '../types.js';
 
 export const authTools: Tool[] = [
   {
@@ -34,7 +34,7 @@ export async function handleAuthTool(
 ): Promise<string> {
   switch (name) {
     case 'auth_me': {
-      const result = await apiRequest<AuthResponse>('GET', '/v1/me');
+      const result = await apiRequest<MeResponse>('GET', '/v1/me');
       return JSON.stringify(result.user, null, 2);
     }
 
