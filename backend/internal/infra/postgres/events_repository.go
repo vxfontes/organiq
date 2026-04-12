@@ -190,11 +190,11 @@ func (r *EventRepository) ListUpcoming(ctx context.Context, start, end time.Time
 	return items, nil
 }
 
-func (r *EventRepository) UpdateNotificationCopy(ctx context.Context, id, title, body string) error {
+func (r *EventRepository) UpdateNotificationCopy(ctx context.Context, userID, id, title, body string) error {
 	_, err := r.db.ExecContext(ctx, `
-		UPDATE organiq.events 
-		SET notification_title = $1, notification_body = $2, updated_at = now() 
-		WHERE id = $3
-	`, title, body, id)
+		UPDATE organiq.events
+		SET notification_title = $1, notification_body = $2, updated_at = now()
+		WHERE id = $3 AND user_id = $4
+	`, title, body, id, userID)
 	return err
 }

@@ -510,7 +510,7 @@ class HomeController implements OQController {
   }
 
   Future<void> refresh() async {
-    await _fetch(initialLoad: false);
+    await _fetch(initialLoad: false, forceRefresh: true);
   }
 
   Future<void> toggleCriticalTaskAt(int index, bool done) async {
@@ -664,11 +664,11 @@ class HomeController implements OQController {
   }
 
   Future<void> _reloadDashboardAfterMutation() async {
-    final result = await _getHomeDashboardUsecase.call();
+    final result = await _getHomeDashboardUsecase.call(forceRefresh: true);
     result.fold((_) => null, _applyDashboard);
   }
 
-  Future<void> _fetch({required bool initialLoad}) async {
+  Future<void> _fetch({required bool initialLoad, bool forceRefresh = false}) async {
     if (loading.value || refreshing.value) return;
 
     if (initialLoad) {
@@ -679,7 +679,7 @@ class HomeController implements OQController {
     error.value = null;
 
     try {
-      final dashboardResult = await _getHomeDashboardUsecase.call();
+      final dashboardResult = await _getHomeDashboardUsecase.call(forceRefresh: forceRefresh);
       dashboardResult.fold((failure) {
         dashboardData.value = null;
         _setError(

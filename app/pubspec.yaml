@@ -2,7 +2,7 @@ name: organiq
 description: "Inbox App."
 publish_to: 'none'
 
-version: 0.8.0+0008000 # 1.2.3 vira -> 0102003 / 11.20.30 vira -> 1120030
+version: 0.9.0+0009000 # 1.2.3 vira -> 0102003 / 11.20.30 vira -> 1120030
 
 environment:
   sdk: ^3.9.2
@@ -16,7 +16,6 @@ dependencies:
   flutter_svg: ^2.0.10
   flutter_modular: ^6.3.4
   hugeicons: 1.1.5
-  http: ^1.2.2
   flutter_secure_storage: ^9.2.2
   json_annotation: ^4.10.0
   dartz: ^0.10.1
@@ -33,6 +32,8 @@ dependencies:
   device_info_plus: ^11.3.0
   intl: ^0.20.2
   url_launcher: ^6.3.1
+  shared_preferences: ^2.3.3
+  connectivity_plus: ^6.1.4
 
 dev_dependencies:
   flutter_test:

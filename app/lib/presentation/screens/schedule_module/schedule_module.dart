@@ -10,7 +10,7 @@ class ScheduleModule extends Module {
 
   @override
   void binds(Injector i) {
-    i.addSingleton<ScheduleController>(ScheduleController.new);
+    i.addLazySingleton<ScheduleController>(ScheduleController.new);
   }
 
   @override

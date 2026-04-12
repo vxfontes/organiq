@@ -188,11 +188,11 @@ func (r *ReminderRepository) ListUpcoming(ctx context.Context, start, end time.T
 	return items, nil
 }
 
-func (r *ReminderRepository) UpdateNotificationCopy(ctx context.Context, id, title, body string) error {
+func (r *ReminderRepository) UpdateNotificationCopy(ctx context.Context, userID, id, title, body string) error {
 	_, err := r.db.ExecContext(ctx, `
-		UPDATE organiq.reminders 
-		SET notification_title = $1, notification_body = $2, updated_at = now() 
-		WHERE id = $3
-	`, title, body, id)
+		UPDATE organiq.reminders
+		SET notification_title = $1, notification_body = $2, updated_at = now()
+		WHERE id = $3 AND user_id = $4
+	`, title, body, id, userID)
 	return err
 }

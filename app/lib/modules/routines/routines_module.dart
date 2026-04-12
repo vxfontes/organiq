@@ -15,10 +15,19 @@ import 'package:organiq/modules/routines/domain/usecases/get_today_summary_useca
 import 'package:organiq/modules/routines/domain/usecases/toggle_routine_usecase.dart';
 import 'package:organiq/modules/routines/domain/usecases/uncomplete_routine_usecase.dart';
 import 'package:organiq/modules/routines/domain/usecases/update_routine_usecase.dart';
+import 'package:organiq/shared/services/cache/cache_service.dart';
+import 'package:organiq/shared/services/connectivity/connectivity_service.dart';
+import 'package:organiq/shared/services/http/http_client.dart';
 
 class RoutinesModule {
   static void binds(Injector i) {
-    i.addLazySingleton<IRoutineRepository>(RoutineRepository.new);
+    i.addLazySingleton<IRoutineRepository>(
+      () => RoutineRepository(
+        i.get<IHttpClient>(),
+        i.get<ICacheService>(),
+        i.get<IConnectivityService>(),
+      ),
+    );
 
     i.addLazySingleton(GetRoutinesUsecase.new);
     i.addLazySingleton(GetRoutinesByWeekdayUsecase.new);

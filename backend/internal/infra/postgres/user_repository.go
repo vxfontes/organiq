@@ -5,17 +5,23 @@ import (
 	"database/sql"
 	"errors"
 
+	"github.com/lib/pq"
+
 	"organiq/backend/internal/app/domain"
 )
 
 var ErrUserNotFound = errors.New("user_not_found")
 
 type UserRepository struct {
-	db *DB
+	db dbtx
 }
 
 func NewUserRepository(db *DB) *UserRepository {
 	return &UserRepository{db: db}
+}
+
+func NewUserRepositoryTx(tx *sql.Tx) *UserRepository {
+	return &UserRepository{db: tx}
 }
 
 func (r *UserRepository) Create(ctx context.Context, user domain.User) (domain.User, error) {
@@ -27,6 +33,9 @@ func (r *UserRepository) Create(ctx context.Context, user domain.User) (domain.U
 
 	var id string
 	if err := row.Scan(&id); err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
+			return domain.User{}, ErrEmailAlreadyExists
+		}
 		return domain.User{}, err
 	}
 	user.ID = id

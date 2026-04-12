@@ -67,14 +67,14 @@ func (uc *TaskUsecase) Create(ctx context.Context, userID, title string, descrip
 		if description != nil {
 			desc = *description
 		}
-		go func(id, title, desc string) {
+		go func(uid, id, title, desc string) {
 			ctxBg, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancel()
 			nTitle, nBody, err := uc.NotificationCopy.GenerateCopy(ctxBg, "Task", title, desc)
 			if err == nil && nTitle != "" {
-				_ = uc.Tasks.UpdateNotificationCopy(ctxBg, id, nTitle, nBody)
+				_ = uc.Tasks.UpdateNotificationCopy(ctxBg, uid, id, nTitle, nBody)
 			}
-		}(item.ID, item.Title, desc)
+		}(userID, item.ID, item.Title, desc)
 	}
 
 	return item, nil
@@ -136,14 +136,14 @@ func (uc *TaskUsecase) Update(ctx context.Context, userID, id string, input Task
 		if item.Description != nil {
 			desc = *item.Description
 		}
-		go func(id, title, desc string) {
+		go func(uid, id, title, desc string) {
 			ctxBg, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancel()
 			nTitle, nBody, err := uc.NotificationCopy.GenerateCopy(ctxBg, "Task", title, desc)
 			if err == nil && nTitle != "" {
-				_ = uc.Tasks.UpdateNotificationCopy(ctxBg, id, nTitle, nBody)
+				_ = uc.Tasks.UpdateNotificationCopy(ctxBg, uid, id, nTitle, nBody)
 			}
-		}(item.ID, item.Title, desc)
+		}(userID, item.ID, item.Title, desc)
 	}
 
 	return item, nil

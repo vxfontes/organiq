@@ -11,11 +11,15 @@ import (
 )
 
 type NotificationPreferencesRepository struct {
-	db *DB
+	db dbtx
 }
 
 func NewNotificationPreferencesRepository(db *DB) *NotificationPreferencesRepository {
 	return &NotificationPreferencesRepository{db: db}
+}
+
+func NewNotificationPreferencesRepositoryTx(tx *sql.Tx) *NotificationPreferencesRepository {
+	return &NotificationPreferencesRepository{db: tx}
 }
 
 func (r *NotificationPreferencesRepository) GetByUserID(ctx context.Context, userID string) (domain.NotificationPreferences, error) {

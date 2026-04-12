@@ -15,6 +15,10 @@ class HomeDynamicHeader extends StatelessWidget {
 
   final String? userName;
 
+  static final _morningSkyPainter = MorningSkyPainter();
+  static final _afternoonSkyPainter = AfternoonSkyPainter();
+  static final _nightSkyPainter = NightSkyPainter();
+
   @override
   Widget build(BuildContext context) {
     final now = DateTimeUtils.nowInUserTimezone();
@@ -123,7 +127,7 @@ class HomeDynamicHeader extends StatelessWidget {
           end: Alignment.bottomCenter,
           colors: [AppColors.skyMorningTop, AppColors.skyMorningBottom],
         ),
-        skyPainter: MorningSkyPainter(),
+        skyPainter: _morningSkyPainter,
       );
     } else if (hour >= 12 && hour < 18) {
       return GreetingStyle(
@@ -139,7 +143,7 @@ class HomeDynamicHeader extends StatelessWidget {
             AppColors.skyAfternoonBottom,
           ],
         ),
-        skyPainter: AfternoonSkyPainter(),
+        skyPainter: _afternoonSkyPainter,
       );
     } else {
       return GreetingStyle(
@@ -151,7 +155,7 @@ class HomeDynamicHeader extends StatelessWidget {
           end: Alignment.bottomCenter,
           colors: [AppColors.skyNightTop, AppColors.skyNightBottom],
         ),
-        skyPainter: NightSkyPainter(),
+        skyPainter: _nightSkyPainter,
       );
     }
   }

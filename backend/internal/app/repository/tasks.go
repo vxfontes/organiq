@@ -14,5 +14,5 @@ type TaskRepository interface {
 	Get(ctx context.Context, userID, id string) (domain.Task, error)
 	List(ctx context.Context, userID string, opts ListOptions) ([]domain.Task, *string, error)
 	ListUpcoming(ctx context.Context, start, end time.Time) ([]domain.Task, error)
-	UpdateNotificationCopy(ctx context.Context, id, title, body string) error
+	UpdateNotificationCopy(ctx context.Context, userID, id, title, body string) error
 }

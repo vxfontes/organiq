@@ -14,5 +14,5 @@ type ReminderRepository interface {
 	Get(ctx context.Context, userID, id string) (domain.Reminder, error)
 	List(ctx context.Context, userID string, opts ListOptions) ([]domain.Reminder, *string, error)
 	ListUpcoming(ctx context.Context, start, end time.Time) ([]domain.Reminder, error)
-	UpdateNotificationCopy(ctx context.Context, id, title, body string) error
+	UpdateNotificationCopy(ctx context.Context, userID, id, title, body string) error
 }

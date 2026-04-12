@@ -62,6 +62,7 @@ class _SignupPageState extends OQState<SignupPage, SignupController> {
         OQTextField(
           label: 'Nome completo',
           hint: 'Como podemos te chamar?',
+          autofillHints: const [AutofillHints.name],
           prefixIcon: const OQIcon(
             OQIcon.personOutline,
             color: AppColors.textMuted,
@@ -73,6 +74,7 @@ class _SignupPageState extends OQState<SignupPage, SignupController> {
           label: 'Email',
           hint: 'voce@exemplo.com',
           keyboardType: TextInputType.emailAddress,
+          autofillHints: const [AutofillHints.email],
           prefixIcon: const OQIcon(
             OQIcon.mailOutline,
             color: AppColors.textMuted,
@@ -84,6 +86,7 @@ class _SignupPageState extends OQState<SignupPage, SignupController> {
           label: 'Senha',
           hint: 'Crie uma senha segura',
           obscureText: true,
+          autofillHints: const [AutofillHints.newPassword],
           prefixIcon: const OQIcon(
             OQIcon.lockOutline,
             color: AppColors.textMuted,

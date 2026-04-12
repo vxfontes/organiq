@@ -81,6 +81,7 @@ class _LoginPageState extends OQState<LoginPage, LoginController> {
           label: 'Email',
           hint: 'voce@exemplo.com',
           keyboardType: TextInputType.emailAddress,
+          autofillHints: const [AutofillHints.email],
           prefixIcon: const OQIcon(
             OQIcon.mailOutline,
             color: AppColors.textMuted,
@@ -92,6 +93,7 @@ class _LoginPageState extends OQState<LoginPage, LoginController> {
           label: 'Senha',
           hint: 'Digite sua senha',
           obscureText: true,
+          autofillHints: const [AutofillHints.password],
           prefixIcon: const OQIcon(
             OQIcon.lockOutline,
             color: AppColors.textMuted,

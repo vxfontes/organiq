@@ -18,3 +18,14 @@ type TxRepositories struct {
 type TxRunner interface {
 	WithTx(ctx context.Context, fn func(tx TxRepositories) error) error
 }
+
+// AuthTxRepositories bundles repositories needed for atomic signup.
+type AuthTxRepositories struct {
+	Users             UserRepository
+	NotificationPrefs NotificationPreferencesRepository
+}
+
+// AuthTxRunner executes the signup flow atomically.
+type AuthTxRunner interface {
+	WithAuthTx(ctx context.Context, fn func(tx AuthTxRepositories) error) error
+}

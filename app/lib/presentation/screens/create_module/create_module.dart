@@ -11,8 +11,8 @@ class CreateModule extends Module {
 
   @override
   void binds(Injector i) {
-    i.addSingleton<CreateController>(CreateController.new);
-    i.addSingleton<SuggestionController>(SuggestionController.new);
+    i.addLazySingleton<CreateController>(CreateController.new);
+    i.addLazySingleton<SuggestionController>(SuggestionController.new);
   }
 
   @override

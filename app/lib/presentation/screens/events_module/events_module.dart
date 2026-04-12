@@ -10,7 +10,7 @@ class EventsModule extends Module {
 
   @override
   void binds(Injector i) {
-    i.addSingleton<EventsController>(EventsController.new);
+    i.addLazySingleton<EventsController>(EventsController.new);
   }
 
   @override

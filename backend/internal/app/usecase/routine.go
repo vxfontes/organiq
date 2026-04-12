@@ -145,14 +145,14 @@ func (uc *RoutineUsecase) Create(ctx context.Context, userID string, input Routi
 		if input.Description != nil {
 			desc = *input.Description
 		}
-		go func(id, title, desc string) {
+		go func(uid, id, title, desc string) {
 			ctxBg, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancel()
 			nTitle, nBody, err := uc.NotificationCopy.GenerateCopy(ctxBg, "Routine", title, desc)
 			if err == nil && nTitle != "" {
-				_ = uc.Routines.UpdateNotificationCopy(ctxBg, id, nTitle, nBody)
+				_ = uc.Routines.UpdateNotificationCopy(ctxBg, uid, id, nTitle, nBody)
 			}
-		}(item.ID, item.Title, desc)
+		}(userID, item.ID, item.Title, desc)
 	}
 
 	return item, nil
@@ -274,14 +274,14 @@ func (uc *RoutineUsecase) Update(ctx context.Context, userID, id string, input R
 		if item.Description != nil {
 			desc = *item.Description
 		}
-		go func(id, title, desc string) {
+		go func(uid, id, title, desc string) {
 			ctxBg, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancel()
 			nTitle, nBody, err := uc.NotificationCopy.GenerateCopy(ctxBg, "Routine", title, desc)
 			if err == nil && nTitle != "" {
-				_ = uc.Routines.UpdateNotificationCopy(ctxBg, id, nTitle, nBody)
+				_ = uc.Routines.UpdateNotificationCopy(ctxBg, uid, id, nTitle, nBody)
 			}
-		}(item.ID, item.Title, desc)
+		}(userID, item.ID, item.Title, desc)
 	}
 
 	return item, nil

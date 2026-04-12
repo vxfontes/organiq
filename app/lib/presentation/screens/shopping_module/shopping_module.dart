@@ -10,7 +10,7 @@ class ShoppingModule extends Module {
 
   @override
   void binds(Injector i) {
-    i.addSingleton<ShoppingController>(ShoppingController.new);
+    i.addLazySingleton<ShoppingController>(ShoppingController.new);
   }
 
   @override

@@ -4,11 +4,22 @@ import 'package:organiq/modules/auth/domain/usecases/get_me_usecase.dart';
 import 'package:organiq/modules/auth/domain/usecases/login_usecase.dart';
 import 'package:organiq/modules/auth/domain/usecases/logout_usecase.dart';
 import 'package:organiq/modules/auth/domain/usecases/signup_usecase.dart';
+import 'package:organiq/shared/services/analytics/app_session_service.dart';
+import 'package:organiq/shared/services/cache/cache_service.dart';
+import 'package:organiq/shared/services/http/http_client.dart';
+import 'package:organiq/shared/storage/auth_token_store.dart';
 
 class AuthModule {
   static void binds(i) {
     // repository
-    i.addLazySingleton<IAuthRepository>(AuthRepository.new);
+    i.addLazySingleton<IAuthRepository>(
+      () => AuthRepository(
+        i.get<IHttpClient>(),
+        i.get<AuthTokenStore>(),
+        i.get<AppSessionService>(),
+        i.get<ICacheService>(),
+      ),
+    );
 
     // usecases
     i.addLazySingleton<GetMeUsecase>(GetMeUsecase.new);

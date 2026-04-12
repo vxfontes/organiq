@@ -18,12 +18,12 @@ class AppRoutes {
   static const settingsNotifications = '/settings/notifications';
 
   // root children (full paths)
-  static const rootHome = '/root/home';
-  static const rootSchedule = '/root/schedule';
-  static const rootReminders = '/root/reminders';
-  static const rootCreate = '/root/create';
-  static const rootShopping = '/root/shopping';
-  static const rootEvents = '/root/events';
+  static const rootHome = '/root/home/';
+  static const rootSchedule = '/root/schedule/';
+  static const rootReminders = '/root/reminders/';
+  static const rootCreate = '/root/create/';
+  static const rootShopping = '/root/shopping/';
+  static const rootEvents = '/root/events/';
 
   // root children (module/child routes)
   static const home = '/home';

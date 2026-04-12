@@ -18,10 +18,10 @@ class SettingsModule extends Module {
 
   @override
   void binds(Injector i) {
-    i.addSingleton<SettingsController>(SettingsController.new);
-    i.addSingleton<SettingsAccountController>(SettingsAccountController.new);
-    i.addSingleton<SettingsContextsController>(SettingsContextsController.new);
-    i.addSingleton<SettingsNotificationsController>(
+    i.addLazySingleton<SettingsController>(SettingsController.new);
+    i.addLazySingleton<SettingsAccountController>(SettingsAccountController.new);
+    i.addLazySingleton<SettingsContextsController>(SettingsContextsController.new);
+    i.addLazySingleton<SettingsNotificationsController>(
       SettingsNotificationsController.new,
     );
   }

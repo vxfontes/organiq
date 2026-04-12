@@ -39,7 +39,7 @@ func main() {
 	defer db.Close()
 
 	// AI Client
-	aiClient, err := ai.NewClient(cfg)
+	aiClient, err := ai.NewSuggestionClient(cfg)
 	if err != nil {
 		slog.Error("failed to init ai client", slog.String("error", err.Error()))
 		os.Exit(1)
@@ -92,7 +92,7 @@ func loadEnvFile() {
 }
 
 func processTasks(ctx context.Context, db *postgres.DB, repo *postgres.TaskRepository, svc *service.NotificationCopyService) {
-	rows, err := db.QueryContext(ctx, "SELECT id, title, description FROM organiq.tasks WHERE notification_title IS NULL")
+	rows, err := db.QueryContext(ctx, "SELECT id, user_id, title, description FROM organiq.tasks WHERE notification_title IS NULL")
 	if err != nil {
 		slog.Error("error listing tasks", slog.String("error", err.Error()))
 		return
@@ -101,16 +101,16 @@ func processTasks(ctx context.Context, db *postgres.DB, repo *postgres.TaskRepos
 
 	count := 0
 	for rows.Next() {
-		var id, title string
+		var id, userID, title string
 		var desc sql.NullString
-		if err := rows.Scan(&id, &title, &desc); err != nil {
+		if err := rows.Scan(&id, &userID, &title, &desc); err != nil {
 			continue
 		}
-		
+
 		fmt.Printf("Generating copy for Task: %s\n", title)
 		t, b, err := svc.GenerateCopy(ctx, "Task", title, desc.String)
 		if err == nil {
-			_ = repo.UpdateNotificationCopy(ctx, id, t, b)
+			_ = repo.UpdateNotificationCopy(ctx, userID, id, t, b)
 			count++
 			time.Sleep(200 * time.Millisecond) // avoid rate limits
 		}
@@ -119,7 +119,7 @@ func processTasks(ctx context.Context, db *postgres.DB, repo *postgres.TaskRepos
 }
 
 func processEvents(ctx context.Context, db *postgres.DB, repo *postgres.EventRepository, svc *service.NotificationCopyService) {
-	rows, err := db.QueryContext(ctx, "SELECT id, title FROM organiq.events WHERE notification_title IS NULL")
+	rows, err := db.QueryContext(ctx, "SELECT id, user_id, title FROM organiq.events WHERE notification_title IS NULL")
 	if err != nil {
 		slog.Error("error listing events", slog.String("error", err.Error()))
 		return
@@ -128,15 +128,15 @@ func processEvents(ctx context.Context, db *postgres.DB, repo *postgres.EventRep
 
 	count := 0
 	for rows.Next() {
-		var id, title string
-		if err := rows.Scan(&id, &title); err != nil {
+		var id, userID, title string
+		if err := rows.Scan(&id, &userID, &title); err != nil {
 			continue
 		}
-		
+
 		fmt.Printf("Generating copy for Event: %s\n", title)
 		t, b, err := svc.GenerateCopy(ctx, "Event", title, "")
 		if err == nil {
-			_ = repo.UpdateNotificationCopy(ctx, id, t, b)
+			_ = repo.UpdateNotificationCopy(ctx, userID, id, t, b)
 			count++
 			time.Sleep(200 * time.Millisecond)
 		}
@@ -145,7 +145,7 @@ func processEvents(ctx context.Context, db *postgres.DB, repo *postgres.EventRep
 }
 
 func processReminders(ctx context.Context, db *postgres.DB, repo *postgres.ReminderRepository, svc *service.NotificationCopyService) {
-	rows, err := db.QueryContext(ctx, "SELECT id, title FROM organiq.reminders WHERE notification_title IS NULL")
+	rows, err := db.QueryContext(ctx, "SELECT id, user_id, title FROM organiq.reminders WHERE notification_title IS NULL")
 	if err != nil {
 		slog.Error("error listing reminders", slog.String("error", err.Error()))
 		return
@@ -154,15 +154,15 @@ func processReminders(ctx context.Context, db *postgres.DB, repo *postgres.Remin
 
 	count := 0
 	for rows.Next() {
-		var id, title string
-		if err := rows.Scan(&id, &title); err != nil {
+		var id, userID, title string
+		if err := rows.Scan(&id, &userID, &title); err != nil {
 			continue
 		}
-		
+
 		fmt.Printf("Generating copy for Reminder: %s\n", title)
 		t, b, err := svc.GenerateCopy(ctx, "Reminder", title, "")
 		if err == nil {
-			_ = repo.UpdateNotificationCopy(ctx, id, t, b)
+			_ = repo.UpdateNotificationCopy(ctx, userID, id, t, b)
 			count++
 			time.Sleep(200 * time.Millisecond)
 		}
@@ -171,7 +171,7 @@ func processReminders(ctx context.Context, db *postgres.DB, repo *postgres.Remin
 }
 
 func processRoutines(ctx context.Context, db *postgres.DB, repo *postgres.RoutineRepositoryImpl, svc *service.NotificationCopyService) {
-	rows, err := db.QueryContext(ctx, "SELECT id, title, description FROM organiq.routines WHERE notification_title IS NULL")
+	rows, err := db.QueryContext(ctx, "SELECT id, user_id, title, description FROM organiq.routines WHERE notification_title IS NULL")
 	if err != nil {
 		slog.Error("error listing routines", slog.String("error", err.Error()))
 		return
@@ -180,16 +180,16 @@ func processRoutines(ctx context.Context, db *postgres.DB, repo *postgres.Routin
 
 	count := 0
 	for rows.Next() {
-		var id, title string
+		var id, userID, title string
 		var desc sql.NullString
-		if err := rows.Scan(&id, &title, &desc); err != nil {
+		if err := rows.Scan(&id, &userID, &title, &desc); err != nil {
 			continue
 		}
-		
+
 		fmt.Printf("Generating copy for Routine: %s\n", title)
 		t, b, err := svc.GenerateCopy(ctx, "Routine", title, desc.String)
 		if err == nil {
-			_ = repo.UpdateNotificationCopy(ctx, id, t, b)
+			_ = repo.UpdateNotificationCopy(ctx, userID, id, t, b)
 			count++
 			time.Sleep(200 * time.Millisecond)
 		}
