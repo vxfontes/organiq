@@ -6,7 +6,9 @@ import 'package:organiq/modules/reminders/data/models/reminder_create_input.dart
 import 'package:organiq/modules/reminders/data/models/reminder_update_input.dart';
 import 'package:organiq/modules/reminders/domain/repositories/i_reminder_repository.dart';
 import 'package:organiq/shared/errors/api_error_mapper.dart';
+import 'package:organiq/shared/errors/exception_mapper.dart';
 import 'package:organiq/shared/errors/failures.dart';
+import 'package:organiq/shared/extensions/response_model_extensions.dart';
 import 'package:organiq/shared/services/http/app_path.dart';
 import 'package:organiq/shared/services/http/http_client.dart';
 
@@ -29,10 +31,8 @@ class ReminderRepository implements IReminderRepository {
         queryParameters: query.isEmpty ? null : query,
       );
 
-      final statusCode = response.statusCode ?? 0;
-      if (_isSuccess(statusCode)) {
-        final data = _asMap(response.data);
-        return Right(ReminderListOutput.fromJson(data));
+      if (response.isSuccess) {
+        return Right(ReminderListOutput.fromJson(response.asMap()));
       }
 
       return Left(
@@ -44,7 +44,13 @@ class ReminderRepository implements IReminderRepository {
         ),
       );
     } catch (err) {
-      return Left(GetListFailure(message: err.toString()));
+      return Left(
+        ExceptionMapper.toFailure(
+          err,
+          fallbackMessage: 'Erro ao carregar lembretes.',
+          failureFactory: (msg) => GetListFailure(message: msg),
+        ),
+      );
     }
   }
 
@@ -58,9 +64,8 @@ class ReminderRepository implements IReminderRepository {
         data: input.toJson(),
       );
 
-      final statusCode = response.statusCode ?? 0;
-      if (_isSuccess(statusCode)) {
-        return Right(ReminderOutput.fromJson(_asMap(response.data)));
+      if (response.isSuccess) {
+        return Right(ReminderOutput.fromJson(response.asMap()));
       }
 
       return Left(
@@ -72,7 +77,13 @@ class ReminderRepository implements IReminderRepository {
         ),
       );
     } catch (err) {
-      return Left(SaveFailure(message: err.toString()));
+      return Left(
+        ExceptionMapper.toFailure(
+          err,
+          fallbackMessage: 'Erro ao criar lembrete.',
+          failureFactory: (msg) => SaveFailure(message: msg),
+        ),
+      );
     }
   }
 
@@ -86,21 +97,26 @@ class ReminderRepository implements IReminderRepository {
         data: input.toJson(),
       );
 
-      final statusCode = response.statusCode ?? 0;
-      if (_isSuccess(statusCode)) {
-        return Right(ReminderOutput.fromJson(_asMap(response.data)));
+      if (response.isSuccess) {
+        return Right(ReminderOutput.fromJson(response.asMap()));
       }
 
       return Left(
         UpdateFailure(
           message: ApiErrorMapper.fromResponseData(
             response.data,
-            fallbackMessage: 'Erro ao carregar lembretes.',
+            fallbackMessage: 'Erro ao atualizar lembrete.',
           ),
         ),
       );
     } catch (err) {
-      return Left(UpdateFailure(message: err.toString()));
+      return Left(
+        ExceptionMapper.toFailure(
+          err,
+          fallbackMessage: 'Erro ao atualizar lembrete.',
+          failureFactory: (msg) => UpdateFailure(message: msg),
+        ),
+      );
     }
   }
 
@@ -109,8 +125,7 @@ class ReminderRepository implements IReminderRepository {
     try {
       final response = await _httpClient.delete(AppPath.reminderById(id));
 
-      final statusCode = response.statusCode ?? 0;
-      if (_isSuccess(statusCode)) {
+      if (response.isSuccess) {
         return const Right(unit);
       }
 
@@ -123,17 +138,13 @@ class ReminderRepository implements IReminderRepository {
         ),
       );
     } catch (err) {
-      return Left(DeleteFailure(message: err.toString()));
+      return Left(
+        ExceptionMapper.toFailure(
+          err,
+          fallbackMessage: 'Erro ao excluir lembrete.',
+          failureFactory: (msg) => DeleteFailure(message: msg),
+        ),
+      );
     }
-  }
-
-  bool _isSuccess(int statusCode) => statusCode >= 200 && statusCode < 300;
-
-  Map<String, dynamic> _asMap(dynamic data) {
-    if (data is Map<String, dynamic>) return data;
-    if (data is Map) {
-      return data.map((key, value) => MapEntry(key.toString(), value));
-    }
-    return <String, dynamic>{};
   }
 }

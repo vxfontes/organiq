@@ -2,7 +2,15 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class TokenStorage {
   const TokenStorage({FlutterSecureStorage? secureStorage})
-    : _storage = secureStorage ?? const FlutterSecureStorage();
+    : _storage = secureStorage ??
+          const FlutterSecureStorage(
+            aOptions: AndroidOptions(
+              encryptedSharedPreferences: true,
+            ),
+            iOptions: IOSOptions(
+              accessibility: KeychainAccessibility.first_unlock_this_device,
+            ),
+          );
 
   static const _tokenKey = 'auth_token';
 

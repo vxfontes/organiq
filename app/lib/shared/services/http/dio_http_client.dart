@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:firebase_performance/firebase_performance.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:organiq/shared/errors/api_error_mapper.dart';
 import 'package:organiq/shared/services/analytics/app_error_reporter.dart';
 import 'package:organiq/shared/services/analytics/app_monitoring_service.dart';
@@ -268,8 +269,16 @@ class DioHttpClient implements IHttpClient {
     ]);
     _instance.interceptors.add(
       InterceptorsWrapper(
-        onError: (err, handler) {
+        onError: (err, handler) async {
           _reportHttpError(err);
+          if (err.response?.statusCode == 401) {
+            final authFlag = err.requestOptions.extra['auth'];
+            final isUnauthenticatedRequest = authFlag == false;
+            if (!isUnauthenticatedRequest) {
+              await _tokenStore?.clearToken();
+              Modular.to.navigate('/auth/');
+            }
+          }
           handler.next(err);
         },
       ),

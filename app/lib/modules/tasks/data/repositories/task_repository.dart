@@ -6,7 +6,9 @@ import 'package:organiq/modules/tasks/data/models/task_create_input.dart';
 import 'package:organiq/modules/tasks/data/models/task_update_input.dart';
 import 'package:organiq/modules/tasks/domain/repositories/i_task_repository.dart';
 import 'package:organiq/shared/errors/api_error_mapper.dart';
+import 'package:organiq/shared/errors/exception_mapper.dart';
 import 'package:organiq/shared/errors/failures.dart';
+import 'package:organiq/shared/extensions/response_model_extensions.dart';
 import 'package:organiq/shared/services/http/app_path.dart';
 import 'package:organiq/shared/services/http/http_client.dart';
 
@@ -29,10 +31,8 @@ class TaskRepository implements ITaskRepository {
         queryParameters: query.isEmpty ? null : query,
       );
 
-      final statusCode = response.statusCode ?? 0;
-      if (_isSuccess(statusCode)) {
-        final data = _asMap(response.data);
-        return Right(TaskListOutput.fromJson(data));
+      if (response.isSuccess) {
+        return Right(TaskListOutput.fromJson(response.asMap()));
       }
 
       return Left(
@@ -44,7 +44,13 @@ class TaskRepository implements ITaskRepository {
         ),
       );
     } catch (err) {
-      return Left(GetListFailure(message: err.toString()));
+      return Left(
+        ExceptionMapper.toFailure(
+          err,
+          fallbackMessage: 'Erro ao carregar tarefas.',
+          failureFactory: (msg) => GetListFailure(message: msg),
+        ),
+      );
     }
   }
 
@@ -56,21 +62,26 @@ class TaskRepository implements ITaskRepository {
         data: input.toJson(),
       );
 
-      final statusCode = response.statusCode ?? 0;
-      if (_isSuccess(statusCode)) {
-        return Right(TaskOutput.fromJson(_asMap(response.data)));
+      if (response.isSuccess) {
+        return Right(TaskOutput.fromJson(response.asMap()));
       }
 
       return Left(
         SaveFailure(
           message: ApiErrorMapper.fromResponseData(
             response.data,
-            fallbackMessage: 'Erro ao carregar tarefas.',
+            fallbackMessage: 'Erro ao criar tarefa.',
           ),
         ),
       );
     } catch (err) {
-      return Left(SaveFailure(message: err.toString()));
+      return Left(
+        ExceptionMapper.toFailure(
+          err,
+          fallbackMessage: 'Erro ao criar tarefa.',
+          failureFactory: (msg) => SaveFailure(message: msg),
+        ),
+      );
     }
   }
 
@@ -82,21 +93,26 @@ class TaskRepository implements ITaskRepository {
         data: input.toJson(),
       );
 
-      final statusCode = response.statusCode ?? 0;
-      if (_isSuccess(statusCode)) {
-        return Right(TaskOutput.fromJson(_asMap(response.data)));
+      if (response.isSuccess) {
+        return Right(TaskOutput.fromJson(response.asMap()));
       }
 
       return Left(
         UpdateFailure(
           message: ApiErrorMapper.fromResponseData(
             response.data,
-            fallbackMessage: 'Erro ao carregar tarefas.',
+            fallbackMessage: 'Erro ao atualizar tarefa.',
           ),
         ),
       );
     } catch (err) {
-      return Left(UpdateFailure(message: err.toString()));
+      return Left(
+        ExceptionMapper.toFailure(
+          err,
+          fallbackMessage: 'Erro ao atualizar tarefa.',
+          failureFactory: (msg) => UpdateFailure(message: msg),
+        ),
+      );
     }
   }
 
@@ -105,8 +121,7 @@ class TaskRepository implements ITaskRepository {
     try {
       final response = await _httpClient.delete(AppPath.taskById(id));
 
-      final statusCode = response.statusCode ?? 0;
-      if (_isSuccess(statusCode)) {
+      if (response.isSuccess) {
         return const Right(unit);
       }
 
@@ -119,17 +134,13 @@ class TaskRepository implements ITaskRepository {
         ),
       );
     } catch (err) {
-      return Left(DeleteFailure(message: err.toString()));
+      return Left(
+        ExceptionMapper.toFailure(
+          err,
+          fallbackMessage: 'Erro ao excluir tarefa.',
+          failureFactory: (msg) => DeleteFailure(message: msg),
+        ),
+      );
     }
-  }
-
-  bool _isSuccess(int statusCode) => statusCode >= 200 && statusCode < 300;
-
-  Map<String, dynamic> _asMap(dynamic data) {
-    if (data is Map<String, dynamic>) return data;
-    if (data is Map) {
-      return data.map((key, value) => MapEntry(key.toString(), value));
-    }
-    return <String, dynamic>{};
   }
 }

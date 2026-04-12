@@ -39,3 +39,22 @@ func (r *TxRunner) WithTx(ctx context.Context, fn func(tx repository.TxRepositor
 
 	return tx.Commit()
 }
+
+func (r *TxRunner) WithAuthTx(ctx context.Context, fn func(tx repository.AuthTxRepositories) error) error {
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	repos := repository.AuthTxRepositories{
+		Users:             NewUserRepositoryTx(tx),
+		NotificationPrefs: NewNotificationPreferencesRepositoryTx(tx),
+	}
+
+	if err := fn(repos); err != nil {
+		_ = tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
+}

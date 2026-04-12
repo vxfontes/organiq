@@ -10,7 +10,7 @@ class HomeModule extends Module {
 
   @override
   void binds(Injector i) {
-    i.addSingleton<HomeController>(HomeController.new);
+    i.addLazySingleton<HomeController>(HomeController.new);
   }
 
   @override

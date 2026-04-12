@@ -5,7 +5,9 @@ import 'package:organiq/modules/auth/data/models/auth_signup_input.dart';
 import 'package:organiq/modules/auth/data/models/auth_user_model.dart';
 import 'package:organiq/modules/auth/domain/repositories/i_auth_repository.dart';
 import 'package:organiq/shared/errors/api_error_mapper.dart';
+import 'package:organiq/shared/errors/exception_mapper.dart';
 import 'package:organiq/shared/errors/failures.dart';
+import 'package:organiq/shared/extensions/response_model_extensions.dart';
 import 'package:organiq/shared/services/analytics/app_session_service.dart';
 import 'package:organiq/shared/services/http/app_path.dart';
 import 'package:organiq/shared/services/http/http_client.dart';
@@ -26,10 +28,9 @@ class AuthRepository implements IAuthRepository {
         data: input.toJson(),
         extra: const {'auth': false},
       );
-      final statusCode = response.statusCode ?? 0;
 
-      if (_isSuccess(statusCode)) {
-        final session = AuthSessionOutput.fromJson(_asMap(response.data));
+      if (response.isSuccess) {
+        final session = AuthSessionOutput.fromJson(response.asMap());
         if (session.token.isEmpty) {
           return Left(GetFailure(message: 'Token inválido'));
         }
@@ -47,7 +48,13 @@ class AuthRepository implements IAuthRepository {
         ),
       );
     } catch (err) {
-      return Left(GetFailure(message: err.toString()));
+      return Left(
+        ExceptionMapper.toFailure(
+          err,
+          fallbackMessage: 'Erro ao fazer login. Tente novamente.',
+          failureFactory: (msg) => GetFailure(message: msg),
+        ),
+      );
     }
   }
 
@@ -61,10 +68,9 @@ class AuthRepository implements IAuthRepository {
         data: input.toJson(),
         extra: const {'auth': false},
       );
-      final statusCode = response.statusCode ?? 0;
 
-      if (_isSuccess(statusCode)) {
-        final session = AuthSessionOutput.fromJson(_asMap(response.data));
+      if (response.isSuccess) {
+        final session = AuthSessionOutput.fromJson(response.asMap());
         if (session.token.isEmpty) {
           return Left(SaveFailure(message: 'Token inválido'));
         }
@@ -82,7 +88,13 @@ class AuthRepository implements IAuthRepository {
         ),
       );
     } catch (err) {
-      return Left(SaveFailure(message: err.toString()));
+      return Left(
+        ExceptionMapper.toFailure(
+          err,
+          fallbackMessage: 'Erro ao criar conta. Tente novamente.',
+          failureFactory: (msg) => SaveFailure(message: msg),
+        ),
+      );
     }
   }
 
@@ -90,10 +102,9 @@ class AuthRepository implements IAuthRepository {
   Future<Either<Failure, AuthUserModel>> me() async {
     try {
       final response = await _httpClient.get(AppPath.me);
-      final statusCode = response.statusCode ?? 0;
 
-      if (_isSuccess(statusCode)) {
-        final session = AuthSessionOutput.fromJson(_asMap(response.data));
+      if (response.isSuccess) {
+        final session = AuthSessionOutput.fromJson(response.asMap());
         return Right(session.user);
       }
 
@@ -106,7 +117,13 @@ class AuthRepository implements IAuthRepository {
         ),
       );
     } catch (err) {
-      return Left(GetFailure(message: err.toString()));
+      return Left(
+        ExceptionMapper.toFailure(
+          err,
+          fallbackMessage: 'Erro ao carregar perfil. Tente novamente.',
+          failureFactory: (msg) => GetFailure(message: msg),
+        ),
+      );
     }
   }
 
@@ -117,17 +134,13 @@ class AuthRepository implements IAuthRepository {
       await _sessionService.refreshSession();
       return const Right(null);
     } catch (err) {
-      return Left(DeleteFailure(message: err.toString()));
+      return Left(
+        ExceptionMapper.toFailure(
+          err,
+          fallbackMessage: 'Erro ao sair. Tente novamente.',
+          failureFactory: (msg) => DeleteFailure(message: msg),
+        ),
+      );
     }
-  }
-
-  bool _isSuccess(int statusCode) => statusCode >= 200 && statusCode < 300;
-
-  Map<String, dynamic> _asMap(dynamic data) {
-    if (data is Map<String, dynamic>) return data;
-    if (data is Map) {
-      return data.map((key, value) => MapEntry(key.toString(), value));
-    }
-    return <String, dynamic>{};
   }
 }

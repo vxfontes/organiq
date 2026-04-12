@@ -34,11 +34,18 @@ class SharedModule extends Module {
       () => AppMonitoringService.instance,
     );
     i.addLazySingleton<IHttpClient>(
-      () => DioHttpClient(
-        Profile.DEV,
-        tokenStore: i.get<AuthTokenStore>(),
-        monitoringService: i.get<AppMonitoringService>(),
-      ),
+      () {
+        final profileStr = const String.fromEnvironment(
+          'APP_PROFILE',
+          defaultValue: 'prd',
+        );
+        final profile = profileStr == 'dev' ? Profile.DEV : Profile.PRD;
+        return DioHttpClient(
+          profile,
+          tokenStore: i.get<AuthTokenStore>(),
+          monitoringService: i.get<AppMonitoringService>(),
+        );
+      },
     );
     i.addLazySingleton<IAppConfigService>(AppConfigService.new);
     i.addLazySingleton<AppSessionService>(AppSessionService.new);

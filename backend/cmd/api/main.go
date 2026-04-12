@@ -12,6 +12,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -49,7 +50,9 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	ctx := context.Background()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	var db *postgres.DB
 	if cfg.DatabaseURL != "" {
 		var err error
@@ -79,10 +82,13 @@ func main() {
 		appConfigRepo := postgres.NewAppConfigRepository(db)
 		emailDigestRepo := postgres.NewEmailDigestRepository(db)
 
+		txRunner := postgres.NewTxRunner(db)
+
 		authUC := &usecase.AuthUsecase{
 			Users:             userRepo,
 			Auth:              authSvc,
 			NotificationPrefs: notificationPrefsRepo,
+			TxRunner:          txRunner,
 		}
 		authHandler = handler.NewAuthHandler(authUC)
 
@@ -149,7 +155,6 @@ func main() {
 		appConfigUC := &usecase.AppConfigUsecase{Config: appConfigRepo}
 		appScreenLogUC := &usecase.AppScreenLogUsecase{Logs: appScreenLogRepo}
 		appErrorLogUC := &usecase.AppErrorLogUsecase{Logs: appErrorLogRepo}
-		txRunner := postgres.NewTxRunner(db)
 
 		var aiClient service.AIClient
 		if cfg.AIAPIKey != "" || cfg.AIFallbackAPIKey != "" || cfg.AIBaseURL != "" || cfg.AIModel != "" || cfg.AIProvider != "" {
@@ -339,7 +344,6 @@ func main() {
 	router := organiqhttp.NewRouter(cfg, log, authHandler, apiHandlers, db)
 
 	srv := &http.Server{
-		Addr:         cfg.Addr(),
 		Handler:      router,
 		ReadTimeout:  cfg.ReadTimeout,
 		WriteTimeout: cfg.WriteTimeout,
@@ -349,28 +353,30 @@ func main() {
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
 
+	ln, err := net.Listen("tcp", cfg.Addr())
+	if err != nil {
+		log.Error("server_listen_error", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
+	log.Info("server_listening", slog.String("addr", cfg.Addr()))
+
 	go func() {
-		log.Info("server_start_attempt", slog.String("addr", cfg.Addr()))
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Error("server_listen_error", slog.String("error", err.Error()))
-			// Signal main goroutine to shutdown on listen error
+		if err := srv.Serve(ln); err != nil && err != http.ErrServerClosed {
+			log.Error("server_serve_error", slog.String("error", err.Error()))
 			shutdown <- syscall.SIGTERM
 		} else if err == http.ErrServerClosed {
 			log.Info("server_closed_gracefully")
 		}
 	}()
 
-	// Give server a moment to bind
-	time.Sleep(100 * time.Millisecond)
-	log.Info("server_listening", slog.String("addr", cfg.Addr()))
-
 	<-shutdown
+	cancel()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer shutdownCancel()
 
 	log.Info("server_shutdown")
-	if err := srv.Shutdown(ctx); err != nil {
+	if err := srv.Shutdown(shutdownCtx); err != nil {
 		log.Error("server_shutdown_error", slog.String("error", err.Error()))
 	}
 	if db != nil {

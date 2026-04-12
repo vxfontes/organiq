@@ -33,6 +33,7 @@ func (r *NotificationLogRepository) ListPending(ctx context.Context, scheduledBe
 		SELECT id, user_id, type, reference_id, title, body, lead_mins, status, scheduled_for, sent_at, read_at, error_msg, created_at
 		FROM organiq.notification_log
 		WHERE status = 'pending' AND scheduled_for <= $1
+		LIMIT 500
 	`, scheduledBefore)
 	if err != nil {
 		return nil, err
@@ -117,7 +118,7 @@ func (r *NotificationLogRepository) Exists(ctx context.Context, nType domain.Not
 				SELECT 1 FROM organiq.notification_log
 				WHERE type = $1
 				AND reference_id = $2
-				AND (lead_mins = $3 OR (lead_mins IS NULL AND $3 IS NULL))
+				AND COALESCE(lead_mins, -1) = COALESCE($3::int, -1)
 				AND scheduled_for = $4
 				AND status IN ('pending', 'sent', 'delivered')
 			)

@@ -10,7 +10,7 @@ class RemindersModule extends Module {
 
   @override
   void binds(Injector i) {
-    i.addSingleton<RemindersController>(RemindersController.new);
+    i.addLazySingleton<RemindersController>(RemindersController.new);
   }
 
   @override

@@ -61,14 +61,14 @@ func (uc *ReminderUsecase) Create(ctx context.Context, userID, title string, sta
 	}
 
 	if uc.NotificationCopy != nil {
-		go func(id, title, desc string) {
+		go func(uid, id, title, desc string) {
 			ctxBg, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancel()
 			nTitle, nBody, err := uc.NotificationCopy.GenerateCopy(ctxBg, "Reminder", title, desc)
 			if err == nil && nTitle != "" {
-				_ = uc.Reminders.UpdateNotificationCopy(ctxBg, id, nTitle, nBody)
+				_ = uc.Reminders.UpdateNotificationCopy(ctxBg, uid, id, nTitle, nBody)
 			}
-		}(item.ID, item.Title, "")
+		}(userID, item.ID, item.Title, "")
 	}
 
 	return item, nil
@@ -123,14 +123,14 @@ func (uc *ReminderUsecase) Update(ctx context.Context, userID, id string, input 
 	}
 
 	if uc.NotificationCopy != nil {
-		go func(id, title, desc string) {
+		go func(uid, id, title, desc string) {
 			ctxBg, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancel()
 			nTitle, nBody, err := uc.NotificationCopy.GenerateCopy(ctxBg, "Reminder", title, desc)
 			if err == nil && nTitle != "" {
-				_ = uc.Reminders.UpdateNotificationCopy(ctxBg, id, nTitle, nBody)
+				_ = uc.Reminders.UpdateNotificationCopy(ctxBg, uid, id, nTitle, nBody)
 			}
-		}(item.ID, item.Title, "")
+		}(userID, item.ID, item.Title, "")
 	}
 
 	return item, nil

@@ -19,8 +19,8 @@ class AuthModule extends Module {
 
   @override
   void binds(Injector i) {
-    i.addSingleton<LoginController>(LoginController.new);
-    i.addSingleton<SignupController>(SignupController.new);
+    i.addLazySingleton<LoginController>(LoginController.new);
+    i.addLazySingleton<SignupController>(SignupController.new);
   }
 
   @override

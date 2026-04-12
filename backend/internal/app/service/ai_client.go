@@ -160,7 +160,9 @@ func (c *HTTPAIClient) completeWithAPIKey(ctx context.Context, prompt, model, ap
 		if err != nil {
 			lastErr = err
 			if attempt < c.maxRetries {
-				backoff(attempt)
+				if err := backoff(ctx, attempt); err != nil {
+					return AICompletion{}, err
+				}
 				continue
 			}
 			return AICompletion{}, err
@@ -171,7 +173,9 @@ func (c *HTTPAIClient) completeWithAPIKey(ctx context.Context, prompt, model, ap
 		if readErr != nil {
 			lastErr = readErr
 			if attempt < c.maxRetries {
-				backoff(attempt)
+				if err := backoff(ctx, attempt); err != nil {
+					return AICompletion{}, err
+				}
 				continue
 			}
 			return AICompletion{}, readErr
@@ -180,7 +184,9 @@ func (c *HTTPAIClient) completeWithAPIKey(ctx context.Context, prompt, model, ap
 		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 			lastErr = fmt.Errorf("ai_http_status_%d", resp.StatusCode)
 			if attempt < c.maxRetries && resp.StatusCode >= 500 {
-				backoff(attempt)
+				if err := backoff(ctx, attempt); err != nil {
+					return AICompletion{}, err
+				}
 				continue
 			}
 			return AICompletion{}, lastErr
@@ -254,14 +260,19 @@ func decodeChatCompletion(raw []byte) (AICompletion, error) {
 	return AICompletion{Content: content, Model: resp.Model, Raw: raw}, nil
 }
 
-func backoff(attempt int) {
+func backoff(ctx context.Context, attempt int) error {
 	if attempt <= 0 {
-		return
+		return nil
 	}
 	base := 200 * time.Millisecond
 	sleep := time.Duration(attempt*attempt) * base
 	if sleep > 2*time.Second {
 		sleep = 2 * time.Second
 	}
-	time.Sleep(sleep)
+	select {
+	case <-time.After(sleep):
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
 }

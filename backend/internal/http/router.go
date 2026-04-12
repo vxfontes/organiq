@@ -38,8 +38,8 @@ func NewRouter(cfg config.Config, log *slog.Logger, authHandler *handler.AuthHan
 		v1.GET("/daily-summary", apiHandlers.Digest.GetDailySummary)
 	}
 	if authHandler != nil {
-		v1.POST("/auth/signup", authHandler.Signup)
-		v1.POST("/auth/login", authHandler.Login)
+		v1.POST("/auth/signup", middleware.RateLimitByIP(10, time.Minute), authHandler.Signup)
+		v1.POST("/auth/login", middleware.RateLimitByIP(10, time.Minute), authHandler.Login)
 	}
 	if apiHandlers != nil && apiHandlers.AppErrorLogs != nil {
 		v1.POST(

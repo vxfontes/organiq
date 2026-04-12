@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
 
 class NightSkyPainter extends CustomPainter {
-  final Random _random = Random(42);
+  static final Random _random = Random(42);
 
   @override
   void paint(Canvas canvas, Size size) {

@@ -64,14 +64,14 @@ func (uc *EventUsecase) Create(ctx context.Context, userID, title string, startA
 	}
 
 	if uc.NotificationCopy != nil {
-		go func(id, title, desc string) {
+		go func(uid, id, title, desc string) {
 			ctxBg, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancel()
 			nTitle, nBody, err := uc.NotificationCopy.GenerateCopy(ctxBg, "Event", title, desc)
 			if err == nil && nTitle != "" {
-				_ = uc.Events.UpdateNotificationCopy(ctxBg, id, nTitle, nBody)
+				_ = uc.Events.UpdateNotificationCopy(ctxBg, uid, id, nTitle, nBody)
 			}
-		}(item.ID, item.Title, "")
+		}(userID, item.ID, item.Title, "")
 	}
 
 	return item, nil
@@ -131,14 +131,14 @@ func (uc *EventUsecase) Update(ctx context.Context, userID, id string, input Eve
 	}
 
 	if uc.NotificationCopy != nil {
-		go func(id, title, desc string) {
+		go func(uid, id, title, desc string) {
 			ctxBg, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancel()
 			nTitle, nBody, err := uc.NotificationCopy.GenerateCopy(ctxBg, "Event", title, desc)
 			if err == nil && nTitle != "" {
-				_ = uc.Events.UpdateNotificationCopy(ctxBg, id, nTitle, nBody)
+				_ = uc.Events.UpdateNotificationCopy(ctxBg, uid, id, nTitle, nBody)
 			}
-		}(item.ID, item.Title, "")
+		}(userID, item.ID, item.Title, "")
 	}
 
 	return item, nil

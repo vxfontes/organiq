@@ -6,7 +6,9 @@ import 'package:organiq/modules/events/data/models/event_list_output.dart';
 import 'package:organiq/modules/events/data/models/event_output.dart';
 import 'package:organiq/modules/events/domain/repositories/i_event_repository.dart';
 import 'package:organiq/shared/errors/api_error_mapper.dart';
+import 'package:organiq/shared/errors/exception_mapper.dart';
 import 'package:organiq/shared/errors/failures.dart';
+import 'package:organiq/shared/extensions/response_model_extensions.dart';
 import 'package:organiq/shared/services/http/app_path.dart';
 import 'package:organiq/shared/services/http/http_client.dart';
 
@@ -30,8 +32,7 @@ class EventRepository implements IEventRepository {
         queryParameters: query.isEmpty ? null : query,
       );
 
-      final statusCode = response.statusCode ?? 0;
-      if (_isSuccess(statusCode)) {
+      if (response.isSuccess) {
         return Right(EventListOutput.fromDynamic(response.data));
       }
 
@@ -44,11 +45,15 @@ class EventRepository implements IEventRepository {
         ),
       );
     } catch (err) {
-      return Left(GetListFailure(message: err.toString()));
+      return Left(
+        ExceptionMapper.toFailure(
+          err,
+          fallbackMessage: 'Erro ao carregar eventos.',
+          failureFactory: (msg) => GetListFailure(message: msg),
+        ),
+      );
     }
   }
-
-  bool _isSuccess(int statusCode) => statusCode >= 200 && statusCode < 300;
 
   @override
   Future<Either<Failure, EventOutput>> createEvent(
@@ -60,8 +65,7 @@ class EventRepository implements IEventRepository {
         data: input.toJson(),
       );
 
-      final statusCode = response.statusCode ?? 0;
-      if (_isSuccess(statusCode)) {
+      if (response.isSuccess) {
         return Right(EventOutput.fromDynamic(response.data));
       }
 
@@ -74,7 +78,13 @@ class EventRepository implements IEventRepository {
         ),
       );
     } catch (err) {
-      return Left(SaveFailure(message: err.toString()));
+      return Left(
+        ExceptionMapper.toFailure(
+          err,
+          fallbackMessage: 'Erro ao criar evento.',
+          failureFactory: (msg) => SaveFailure(message: msg),
+        ),
+      );
     }
   }
 
@@ -89,8 +99,7 @@ class EventRepository implements IEventRepository {
         queryParameters: query.isEmpty ? null : query,
       );
 
-      final statusCode = response.statusCode ?? 0;
-      if (_isSuccess(statusCode)) {
+      if (response.isSuccess) {
         return Right(AgendaOutput.fromDynamic(response.data));
       }
 
@@ -103,7 +112,13 @@ class EventRepository implements IEventRepository {
         ),
       );
     } catch (err) {
-      return Left(GetListFailure(message: err.toString()));
+      return Left(
+        ExceptionMapper.toFailure(
+          err,
+          fallbackMessage: 'Erro ao carregar agenda.',
+          failureFactory: (msg) => GetListFailure(message: msg),
+        ),
+      );
     }
   }
 
@@ -111,9 +126,8 @@ class EventRepository implements IEventRepository {
   Future<Either<Failure, Unit>> deleteEvent(String id) async {
     try {
       final response = await _httpClient.delete(AppPath.eventById(id));
-      final statusCode = response.statusCode ?? 0;
 
-      if (_isSuccess(statusCode)) {
+      if (response.isSuccess) {
         return const Right(unit);
       }
 
@@ -126,7 +140,13 @@ class EventRepository implements IEventRepository {
         ),
       );
     } catch (err) {
-      return Left(DeleteFailure(message: err.toString()));
+      return Left(
+        ExceptionMapper.toFailure(
+          err,
+          fallbackMessage: 'Erro ao excluir evento.',
+          failureFactory: (msg) => DeleteFailure(message: msg),
+        ),
+      );
     }
   }
 }

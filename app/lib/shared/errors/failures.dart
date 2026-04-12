@@ -69,3 +69,15 @@ class UpdateRequiredFailure extends Failure {
 
   UpdateRequiredFailure({this.message}) : super(message: message);
 }
+
+class NetworkFailure extends Failure {
+  final String? message;
+
+  NetworkFailure({this.message}) : super(message: message);
+}
+
+class UnknownFailure extends Failure {
+  final String? message;
+
+  UnknownFailure({this.message}) : super(message: message);
+}

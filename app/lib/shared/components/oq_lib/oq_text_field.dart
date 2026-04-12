@@ -18,6 +18,7 @@ class OQTextField extends StatelessWidget {
     this.maxLines = 1,
     this.readOnly = false,
     this.enabled = true,
+    this.autofillHints,
   });
 
   final String label;
@@ -33,6 +34,7 @@ class OQTextField extends StatelessWidget {
   final int maxLines;
   final bool readOnly;
   final bool enabled;
+  final List<String>? autofillHints;
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +46,7 @@ class OQTextField extends StatelessWidget {
       readOnly: readOnly,
       onChanged: onChanged,
       onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+      autofillHints: autofillHints,
       minLines: minLines,
       maxLines: maxLines,
       style: const TextStyle(color: AppColors.text),

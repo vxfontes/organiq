@@ -10,7 +10,7 @@ class NotificationsModule extends Module {
 
   @override
   void binds(Injector i) {
-    i.addSingleton<NotificationsController>(NotificationsController.new);
+    i.addLazySingleton<NotificationsController>(NotificationsController.new);
   }
 
   @override

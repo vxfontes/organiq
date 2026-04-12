@@ -116,7 +116,7 @@ class PushNotificationService {
   Future<void> _initializeInternal() async {
     if (_repository == null) {
       if (kDebugMode) {
-        print('PushNotificationService: repository not set.');
+        debugPrint('PushNotificationService: repository not set.');
       }
       return;
     }
@@ -194,7 +194,7 @@ class PushNotificationService {
             ),
           );
           if (kDebugMode) {
-            print('PushNotificationService: payload parse error=$e');
+            debugPrint('PushNotificationService: payload parse error=$e');
           }
         }
       },
@@ -293,7 +293,7 @@ class PushNotificationService {
         ),
       );
       if (kDebugMode) {
-        print('PushNotificationService: getToken error=$e');
+        debugPrint('PushNotificationService: getToken error=$e');
       }
     }
   }
@@ -332,7 +332,7 @@ class PushNotificationService {
           ),
         );
         if (kDebugMode) {
-          print('PushNotificationService: force getToken error=$e');
+          debugPrint('PushNotificationService: force getToken error=$e');
         }
       }
       return;
@@ -394,7 +394,7 @@ class PushNotificationService {
       }
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           'PushNotificationService: getToken returned null attempt=$attempt/$maxAttempts',
         );
       }
@@ -413,13 +413,13 @@ class PushNotificationService {
       final apnsToken = await FirebaseMessaging.instance.getAPNSToken();
       if (apnsToken != null && apnsToken.isNotEmpty) {
         if (kDebugMode) {
-          print('PushNotificationService: APNS token available.');
+          debugPrint('PushNotificationService: APNS token available.');
         }
         return;
       }
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           'PushNotificationService: APNS token pending attempt=$attempt/$maxAttempts',
         );
       }
@@ -512,7 +512,7 @@ class PushNotificationService {
   Future<void> _handleForegroundMessage(RemoteMessage message) async {
     if (_shouldSuppressDuplicateForegroundMessage(message)) {
       if (kDebugMode) {
-        print(
+        debugPrint(
           'PushNotificationService: duplicate foreground message suppressed.',
         );
       }
