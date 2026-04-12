@@ -9,11 +9,20 @@ import 'package:organiq/modules/flags/domain/usecases/get_flags_usecase.dart';
 import 'package:organiq/modules/flags/domain/usecases/get_subflags_by_flag_usecase.dart';
 import 'package:organiq/modules/flags/domain/usecases/update_flag_usecase.dart';
 import 'package:organiq/modules/flags/domain/usecases/update_subflag_usecase.dart';
+import 'package:organiq/shared/services/cache/cache_service.dart';
+import 'package:organiq/shared/services/connectivity/connectivity_service.dart';
+import 'package:organiq/shared/services/http/http_client.dart';
 
 class FlagsModule {
   static void binds(Injector i) {
     // repository
-    i.addLazySingleton<IFlagRepository>(FlagRepository.new);
+    i.addLazySingleton<IFlagRepository>(
+      () => FlagRepository(
+        i.get<IHttpClient>(),
+        i.get<ICacheService>(),
+        i.get<IConnectivityService>(),
+      ),
+    );
 
     // usecases
     i.addLazySingleton<GetFlagsUsecase>(GetFlagsUsecase.new);

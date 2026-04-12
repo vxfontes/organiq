@@ -7,6 +7,7 @@ import 'package:organiq/shared/errors/failures.dart';
 import 'package:organiq/shared/services/analytics/app_monitoring_service.dart';
 import 'package:organiq/shared/services/analytics/screen_log_service.dart';
 import 'package:organiq/shared/services/app_config/app_config_service.dart';
+import 'package:organiq/shared/services/cache/cache_service.dart';
 import 'package:organiq/shared/services/timezone/user_timezone_service.dart';
 import 'package:organiq/shared/state/oq_state.dart';
 import 'package:organiq/shared/storage/auth_token_store.dart';
@@ -20,6 +21,7 @@ class SplashController implements OQController {
     this._monitoringService,
     this._screenLogService,
     this._appConfigService,
+    this._cache,
   );
 
   final CheckHealthUsecase _checkHealthUsecase;
@@ -28,6 +30,7 @@ class SplashController implements OQController {
   final AppMonitoringService _monitoringService;
   final ScreenLogService _screenLogService;
   final IAppConfigService _appConfigService;
+  final ICacheService _cache;
 
   final ValueNotifier<bool> loading = ValueNotifier(true);
   final ValueNotifier<String?> error = ValueNotifier(null);
@@ -103,7 +106,10 @@ class SplashController implements OQController {
       });
       if (!hasSession) {
         UserTimezoneService.instance.clear();
-        await _tokenStore.clearToken();
+        await Future.wait([
+          _tokenStore.clearToken(),
+          _cache.clear(),
+        ]);
         await _monitoringService.clearUser();
         _screenLogService.logFlowStep(
           flowName: 'bootstrap',

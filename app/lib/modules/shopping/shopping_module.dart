@@ -9,10 +9,19 @@ import 'package:organiq/modules/shopping/domain/usecases/get_shopping_items_usec
 import 'package:organiq/modules/shopping/domain/usecases/get_shopping_lists_usecase.dart';
 import 'package:organiq/modules/shopping/domain/usecases/update_shopping_item_usecase.dart';
 import 'package:organiq/modules/shopping/domain/usecases/update_shopping_list_usecase.dart';
+import 'package:organiq/shared/services/cache/cache_service.dart';
+import 'package:organiq/shared/services/connectivity/connectivity_service.dart';
+import 'package:organiq/shared/services/http/http_client.dart';
 
 class ShoppingModule {
   static void binds(Injector i) {
-    i.addLazySingleton<IShoppingRepository>(ShoppingRepository.new);
+    i.addLazySingleton<IShoppingRepository>(
+      () => ShoppingRepository(
+        i.get<IHttpClient>(),
+        i.get<ICacheService>(),
+        i.get<IConnectivityService>(),
+      ),
+    );
 
     i.addLazySingleton<GetShoppingListsUsecase>(GetShoppingListsUsecase.new);
     i.addLazySingleton<GetShoppingItemsUsecase>(GetShoppingItemsUsecase.new);

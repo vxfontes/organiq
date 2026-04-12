@@ -7,6 +7,7 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:organiq/shared/errors/api_error_mapper.dart';
 import 'package:organiq/shared/services/analytics/app_error_reporter.dart';
 import 'package:organiq/shared/services/analytics/app_monitoring_service.dart';
+import 'package:organiq/shared/services/cache/cache_service.dart';
 import 'package:organiq/shared/services/http/app_service.dart';
 import 'package:organiq/shared/services/http/http_client.dart';
 import 'package:organiq/shared/storage/auth_token_store.dart';
@@ -17,8 +18,10 @@ class DioHttpClient implements IHttpClient {
     this.profile, {
     AuthTokenStore? tokenStore,
     AppMonitoringService? monitoringService,
+    ICacheService? cacheService,
   }) : _tokenStore = tokenStore,
-       _monitoringService = monitoringService ?? AppMonitoringService.instance {
+       _monitoringService = monitoringService ?? AppMonitoringService.instance,
+       _cacheService = cacheService {
     _onCreate();
   }
 
@@ -26,6 +29,7 @@ class DioHttpClient implements IHttpClient {
   final Profile profile;
   final AuthTokenStore? _tokenStore;
   final AppMonitoringService _monitoringService;
+  final ICacheService? _cacheService;
 
   @override
   Future<ResponseModel> get(
@@ -275,7 +279,10 @@ class DioHttpClient implements IHttpClient {
             final authFlag = err.requestOptions.extra['auth'];
             final isUnauthenticatedRequest = authFlag == false;
             if (!isUnauthenticatedRequest) {
-              await _tokenStore?.clearToken();
+              await Future.wait([
+                if (_tokenStore != null) _tokenStore!.clearToken(),
+                if (_cacheService != null) _cacheService!.clear(),
+              ]);
               Modular.to.navigate('/auth/');
             }
           }

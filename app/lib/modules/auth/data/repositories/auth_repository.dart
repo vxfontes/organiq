@@ -9,6 +9,7 @@ import 'package:organiq/shared/errors/exception_mapper.dart';
 import 'package:organiq/shared/errors/failures.dart';
 import 'package:organiq/shared/extensions/response_model_extensions.dart';
 import 'package:organiq/shared/services/analytics/app_session_service.dart';
+import 'package:organiq/shared/services/cache/cache_service.dart';
 import 'package:organiq/shared/services/http/app_path.dart';
 import 'package:organiq/shared/services/http/http_client.dart';
 import 'package:organiq/shared/storage/auth_token_store.dart';
@@ -17,8 +18,9 @@ class AuthRepository implements IAuthRepository {
   final IHttpClient _httpClient;
   final AuthTokenStore _tokenStore;
   final AppSessionService _sessionService;
+  final ICacheService _cache;
 
-  AuthRepository(this._httpClient, this._tokenStore, this._sessionService);
+  AuthRepository(this._httpClient, this._tokenStore, this._sessionService, this._cache);
 
   @override
   Future<Either<Failure, AuthSessionOutput>> login(AuthLoginInput input) async {
@@ -130,7 +132,10 @@ class AuthRepository implements IAuthRepository {
   @override
   Future<Either<Failure, void>> logout() async {
     try {
-      await _tokenStore.clearToken();
+      await Future.wait([
+        _tokenStore.clearToken(),
+        _cache.clear(),
+      ]);
       await _sessionService.refreshSession();
       return const Right(null);
     } catch (err) {

@@ -10,14 +10,27 @@ import 'package:organiq/modules/notifications/domain/usecases/mark_notification_
 import 'package:organiq/modules/notifications/domain/usecases/send_test_email_digest_usecase.dart';
 import 'package:organiq/modules/notifications/domain/usecases/send_test_notification_usecase.dart';
 import 'package:organiq/modules/notifications/domain/usecases/update_notification_prefs_usecase.dart';
+import 'package:organiq/shared/services/cache/cache_service.dart';
+import 'package:organiq/shared/services/connectivity/connectivity_service.dart';
+import 'package:organiq/shared/services/http/http_client.dart';
 
 class NotificationsModule {
   static void binds(Injector i) {
     // repositories
     i.addLazySingleton<INotificationPrefsRepository>(
-      NotificationPrefsRepository.new,
+      () => NotificationPrefsRepository(
+        i.get<IHttpClient>(),
+        i.get<ICacheService>(),
+        i.get<IConnectivityService>(),
+      ),
     );
-    i.addLazySingleton<INotificationsRepository>(NotificationsRepository.new);
+    i.addLazySingleton<INotificationsRepository>(
+      () => NotificationsRepository(
+        i.get<IHttpClient>(),
+        i.get<ICacheService>(),
+        i.get<IConnectivityService>(),
+      ),
+    );
 
     // usecases
     i.addLazySingleton<GetNotificationPrefsUsecase>(

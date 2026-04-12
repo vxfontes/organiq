@@ -8,7 +8,7 @@ class GetHomeDashboardUsecase extends OQUsecase {
 
   final IHomeRepository _repository;
 
-  UsecaseResponse<Failure, HomeDashboardOutput> call() {
-    return _repository.fetchDashboard();
+  UsecaseResponse<Failure, HomeDashboardOutput> call({bool forceRefresh = false}) {
+    return _repository.fetchDashboard(forceRefresh: forceRefresh);
   }
 }

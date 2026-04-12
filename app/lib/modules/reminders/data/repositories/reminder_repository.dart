@@ -9,15 +9,61 @@ import 'package:organiq/shared/errors/api_error_mapper.dart';
 import 'package:organiq/shared/errors/exception_mapper.dart';
 import 'package:organiq/shared/errors/failures.dart';
 import 'package:organiq/shared/extensions/response_model_extensions.dart';
+import 'package:organiq/shared/services/cache/cache_service.dart';
+import 'package:organiq/shared/services/connectivity/connectivity_service.dart';
 import 'package:organiq/shared/services/http/app_path.dart';
 import 'package:organiq/shared/services/http/http_client.dart';
 
+const _cacheKeyReminderList = 'cache:${AppPath.reminders}';
+const _cacheKeyDashboard = 'cache:${AppPath.homeDashboard}';
+
 class ReminderRepository implements IReminderRepository {
-  ReminderRepository(this._httpClient);
+  ReminderRepository(this._httpClient, this._cache, this._connectivity);
 
   final IHttpClient _httpClient;
+  final ICacheService _cache;
+  final IConnectivityService _connectivity;
+
+  // -------------------------------------------------------------------------
+  // fetchReminders — estratégia cache-first
+  //
+  // 1. Tem cursor (paginação): vai direto à API.
+  // 2. Sem cursor e cache válido: retorna cache.
+  // 3. Sem cursor, cache ausente/expirado, offline: retorna NetworkFailure.
+  // 4. Sem cursor, cache ausente/expirado, online: busca API, atualiza cache.
+  // -------------------------------------------------------------------------
   @override
   Future<Either<Failure, ReminderListOutput>> fetchReminders({
+    int? limit,
+    String? cursor,
+  }) async {
+    if (cursor != null) {
+      return _fetchRemindersFromApi(limit: limit, cursor: cursor);
+    }
+
+    final cached = await _cache.get(_cacheKeyReminderList);
+    if (cached != null) {
+      try {
+        return Right(ReminderListOutput.fromJson(cached));
+      } catch (_) {
+        await _cache.invalidate(_cacheKeyReminderList);
+      }
+    }
+
+    final online = await _connectivity.isOnline();
+    if (!online) {
+      return Left(
+        NetworkFailure(
+          message:
+              'Sem conexão. Conecte-se à internet para carregar seus lembretes.',
+        ),
+      );
+    }
+
+    return _fetchRemindersFromApi(limit: limit);
+  }
+
+  Future<Either<Failure, ReminderListOutput>> _fetchRemindersFromApi({
     int? limit,
     String? cursor,
   }) async {
@@ -32,7 +78,11 @@ class ReminderRepository implements IReminderRepository {
       );
 
       if (response.isSuccess) {
-        return Right(ReminderListOutput.fromJson(response.asMap()));
+        final output = ReminderListOutput.fromJson(response.asMap());
+        if (cursor == null) {
+          await _cache.set(_cacheKeyReminderList, response.asMap());
+        }
+        return Right(output);
       }
 
       return Left(
@@ -54,6 +104,9 @@ class ReminderRepository implements IReminderRepository {
     }
   }
 
+  // -------------------------------------------------------------------------
+  // createReminder — invalida cache após sucesso
+  // -------------------------------------------------------------------------
   @override
   Future<Either<Failure, ReminderOutput>> createReminder(
     ReminderCreateInput input,
@@ -65,6 +118,10 @@ class ReminderRepository implements IReminderRepository {
       );
 
       if (response.isSuccess) {
+        await Future.wait([
+          _cache.invalidate(_cacheKeyReminderList),
+          _cache.invalidate(_cacheKeyDashboard),
+        ]);
         return Right(ReminderOutput.fromJson(response.asMap()));
       }
 
@@ -87,6 +144,9 @@ class ReminderRepository implements IReminderRepository {
     }
   }
 
+  // -------------------------------------------------------------------------
+  // updateReminder — invalida cache após sucesso
+  // -------------------------------------------------------------------------
   @override
   Future<Either<Failure, ReminderOutput>> updateReminder(
     ReminderUpdateInput input,
@@ -98,6 +158,10 @@ class ReminderRepository implements IReminderRepository {
       );
 
       if (response.isSuccess) {
+        await Future.wait([
+          _cache.invalidate(_cacheKeyReminderList),
+          _cache.invalidate(_cacheKeyDashboard),
+        ]);
         return Right(ReminderOutput.fromJson(response.asMap()));
       }
 
@@ -120,12 +184,19 @@ class ReminderRepository implements IReminderRepository {
     }
   }
 
+  // -------------------------------------------------------------------------
+  // deleteReminder — invalida cache após sucesso
+  // -------------------------------------------------------------------------
   @override
   Future<Either<Failure, Unit>> deleteReminder(String id) async {
     try {
       final response = await _httpClient.delete(AppPath.reminderById(id));
 
       if (response.isSuccess) {
+        await Future.wait([
+          _cache.invalidate(_cacheKeyReminderList),
+          _cache.invalidate(_cacheKeyDashboard),
+        ]);
         return const Right(unit);
       }
 

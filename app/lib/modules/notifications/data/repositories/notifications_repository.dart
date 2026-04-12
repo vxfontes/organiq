@@ -3,16 +3,65 @@ import 'package:organiq/modules/notifications/data/models/notification_log_model
 import 'package:organiq/modules/notifications/domain/repositories/i_notifications_repository.dart';
 import 'package:organiq/shared/errors/api_error_mapper.dart';
 import 'package:organiq/shared/errors/failures.dart';
+import 'package:organiq/shared/services/cache/cache_service.dart';
+import 'package:organiq/shared/services/connectivity/connectivity_service.dart';
 import 'package:organiq/shared/services/http/app_path.dart';
 import 'package:organiq/shared/services/http/http_client.dart';
 
+const _cacheKeyNotifications = 'cache:${AppPath.notifications}';
+const _notificationsTtl = Duration(minutes: 2);
+
 class NotificationsRepository implements INotificationsRepository {
-  NotificationsRepository(this._httpClient);
+  NotificationsRepository(this._httpClient, this._cache, this._connectivity);
 
   final IHttpClient _httpClient;
+  final ICacheService _cache;
+  final IConnectivityService _connectivity;
 
+  // -------------------------------------------------------------------------
+  // fetchNotifications — estratégia cache-first com TTL de 2min
+  //
+  // Notificações têm dado dinâmico; TTL curto equilibra frescor e performance.
+  // Usa offset em vez de cursor — sem cursor, não há distinção de paginação
+  // pelo mesmo critério; cacheamos apenas a chamada sem offset (primeira página).
+  // -------------------------------------------------------------------------
   @override
   Future<Either<Failure, List<NotificationLogModel>>> fetchNotifications({
+    int? limit,
+    int? offset,
+  }) async {
+    // Apenas cacheia a primeira página (sem offset ou offset == 0).
+    final isFirstPage = offset == null || offset == 0;
+
+    if (isFirstPage) {
+      final cached = await _cache.get(_cacheKeyNotifications);
+      if (cached != null) {
+        try {
+          final List items = cached['items'] ?? [];
+          return Right(
+            items.map((e) => NotificationLogModel.fromMap(e)).toList(),
+          );
+        } catch (_) {
+          await _cache.invalidate(_cacheKeyNotifications);
+        }
+      }
+
+      final online = await _connectivity.isOnline();
+      if (!online) {
+        return Left(
+          NetworkFailure(
+            message:
+                'Sem conexão. Conecte-se à internet para carregar suas notificações.',
+          ),
+        );
+      }
+    }
+
+    return _fetchNotificationsFromApi(limit: limit, offset: offset);
+  }
+
+  Future<Either<Failure, List<NotificationLogModel>>>
+      _fetchNotificationsFromApi({
     int? limit,
     int? offset,
   }) async {
@@ -27,6 +76,14 @@ class NotificationsRepository implements INotificationsRepository {
       );
       final statusCode = response.statusCode ?? 0;
       if (statusCode >= 200 && statusCode < 300) {
+        final isFirstPage = offset == null || offset == 0;
+        if (isFirstPage && response.data is Map<String, dynamic>) {
+          await _cache.set(
+            _cacheKeyNotifications,
+            response.data as Map<String, dynamic>,
+            ttl: _notificationsTtl,
+          );
+        }
         final List items = response.data['items'] ?? [];
         return Right(
           items.map((e) => NotificationLogModel.fromMap(e)).toList(),
@@ -45,11 +102,17 @@ class NotificationsRepository implements INotificationsRepository {
     }
   }
 
+  // -------------------------------------------------------------------------
+  // markAsRead — invalida cache de notificações após sucesso
+  // -------------------------------------------------------------------------
   @override
   Future<Either<Failure, Unit>> markAsRead(String id) async {
     try {
       final response = await _httpClient.patch(AppPath.notificationRead(id));
-      if ((response.statusCode ?? 0) < 300) return const Right(unit);
+      if ((response.statusCode ?? 0) < 300) {
+        await _cache.invalidate(_cacheKeyNotifications);
+        return const Right(unit);
+      }
       return Left(
         UpdateFailure(
           message: ApiErrorMapper.fromResponseData(
@@ -63,11 +126,17 @@ class NotificationsRepository implements INotificationsRepository {
     }
   }
 
+  // -------------------------------------------------------------------------
+  // markAllAsRead — invalida cache de notificações após sucesso
+  // -------------------------------------------------------------------------
   @override
   Future<Either<Failure, Unit>> markAllAsRead() async {
     try {
       final response = await _httpClient.patch(AppPath.notificationsReadAll);
-      if ((response.statusCode ?? 0) < 300) return const Right(unit);
+      if ((response.statusCode ?? 0) < 300) {
+        await _cache.invalidate(_cacheKeyNotifications);
+        return const Right(unit);
+      }
       return Left(
         UpdateFailure(
           message: ApiErrorMapper.fromResponseData(

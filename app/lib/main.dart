@@ -6,6 +6,7 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:organiq/shared/services/analytics/app_error_reporter.dart';
 import 'package:organiq/shared/services/analytics/app_monitoring_service.dart';
 import 'package:organiq/shared/services/push/firebase_bootstrap.dart';
+import 'package:organiq/shared/storage/app_preferences.dart';
 
 import 'presentation/app.dart';
 import 'presentation/routes/app_module.dart';
@@ -75,6 +76,10 @@ void main() async {
           ),
         );
       }
+
+      // AppPreferences é inicializado aqui, antes do runApp, garantindo que
+      // SharedPreferences esteja pronto quando qualquer módulo for resolvido.
+      await AppPreferences.initialize();
 
       runApp(ModularApp(module: AppModule(), child: const AppWidget()));
     },

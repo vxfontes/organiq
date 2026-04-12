@@ -5,11 +5,20 @@ import 'package:organiq/modules/reminders/domain/usecases/create_reminder_usecas
 import 'package:organiq/modules/reminders/domain/usecases/delete_reminder_usecase.dart';
 import 'package:organiq/modules/reminders/domain/usecases/get_reminders_usecase.dart';
 import 'package:organiq/modules/reminders/domain/usecases/update_reminder_usecase.dart';
+import 'package:organiq/shared/services/cache/cache_service.dart';
+import 'package:organiq/shared/services/connectivity/connectivity_service.dart';
+import 'package:organiq/shared/services/http/http_client.dart';
 
 class RemindersModule {
   static void binds(Injector i) {
     // repository
-    i.addLazySingleton<IReminderRepository>(ReminderRepository.new);
+    i.addLazySingleton<IReminderRepository>(
+      () => ReminderRepository(
+        i.get<IHttpClient>(),
+        i.get<ICacheService>(),
+        i.get<IConnectivityService>(),
+      ),
+    );
 
     // usecases
     i.addLazySingleton<CreateReminderUsecase>(CreateReminderUsecase.new);
