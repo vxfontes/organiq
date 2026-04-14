@@ -8,6 +8,7 @@ import 'package:organiq/presentation/screens/shopping_module/controller/shopping
 import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/state/oq_state.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
+import 'package:organiq/shared/tutorial/tutorial_keys.dart';
 import 'package:organiq/shared/utils/text_utils.dart';
 
 class ShoppingPage extends StatefulWidget {
@@ -59,7 +60,10 @@ class _ShoppingPageState extends OQState<ShoppingPage, ShoppingController> {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
             children: [
-              _buildHeader(context),
+              KeyedSubtree(
+                key: TutorialKeys.shoppingHeader,
+                child: _buildHeader(context),
+              ),
               const SizedBox(height: 18),
               if (showInitialLoading)
                 _buildLoadingSkeleton()

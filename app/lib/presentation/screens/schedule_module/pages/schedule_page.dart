@@ -11,6 +11,7 @@ import 'package:organiq/presentation/screens/schedule_module/controller/schedule
 import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/state/oq_state.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
+import 'package:organiq/shared/tutorial/tutorial_keys.dart';
 
 class SchedulePage extends StatefulWidget {
   const SchedulePage({super.key});
@@ -67,7 +68,10 @@ class _SchedulePageState extends OQState<SchedulePage, ScheduleController> {
               if (mode == ScheduleViewMode.daily) ...[
                 RoutineWeekSelector(controller: controller),
                 const SizedBox(height: 20),
-                _buildWeekdayTabs(selectedWeekdayIndex),
+                KeyedSubtree(
+                  key: TutorialKeys.scheduleWeekDays,
+                  child: _buildWeekdayTabs(selectedWeekdayIndex),
+                ),
                 const SizedBox(height: 20),
                 if (showContentLoading)
                   _buildRoutineContentSkeleton()
@@ -288,28 +292,50 @@ class _SchedulePageState extends OQState<SchedulePage, ScheduleController> {
       return _buildEmptyState();
     }
 
+    var isFirstCard = true;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         for (final section in sections)
-          _buildPeriodSection(section.title, section.items),
+          _buildPeriodSection(
+            section.title,
+            section.items,
+            isFirstSection: isFirstCard,
+            onFirstCardUsed: () => isFirstCard = false,
+          ),
       ],
     );
   }
 
-  Widget _buildPeriodSection(String title, List<RoutineOutput> routines) {
+  Widget _buildPeriodSection(
+    String title,
+    List<RoutineOutput> routines, {
+    bool isFirstSection = false,
+    VoidCallback? onFirstCardUsed,
+  }) {
+    var usedFirstKey = !isFirstSection;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 20),
         OQText(title, context: context).subtitulo.build(),
         const SizedBox(height: 12),
-        ...routines.map(
-          (routine) => Padding(
+        ...routines.map((routine) {
+          final useKey = !usedFirstKey;
+          if (useKey) {
+            usedFirstKey = true;
+            onFirstCardUsed?.call();
+          }
+          return Padding(
             padding: const EdgeInsets.only(bottom: 10),
-            child: _buildRoutineCard(routine),
-          ),
-        ),
+            child: useKey
+                ? KeyedSubtree(
+                    key: TutorialKeys.scheduleRoutineCard,
+                    child: _buildRoutineCard(routine),
+                  )
+                : _buildRoutineCard(routine),
+          );
+        }),
       ],
     );
   }

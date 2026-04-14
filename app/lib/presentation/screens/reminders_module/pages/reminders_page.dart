@@ -8,6 +8,7 @@ import 'package:organiq/presentation/screens/reminders_module/controller/reminde
 import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/state/oq_state.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
+import 'package:organiq/shared/tutorial/tutorial_keys.dart';
 import 'package:organiq/shared/utils/reminders_format.dart';
 
 class RemindersPage extends StatefulWidget {
@@ -72,7 +73,10 @@ class _RemindersPageState extends OQState<RemindersPage, RemindersController> {
               if (showInitialLoading)
                 _buildLoadingSkeleton()
               else ...[
-                _buildTodoSection(context, tasks),
+                KeyedSubtree(
+                  key: TutorialKeys.remindersSection,
+                  child: _buildTodoSection(context, tasks),
+                ),
                 _buildTodaySection(context, reminders),
                 _buildUpcomingSection(context, reminders),
               ],

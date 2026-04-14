@@ -27,15 +27,6 @@ class OQButton extends StatelessWidget {
     const padding = EdgeInsets.symmetric(horizontal: 16, vertical: 14);
     const minimumSize = Size.fromHeight(48);
 
-    Widget content = OQText(label, context: context).label.build();
-    if (loading) {
-      content = const SizedBox(
-        height: 18,
-        width: 18,
-        child: CircularProgressIndicator(strokeWidth: 2),
-      );
-    }
-
     switch (variant) {
       case OQButtonVariant.primary:
         return ElevatedButton(
@@ -84,7 +75,19 @@ class OQButton extends StatelessWidget {
               (0.6 * 255).round(),
             ),
           ),
-          child: content,
+          child: loading
+              ? const SizedBox(
+                  height: 18,
+                  width: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.primary600,
+                  ),
+                )
+              : OQText(
+                  label,
+                  context: context,
+                ).label.color(AppColors.primary600).build(),
         );
       case OQButtonVariant.ghost:
         return TextButton(

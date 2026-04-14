@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:organiq/presentation/routes/app_navigation.dart';
 import 'package:organiq/presentation/routes/app_routes.dart';
 import 'package:organiq/presentation/screens/settings_module/controller/settings_controller.dart';
 import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/state/oq_state.dart';
+import 'package:organiq/shared/tutorial/tutorial_controller.dart';
+import 'package:organiq/shared/tutorial/tutorial_launcher.dart';
+import 'package:organiq/shared/tutorial/tutorial_service.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -34,6 +38,26 @@ class _SettingsPageState extends OQState<SettingsPage, SettingsController> {
     if (error != null && error.isNotEmpty && mounted) {
       OQSnackBar.error(context, error);
     }
+  }
+
+  void _restartTutorial(BuildContext settingsContext) {
+    final tutorialController = Modular.get<TutorialController>();
+    final tutorialService = Modular.get<TutorialService>();
+    // Capture the overlay before popping — it belongs to the root navigator
+    // which outlives the settings page.
+    final overlayState = Overlay.of(settingsContext);
+
+    AppNavigation.pop(null, settingsContext);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      AppNavigation.navigate('/root/home/');
+      await Future<void>.delayed(const Duration(milliseconds: 350));
+      await TutorialLauncher.relaunchWithOverlay(
+        overlayState: overlayState,
+        controller: tutorialController,
+        service: tutorialService,
+      );
+    });
   }
 
   Future<void> _loadVersionLabel() async {
@@ -90,6 +114,12 @@ class _SettingsPageState extends OQState<SettingsPage, SettingsController> {
                     subtitle: 'Gerenciar flags e subflags',
                     icon: OQIcon.gridViewRounded,
                     onTap: () => AppNavigation.push(AppRoutes.settingsContexts),
+                  ),
+                  OQMenuItem(
+                    title: 'Tutorial',
+                    subtitle: 'Ver o tutorial de introdução novamente',
+                    icon: OQIcon.autoAwesomeRounded,
+                    onTap: () => _restartTutorial(context),
                   ),
                   // OQMenuItem(
                   //   title: 'Componentes',
