@@ -6,6 +6,7 @@ import 'package:organiq/presentation/screens/create_module/components/create_pro
 import 'package:organiq/presentation/screens/create_module/components/create_transcription_loading_card.dart';
 import 'package:organiq/presentation/screens/create_module/components/create_voice_recording_card.dart';
 import 'package:organiq/shared/components/oq_lib/index.dart';
+import 'package:organiq/shared/tutorial/tutorial_keys.dart';
 
 class CreateInputPhaseView extends StatelessWidget {
   const CreateInputPhaseView({
@@ -64,6 +65,7 @@ class CreateInputPhaseView extends StatelessWidget {
         ],
         const SizedBox(height: 20),
         OQAIInputArea(
+          key: TutorialKeys.createTextArea,
           controller: inputController,
           label: 'O que está na sua mente?',
           hint:

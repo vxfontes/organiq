@@ -7,6 +7,7 @@ import 'package:organiq/presentation/screens/events_module/controller/events_con
 import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/state/oq_state.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
+import 'package:organiq/shared/tutorial/tutorial_keys.dart';
 
 class EventsPage extends StatefulWidget {
   const EventsPage({super.key});
@@ -61,18 +62,24 @@ class _EventsPageState extends OQState<EventsPage, EventsController> {
             children: [
               _buildHeader(context),
               const SizedBox(height: 16),
-              EventCalendarStrip(
-                days: days,
-                selectedDate: selectedDate,
-                months: controller.months,
-                weekdays: controller.weekdays,
-                onSelectDate: controller.selectDate,
+              KeyedSubtree(
+                key: TutorialKeys.eventsCalendarStrip,
+                child: EventCalendarStrip(
+                  days: days,
+                  selectedDate: selectedDate,
+                  months: controller.months,
+                  weekdays: controller.weekdays,
+                  onSelectDate: controller.selectDate,
+                ),
               ),
               const SizedBox(height: 14),
-              EventFilters(
-                selected: selectedFilter,
-                labelBuilder: controller.filterLabel,
-                onSelect: controller.selectFilter,
+              KeyedSubtree(
+                key: TutorialKeys.eventsFilters,
+                child: EventFilters(
+                  selected: selectedFilter,
+                  labelBuilder: controller.filterLabel,
+                  onSelect: controller.selectFilter,
+                ),
               ),
               const SizedBox(height: 16),
               if (loading)

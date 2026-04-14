@@ -13,6 +13,7 @@ import 'package:organiq/presentation/screens/create_module/controller/suggestion
 import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/state/oq_state.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
+import 'package:organiq/shared/tutorial/tutorial_keys.dart';
 
 class CreatePage extends StatefulWidget {
   const CreatePage({super.key});
@@ -147,10 +148,13 @@ class _CreatePageState extends OQState<CreatePage, CreateController> {
         }
 
         final phase = controller.phase.value;
-        final selector = CreateModeSelector(
-          mode: createMode,
-          onModeChanged: controller.selectCreateMode,
-          enabled: selectorEnabled,
+        final selector = KeyedSubtree(
+          key: TutorialKeys.createModeSelector,
+          child: CreateModeSelector(
+            mode: createMode,
+            onModeChanged: controller.selectCreateMode,
+            enabled: selectorEnabled,
+          ),
         );
 
         return ColoredBox(

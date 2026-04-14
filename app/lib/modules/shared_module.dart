@@ -26,6 +26,9 @@ import 'package:organiq/shared/services/speech/speech_transcription_service.dart
 import 'package:organiq/shared/storage/app_preferences.dart';
 import 'package:organiq/shared/storage/auth_token_store.dart';
 import 'package:organiq/shared/storage/token_storage.dart';
+import 'package:organiq/shared/tutorial/tutorial_controller.dart';
+import 'package:organiq/shared/tutorial/tutorial_registry.dart';
+import 'package:organiq/shared/tutorial/tutorial_service.dart';
 
 // SharedModule usa AppPreferences.instance para acessar SharedPreferences.
 // A instância é inicializada em main() antes do runApp, garantindo que está
@@ -70,6 +73,15 @@ class SharedModule extends Module {
     i.addLazySingleton<ICacheService>(() => CacheService(AppPreferences.instance));
     i.addLazySingleton<IConnectivityService>(
       () => ConnectivityService(Connectivity()),
+    );
+
+    // Tutorial
+    i.addLazySingleton<TutorialService>(TutorialService.new);
+    i.addLazySingleton<TutorialController>(
+      () => TutorialController(
+        tutorialService: i.get<TutorialService>(),
+        steps: TutorialRegistry.build(),
+      ),
     );
 
     // modules

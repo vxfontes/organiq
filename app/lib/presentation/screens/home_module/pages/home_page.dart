@@ -7,6 +7,7 @@ import 'package:organiq/presentation/screens/home_module/controller/home_control
 import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/state/oq_state.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
+import 'package:organiq/shared/tutorial/tutorial_keys.dart';
 import 'package:organiq/shared/utils/date_time.dart';
 
 class HomePage extends StatefulWidget {
@@ -99,7 +100,10 @@ class _HomePageState extends OQState<HomePage, HomeController> {
                   children: [
                     const HomeDynamicHeader(),
                     const SizedBox(height: 12),
-                    HomeQuickAddBar(controller: controller),
+                    HomeQuickAddBar(
+                      key: TutorialKeys.homeQuickAddBar,
+                      controller: controller,
+                    ),
                     const SizedBox(height: 12),
                     HomeWeekStripSection(
                       controller: controller,
@@ -115,15 +119,19 @@ class _HomePageState extends OQState<HomePage, HomeController> {
                             AppNavigation.push(AppRoutes.rootCreate),
                       ),
                     ] else ...[
-                      HomeNextActionsCarousel(
-                        pastItems: pastActions,
-                        nextItems: nextActions,
-                        onComplete: (item) {
-                          controller.markTimelineItemDone(item.id, item.type);
-                        },
+                      KeyedSubtree(
+                        key: TutorialKeys.homeCarousel,
+                        child: HomeNextActionsCarousel(
+                          pastItems: pastActions,
+                          nextItems: nextActions,
+                          onComplete: (item) {
+                            controller.markTimelineItemDone(item.id, item.type);
+                          },
+                        ),
                       ),
                       const SizedBox(height: 16),
                       HomeBentoRow(
+                        key: TutorialKeys.homeBentoRow,
                         progressPercent: controller.dayProgressPercent,
                         routinesDone: controller.routinesDone,
                         routinesTotal: controller.routinesTotal,

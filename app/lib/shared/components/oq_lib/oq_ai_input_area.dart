@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:organiq/shared/components/oq_lib/oq_text.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
+import 'package:organiq/shared/tutorial/tutorial_keys.dart';
 
 enum OQAIInputState { idle, typing, ready, processing }
 
@@ -203,6 +204,7 @@ class _OQAIInputAreaState extends State<OQAIInputArea>
     final isActive = widget.isListening;
 
     return Container(
+      key: TutorialKeys.createVoiceButton,
       margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
       decoration: BoxDecoration(
         color: isActive

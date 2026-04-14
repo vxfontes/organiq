@@ -4,6 +4,7 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:organiq/shared/components/oq_lib/oq_huge_icons.dart';
 import 'package:organiq/shared/components/oq_lib/oq_icon.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
+import 'package:organiq/shared/tutorial/tutorial_keys.dart';
 
 class OQBottomNav extends StatelessWidget {
   const OQBottomNav({super.key, this.currentIndex = 2, this.onTap});
@@ -48,12 +49,14 @@ class OQBottomNav extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     _NavIcon(
+                      key: TutorialKeys.navHome,
                       index: 0,
                       icon: OQHugeIcon.home,
                       isActive: currentIndex == 0,
                       onTap: onTap,
                     ),
                     _NavIcon(
+                      key: TutorialKeys.navSchedule,
                       index: 1,
                       icon: OQHugeIcon.schedule,
                       isActive: currentIndex == 1,
@@ -61,12 +64,14 @@ class OQBottomNav extends StatelessWidget {
                     ),
                     const SizedBox(width: 56),
                     _NavIcon(
+                      key: TutorialKeys.navShopping,
                       index: 3,
                       icon: OQHugeIcon.shoppingBag,
                       isActive: currentIndex == 3,
                       onTap: onTap,
                     ),
                     _NavIcon(
+                      key: TutorialKeys.navEvents,
                       index: 4,
                       icon: OQHugeIcon.calendar,
                       isActive: currentIndex == 4,
@@ -79,7 +84,11 @@ class OQBottomNav extends StatelessWidget {
           ),
           Positioned(
             bottom: 35,
-            child: _CenterAction(isActive: currentIndex == 2, onTap: onTap),
+            child: _CenterAction(
+              key: TutorialKeys.navCreate,
+              isActive: currentIndex == 2,
+              onTap: onTap,
+            ),
           ),
         ],
       ),
@@ -89,6 +98,7 @@ class OQBottomNav extends StatelessWidget {
 
 class _NavIcon extends StatelessWidget {
   const _NavIcon({
+    super.key,
     required this.index,
     required this.icon,
     required this.isActive,
@@ -120,7 +130,7 @@ class _NavIcon extends StatelessWidget {
 }
 
 class _CenterAction extends StatelessWidget {
-  const _CenterAction({required this.isActive, required this.onTap});
+  const _CenterAction({super.key, required this.isActive, required this.onTap});
 
   final bool isActive;
   final ValueChanged<int>? onTap;

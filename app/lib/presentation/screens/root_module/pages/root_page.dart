@@ -5,6 +5,10 @@ import 'package:organiq/presentation/routes/app_routes.dart';
 import 'package:organiq/shared/components/oq_lib/index.dart';
 import 'package:organiq/shared/services/analytics/screen_log_service.dart';
 import 'package:organiq/shared/theme/app_colors.dart';
+import 'package:organiq/shared/tutorial/tutorial_controller.dart';
+import 'package:organiq/shared/tutorial/tutorial_keys.dart';
+import 'package:organiq/shared/tutorial/tutorial_launcher.dart';
+import 'package:organiq/shared/tutorial/tutorial_service.dart';
 
 class RootPage extends StatefulWidget {
   const RootPage({super.key});
@@ -16,18 +20,39 @@ class RootPage extends StatefulWidget {
 class _RootPageState extends State<RootPage> {
   int _currentIndex = 0;
   late final ScreenLogService _screenLogService;
+  late final TutorialController _tutorialController;
 
   @override
   void initState() {
     super.initState();
     _screenLogService = Modular.get<ScreenLogService>();
+    _tutorialController = Modular.get<TutorialController>();
+    _tutorialController.onTabChangeRequested = _onNavTap;
+    _tutorialController.onRouteChangeRequested =
+        (route) => AppNavigation.navigate(route);
+    _tutorialController.onPushRouteRequested =
+        (route) => AppNavigation.push(route);
+    _tutorialController.onPopRouteRequested = () => AppNavigation.pop();
     _syncIndex();
     AppNavigation.addListener(_handleRouteChange);
     _ensureChildRoute();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      await TutorialLauncher.launchIfNeeded(
+        context: context,
+        controller: _tutorialController,
+        service: Modular.get<TutorialService>(),
+      );
+    });
   }
 
   @override
   void dispose() {
+    _tutorialController.onTabChangeRequested = null;
+    _tutorialController.onRouteChangeRequested = null;
+    _tutorialController.onPushRouteRequested = null;
+    _tutorialController.onPopRouteRequested = null;
     AppNavigation.removeListener(_handleRouteChange);
     super.dispose();
   }
@@ -99,6 +124,7 @@ class _RootPageState extends State<RootPage> {
         padding: const EdgeInsets.only(left: 12, right: 12),
         actions: [
           IconButton(
+            key: TutorialKeys.appBarNotifications,
             onPressed: () {
               _screenLogService.logInteraction(
                 action: 'tap_notifications_history',
@@ -117,6 +143,7 @@ class _RootPageState extends State<RootPage> {
             ),
           ),
           IconButton(
+            key: TutorialKeys.appBarSettings,
             onPressed: () {
               _screenLogService.logInteraction(
                 action: 'tap_settings',
